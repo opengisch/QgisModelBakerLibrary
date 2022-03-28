@@ -1,8 +1,8 @@
-![modelbaker librar](assets/modelbaker_logo.svg)
+# modelbaker - the library
 
-The Model Baker Library is a Package containing two main areas:
+The modelbaker library is a package containing two main areas:
 - Wrapper for ili2db 
-- Functionalies to generate a QGIS project from it's database source and interacting with this source
+- Modules to generate a QGIS project from it's database source and interacting with this source
 
 This Library is the backend of the QGIS Plugin [QGIS Model Baker](https://github.com/opengisch/QgisModelBaker).
 ### Installation
