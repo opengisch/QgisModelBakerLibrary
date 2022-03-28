@@ -20,5 +20,5 @@ setuptools.setup(
         "Operating System :: OS Independent",
     ],
     python_requires=">=3.6",
-    packages=setuptools.find_packages(where="modelbaker"),
+    packages=setuptools.find_packages(),
 )
