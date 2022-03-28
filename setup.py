@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="modelbaker",
-    version="0.0.3",
+    version="0.0.4",
     author="Dave Signer",
     author_email="david@opengis.ch",
     description="The full model baker core",
