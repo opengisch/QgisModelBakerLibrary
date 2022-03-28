@@ -19,6 +19,6 @@ setuptools.setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=['modelbaker'],
     python_requires=">=3.6",
+    packages=setuptools.find_packages(where="modelbaker"),
 )
