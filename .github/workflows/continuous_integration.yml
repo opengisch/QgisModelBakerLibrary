@@ -8,6 +8,8 @@ on:
   pull_request:
     branches:
       - '**'
+  release:
+    types: [published]
 
 jobs:
   # Run unit tests
@@ -27,3 +29,38 @@ jobs:
         run: docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
       - name: Test on QGIS with PG
         run: docker-compose -f .docker/docker-compose.gh.yml run -e "PGHOST=postgres11" qgis /usr/src/.docker/run-docker-tests.sh
+
+  release:
+    name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+    runs-on: ubuntu-18.04
+    if: ${{ github.event_name == 'release' }}
+    steps:
+    - uses: actions/checkout@master
+    - name: Set up Python 3.9
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.9
+    - name: Install pypa/build
+      run: >-
+        python -m
+        pip install
+        build
+        --user
+    - name: Build a binary wheel and a source tarball
+      run: >-
+        python -m
+        build
+        --sdist
+        --wheel
+        --outdir dist/
+        .
+    - name: Publish distribution 📦 to Test PyPI
+      uses: pypa/gh-action-pypi-publish@master
+      with:
+        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
+        repository_url: https://test.pypi.org/legacy/
+    #- name: Publish distribution 📦 to PyPI
+    #  if: startsWith(github.ref, 'refs/tags')
+    #  uses: pypa/gh-action-pypi-publish@master
+    #  with:
+    #    password: ${{ secrets.PYPI_API_TOKEN }}
