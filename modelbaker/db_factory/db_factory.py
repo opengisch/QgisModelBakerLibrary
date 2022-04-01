@@ -29,7 +29,7 @@ from .layer_uri import LayerUri
 
 
 class DbFactory(ABC):
-    """Creates an entire set of objects so that QgisModelBaker supports some database. This is a abstract class."""
+    """Creates an entire set of objects so that modelbaker supports some database. This is a abstract class."""
 
     @abstractmethod
     def get_db_connector(self, uri: str, schema: str) -> DBConnector:

@@ -24,7 +24,7 @@ from .gpkg_layer_uri import GpkgLayerUri
 
 
 class GpkgFactory(DbFactory):
-    """Creates an entire set of objects so that QgisModelBaker supports Geopackage database."""
+    """Creates an entire set of objects so that QgisMmodelbakerodelBaker supports Geopackage database."""
 
     def get_db_connector(self, uri, schema):
         return GPKGConnector(uri, None)

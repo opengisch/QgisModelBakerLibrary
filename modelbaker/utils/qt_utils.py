@@ -49,8 +49,8 @@ def selectFileName(line_edit_widget, title, file_filter, parent):
 
 def make_file_selector(
     widget,
-    title=QCoreApplication.translate("QgisModelBaker", "Open File"),
-    file_filter=QCoreApplication.translate("QgisModelBaker", "Any file (*)"),
+    title=QCoreApplication.translate("modelbaker", "Open File"),
+    file_filter=QCoreApplication.translate("modelbaker", "Any file (*)"),
     parent=None,
 ):
     return partial(
@@ -96,8 +96,8 @@ def selectFileNameToSave(
 
 def make_save_file_selector(
     widget,
-    title=QCoreApplication.translate("QgisModelBaker", "Open File"),
-    file_filter=QCoreApplication.translate("QgisModelBaker", "Any file(*)"),
+    title=QCoreApplication.translate("modelbaker", "Open File"),
+    file_filter=QCoreApplication.translate("modelbaker", "Any file(*)"),
     parent=None,
     extension="",
     extensions=None,
@@ -124,7 +124,7 @@ def selectFolder(line_edit_widget, title, parent):
 
 def make_folder_selector(
     widget,
-    title=QCoreApplication.translate("QgisModelBaker", "Open Folder"),
+    title=QCoreApplication.translate("modelbaker", "Open Folder"),
     parent=None,
 ):
     return partial(selectFolder, line_edit_widget=widget, title=title, parent=parent)

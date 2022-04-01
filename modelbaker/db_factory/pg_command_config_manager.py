@@ -30,7 +30,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
     :ivar configuration object that will be managed
     """
 
-    _settings_base_path = "QgisModelBaker/ili2pg/"
+    _settings_base_path = "ili2pg/"
 
     def __init__(self, configuration):
         DbCommandConfigManager.__init__(self, configuration)

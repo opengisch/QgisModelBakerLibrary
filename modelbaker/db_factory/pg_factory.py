@@ -26,7 +26,7 @@ from .pg_layer_uri import PgLayerUri
 
 
 class PgFactory(DbFactory):
-    """Creates an entire set of objects so that QgisModelBaker supports Postgres/Postgis database."""
+    """Creates an entire set of objects so that modelbaker supports Postgres/Postgis database."""
 
     def get_db_connector(self, uri, schema):
         return PGConnector(uri, schema)

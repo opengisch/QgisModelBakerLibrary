@@ -19,11 +19,11 @@
 
 from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsMessageLog
 
-from QgisModelBaker.libs.modelbaker.iliwrapper.globals import DbIliMode
-from QgisModelBaker.libs.modelbaker.utils.qt_utils import slugify
+from modelbaker.iliwrapper.globals import DbIliMode
+from modelbaker.utils.qt_utils import slugify
 
-from QgisModelBaker.libs.modelbaker.db_factory.db_simple_factory import DbSimpleFactory
-from QgisModelBaker.libs.modelbaker.dbconnector.db_connector import DBConnectorError
+from modelbaker.db_factory.db_simple_factory import DbSimpleFactory
+from modelbaker.dbconnector.db_connector import DBConnectorError
 
 
 def get_schema_identificator_from_layersource(layer_source_name, layer_source):
