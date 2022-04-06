@@ -32,9 +32,7 @@ from qgis.core import (
 from qgis.testing import start_app, unittest
 
 from modelbaker.dataobjects.project import Project
-from modelbaker.db_factory.gpkg_command_config_manager import (
-    GpkgCommandConfigManager,
-)
+from modelbaker.db_factory.gpkg_command_config_manager import GpkgCommandConfigManager
 from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode

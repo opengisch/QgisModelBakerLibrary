@@ -22,14 +22,13 @@ import re
 from qgis.core import QgsApplication, QgsRelation, QgsWkbTypes
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QObject, pyqtSignal
 
-from ..iliwrapper.globals import DbIliMode
 from ..dataobjects.fields import Field
 from ..dataobjects.layers import Layer
 from ..dataobjects.legend import LegendGroup
 from ..dataobjects.relations import Relation
-from ..utils.qt_utils import slugify
-
 from ..db_factory.db_simple_factory import DbSimpleFactory
+from ..iliwrapper.globals import DbIliMode
+from ..utils.qt_utils import slugify
 from .config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES, READONLY_FIELDNAMES
 from .domain_relations_generator import DomainRelationGenerator
 

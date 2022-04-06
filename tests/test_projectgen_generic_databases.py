@@ -32,11 +32,7 @@ from modelbaker.dataobjects.project import Project
 from modelbaker.dbconnector.db_connector import DBConnectorError
 from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper.globals import DbIliMode
-from tests.utils import (
-    get_pg_connection_string,
-    iliimporter_config,
-    testdata_path,
-)
+from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
 
 start_app()
 

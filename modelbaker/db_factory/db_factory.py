@@ -19,11 +19,9 @@
 from abc import ABC, abstractmethod
 from typing import Tuple
 
-from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 from ..dataobjects.fields import Field
-from ..utils.globals import DbActionType
-
 from ..dbconnector.db_connector import DBConnector
+from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 from .db_command_config_manager import DbCommandConfigManager
 from .layer_uri import LayerUri
 

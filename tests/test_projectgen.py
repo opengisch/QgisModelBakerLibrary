@@ -33,9 +33,7 @@ from qgis.PyQt.QtCore import QEventLoop, Qt, QTimer
 from qgis.testing import start_app, unittest
 
 from modelbaker.dataobjects.project import Project
-from modelbaker.db_factory.gpkg_command_config_manager import (
-    GpkgCommandConfigManager,
-)
+from modelbaker.db_factory.gpkg_command_config_manager import GpkgCommandConfigManager
 from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
@@ -45,11 +43,7 @@ from modelbaker.iliwrapper.ilicache import (
     IliToppingFileCache,
     IliToppingFileItemModel,
 )
-from tests.utils import (
-    get_pg_connection_string,
-    iliimporter_config,
-    testdata_path,
-)
+from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
 
 CATALOGUE_DATASETNAME = "Catset"
 
@@ -2947,7 +2941,9 @@ class TestProjectGen(unittest.TestCase):
             "ilidata:ch.opengis.topping.opengisch_KbS_LV95_V1_4_005",
         ]
         qml_file_model = self.get_topping_file_model(
-            importer.configuration.base_configuration, list(qml_section.values()), test_path
+            importer.configuration.base_configuration,
+            list(qml_section.values()),
+            test_path,
         )
         for layer in project.layers:
             if layer.alias:
@@ -3332,7 +3328,9 @@ class TestProjectGen(unittest.TestCase):
             "ilidata:ch.opengis.topping.opengisch_KbS_LV95_V1_4_005",
         ]
         qml_file_model = self.get_topping_file_model(
-            importer.configuration.base_configuration, list(qml_section.values()), test_path
+            importer.configuration.base_configuration,
+            list(qml_section.values()),
+            test_path,
         )
         for layer in project.layers:
             if layer.alias:
@@ -3760,8 +3758,10 @@ class TestProjectGen(unittest.TestCase):
         return metaconfig
 
     # that's the same like in generate_project.py and workflow_wizard.py
-    def get_topping_file_list(self, base_config, id_list ):
-        topping_file_model = self.get_topping_file_model(base_config, id_list, test_path)
+    def get_topping_file_list(self, base_config, id_list):
+        topping_file_model = self.get_topping_file_model(
+            base_config, id_list, test_path
+        )
         file_path_list = []
 
         for file_id in id_list:
@@ -3773,7 +3773,7 @@ class TestProjectGen(unittest.TestCase):
                 file_path_list.append(file_path)
         return file_path_list
 
-    def get_topping_file_model(self, base_config, id_list, tool_dir = None):
+    def get_topping_file_model(self, base_config, id_list, tool_dir=None):
         topping_file_cache = IliToppingFileCache(base_config, id_list, tool_dir)
 
         # we wait for the download or we timeout after 30 seconds and we apply what we have

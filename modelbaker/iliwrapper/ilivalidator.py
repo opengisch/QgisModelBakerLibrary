@@ -18,19 +18,23 @@
  ***************************************************************************/
 """
 
-from .ili2dbconfig import ValidateConfiguration
-from .iliexecutable import IliExecutable
 import xml.etree.cElementTree as CET
 from enum import Enum
 
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
 from PyQt5.QtCore import Qt
+from PyQt5.QtGui import QStandardItem, QStandardItemModel
+
+from .ili2dbconfig import ValidateConfiguration
+from .iliexecutable import IliExecutable
+
+
 class Validator(IliExecutable):
     def __init__(self, parent=None):
         super(Validator, self).__init__(parent)
 
     def _create_config(self):
         return ValidateConfiguration()
+
 
 class ValidationResultModel(QStandardItemModel):
     """

@@ -10,19 +10,11 @@ import pyodbc
 from qgis import utils
 from qgis.testing import start_app, unittest
 
-from modelbaker.db_factory.mssql_command_config_manager import (
-    MssqlCommandConfigManager,
-)
-from modelbaker.db_factory.pg_command_config_manager import (
-    PgCommandConfigManager,
-)
+from modelbaker.db_factory.mssql_command_config_manager import MssqlCommandConfigManager
+from modelbaker.db_factory.pg_command_config_manager import PgCommandConfigManager
 from modelbaker.iliwrapper import iliimporter, iliupdater
 from modelbaker.iliwrapper.globals import DbIliMode
-from tests.utils import (
-    iliimporter_config,
-    iliupdater_config,
-    testdata_path,
-)
+from tests.utils import iliimporter_config, iliupdater_config, testdata_path
 
 start_app()
 

@@ -33,7 +33,6 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QCoreApplication, QSettings
 
 from ..generator.config import IGNORED_FIELDNAMES
-
 from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
 
 

@@ -27,17 +27,11 @@ from qgis.core import QgsProject
 from qgis.testing import start_app, unittest
 
 from modelbaker.dataobjects.project import Project
-from modelbaker.db_factory.gpkg_command_config_manager import (
-    GpkgCommandConfigManager,
-)
+from modelbaker.db_factory.gpkg_command_config_manager import GpkgCommandConfigManager
 from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
-from tests.utils import (
-    get_pg_connection_string,
-    iliimporter_config,
-    testdata_path,
-)
+from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
 
 start_app()
 

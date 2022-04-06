@@ -30,8 +30,8 @@ from PyQt5.QtGui import QPalette, QRegion, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QGridLayout, QItemDelegate, QLabel, QStyle, QWidget
 from qgis.core import Qgis, QgsMessageLog
 
-from .ili2dbutils import get_all_modeldir_in_path
 from ..utils.qt_utils import download_file
+from .ili2dbutils import get_all_modeldir_in_path
 
 
 class IliCache(QObject):

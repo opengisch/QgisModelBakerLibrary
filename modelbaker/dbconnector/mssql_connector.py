@@ -20,7 +20,6 @@
 import re
 
 import pyodbc
-from pyodbc import InterfaceError, ProgrammingError
 from qgis.core import Qgis
 
 from .db_connector import DBConnector, DBConnectorError

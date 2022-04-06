@@ -19,7 +19,6 @@
 import logging
 
 from ..iliwrapper.globals import DbIliMode
-
 from .db_factory import DbFactory
 
 available_database_factories = dict()

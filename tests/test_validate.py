@@ -36,6 +36,7 @@ from tests.utils import (
 
 start_app()
 
+
 class TestExport(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
@@ -117,7 +118,9 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 1
         assert (
-            result_model.index(0, 0).data(ilivalidator.ValidationResultModel.Roles.MESSAGE)[0:36]
+            result_model.index(0, 0).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )[0:36]
             == "Intersection coord1 (81.785, 99.314)"
         )
 
@@ -193,7 +196,9 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 1
         assert (
-            result_model.index(0, 0).data(ilivalidator.ValidationResultModel.Roles.MESSAGE)[0:36]
+            result_model.index(0, 0).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )[0:36]
             == "Intersection coord1 (81.785, 99.314)"
         )
 
@@ -269,7 +274,9 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 1
         assert (
-            result_model.index(0, 0).data(ilivalidator.ValidationResultModel.Roles.MESSAGE)[0:36]
+            result_model.index(0, 0).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )[0:36]
             == "Intersection coord1 (81.785, 99.314)"
         )
 

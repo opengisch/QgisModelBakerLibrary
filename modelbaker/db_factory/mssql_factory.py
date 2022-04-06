@@ -17,7 +17,6 @@
  ***************************************************************************/
 """
 from ..dataobjects.fields import Field
-
 from ..dbconnector.mssql_connector import MssqlConnector
 from .db_factory import DbFactory
 from .mssql_command_config_manager import MssqlCommandConfigManager

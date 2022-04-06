@@ -30,16 +30,10 @@ from qgis import utils
 from qgis.testing import start_app, unittest
 
 import modelbaker.utils.db_utils as db_utils
-from modelbaker.db_factory.pg_command_config_manager import (
-    PgCommandConfigManager,
-)
+from modelbaker.db_factory.pg_command_config_manager import PgCommandConfigManager
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
-from tests.utils import (
-    ilidataimporter_config,
-    iliimporter_config,
-    testdata_path,
-)
+from tests.utils import ilidataimporter_config, iliimporter_config, testdata_path
 
 start_app()
 
