@@ -32,7 +32,7 @@ jobs:
 
   release:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
-    if: ${{ github.event_name == 'push' || github.event_name == 'release'] }}
+    if: ${{ github.event_name == 'push' || github.event_name == 'release' }}
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
