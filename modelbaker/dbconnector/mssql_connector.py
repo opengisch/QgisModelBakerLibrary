@@ -19,6 +19,7 @@
 
 import re
 
+import pyodbc
 from pyodbc import InterfaceError, ProgrammingError
 from qgis.core import Qgis
 
@@ -38,8 +39,8 @@ class MssqlConnector(DBConnector):
         try:
             self.conn = pyodbc.connect(uri)
         except (
-            ProgrammingError,
-            InterfaceError,
+            pyodbc.ProgrammingError,
+            pyodbc.InterfaceError,
             pyodbc.Error,
             pyodbc.OperationalError,
         ) as e:
