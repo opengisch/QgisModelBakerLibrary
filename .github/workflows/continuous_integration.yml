@@ -41,7 +41,7 @@ jobs:
       with:
         python-version: 3.9
     - name: Set version
-      run: sed -i setup.py -e "s/\[VERSION\]/${GIT_TAG_NAME}/g"
+      run: sed -i setup.py -e "s/\[VERSION\]/${GIT_TAG_NAME:1}/g"
     - name: Install pypa/build
       run: >-
         python -m
