@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-20.04
     strategy:
       matrix:
-        qgis_version: [release-3_16, release-3_22, latest]
+        qgis_version: [release-3_22, release-3_24, latest]
     env:
       QGIS_TEST_VERSION: ${{ matrix.qgis_version }}
     steps:
@@ -32,6 +32,7 @@ jobs:
 
   release:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
+    if: ${{ github.event_name in ['push', 'release'] }}
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
@@ -39,6 +40,8 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.9
+    - name: Set version
+      run: sed -i setup.py -e "s/\[VERSION\]/${GIT_TAG_NAME}/g"
     - name: Install pypa/build
       run: >-
         python -m
