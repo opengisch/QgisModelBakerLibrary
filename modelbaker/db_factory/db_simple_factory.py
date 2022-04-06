@@ -19,7 +19,6 @@
 import logging
 
 from ..iliwrapper.globals import DbIliMode
-
 from .db_factory import DbFactory
 
 available_database_factories = dict()
@@ -70,7 +69,7 @@ class DbSimpleFactory:
         return result
 
     def get_db_list(self, is_schema_import=False):
-        """Gets a list containing the databases available in QgisModelBaker.
+        """Gets a list containing the databases available in modelbaker.
 
         This list can be used to show the available databases in GUI, for example, **QComboBox source**
         in **Import Data Dialog**.
@@ -92,9 +91,9 @@ class DbSimpleFactory:
 
     @property
     def default_database(self):
-        """Gets a default database for QgisModelBaker.
+        """Gets a default database for modelbaker.
 
-        :return: Default database for QgisModelBaker.
+        :return: Default database for modelbaker.
         :rtype: :class:`DbIliMode`
         """
         return list(available_database_factories.keys())[0]

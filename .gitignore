@@ -1,5 +1,9 @@
-# Byte-compiled / optimized / DLL files
-__pycache__/
-*.py[cod]
-*$py.class
+.idea
+__pycache__
+/modelbaker/iliwrapper/bin
+*.orig
+i18n
+.DS_Store
 *.pyc
+.cache
+.vscode

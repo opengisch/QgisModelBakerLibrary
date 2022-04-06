@@ -1,7 +1,8 @@
+![logo](assets/Long-Logo_Green_Modelbaker_RGB.png)
 # modelbaker - the library
 
 The modelbaker library is a package containing two main areas:
-- Wrapper for ili2db 
+- Wrapper for ili2db `iliwrapper`
 - Modules to generate a QGIS project from it's database source and interacting with this source
 
 This Library is the backend of the QGIS Plugin [QGIS Model Baker](https://github.com/opengisch/QgisModelBaker).
@@ -14,8 +15,9 @@ pip install modelbaker
 
 ```
 .
-
+├── __init__.py
 ├── iliwrapper
+│   ├── __init__.py
 │   ├── globals.py
 │   ├── ili2dbargs.py
 │   ├── ili2dbconfig.py
@@ -26,31 +28,30 @@ pip install modelbaker
 │   ├── iliexporter.py
 │   ├── iliimporter.py
 │   ├── iliupdater.py
-│   ├── ilivalidator.py
-│   └── __init__.py
+│   └── ilivalidator.py
 ├── dataobjects
+│   ├── __init__.py
 │   ├── fields.py
 │   ├── form.py
-│   ├── __init__.py
 │   ├── layers.py
 │   ├── legend.py
 │   ├── project.py
 │   └── relations.py
 ├── dbconnector
+│   ├── __init__.py
 │   ├── config.py
 │   ├── db_connector.py
 │   ├── gpkg_connector.py
-│   ├── __init__.py
 │   ├── mssql_connector.py
 │   └── pg_connector.py
 ├── db_factory
+│   ├── __init__.py
 │   ├── db_command_config_manager.py
 │   ├── db_factory.py
 │   ├── db_simple_factory.py
 │   ├── gpkg_command_config_manager.py
 │   ├── gpkg_factory.py
 │   ├── gpkg_layer_uri.py
-│   ├── __init__.py
 │   ├── layer_uri.py
 │   ├── mssql_command_config_manager.py
 │   ├── mssql_factory.py
@@ -59,15 +60,14 @@ pip install modelbaker
 │   ├── pg_factory.py
 │   └── pg_layer_uri.py
 ├── generator
+│   ├── __init__.py
 │   ├── config.py
 │   ├── domain_relations_generator.py
-│   ├── generator.py
-│   └── __init__.py
-├── __init__.py
+│   └── generator.py
 └── utils
+│   ├── __init__.py
     ├── db_utils.py
     ├── globals.py
-    ├── __init__.py
     ├── qgis_utils.py
     └── qt_utils.py
 ```

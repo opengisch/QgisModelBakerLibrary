@@ -17,10 +17,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from .ili2dbconfig import (
-    ExportConfiguration,
-    Ili2DbCommandConfiguration,
-)
+from .ili2dbconfig import ExportConfiguration, Ili2DbCommandConfiguration
 from .iliexecutable import IliExecutable
 
 

@@ -29,7 +29,6 @@ from qgis.PyQt.QtCore import QCoreApplication
 from qgis.PyQt.QtGui import QColor
 
 from ..utils.qt_utils import NetworkError, download_file
-
 from .globals import DbIliMode
 from .ili2dbtools import get_tool_url, get_tool_version
 

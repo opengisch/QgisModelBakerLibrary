@@ -23,14 +23,10 @@ from abc import abstractmethod
 
 from qgis.PyQt.QtCore import QEventLoop, QObject, QProcess, pyqtSignal
 
+from ..utils.qt_utils import AbstractQObjectMeta
 from .ili2dbargs import get_ili2db_args
 from .ili2dbconfig import Ili2DbCommandConfiguration
-from .ili2dbutils import (
-    JavaNotFoundError,
-    get_ili2db_bin,
-    get_java_path,
-)
-from ..utils.qt_utils import AbstractQObjectMeta
+from .ili2dbutils import JavaNotFoundError, get_ili2db_bin, get_java_path
 
 
 class IliExecutable(QObject, metaclass=AbstractQObjectMeta):

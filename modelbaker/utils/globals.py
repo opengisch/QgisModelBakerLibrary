@@ -21,7 +21,7 @@ from enum import Enum
 
 
 class DbActionType(Enum):
-    """Defines constants for generate, import data, or export actions of QgisModelBaker."""
+    """Defines constants for generate, import data, or export actions of modelbaker."""
 
     GENERATE = 1
     IMPORT_DATA = 2

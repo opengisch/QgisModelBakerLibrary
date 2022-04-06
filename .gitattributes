@@ -1,0 +1,8 @@
+.gitattributes export-ignore
+.gitignore export-ignore
+.idea export-ignore
+QgisModelBakerLibrary.zip export-ignore
+*.sh export-ignore
+*/__pycache__ export-ignore
+tests export-ignore
+QgisModelBakerLibrary/metadata.txt eol=lf

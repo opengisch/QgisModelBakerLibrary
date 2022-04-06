@@ -20,10 +20,7 @@
 
 from qgis.core import QgsLayerDefinition, QgsLayerTreeLayer, QgsProject
 
-from ..utils.qgis_utils import (
-    get_group_non_recursive,
-    get_suggested_index_for_layer,
-)
+from ..utils.qgis_utils import get_group_non_recursive, get_suggested_index_for_layer
 
 
 class LegendGroup(object):

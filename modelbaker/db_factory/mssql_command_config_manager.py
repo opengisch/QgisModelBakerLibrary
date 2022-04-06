@@ -23,7 +23,7 @@ from .db_command_config_manager import DbCommandConfigManager
 
 class MssqlCommandConfigManager(DbCommandConfigManager):
 
-    _settings_base_path = "QgisModelBaker/ili2mssql/"
+    _settings_base_path = "ili2mssql/"
 
     def __init__(self, configuration):
         DbCommandConfigManager.__init__(self, configuration)

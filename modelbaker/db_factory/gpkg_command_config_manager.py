@@ -30,7 +30,7 @@ class GpkgCommandConfigManager(DbCommandConfigManager):
     :ivar configuration object that will be managed
     """
 
-    _settings_base_path = "QgisModelBaker/ili2gpkg/"
+    _settings_base_path = "ili2gpkg/"
 
     def __init__(self, configuration):
         DbCommandConfigManager.__init__(self, configuration)

@@ -5,7 +5,7 @@ with open("README.md", "r", encoding="utf-8") as fh:
 
 setuptools.setup(
     name="modelbaker",
-    version="0.0.4",
+    version="[VERSION]",
     author="Dave Signer",
     author_email="david@opengis.ch",
     description="The full model baker core",
@@ -13,8 +13,8 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/opengisch/QgisModelBakerLibrary",
     classifiers=[
-        'Topic :: Database',
-        'License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)',
+        "Topic :: Database",
+        "License :: OSI Approved :: GNU General Public License v2 or later (GPLv2+)",
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
