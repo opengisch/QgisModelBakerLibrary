@@ -3,9 +3,12 @@ import setuptools
 with open("README.md", "r", encoding="utf-8") as fh:
     long_description = fh.read()
 
+with open("VERSION", "r", encoding="utf-8") as fh:
+    version = fh.read().strip()
+
 setuptools.setup(
     name="modelbaker",
-    version="[VERSION]",
+    version=version,
     author="Dave Signer",
     author_email="david@opengis.ch",
     description="The full model baker core",
