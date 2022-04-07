@@ -9,7 +9,7 @@ on:
     branches:
       - '**'
   release:
-    types: [published]
+    types: [released]
 
 jobs:
   # Run unit tests
@@ -32,7 +32,7 @@ jobs:
 
   release:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
-    if: ${{ github.event_name == 'push' || github.event_name == 'release' }}
+    if: startsWith(github.ref, 'refs/tags/v')
     runs-on: ubuntu-18.04
     steps:
     - uses: actions/checkout@master
@@ -40,8 +40,12 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.9
-    - name: Set version
-      run: sed -i setup.py -e "s/\[VERSION\]/${GIT_TAG_NAME:1}/g"
+    - name: Get version number
+      id: v
+      run: |
+        export VERSION_NUMBER=${GITHUB_REF/refs\/tags\/v}
+        echo $VERSION_NUMBER > VERSION
+        echo "::set-output name=VERSION::${VERSION_NUMBER}"
     - name: Install pypa/build
       run: >-
         python -m
@@ -56,14 +60,17 @@ jobs:
         --wheel
         --outdir dist/
         .
-    - name: Publish distribution 📦 to Test PyPI
-      if: ${{ github.event_name == 'push' }}
-      uses: pypa/gh-action-pypi-publish@master
+    - name: 🚀 Upload Release Asset
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        password: ${{ secrets.TEST_PYPI_API_TOKEN }}
-        repository_url: https://test.pypi.org/legacy/
+        upload_url: ${{ github.event.release.upload_url }}
+        asset_path: dist/modelbaker-${{ steps.v.outputs.VERSION }}-py3-none-any.whl
+        asset_name: dist/modelbaker-${{ steps.v.outputs.VERSION }}-py3-none-any.whl
+        asset_content_type: application/binary
+
     - name: Publish distribution 📦 to PyPI
-      if: ${{ github.event_name == 'release' }}
       uses: pypa/gh-action-pypi-publish@master
       with:
         password: ${{ secrets.PYPI_API_TOKEN }}
