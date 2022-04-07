@@ -7,3 +7,7 @@ i18n
 *.pyc
 .cache
 .vscode
+dist
+build
+**/__pycache__
+**/modelbaker.egg-info
