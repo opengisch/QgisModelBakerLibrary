@@ -72,3 +72,6 @@ pip install modelbaker
     ├── qgis_utils.py
     └── qt_utils.py
 ```
+
+### ili2db
+In the current release we use ili2db version 4.6.1
