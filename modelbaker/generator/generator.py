@@ -504,11 +504,22 @@ class Generator(QObject):
                         if node:
                             current_node.append(node)
             else:
-                # get layer
-                for layer in layers:
-                    if layer.alias == current_node_name:
-                        current_node = layer
-                        break
+                # get layer according to the ili name
+                if "iliname" in item_properties:
+                    for layer in layers:
+                        ili_name = item_properties.get("iliname")
+                        if layer.ili_name == ili_name:
+                            layer.alias = current_node_name
+                            current_node = layer
+                            break
+
+                if not current_node:
+                    # get the layer according to the alias
+                    for layer in layers:
+                        if layer.alias == current_node_name:
+                            current_node = layer
+                            break
+
                 if not current_node:
                     current_node = self.generate_node(
                         layers, current_node_name, item_properties
