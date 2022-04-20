@@ -25,12 +25,18 @@ from ..iliwrapper.globals import DbIliMode
 from .qt_utils import slugify
 
 
-def get_schema_identificator_from_layersource(layer_source_name, layer_source):
-    if layer_source_name == "postgres" or layer_source_name == "mssql":
+def get_schema_identificator_from_layersource(layer_source_provider, layer_source):
+    if (
+        layer_source_provider.name() == "postgres"
+        or layer_source_provider.name() == "mssql"
+    ):
         return slugify(
             f"{layer_source.host()}_{layer_source.database()}_{layer_source.schema()}"
         )
-    elif layer_source_name == "ogr":
+    elif (
+        layer_source_provider.name() == "ogr"
+        and layer_source_provider.storageType() == "GPKG"
+    ):
         return slugify(layer_source.uri().split("|")[0].strip())
     return ""
 
@@ -53,7 +59,9 @@ def get_authconfig_map(authconfigid):
     return auth_cfg.configMap()
 
 
-def get_configuration_from_layersource(layer_source_name, layer_source, configuration):
+def get_configuration_from_layersource(
+    layer_source_provider, layer_source, configuration
+):
     """
     Determines the connection parameters from a layer source.
     Returns:
@@ -63,7 +71,7 @@ def get_configuration_from_layersource(layer_source_name, layer_source, configur
     """
     mode = ""
     valid = False
-    if layer_source_name == "postgres":
+    if layer_source_provider.name() == "postgres":
         mode = DbIliMode.pg
         if layer_source.authConfigId():
             authconfig_map = get_authconfig_map(layer_source.authConfigId())
@@ -82,11 +90,14 @@ def get_configuration_from_layersource(layer_source_name, layer_source, configur
             and configuration.database
             and configuration.dbschema
         )
-    elif layer_source_name == "ogr":
+    elif (
+        layer_source_provider.name() == "ogr"
+        and layer_source_provider.storageType() == "GPKG"
+    ):
         mode = DbIliMode.gpkg
         configuration.dbfile = layer_source.uri().split("|")[0].strip()
         valid = bool(configuration.dbfile)
-    elif layer_source_name == "mssql":
+    elif layer_source_provider.name() == "mssql":
         mode = DbIliMode.mssql
         configuration.dbhost = layer_source.host()
         configuration.dbusr = layer_source.username()
