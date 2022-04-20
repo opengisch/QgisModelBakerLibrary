@@ -42,7 +42,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
             uri += ["sslmode='{}'".format(self.configuration.sslmode)]
 
         if not su and self.configuration.dbservice:
-            uri += ["service='{}'".format(self.configuration.sslmode)]
+            uri += ["service='{}'".format(self.configuration.dbservice)]
             return " ".join(uri)
 
         uri += ["dbname='{}'".format(self.configuration.database)]
