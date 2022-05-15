@@ -338,25 +338,10 @@ class Generator(QObject):
                     ]
 
                 if self.basket_handling and column_name in BASKET_FIELDNAMES:
-                    if self.tool in [
-                        DbIliMode.pg,
-                        DbIliMode.ili2pg,
-                        DbIliMode.mssql,
-                        DbIliMode.ili2mssql,
-                    ]:
-                        schema_topic_identificator = slugify(
-                            f"{layer.source().host()}_{layer.source().database()}_{layer.source().schema()}_{layer.model_topic_name}"
-                        )
-                        field.default_value_expression = (
-                            f"@{schema_topic_identificator}"
-                        )
-                    elif self.tool in [DbIliMode.ili2gpkg, DbIliMode.gpkg]:
-                        schema_topic_identificator = slugify(
-                            f"@{layer.source().uri().split('|')[0].strip()}_{layer.model_topic_name}"
-                        )
-                        field.default_value_expression = (
-                            f"@{schema_topic_identificator}"
-                        )
+                    default_basket_topic = slugify(
+                        f"default_basket{'_' if layer.model_topic_name else ''}{layer.model_topic_name}"
+                    )
+                    field.default_value_expression = f"@{default_basket_topic}"
 
                 if "enum_domain" in fielddef and fielddef["enum_domain"]:
                     field.enum_domain = fielddef["enum_domain"]
