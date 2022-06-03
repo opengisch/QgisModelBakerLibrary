@@ -337,7 +337,7 @@ class TestImport(unittest.TestCase):
         )
         record = next(cursor)
         assert record is not None
-        assert record[0] == "59ba6620-6cbc-452f-91c2-ea2574b47330"
+        assert record[0].lower() == "59ba6620-6cbc-452f-91c2-ea2574b47330"
 
     def test_tid_import_geopackage(self):
         # Schema Import
@@ -386,7 +386,7 @@ class TestImport(unittest.TestCase):
         )
         record = next(cursor)
         assert record is not None
-        assert record[0] == "59ba6620-6cbc-452f-91c2-ea2574b47330"
+        assert record[0].lower() == "59ba6620-6cbc-452f-91c2-ea2574b47330"
 
     def test_tid_import_mssql(self):
         # Schema Import
@@ -442,7 +442,7 @@ class TestImport(unittest.TestCase):
         )
         record = next(cursor)
         assert record is not None
-        assert record[0] == "59ba6620-6cbc-452f-91c2-ea2574b47330"
+        assert record[0].lower() == "59ba6620-6cbc-452f-91c2-ea2574b47330"
 
     def print_info(self, text):
         logging.info(text)
