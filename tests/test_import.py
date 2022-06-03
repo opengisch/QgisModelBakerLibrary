@@ -293,8 +293,8 @@ class TestImport(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/OeVBasketTest_V1.ili")
-        importer.configuration.ilimodels = "OeVBasketTest"
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "any_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
@@ -313,7 +313,7 @@ class TestImport(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_winti.xtf"
+            "xtf/test_pipebaskettest_v1_winti.xtf"
         )
         dataImporter.configuration.with_importtid = True
         dataImporter.stdout.connect(self.print_info)
@@ -329,7 +329,7 @@ class TestImport(unittest.TestCase):
         cursor.execute(
             """
                 SELECT {}
-                FROM {}.haltestelle
+                FROM {}.station
                 WHERE aname = 'Oberwinterthur'
             """.format(
                 db_connector.tilitid, dataImporter.configuration.dbschema
@@ -344,8 +344,8 @@ class TestImport(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/OeVBasketTest_V1.ili")
-        importer.configuration.ilimodels = "OeVBasketTest"
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath, "tmp_basket_gpkg.gpkg"
         )
@@ -364,7 +364,7 @@ class TestImport(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_winti.xtf"
+            "xtf/test_pipebaskettest_v1_winti.xtf"
         )
         dataImporter.configuration.with_importtid = True
         dataImporter.stdout.connect(self.print_info)
@@ -378,7 +378,7 @@ class TestImport(unittest.TestCase):
         cursor.execute(
             """
                 SELECT {}
-                FROM haltestelle
+                FROM station
                 WHERE aname = 'Oberwinterthur'
             """.format(
                 db_connector.tilitid, dataImporter.configuration.dbschema
@@ -393,8 +393,8 @@ class TestImport(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/OeVBasketTest_V1.ili")
-        importer.configuration.ilimodels = "OeVBasketTest"
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "baskets_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
@@ -414,7 +414,7 @@ class TestImport(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_winti.xtf"
+            "xtf/test_pipebaskettest_v1_winti.xtf"
         )
         dataImporter.configuration.with_importtid = True
         dataImporter.stdout.connect(self.print_info)
@@ -434,7 +434,7 @@ class TestImport(unittest.TestCase):
         cursor.execute(
             """
                 SELECT {}
-                FROM {}.haltestelle
+                FROM {}.station
                 WHERE aname = 'Oberwinterthur'
             """.format(
                 db_connector.tilitid, dataImporter.configuration.dbschema

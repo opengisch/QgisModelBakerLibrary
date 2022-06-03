@@ -45,8 +45,8 @@ class TestDatasetHandling(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/OeVBasketTest_V1.ili")
-        importer.configuration.ilimodels = "OeVBasketTest"
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "any_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
@@ -62,7 +62,7 @@ class TestDatasetHandling(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_winti.xtf"
+            "xtf/test_pipebaskettest_v1_winti.xtf"
         )
         dataImporter.configuration.dataset = "Winti"
         dataImporter.stdout.connect(self.print_info)
@@ -88,7 +88,7 @@ class TestDatasetHandling(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_seuzach.xtf"
+            "xtf/test_pipebaskettest_v1_seuzach.xtf"
         )
         dataImporter.configuration.dataset = "Seuzach"
         dataImporter.stdout.connect(self.print_info)
@@ -110,8 +110,8 @@ class TestDatasetHandling(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/OeVBasketTest_V1.ili")
-        importer.configuration.ilimodels = "OeVBasketTest"
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath, "tmp_basket_gpkg.gpkg"
         )
@@ -127,7 +127,7 @@ class TestDatasetHandling(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_winti.xtf"
+            "xtf/test_pipebaskettest_v1_winti.xtf"
         )
         dataImporter.configuration.dataset = "Winti"
         dataImporter.stdout.connect(self.print_info)
@@ -153,7 +153,7 @@ class TestDatasetHandling(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_seuzach.xtf"
+            "xtf/test_pipebaskettest_v1_seuzach.xtf"
         )
         dataImporter.configuration.dataset = "Seuzach"
         dataImporter.stdout.connect(self.print_info)
@@ -176,8 +176,8 @@ class TestDatasetHandling(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/OeVBasketTest_V1.ili")
-        importer.configuration.ilimodels = "OeVBasketTest"
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "baskets_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
@@ -194,7 +194,7 @@ class TestDatasetHandling(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_winti.xtf"
+            "xtf/test_pipebaskettest_v1_winti.xtf"
         )
         dataImporter.configuration.dataset = "Winti"
         dataImporter.stdout.connect(self.print_info)
@@ -220,7 +220,7 @@ class TestDatasetHandling(unittest.TestCase):
         dataImporter.configuration = ilidataimporter_config(importer.tool)
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
-            "xtf/test_oevbaskettest_v1_seuzach.xtf"
+            "xtf/test_pipebaskettest_v1_seuzach.xtf"
         )
         dataImporter.configuration.dataset = "Seuzach"
         dataImporter.stdout.connect(self.print_info)
