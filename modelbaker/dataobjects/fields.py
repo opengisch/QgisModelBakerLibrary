@@ -30,6 +30,7 @@ class Field:
         self.widget_config = dict()
         self.default_value_expression = None
         self.enum_domain = None
+        self.oid_domain = None
 
     def dump(self):
         definition = dict()
