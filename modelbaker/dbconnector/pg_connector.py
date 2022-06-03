@@ -477,7 +477,7 @@ class PGConnector(DBConnector):
                         order_by_attr_order=order_by_attr_order,
                     )
                 )
-                
+
                 return fields_cur
 
         return []

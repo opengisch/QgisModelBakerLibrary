@@ -27,7 +27,6 @@ from ..dataobjects.layers import Layer
 from ..dataobjects.legend import LegendGroup
 from ..dataobjects.relations import Relation
 from ..db_factory.db_simple_factory import DbSimpleFactory
-from ..iliwrapper.globals import DbIliMode
 from ..utils.qt_utils import slugify
 from .config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES, READONLY_FIELDNAMES
 from .domain_relations_generator import DomainRelationGenerator

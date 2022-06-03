@@ -395,7 +395,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.baskets:
             self.append_args(args, ["--baskets", ";".join(self.baskets)])
-        
+
         if self.with_exporttid:
             self.append_args(args, ["--exportTid"])
 
