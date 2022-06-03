@@ -368,7 +368,8 @@ class MssqlConnector(DBConnector):
                 stmt += ln + "    , txttype.setting AS texttype"
                 stmt += ln + "    , alias.setting AS column_alias"
                 stmt += ln + "    , full_name.iliname AS fully_qualified_name"
-                stmt += ln + "    , enum_domain.setting as enum_domain"
+                stmt += ln + "    , enum_domain.setting AS enum_domain"
+                stmt += ln + "    , oid_domain.setting AS oid_domain"
                 if metaattrs_exists:
                     stmt += (
                         ln
@@ -399,6 +400,10 @@ class MssqlConnector(DBConnector):
                 stmt += ln + "    ON c.table_name = enum_domain.tablename"
                 stmt += ln + "    AND c.column_name = enum_domain.columnname"
                 stmt += ln + "    AND enum_domain.tag = 'ch.ehi.ili2db.enumDomain'"
+                stmt += ln + "LEFT JOIN {schema}.t_ili2db_column_prop oid_domain"
+                stmt += ln + "    ON c.table_name = oid_domain.tablename"
+                stmt += ln + "    AND LOWER(c.column_name) = LOWER(oid_domain.columnname)"
+                stmt += ln + "    AND oid_domain.tag = 'ch.ehi.ili2db.oidDomain'"
                 if metaattrs_exists:
                     stmt += ln + "LEFT JOIN {schema}.t_ili2db_meta_attrs form_order"
                     stmt += ln + "    ON full_name.iliname=form_order.ilielement AND"
