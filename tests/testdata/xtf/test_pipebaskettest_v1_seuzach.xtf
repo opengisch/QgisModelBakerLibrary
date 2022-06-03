@@ -15,11 +15,11 @@
             <PipeBasketTest.Lines.SingleLine TID="be5f7c03-4db1-4814-8f54-548de0e67d42"><Bezeichnung>Seuzach - Töss - Oberseuzach</Bezeichnung><Code>1</Code></PipeBasketTest.Lines.SingleLine>
             <PipeBasketTest.Lines.SingleLine TID="c8498a47-2294-42d8-b3a9-47a752e32ae6"><Bezeichnung>Seuzach - Veltheim - Whatever</Bezeichnung><Code>2</Code></PipeBasketTest.Lines.SingleLine>
         </PipeBasketTest.Lines>
-        <PipeBasketTest.Infrastructur BID="e5a1288c-c09a-487c-ba24-a71a36717076">
-            <PipeBasketTest.Infrastructur.Station TID="a219d6cd-95a2-4a8c-8c99-c390fd18c4c0"><Name>Seuzach</Name><Code>11</Code></PipeBasketTest.Infrastructur.Station>
-            <PipeBasketTest.Infrastructur.Station TID="e7939061-d8ef-4ee5-905d-d667765ba5f2"><Name>Rickenbach</Name><Code>12</Code></PipeBasketTest.Infrastructur.Station>
-            <PipeBasketTest.Infrastructur.Station TID="04a36f85-6b08-434c-ace3-9e1ef67ed0ca"><Name>Oberseuzach</Name><Code>13</Code></PipeBasketTest.Infrastructur.Station>
-            <PipeBasketTest.Infrastructur.Station TID="2ae2f5a9-2e60-4253-b1bf-07fd8723457a"><Name>Whatever</Name><Code>14</Code></PipeBasketTest.Infrastructur.Station>
-        </PipeBasketTest.Infrastructur>
+        <PipeBasketTest.Infrastructure BID="e5a1288c-c09a-487c-ba24-a71a36717076">
+            <PipeBasketTest.Infrastructure.Station TID="a219d6cd-95a2-4a8c-8c99-c390fd18c4c0"><Name>Seuzach</Name><Code>11</Code></PipeBasketTest.Infrastructure.Station>
+            <PipeBasketTest.Infrastructure.Station TID="e7939061-d8ef-4ee5-905d-d667765ba5f2"><Name>Rickenbach</Name><Code>12</Code></PipeBasketTest.Infrastructure.Station>
+            <PipeBasketTest.Infrastructure.Station TID="04a36f85-6b08-434c-ace3-9e1ef67ed0ca"><Name>Oberseuzach</Name><Code>13</Code></PipeBasketTest.Infrastructure.Station>
+            <PipeBasketTest.Infrastructure.Station TID="2ae2f5a9-2e60-4253-b1bf-07fd8723457a"><Name>Whatever</Name><Code>14</Code></PipeBasketTest.Infrastructure.Station>
+        </PipeBasketTest.Infrastructure>
     </DATASECTION>
 </TRANSFER>
