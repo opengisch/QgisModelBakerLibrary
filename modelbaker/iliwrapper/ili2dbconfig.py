@@ -373,6 +373,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.topics = ""
         self.dataset = ""
         self.baskets = list()
+        self.with_exporttid = False
         self.xtflog = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
@@ -394,6 +395,9 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.baskets:
             self.append_args(args, ["--baskets", ";".join(self.baskets)])
+        
+        if self.with_exporttid:
+            self.append_args(args, ["--exportTid"])
 
         if self.xtflog:
             self.append_args(args, ["--xtflog", self.xtflog])
