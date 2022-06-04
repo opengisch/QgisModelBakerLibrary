@@ -310,6 +310,7 @@ class GPKGConnector(DBConnector):
             record["texttype"] = None
             record["column_alias"] = None
             record["enum_domain"] = None
+            record["oid_domain"] = None
 
             if record["column_name"] == "T_Id" and Qgis.QGIS_VERSION_INT >= 30500:
                 # Calculated on client side, since sqlite doesn't provide the means to pre-evaluate serials
@@ -333,7 +334,9 @@ class GPKGConnector(DBConnector):
                     elif column_prop["tag"] == "ch.ehi.ili2db.enumDomain":
                         record["enum_domain"] = column_prop["setting"]
                     elif column_prop["tag"] == "ch.ehi.ili2db.oidDomain":
+                        record["oid_domain"] = column_prop["setting"]
                         # Calculated on client side, since sqlite doesn't provide the means to pre-evaluate UUID
+                        # This could be moved to the field function in the generator in future, since we get the oid_domain.
                         if (
                             record["column_name"] == "T_Ili_Tid"
                             and column_prop["setting"] == "INTERLIS.UUIDOID"

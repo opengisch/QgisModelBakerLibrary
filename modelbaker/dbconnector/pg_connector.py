@@ -348,6 +348,7 @@ class PGConnector(DBConnector):
             text_kind_field = ""
             full_name_field = ""
             enum_domain_field = ""
+            oid_domain_field = ""
             attr_order_field = ""
             attr_mapping_field = ""
             column_alias = ""
@@ -356,6 +357,7 @@ class PGConnector(DBConnector):
             disp_name_join = ""
             full_name_join = ""
             enum_domain_join = ""
+            oid_domain_join = ""
             attr_order_join = ""
             attr_mapping_join = ""
             order_by_attr_order = ""
@@ -366,6 +368,7 @@ class PGConnector(DBConnector):
                 column_alias = "alias.setting AS column_alias,"
                 full_name_field = "full_name.iliname as fully_qualified_name,"
                 enum_domain_field = "enum_domain.setting as enum_domain,"
+                oid_domain_field = "oid_domain.setting as oid_domain,"
                 unit_join = """LEFT JOIN {}.t_ili2db_column_prop unit
                                                     ON c.table_name=unit.tablename AND
                                                     c.column_name=unit.columnname AND
@@ -396,6 +399,12 @@ class PGConnector(DBConnector):
                                                     ON c.table_name=enum_domain.tablename AND
                                                     c.column_name=enum_domain.columnname AND
                                                     enum_domain.tag = 'ch.ehi.ili2db.enumDomain'""".format(
+                    self.schema
+                )
+                oid_domain_join = """LEFT JOIN {}.t_ili2db_column_prop oid_domain
+                                                    ON c.table_name=oid_domain.tablename AND
+                                                    lower(c.column_name)=lower(oid_domain.columnname) AND
+                                                    oid_domain.tag = 'ch.ehi.ili2db.oidDomain'""".format(
                     self.schema
                 )
                 if self._table_exists(PG_METAATTRS_TABLE):
@@ -429,6 +438,7 @@ class PGConnector(DBConnector):
                       {column_alias}
                       {full_name_field}
                       {enum_domain_field}
+                      {oid_domain_field}
                       {attr_order_field}
                       {attr_mapping_field}
                       pgd.description AS comment
@@ -440,6 +450,7 @@ class PGConnector(DBConnector):
                     {disp_name_join}
                     {full_name_join}
                     {enum_domain_join}
+                    {oid_domain_join}
                     {attr_order_join}
                     {attr_mapping_join}
                     WHERE st.relid = '{schema}."{table}"'::regclass
@@ -452,6 +463,7 @@ class PGConnector(DBConnector):
                         column_alias=column_alias,
                         full_name_field=full_name_field,
                         enum_domain_field=enum_domain_field,
+                        oid_domain_field=oid_domain_field,
                         attr_order_field=attr_order_field,
                         attr_mapping_field=attr_mapping_field,
                         unit_join=unit_join,
@@ -459,6 +471,7 @@ class PGConnector(DBConnector):
                         disp_name_join=disp_name_join,
                         full_name_join=full_name_join,
                         enum_domain_join=enum_domain_join,
+                        oid_domain_join=oid_domain_join,
                         attr_order_join=attr_order_join,
                         attr_mapping_join=attr_mapping_join,
                         order_by_attr_order=order_by_attr_order,

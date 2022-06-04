@@ -121,6 +121,8 @@ class DBConnector(QObject):
                 unit
                 texttype
                 column_alias
+                enum_domain
+                oid_domain
                 fully_qualified_name
         """
         return []

@@ -2468,6 +2468,200 @@ class TestProjectGen(unittest.TestCase):
             == QgsRelation.Composition
         )
 
+    def test_tid_default_postgis(self):
+        """
+        When OID defined in INTERLIS - PostgreSQL creates uuid server side.
+        When OID not defined in INTERLIS - QGIS should set it with default values.
+        """
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
+        importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+            consider_basket_handling=True,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project(context={"catalogue_datasetname": CATALOGUE_DATASETNAME})
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.name == "singleline":
+                # default expression since it's not defined in model
+                count += 1
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField('t_ili_tid')
+                t_ili_tid_field = fields.field(field_idx)
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == "substr(uuid(), 2, 36)"
+            if layer.name == "station":
+                # no default expression since it's defined in model
+                count += 1
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField('t_ili_tid')
+                t_ili_tid_field = fields.field(field_idx)
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == ""
+
+        # check if the layers have been considered
+        assert count == 2
+
+    def test_tid_import_geopackage(self):
+        """
+        When OID defined in INTERLIS - QGIS should set it with default values.
+        When OID not defined in INTERLIS - QGIS should set it with default values.
+        """
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath, "tmp_tid_gpkg.gpkg"
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance, consider_basket_handling=True
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project(context={"catalogue_datasetname": CATALOGUE_DATASETNAME})
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.name == "singleline":
+                # default expression since it's not defined in model
+                count += 1
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField('T_Ili_Tid')
+                t_ili_tid_field = fields.field(field_idx)
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == "substr(uuid(), 2, 36)"
+            if layer.name == "station":
+                # default expression even when it's defined in model (since geopackage cannot create uuids)
+                count += 1
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField('T_Ili_Tid')
+                t_ili_tid_field = fields.field(field_idx)
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == "substr(uuid(), 2, 36)"
+
+        # check if the layers have been considered
+        assert count == 2
+
+    def test_tid_import_mssql(self):
+        """
+        When OID defined in INTERLIS - MSSQL creates uuid server side.
+        When OID not defined in INTERLIS - QGIS should set it with default values.
+        """
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2mssql
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilimodels = "PipeBasketTest"
+        importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
+            drv="{ODBC Driver 17 for SQL Server}",
+            server=importer.configuration.dbhost,
+            db=importer.configuration.database,
+            uid=importer.configuration.dbusr,
+            pwd=importer.configuration.dbpwd,
+        )
+
+        generator = Generator(
+            DbIliMode.ili2mssql, uri, importer.configuration.inheritance, importer.configuration.dbschema
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project(context={"catalogue_datasetname": CATALOGUE_DATASETNAME})
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.name == "singleline":
+                # default expression since it's not defined in model
+                count += 1
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField('t_ili_tid')
+                t_ili_tid_field = fields.field(field_idx)
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == "substr(uuid(), 2, 36)"
+            if layer.name == "station":
+                # no default expression since it's defined in model
+                count += 1
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField('t_ili_tid')
+                t_ili_tid_field = fields.field(field_idx)
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == ""
+
+        # check if the layers have been considered
+        assert count == 2
+
     def test_kbs_postgis_basket_handling(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg

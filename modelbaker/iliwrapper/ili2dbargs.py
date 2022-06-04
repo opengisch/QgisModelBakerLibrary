@@ -20,7 +20,7 @@
 
 import logging
 
-from qgis.PyQt.QtCore import QDir, QFile, QTextStream
+from qgis.PyQt.QtCore import QDir, QFile
 
 from .globals import DbIliMode
 from .ili2dbconfig import SchemaImportConfiguration
