@@ -75,3 +75,28 @@ pip install modelbaker
 
 ### ili2db
 In the current release we use ili2db version 4.6.1
+
+## Infos for Devs
+
+### Code style
+
+Is enforced with pre-commit. To use, make:
+```
+pip install pre-commit
+pre-commit install
+```
+And to run it over all the files (with infile changes):
+```
+pre-commit run --color=always --all-file
+```
+
+### Needed packages from PyPI
+
+Needed packages from PyPI are downloaded and packaged on deployment to the plugin's libs folder.
+
+Run the script to download and unpack them or install them to your system.
+
+Script:
+```
+./scripts/package_pip_packages.sh
+```
