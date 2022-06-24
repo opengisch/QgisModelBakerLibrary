@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """
 /***************************************************************************
-    begin                :    22/06/2022
+    begin                :    24/06/2022
     git sha              :    :%H$
     copyright            :    (C) 2022 by Dave Signer (took base from) Damiano Lombardi
     email                :    david@opengis.ch
@@ -17,12 +17,20 @@
  ***************************************************************************/
 """
 
+import datetime
+import logging
 import os
+from subprocess import call
 
+from qgis.core import QgsDataSourceUri, QgsProject
 from qgis.testing import start_app, unittest
 
-from modelbaker.iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
-from modelbaker.utils.globals import DbActionType
+import modelbaker.utils.db_utils as db_utils
+from modelbaker.dataobjects.project import Project
+from modelbaker.generator.generator import Generator
+from modelbaker.iliwrapper import iliimporter
+from modelbaker.iliwrapper.globals import DbIliMode
+from modelbaker.iliwrapper.ili2dbconfig import ValidateConfiguration
 from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
 
 start_app()
@@ -34,11 +42,37 @@ class TestPgservice(unittest.TestCase):
         """Run before all tests."""
         cls.pgservicefile = os.environ.get("PGSERVICEFILE", None)
         os.environ["PGSERVICEFILE"] = testdata_path("pgservice/pg_service.conf")
+        os.environ["PGPASSWORD"] = "docker"
+        call(
+            [
+                "psql",
+                "-h" + os.environ["PGHOST"],
+                "-Udocker",
+                "-c \"CREATE USER sevy WITH LOGIN SUPERUSER PASSWORD 'sevys_password';\"",
+            ],
+            env=os.environ,
+        )
+        call(
+            [
+                "psql",
+                "-h" + os.environ["PGHOST"],
+                "-Udocker",
+                "-c \"CREATE USER mani WITH LOGIN SUPERUSER PASSWORD 'manis_password';\"",
+            ],
+            env=os.environ,
+        )
 
     def test_pure_service(self):
         """
-        Set up connection with service configuration without authentification.
-        In the uri the connection parameters are taken from the service conf and the username password from the seperate parameters.
+        Set up connection with service configuration with authentification.
+        [sevys_service]
+        dbname=gis
+        user=sevy
+        password=sevys_password
+
+        Import is done with superuser docker / docker.
+
+        In the uri the dbname, username and password are taken from the service conf and the host from the manual parameter.
         """
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
@@ -49,8 +83,10 @@ class TestPgservice(unittest.TestCase):
             datetime.datetime.now()
         )
 
-        importer.configuration.dbservice = "freddys_service"
-        # needs superuser since credentials from service are not valid
+        # database would be set over the gui when loading the service conf
+        importer.configuration.dbservice = "sevys_service"
+        importer.configuration.database = "gis"
+        # needs superuser
         importer.configuration.db_use_super_login = True
 
         importer.stdout.connect(self.print_info)
@@ -77,9 +113,45 @@ class TestPgservice(unittest.TestCase):
         qgis_project = QgsProject.instance()
         project.create(None, qgis_project)
 
-        # check layer uri if dbname/user/password are not in the manual params but from service conf: user and password are freddy
+        # dbname/user/password should not be in the layer source
+        # for validation they should be available from the service conf
+        count = 0
+        for layer in available_layers:
+            if layer.name == "LandCover":
+                source_provider = layer.dataProvider()
+                source = QgsDataSourceUri(layer.dataProvider().dataSourceUri())
+                assert source.dbservice() == "sevys_service"
+                assert source.dbhost() == os.environ["PGHOST"]
+                assert source.database() is None
+                assert source.username() is None
+                assert source.password() is None
+
+                validate_configuration = ValidateConfiguration()
+                valid, mode = db_utils.get_configuration_from_layersource(
+                    source_provider, source, validate_configuration
+                )
+                assert valid
+
+                assert validate_configuration.database == "gis"
+                assert validate_configuration.dbusr == "sevy"
+                assert validate_configuration.dbpwd == "sevys_password"
+
+                count += 1
+
+                break
+
+        assert count == 1
 
     def test_manual_service(self):
+        """
+        Set up connection with service configuration with authentification.
+        [manis_service]
+        dbname=gis
+
+        Import is done with superuser docker / docker.
+
+        In the uri the dbname is taken from the service conf and the host, username and password from the manual parameter.
+        """
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
@@ -90,8 +162,12 @@ class TestPgservice(unittest.TestCase):
             datetime.datetime.now()
         )
 
-        importer.configuration.dbservice = "onlydb_service"
-        # needs superuser since credentials from service are not valid
+        # database would be set over the gui when loading the service conf
+        importer.configuration.dbservice = "manis_service"
+        importer.configuration.database = "gis"
+        importer.configuration.dbusr = "mani"
+        importer.configuration.dbpwd = "manis_password"
+        # needs superuser
         importer.configuration.db_use_super_login = True
 
         importer.stdout.connect(self.print_info)
@@ -118,69 +194,43 @@ class TestPgservice(unittest.TestCase):
         qgis_project = QgsProject.instance()
         project.create(None, qgis_project)
 
-        # check layer uri if dbname are not in the manual but user password are (docker)
+        # dbname should not be in the layer source but user/password are (mani/manis_password)
+        # for validation dbname should be available from the service conf
+        count = 0
+        for layer in available_layers:
+            if layer.name == "LandCover":
+                source_provider = layer.dataProvider()
+                source = QgsDataSourceUri(layer.dataProvider().dataSourceUri())
+                assert source.dbservice() == "manis_service"
+                assert source.dbhost() == os.environ["PGHOST"]
+                assert source.database() is None
+                assert source.username() is "mani"
+                assert source.password() is "manis_password"
 
-    def test_authconf_service(self):
-        # Schema Import
-        importer = iliimporter.Importer()
-        importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
-        importer.configuration.ilimodels = "RoadsSimple"
-        importer.configuration.dbschema = "roads_simple_pure{:%Y%m%d%H%M%S%f}".format(
-            datetime.datetime.now()
-        )
+                validate_configuration = ValidateConfiguration()
+                valid, mode = db_utils.get_configuration_from_layersource(
+                    source_provider, source, validate_configuration
+                )
+                assert valid
 
-        importer.configuration.dbservice = "freddys_service"
-        # needs superuser since credentials from service are not valid
-        importer.configuration.db_use_super_login = True
+                assert validate_configuration.database == "gis"
+                assert validate_configuration.dbusr == "mani"
+                assert validate_configuration.dbpwd == "manis_password"
 
-        importer.stdout.connect(self.print_info)
-        importer.stderr.connect(self.print_error)
-        assert importer.run() == iliimporter.Importer.SUCCESS
+                count += 1
 
-        generator = Generator(
-            DbIliMode.ili2pg,
-            get_pg_connection_string(),
-            "smart2",
-            importer.configuration.dbschema,
-        )
+                break
 
-        available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
-        legend = generator.legend(available_layers)
+        assert count == 1
 
-        project = Project()
-        project.layers = available_layers
-        project.relations = relations
-        project.legend = legend
-        project.post_generate()
+    def print_info(self, text):
+        logging.info(text)
 
-        qgis_project = QgsProject.instance()
-        project.create(None, qgis_project)
+    def print_error(self, text):
+        logging.error(text)
 
-        # check layer uri if dbname are not in the manual and neither password and user but authdb instead
-
-    def test_pgservice_pg_config_panel(self):
-
-        pg_config_panel = PgConfigPanel(None, DbActionType.EXPORT)
-        pg_config_panel.show()
-
-        index_postgis_test = pg_config_panel.pg_service_combo_box.findData(
-            "postgis_test", PgConfigPanel._SERVICE_COMBOBOX_ROLE.DBSERVICE
-        )
-        self.assertIsNot(index_postgis_test, -1)
-
-        configuration = Ili2DbCommandConfiguration()
-        configuration.dbservice = "postgis_test"
-        pg_config_panel.set_fields(configuration)
-        pg_config_panel.get_fields(configuration)
-
-        self.assertEqual(configuration.dbhost, "db.test.com")
-        self.assertEqual(configuration.dbport, "5433")
-        self.assertEqual(configuration.dbusr, "postgres")
-        self.assertEqual(configuration.dbpwd, "secret")
-        self.assertEqual(configuration.sslmode, "verify-ca")
+    def tearDown(self):
+        QgsProject.instance().removeAllMapLayers()
 
     @classmethod
     def tearDownClass(cls):
