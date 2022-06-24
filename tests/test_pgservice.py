@@ -27,11 +27,13 @@ from qgis.testing import start_app, unittest
 
 import modelbaker.utils.db_utils as db_utils
 from modelbaker.dataobjects.project import Project
+from modelbaker.db_factory.db_simple_factory import DbSimpleFactory
+from modelbaker.db_factory.pg_command_config_manager import PgCommandConfigManager
 from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from modelbaker.iliwrapper.ili2dbconfig import ValidateConfiguration
-from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
+from tests.utils import iliimporter_config, testdata_path
 
 start_app()
 
@@ -83,21 +85,41 @@ class TestPgservice(unittest.TestCase):
             datetime.datetime.now()
         )
 
-        # database would be set over the gui when loading the service conf
+        # override default values
+        importer.configuration.base_configuration.super_pg_user = "docker"
+        importer.configuration.base_configuration.super_pg_password = "docker"
+        importer.configuration.dbusr = ""
+        importer.configuration.dbpwd = ""
+        # assuming user chooses service
         importer.configuration.dbservice = "sevys_service"
+        # params would be set over the gui when loading the service conf
         importer.configuration.database = "gis"
+        importer.configuration.dbusr = "sevy"
+        importer.configuration.dbpwd = "sevys_password"
         # needs superuser
         importer.configuration.db_use_super_login = True
 
+        # create schema with superuser
+        db_simple_factory = DbSimpleFactory()
+        db_factory = db_simple_factory.create_factory(importer.configuration.tool)
+        res, message = db_factory.pre_generate_project(importer.configuration)
+        assert res
+
+        # import model
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
+        config_manager = PgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+        mgmt_uri = config_manager.get_uri(importer.configuration.db_use_super_login)
+
         generator = Generator(
             DbIliMode.ili2pg,
-            get_pg_connection_string(),
+            uri,
             "smart2",
             importer.configuration.dbschema,
+            mgmt_uri=mgmt_uri,
         )
 
         available_layers = generator.layers()
@@ -117,11 +139,11 @@ class TestPgservice(unittest.TestCase):
         # for validation they should be available from the service conf
         count = 0
         for layer in available_layers:
-            if layer.name == "LandCover":
-                source_provider = layer.dataProvider()
-                source = QgsDataSourceUri(layer.dataProvider().dataSourceUri())
-                assert source.dbservice() == "sevys_service"
-                assert source.dbhost() == os.environ["PGHOST"]
+            if layer.name == "landcover":
+                source_provider = layer.layer.dataProvider()
+                source = QgsDataSourceUri(layer.layer.dataProvider().dataSourceUri())
+                assert source.service() == "sevys_service"
+                assert source.host() == os.environ["PGHOST"]
                 assert source.database() is None
                 assert source.username() is None
                 assert source.password() is None
@@ -162,25 +184,51 @@ class TestPgservice(unittest.TestCase):
             datetime.datetime.now()
         )
 
-        # database would be set over the gui when loading the service conf
+        # override default values
+        importer.configuration.base_configuration.super_pg_user = "docker"
+        importer.configuration.base_configuration.super_pg_password = "docker"
+        importer.configuration.dbusr = ""
+        importer.configuration.dbpwd = ""
+        # assuming user chooses service
         importer.configuration.dbservice = "manis_service"
+        # params would be set over the gui when loading the service conf
         importer.configuration.database = "gis"
+        importer.configuration.dbusr = ""
+        importer.configuration.dbpwd = ""
+        # assuming user types in additional params
         importer.configuration.dbusr = "mani"
         importer.configuration.dbpwd = "manis_password"
         # needs superuser
         importer.configuration.db_use_super_login = True
 
+        # create schema with superuser
+        db_simple_factory = DbSimpleFactory()
+        db_factory = db_simple_factory.create_factory(importer.configuration.tool)
+        res, message = db_factory.pre_generate_project(importer.configuration)
+        assert res
+
+        # import model
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
+        config_manager = PgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+        mgmt_uri = config_manager.get_uri(importer.configuration.db_use_super_login)
+
+        # create schema with superuser
+        db_simple_factory = DbSimpleFactory()
+        db_factory = db_simple_factory.create_factory(importer.configuration.tool)
+        res, message = db_factory.pre_generate_project(importer.configuration)
+        assert res
+
         generator = Generator(
             DbIliMode.ili2pg,
-            get_pg_connection_string(),
+            uri,
             "smart2",
             importer.configuration.dbschema,
+            mgmt_uri=mgmt_uri,
         )
-
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -198,11 +246,11 @@ class TestPgservice(unittest.TestCase):
         # for validation dbname should be available from the service conf
         count = 0
         for layer in available_layers:
-            if layer.name == "LandCover":
-                source_provider = layer.dataProvider()
-                source = QgsDataSourceUri(layer.dataProvider().dataSourceUri())
-                assert source.dbservice() == "manis_service"
-                assert source.dbhost() == os.environ["PGHOST"]
+            if layer.name == "landcover":
+                source_provider = layer.layer.dataProvider()
+                source = QgsDataSourceUri(layer.layer.dataProvider().dataSourceUri())
+                assert source.service() == "manis_service"
+                assert source.host() == os.environ["PGHOST"]
                 assert source.database() is None
                 assert source.username() is "mani"
                 assert source.password() is "manis_password"
