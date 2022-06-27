@@ -1,7 +1,7 @@
 #!/bin/bash
 LIBS_DIR="modelbaker/libs"
 
-PGSERVICEPARSER=("pgserviceparser" "1.0.2")
+PGSERVICEPARSER=("pgserviceparser" "1.1.0")
 
 PACKAGES=(
   PGSERVICEPARSER[@]

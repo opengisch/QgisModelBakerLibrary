@@ -20,8 +20,9 @@
 import datetime
 import logging
 import os
-from subprocess import call
 
+import psycopg2
+import psycopg2.extras
 from qgis.core import QgsDataSourceUri, QgsProject
 from qgis.testing import start_app, unittest
 
@@ -33,7 +34,8 @@ from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from modelbaker.iliwrapper.ili2dbconfig import ValidateConfiguration
-from tests.utils import iliimporter_config, testdata_path
+from modelbaker.libs import pgserviceparser
+from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
 
 start_app()
 
@@ -43,31 +45,22 @@ class TestPgservice(unittest.TestCase):
     def setUpClass(cls):
         """Run before all tests."""
         cls.pgservicefile = os.environ.get("PGSERVICEFILE", None)
+        # create pgservicefile
+
         os.environ["PGSERVICEFILE"] = testdata_path("pgservice/pg_service.conf")
-        os.environ["PGPASSWORD"] = "docker"
-        call(
-            [
-                "psql",
-                "-h" + os.environ["PGHOST"],
-                "-Udocker",
-                "-c \"CREATE USER sevy WITH LOGIN SUPERUSER PASSWORD 'sevys_password';\"",
-            ],
-            env=os.environ,
+
+        pgserviceparser.write_service_setting(
+            "sevys_service", "host", os.environ["PGHOST"], os.environ["PGSERVICEFILE"]
         )
-        call(
-            [
-                "psql",
-                "-h" + os.environ["PGHOST"],
-                "-Udocker",
-                "-c \"CREATE USER mani WITH LOGIN SUPERUSER PASSWORD 'manis_password';\"",
-            ],
-            env=os.environ,
+        pgserviceparser.write_service_setting(
+            "manis_service", "host", os.environ["PGHOST"], os.environ["PGSERVICEFILE"]
         )
 
     def test_pure_service(self):
         """
         Set up connection with service configuration with authentification.
         [sevys_service]
+        host=os.environ["PGHOST"]
         dbname=gis
         user=sevy
         password=sevys_password
@@ -96,8 +89,16 @@ class TestPgservice(unittest.TestCase):
         importer.configuration.database = "gis"
         importer.configuration.dbusr = "sevy"
         importer.configuration.dbpwd = "sevys_password"
+        importer.configuration.dbhost = os.environ["PGHOST"]
         # needs superuser
         importer.configuration.db_use_super_login = True
+
+        # create the user we need
+        uri = get_pg_connection_string()
+        conn = psycopg2.connect(uri)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("CREATE USER sevy WITH SUPERUSER PASSWORD 'sevys_password';")
+        conn.commit()
 
         # create schema with superuser
         db_simple_factory = DbSimpleFactory()
@@ -123,7 +124,7 @@ class TestPgservice(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations = []
         legend = generator.legend(available_layers)
 
         project = Project()
@@ -141,12 +142,12 @@ class TestPgservice(unittest.TestCase):
         for layer in available_layers:
             if layer.name == "landcover":
                 source_provider = layer.layer.dataProvider()
+                print(layer.layer.dataProvider().dataSourceUri())
                 source = QgsDataSourceUri(layer.layer.dataProvider().dataSourceUri())
                 assert source.service() == "sevys_service"
-                assert source.host() == os.environ["PGHOST"]
-                assert source.database() is None
-                assert source.username() is None
-                assert source.password() is None
+                assert source.database() == ""
+                assert source.username() == ""
+                assert source.password() == ""
 
                 validate_configuration = ValidateConfiguration()
                 valid, mode = db_utils.get_configuration_from_layersource(
@@ -168,6 +169,7 @@ class TestPgservice(unittest.TestCase):
         """
         Set up connection with service configuration with authentification.
         [manis_service]
+        host=os.environ["PGHOST"]
         dbname=gis
 
         Import is done with superuser docker / docker.
@@ -195,11 +197,19 @@ class TestPgservice(unittest.TestCase):
         importer.configuration.database = "gis"
         importer.configuration.dbusr = ""
         importer.configuration.dbpwd = ""
+        importer.configuration.dbhost = os.environ["PGHOST"]
         # assuming user types in additional params
         importer.configuration.dbusr = "mani"
         importer.configuration.dbpwd = "manis_password"
         # needs superuser
         importer.configuration.db_use_super_login = True
+
+        # create the user we need
+        uri = get_pg_connection_string()
+        conn = psycopg2.connect(uri)
+        cur = conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+        cur.execute("CREATE USER mani WITH SUPERUSER PASSWORD 'manis_password';")
+        conn.commit()
 
         # create schema with superuser
         db_simple_factory = DbSimpleFactory()
@@ -216,12 +226,6 @@ class TestPgservice(unittest.TestCase):
         uri = config_manager.get_uri()
         mgmt_uri = config_manager.get_uri(importer.configuration.db_use_super_login)
 
-        # create schema with superuser
-        db_simple_factory = DbSimpleFactory()
-        db_factory = db_simple_factory.create_factory(importer.configuration.tool)
-        res, message = db_factory.pre_generate_project(importer.configuration)
-        assert res
-
         generator = Generator(
             DbIliMode.ili2pg,
             uri,
@@ -230,7 +234,7 @@ class TestPgservice(unittest.TestCase):
             mgmt_uri=mgmt_uri,
         )
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations = []
         legend = generator.legend(available_layers)
 
         project = Project()
@@ -248,12 +252,12 @@ class TestPgservice(unittest.TestCase):
         for layer in available_layers:
             if layer.name == "landcover":
                 source_provider = layer.layer.dataProvider()
+                print(layer.layer.dataProvider().dataSourceUri())
                 source = QgsDataSourceUri(layer.layer.dataProvider().dataSourceUri())
                 assert source.service() == "manis_service"
-                assert source.host() == os.environ["PGHOST"]
-                assert source.database() is None
-                assert source.username() is "mani"
-                assert source.password() is "manis_password"
+                assert source.database() == ""
+                assert source.username() == "mani"
+                assert source.password() == "manis_password"
 
                 validate_configuration = ValidateConfiguration()
                 valid, mode = db_utils.get_configuration_from_layersource(
