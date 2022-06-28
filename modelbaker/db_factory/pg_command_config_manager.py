@@ -18,6 +18,7 @@
 """
 from qgis.PyQt.QtCore import QSettings
 
+from ..libs import pgserviceparser
 from .db_command_config_manager import DbCommandConfigManager
 
 
@@ -38,15 +39,6 @@ class PgCommandConfigManager(DbCommandConfigManager):
     def get_uri(self, su=False):
         uri = []
 
-        if self.configuration.sslmode:
-            uri += ["sslmode='{}'".format(self.configuration.sslmode)]
-
-        if not su and self.configuration.dbservice:
-            uri += ["service='{}'".format(self.configuration.dbservice)]
-            return " ".join(uri)
-
-        uri += ["dbname='{}'".format(self.configuration.database)]
-
         if su:
             uri += [
                 "user={}".format(self.configuration.base_configuration.super_pg_user)
@@ -57,15 +49,59 @@ class PgCommandConfigManager(DbCommandConfigManager):
                         self.configuration.base_configuration.super_pg_password
                     )
                 ]
-        elif self.configuration.dbauthid:
+            if self.configuration.sslmode:
+                uri += ["sslmode='{}'".format(self.configuration.sslmode)]
+            uri += ["host={}".format(self.configuration.dbhost)]
+            if self.configuration.dbport:
+                uri += ["port={}".format(self.configuration.dbport)]
+            uri += ["dbname='{}'".format(self.configuration.database)]
+            return " ".join(uri)
+
+        if self.configuration.dbservice:
+            uri += ["service='{}'".format(self.configuration.dbservice)]
+
+        # only set the params when they are not available in the service
+        if not pgserviceparser.service_config(self.configuration.dbservice).get(
+            "sslmode", None
+        ):
+            if self.configuration.sslmode:
+                uri += ["sslmode='{}'".format(self.configuration.sslmode)]
+
+        if not pgserviceparser.service_config(self.configuration.dbservice).get(
+            "host", None
+        ):
+            uri += ["host={}".format(self.configuration.dbhost)]
+
+        if not pgserviceparser.service_config(self.configuration.dbservice).get(
+            "port", None
+        ):
+            if self.configuration.dbport:
+                uri += ["port={}".format(self.configuration.dbport)]
+
+        if not pgserviceparser.service_config(self.configuration.dbservice).get(
+            "dbname", None
+        ):
+            uri += ["dbname='{}'".format(self.configuration.database)]
+
+        if self.configuration.dbauthid and not (
+            pgserviceparser.service_config(self.configuration.dbservice).get(
+                "user", None
+            )
+            and pgserviceparser.service_config(self.configuration.dbservice).get(
+                "password", None
+            )
+        ):
             uri += ["authcfg={}".format(self.configuration.dbauthid)]
         else:
-            uri += ["user={}".format(self.configuration.dbusr)]
-            if self.configuration.dbpwd:
-                uri += ["password={}".format(self.configuration.dbpwd)]
-        uri += ["host={}".format(self.configuration.dbhost)]
-        if self.configuration.dbport:
-            uri += ["port={}".format(self.configuration.dbport)]
+            if not pgserviceparser.service_config(self.configuration.dbservice).get(
+                "user", None
+            ):
+                uri += ["user={}".format(self.configuration.dbusr)]
+            if not pgserviceparser.service_config(self.configuration.dbservice).get(
+                "password", None
+            ):
+                if self.configuration.dbpwd:
+                    uri += ["password={}".format(self.configuration.dbpwd)]
 
         return " ".join(uri)
 
@@ -128,6 +164,9 @@ class PgCommandConfigManager(DbCommandConfigManager):
         settings.setValue(
             self._settings_base_path + "authid", self.configuration.dbauthid
         )
+        settings.setValue(
+            self._settings_base_path + "service", self.configuration.dbservice
+        )
 
     def load_config_from_qsettings(self):
         settings = QSettings()
@@ -146,6 +185,9 @@ class PgCommandConfigManager(DbCommandConfigManager):
         self.configuration.dbpwd = settings.value(self._settings_base_path + "password")
         self.configuration.dbauthid = settings.value(
             self._settings_base_path + "authid"
+        )
+        self.configuration.dbservice = settings.value(
+            self._settings_base_path + "service"
         )
         self.configuration.db_use_super_login = settings.value(
             self._settings_base_path + "usesuperlogin", defaultValue=False, type=bool

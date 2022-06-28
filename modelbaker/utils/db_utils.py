@@ -22,6 +22,7 @@ from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsMessageLog
 from ..db_factory.db_simple_factory import DbSimpleFactory
 from ..dbconnector.db_connector import DBConnectorError
 from ..iliwrapper.globals import DbIliMode
+from ..libs import pgserviceparser
 from .qt_utils import slugify
 
 
@@ -64,6 +65,7 @@ def get_configuration_from_layersource(
 ):
     """
     Determines the connection parameters from a layer source.
+    On service in postgres it preferences the static parameters over the ones in the service file if available.
     Returns:
         valid (boolean): if the needed database connection parameters are determined
         mode (DbIliMode): Kind of database like pg, gpkg or mssql
@@ -73,15 +75,18 @@ def get_configuration_from_layersource(
     valid = False
     if layer_source_provider.name() == "postgres":
         mode = DbIliMode.pg
+        configuration.dbservice = layer_source.service()
+        service_map = pgserviceparser.service_config(configuration.dbservice)
         if layer_source.authConfigId():
-            authconfig_map = get_authconfig_map(layer_source.authConfigId())
+            configuration.dbauthid = layer_source.authConfigId()
+            authconfig_map = get_authconfig_map(configuration.dbauthid)
             configuration.dbusr = authconfig_map.get("username")
             configuration.dbpwd = authconfig_map.get("password")
         else:
-            configuration.dbusr = layer_source.username()
-            configuration.dbpwd = layer_source.password()
-        configuration.dbhost = layer_source.host()
-        configuration.database = layer_source.database()
+            configuration.dbusr = layer_source.username() or service_map.get("user")
+            configuration.dbpwd = layer_source.password() or service_map.get("password")
+        configuration.dbhost = layer_source.host() or service_map.get("host")
+        configuration.database = layer_source.database() or service_map.get("dbname")
         configuration.dbschema = layer_source.schema()
         valid = bool(
             configuration.dbusr
