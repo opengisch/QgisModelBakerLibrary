@@ -17,7 +17,13 @@
  ***************************************************************************/
 """
 
-from qgis.core import Qgis, QgsLayerTreeNode, QgsMapLayer, QgsWkbTypes
+from qgis.core import (
+    Qgis,
+    QgsLayerTreeLayer,
+    QgsLayerTreeNode,
+    QgsMapLayer,
+    QgsWkbTypes,
+)
 
 layer_order = [
     "point",  # QgsWkbTypes.PointGeometry
@@ -56,9 +62,12 @@ def get_first_index_for_layer_type(layer_type, group, ignore_node_names=None):
             # We've reached the lowest index in the layer tree before a group
             return current
 
-        layer = tree_node.layer()
-        if get_layer_type(layer) == layer_type:
-            return current
+        # Make this check because children() sometimes returns nodes of type QgsLayerTreeNode instead.
+        # This is a workaround for a weird behavior of QGIS.
+        if isinstance(tree_node, QgsLayerTreeLayer):
+            layer = tree_node.layer()
+            if get_layer_type(layer) == layer_type:
+                return current
 
     return None
 
