@@ -35,7 +35,7 @@ class GpkgCommandConfigManager(DbCommandConfigManager):
     def __init__(self, configuration):
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su=False):
+    def get_uri(self, su=False, qgis=False):
         return self.configuration.dbfile
 
     def get_db_args(self, hide_password=False, su=False):

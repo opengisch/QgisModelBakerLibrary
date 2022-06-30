@@ -28,7 +28,7 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
     def __init__(self, configuration):
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su=False):
+    def get_uri(self, su=False, qgis=False):
         separator = ";"
         uri = []
         uri += ["DRIVER={{{}}}".format(self.configuration.db_odbc_driver)]
