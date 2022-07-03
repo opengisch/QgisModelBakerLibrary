@@ -41,10 +41,11 @@ class DbCommandConfigManager(ABC):
         self.configuration = configuration
 
     @abstractmethod
-    def get_uri(self, su: bool = False):
+    def get_uri(self, su: bool = False, qgis: bool = False):
         """Gets database uri (connection string) for db connectors (:class:`DBConnector`).
 
         :param bool su: *True* to use super user credentials, *False* otherwise.
+        :param bool qgis: *True* to use qgis specific credentials (e.g. authcfg), *False* otherwise.
         :return: Database uri (connection string).
         :rtype str
         """

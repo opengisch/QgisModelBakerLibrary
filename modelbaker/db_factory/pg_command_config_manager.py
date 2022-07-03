@@ -36,7 +36,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
     def __init__(self, configuration):
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su=False):
+    def get_uri(self, su=False, qgis=False):
         uri = []
 
         if su:
@@ -83,12 +83,17 @@ class PgCommandConfigManager(DbCommandConfigManager):
         ):
             uri += ["dbname='{}'".format(self.configuration.database)]
 
-        if self.configuration.dbauthid and not (
-            pgserviceparser.service_config(self.configuration.dbservice).get(
-                "user", None
-            )
-            and pgserviceparser.service_config(self.configuration.dbservice).get(
-                "password", None
+        # only provide authcfg to the uri when it's needed for QGIS specific things
+        if (
+            qgis
+            and self.configuration.dbauthid
+            and not (
+                pgserviceparser.service_config(self.configuration.dbservice).get(
+                    "user", None
+                )
+                and pgserviceparser.service_config(self.configuration.dbservice).get(
+                    "password", None
+                )
             )
         ):
             uri += ["authcfg={}".format(self.configuration.dbauthid)]
