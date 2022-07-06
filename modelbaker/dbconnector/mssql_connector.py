@@ -402,7 +402,9 @@ class MssqlConnector(DBConnector):
                 stmt += ln + "    AND enum_domain.tag = 'ch.ehi.ili2db.enumDomain'"
                 stmt += ln + "LEFT JOIN {schema}.t_ili2db_column_prop oid_domain"
                 stmt += ln + "    ON c.table_name = oid_domain.tablename"
-                stmt += ln + "    AND LOWER(c.column_name) = LOWER(oid_domain.columnname)"
+                stmt += (
+                    ln + "    AND LOWER(c.column_name) = LOWER(oid_domain.columnname)"
+                )
                 stmt += ln + "    AND oid_domain.tag = 'ch.ehi.ili2db.oidDomain'"
                 if metaattrs_exists:
                     stmt += ln + "LEFT JOIN {schema}.t_ili2db_meta_attrs form_order"
@@ -773,10 +775,12 @@ WHERE TABLE_SCHEMA='{schema}'
             cur = self.conn.cursor()
             cur.execute(
                 """
-                    SELECT DISTINCT PARSENAME(iliname,1) as model,
-                    PARSENAME(iliname,2) as topic
-                    FROM {schema}.t_ili2db_classname
-					WHERE PARSENAME(iliname,3) != ''
+                    SELECT DISTINCT PARSENAME(cn.iliname,1) as model,
+                    PARSENAME(cn.iliname,2) as topic
+                    FROM {schema}.t_ili2db_classname as cn
+                    JOIN {schema}.t_ili2db_table_prop as tp
+                    ON cn.sqlname = tp.tablename
+					WHERE PARSENAME(cn.iliname,3) != '' and tp.setting != 'ENUM'
                 """.format(
                     schema=self.schema
                 )

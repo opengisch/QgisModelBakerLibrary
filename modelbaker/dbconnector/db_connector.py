@@ -297,7 +297,8 @@ class DBConnector(QObject):
 
     def get_topics_info(self):
         """
-        Returns all the topics found in the table t_ili2db_classname
+        Returns all the topics found in the table t_ili2db_classname as long as they contain tables found in t_ili2db_table_prop and are there not defined as ENUM.
+        This avoids to get structures back, containing enumerations and not being in a topic, having the structure <modelname>.<structurename>.<enumerationname>.
         Return:
             Iterable allowing to access rows, each row should allow to access
             specific columns by name (e.g., a list of dicts {column_name:value})
