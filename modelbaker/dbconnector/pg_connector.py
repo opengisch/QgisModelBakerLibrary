@@ -876,10 +876,12 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 """
-                    SELECT DISTINCT (string_to_array(iliname, '.'))[1] as model,
-                    (string_to_array(iliname, '.'))[2] as topic
-                    FROM {schema}.t_ili2db_classname
-					WHERE array_length(string_to_array(iliname, '.'),1) > 2
+                    SELECT DISTINCT (string_to_array(cn.iliname, '.'))[1] as model,
+                    (string_to_array(cn.iliname, '.'))[2] as topic
+                    FROM {schema}.t_ili2db_classname as cn
+                    JOIN {schema}.t_ili2db_table_prop as tp
+                    ON cn.sqlname = tp.tablename
+					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and tp.setting != 'ENUM'
                 """.format(
                     schema=self.schema
                 )

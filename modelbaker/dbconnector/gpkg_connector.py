@@ -704,10 +704,12 @@ class GPKGConnector(DBConnector):
             cur = self.conn.cursor()
             cur.execute(
                 """
-                    SELECT DISTINCT substr(IliName, 0, instr(IliName, '.')) as model,
-                    substr(substr(IliName, instr(IliName, '.')+1),0, instr(substr(IliName, instr(IliName, '.')+1),'.')) as topic
-                    FROM T_ILI2DB_CLASSNAME
-					WHERE topic != ''
+                    SELECT DISTINCT substr(CN.IliName, 0, instr(CN.IliName, '.')) as model,
+                    substr(substr(CN.IliName, instr(CN.IliName, '.')+1),0, instr(substr(CN.IliName, instr(CN.IliName, '.')+1),'.')) as topic
+                    FROM T_ILI2DB_CLASSNAME as CN
+                    JOIN T_ILI2DB_TABLE_PROP as TP
+                    ON CN.sqlname = TP.tablename
+					WHERE topic != '' and TP.setting != 'ENUM'
                 """
             )
             contents = cur.fetchall()
