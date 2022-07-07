@@ -82,7 +82,9 @@ class GPKGConnector(DBConnector):
                 GPKG_METADATA_TABLE
             )
         )
-        return cursor.fetchone()[0] == 1
+        result = cursor.fetchone()[0] == 1
+        cursor.close()
+        return result
 
     def _table_exists(self, tablename):
         cursor = self.conn.cursor()
@@ -94,7 +96,9 @@ class GPKGConnector(DBConnector):
                 tablename
             )
         )
-        return cursor.fetchone()[0] == 1
+        result = cursor.fetchone()[0] == 1
+        cursor.close()
+        return result
 
     def get_tables_info(self):
         return self._tables_info
@@ -171,6 +175,7 @@ class GPKGConnector(DBConnector):
             records = cursor.fetchall()
         except sqlite3.OperationalError as e:
             # If the geopackage is empty, geometry_columns table does not exist
+            cursor.close()
             return []
 
         # Use prefix-suffix pairs defined in config to filter out matching tables
@@ -395,6 +400,7 @@ class GPKGConnector(DBConnector):
             if res2:
                 constraint_mapping[res2.group(1)] = (res2.group(2), res2.group(3))
 
+        cursor.close()
         return constraint_mapping
 
     def get_relations_info(self, filter_layer_list=[]):
@@ -449,8 +455,9 @@ class GPKGConnector(DBConnector):
         return complete_records
 
     def get_bags_of_info(self):
-        cursor = self.conn.cursor()
+        bags_of_info = {}
         if self.metadata_exists():
+            cursor = self.conn.cursor()
             cursor.execute(
                 """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
                             meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max
@@ -466,7 +473,9 @@ class GPKGConnector(DBConnector):
                             WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey' AND meta_attrs_array.attr_value = 'ARRAY'
                             """
             )
-        return cursor
+            bags_of_info = cursor.fetchall()
+            cursor.close()
+        return bags_of_info
 
     def get_iliname_dbname_mapping(self, sqlnames=list()):
         """Note: the parameter sqlnames is only used for ili2db version 3 relation creation"""
@@ -569,6 +578,7 @@ class GPKGConnector(DBConnector):
                     list_result.append(result)
                     result = dict()
 
+        cursor.close()
         return list_result
 
     def ili_version(self):
@@ -584,6 +594,7 @@ class GPKGConnector(DBConnector):
         for column_info in table_info:
             if column_info[1] == "file":
                 result += 1
+        cursor.close()
         if result > 1:
             self.new_message.emit(
                 Qgis.Warning,
@@ -606,14 +617,15 @@ class GPKGConnector(DBConnector):
                 ["ch.ehi.ili2db.BasketHandling"],
             )
             content = cursor.fetchone()
+            cursor.close()
             if content:
                 return content[0] == "readWrite"
         return False
 
     def get_baskets_info(self):
         if self._table_exists(GPKG_BASKET_TABLE):
-            cur = self.conn.cursor()
-            cur.execute(
+            cursor = self.conn.cursor()
+            cursor.execute(
                 """SELECT b.t_id as basket_t_id,
                             b.t_ili_tid as basket_t_ili_tid,
                             b.topic as topic,
@@ -625,27 +637,29 @@ class GPKGConnector(DBConnector):
                     basket_table=GPKG_BASKET_TABLE, dataset_table=GPKG_DATASET_TABLE
                 )
             )
-            contents = cur.fetchall()
+            contents = cursor.fetchall()
+            cursor.close()
             return contents
         return {}
 
     def get_datasets_info(self):
         if self._table_exists(GPKG_DATASET_TABLE):
-            cur = self.conn.cursor()
-            cur.execute(
+            cursor = self.conn.cursor()
+            cursor.execute(
                 """SELECT t_id, datasetname
                            FROM {dataset_table}
                         """.format(
                     dataset_table=GPKG_DATASET_TABLE
                 )
             )
-            contents = cur.fetchall()
+            contents = cursor.fetchall()
+            cursor.close()
             return contents
         return {}
 
     def create_dataset(self, datasetname):
         if self._table_exists(GPKG_DATASET_TABLE):
-            cur = self.conn.cursor()
+            cursor = self.conn.cursor()
             try:
                 (
                     status,
@@ -653,11 +667,12 @@ class GPKGConnector(DBConnector):
                     fetch_and_increment_feedback,
                 ) = self._fetch_and_increment_key_object(self.tid)
                 if not status:
+                    cursor.close()
                     return False, self.tr('Could not create dataset "{}": {}').format(
                         datasetname, fetch_and_increment_feedback
                     )
 
-                cur.execute(
+                cursor.execute(
                     """
                     INSERT INTO {dataset_table} ({tid_name},datasetName) VALUES (:next_id, :datasetname)
                     """.format(
@@ -666,10 +681,12 @@ class GPKGConnector(DBConnector):
                     {"datasetname": datasetname, "next_id": next_id},
                 )
                 self.conn.commit()
+                cursor.close()
                 return True, self.tr('Successfully created dataset "{}".').format(
                     datasetname
                 )
             except sqlite3.Error as e:
+                cursor.close()
                 error_message = " ".join(e.args)
                 return False, self.tr('Could not create dataset "{}": {}').format(
                     datasetname, error_message
@@ -678,9 +695,9 @@ class GPKGConnector(DBConnector):
 
     def rename_dataset(self, tid, datasetname):
         if self._table_exists(GPKG_DATASET_TABLE):
-            cur = self.conn.cursor()
+            cursor = self.conn.cursor()
             try:
-                cur.execute(
+                cursor.execute(
                     """
                     UPDATE {dataset_table} SET datasetName = :datasetname WHERE {tid_name} = {tid}
                     """.format(
@@ -689,10 +706,12 @@ class GPKGConnector(DBConnector):
                     {"datasetname": datasetname},
                 )
                 self.conn.commit()
+                cursor.close()
                 return True, self.tr('Successfully renamed dataset to "{}".').format(
                     datasetname
                 )
             except sqlite3.Error as e:
+                cursor.close()
                 error_message = " ".join(e.args)
                 return False, self.tr('Could not rename dataset to "{}": {}').format(
                     datasetname, error_message
@@ -701,8 +720,8 @@ class GPKGConnector(DBConnector):
 
     def get_topics_info(self):
         if self._table_exists("T_ILI2DB_CLASSNAME"):
-            cur = self.conn.cursor()
-            cur.execute(
+            cursor = self.conn.cursor()
+            cursor.execute(
                 """
                     SELECT DISTINCT substr(CN.IliName, 0, instr(CN.IliName, '.')) as model,
                     substr(substr(CN.IliName, instr(CN.IliName, '.')+1),0, instr(substr(CN.IliName, instr(CN.IliName, '.')+1),'.')) as topic
@@ -712,14 +731,15 @@ class GPKGConnector(DBConnector):
 					WHERE topic != '' and TP.setting != 'ENUM'
                 """
             )
-            contents = cur.fetchall()
+            contents = cursor.fetchall()
+            cursor.close()
             return contents
         return {}
 
     def create_basket(self, dataset_tid, topic):
         if self._table_exists(GPKG_BASKET_TABLE):
-            cur = self.conn.cursor()
-            cur.execute(
+            cursor = self.conn.cursor()
+            cursor.execute(
                 """
                     SELECT * FROM {basket_table}
                     WHERE dataset = {dataset_tid} and topic = '{topic}'
@@ -727,7 +747,8 @@ class GPKGConnector(DBConnector):
                     basket_table=GPKG_BASKET_TABLE, dataset_tid=dataset_tid, topic=topic
                 )
             )
-            if cur.fetchone():
+            if cursor.fetchone():
+                cursor.close()
                 return False, self.tr('Basket for topic "{}" already exists.').format(
                     topic
                 )
@@ -741,7 +762,7 @@ class GPKGConnector(DBConnector):
                     return False, self.tr(
                         'Could not create basket for topic "{}": {}'
                     ).format(topic, fetch_and_increment_feedback)
-                cur.execute(
+                cursor.execute(
                     """
                     INSERT INTO {basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
                     VALUES ({next_id}, {dataset_tid}, '{topic}', '{uuid}', 'Qgis Model Baker')
@@ -756,10 +777,12 @@ class GPKGConnector(DBConnector):
                     )
                 )
                 self.conn.commit()
+                cursor.close()
                 return True, self.tr(
                     'Successfully created basket for topic "{}".'
                 ).format(topic)
             except sqlite3.Error as e:
+                cursor.close()
                 error_message = " ".join(e.args)
                 return False, self.tr(
                     'Could not create basket for topic "{}": {}'
@@ -779,6 +802,7 @@ class GPKGConnector(DBConnector):
                 ["ch.ehi.ili2db.TidHandling"],
             )
             content = cursor.fetchone()
+            cursor.close()
             if content:
                 return content[0] == "property"
         return False
@@ -787,8 +811,8 @@ class GPKGConnector(DBConnector):
         next_id = 0
         if self._table_exists("T_KEY_OBJECT"):
             # fetch last unique id of field_name
-            cur = self.conn.cursor()
-            cur.execute(
+            cursor = self.conn.cursor()
+            cursor.execute(
                 """
                     SELECT T_LastUniqueId, T_CreateDate FROM T_KEY_OBJECT
                     WHERE T_Key = ?
@@ -796,7 +820,7 @@ class GPKGConnector(DBConnector):
                 [field_name],
             )
 
-            content = cur.fetchone()
+            content = cursor.fetchone()
 
             create_date = "date('now')"
 
@@ -807,7 +831,7 @@ class GPKGConnector(DBConnector):
 
             # and update
             try:
-                cur.execute(
+                cursor.execute(
                     """
                     INSERT OR REPLACE INTO T_KEY_OBJECT (T_Key, T_LastUniqueId, T_LastChange, T_CreateDate, T_User )
                     VALUES (:key, :next_id, date('now'), :create_date, 'Qgis Model Baker')
@@ -815,6 +839,7 @@ class GPKGConnector(DBConnector):
                     {"key": field_name, "next_id": next_id, "create_date": create_date},
                 )
                 self.conn.commit()
+                cursor.close()
                 return (
                     True,
                     next_id,
@@ -823,8 +848,8 @@ class GPKGConnector(DBConnector):
                     ),
                 )
             except sqlite3.Error as e:
+                cursor.close()
                 error_message = " ".join(e.args)
-
                 return (
                     False,
                     next_id,
