@@ -16,3 +16,10 @@ layertree:
                 tablename: "parzellenidentifikation"
                 iliname: "KbS_Basis_V1_4.Parzellenidentifikation"
                 qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_005_parzellenidentifikation.qml"
+    - "System Layers":
+        group: true
+        child-nodes:
+            - "t_ili2db_dataset":
+                #alias is empty, so it should find the layer name
+            - "t_ili2db_basket":
+                #alias is empty, so it should find the layer name
