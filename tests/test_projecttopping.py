@@ -41,6 +41,8 @@ start_app()
 
 test_path = pathlib.Path(__file__).parent.absolute()
 
+CATALOGUE_DATASETNAME = "Catset"
+
 
 class TestProjectTopping(unittest.TestCase):
     @classmethod
@@ -387,6 +389,7 @@ class TestProjectTopping(unittest.TestCase):
     def test_kbs_postgis_iliname(self):
         """
         Checks if layers can be loaded by it's iliname and geometry column.
+        Checks if layers can be loaded by it's layername (what is basicly the table name) for layers without alias.
         Checks if qml style files can be applied by to some layers and some not (with the same name).
         """
 
@@ -403,6 +406,7 @@ class TestProjectTopping(unittest.TestCase):
         importer.configuration.tomlfile = os.path.join(
             self.toppings_test_path, "metaattributes/sh_KbS_LV95_V1_4.toml"
         )
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -412,10 +416,11 @@ class TestProjectTopping(unittest.TestCase):
             get_pg_connection_string(),
             "smart2",
             importer.configuration.dbschema,
+            consider_basket_handling=True,
         )
         available_layers = generator.layers()
 
-        assert len(available_layers) == 16
+        assert len(available_layers) == 18
 
         # load the projecttopping file
         projecttopping_file_path = os.path.join(
@@ -438,12 +443,12 @@ class TestProjectTopping(unittest.TestCase):
                 else None,
             )
 
-        # no additional layers
-        assert len(available_layers) == 16
+        # additional basket layers
+        assert len(available_layers) == 18
 
         relations, _ = generator.relations(available_layers)
 
-        project = Project()
+        project = Project(context={"catalogue_datasetname": CATALOGUE_DATASETNAME})
         project.layers = available_layers
         project.legend = legend
         project.relations = relations
@@ -458,6 +463,9 @@ class TestProjectTopping(unittest.TestCase):
         polygon_standort = None
         # parzellen layer with applied qml
         parzellen = None
+        # system layer found by it's layername
+        t_ili2db_basket = None
+        t_ili2db_dataset = None
 
         main_group = qgis_project.layerTreeRoot().findGroup("KbS_LV95_V1_4 Layers")
         assert main_group is not None
@@ -471,9 +479,21 @@ class TestProjectTopping(unittest.TestCase):
             if layer.name() == "Parzellen":
                 parzellen = layer
 
-        assert punkt_standort
-        assert polygon_standort
-        assert parzellen
+        assert punkt_standort.layer().isValid()
+        assert polygon_standort.layer().isValid()
+        assert parzellen.layer().isValid()
+
+        system_group = qgis_project.layerTreeRoot().findGroup("System Layers")
+        assert system_group is not None
+        layers = system_group.findLayers()
+        for layer in layers:
+            if layer.name() == "t_ili2db_basket":
+                t_ili2db_basket = layer
+            if layer.name() == "t_ili2db_dataset":
+                t_ili2db_dataset = layer
+
+        assert t_ili2db_basket.layer().isValid()
+        assert t_ili2db_dataset.layer().isValid()
 
         # check qml from file at punkt_standort
         edit_form_config = punkt_standort.layer().editFormConfig()

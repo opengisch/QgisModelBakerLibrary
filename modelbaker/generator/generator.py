@@ -206,7 +206,7 @@ class Generator(QObject):
             )
             coordinate_precision = None
             if coord_decimals:
-                coordinate_precision = 1 / (10 ** coord_decimals)
+                coordinate_precision = 1 / (10**coord_decimals)
 
             layer = Layer(
                 layer_uri.provider,
@@ -519,6 +519,13 @@ class Generator(QObject):
                     # get the layer according to the alias
                     for layer in layers:
                         if layer.alias == current_node_name:
+                            current_node = layer
+                            break
+
+                if not current_node:
+                    # get the layer according to the name
+                    for layer in layers:
+                        if layer.name == current_node_name:
                             current_node = layer
                             break
 
