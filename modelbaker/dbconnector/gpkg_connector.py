@@ -807,6 +807,21 @@ class GPKGConnector(DBConnector):
                 return content[0] == "property"
         return False
 
+    def get_ili2db_settings(self):
+        result = {}
+        if self._table_exists(GPKG_SETTINGS_TABLE):
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """SELECT *
+                            FROM {}
+                            """.format(
+                    GPKG_SETTINGS_TABLE
+                )
+            )
+            result = cursor.fetchall()
+            cursor.close()
+        return result
+
     def _fetch_and_increment_key_object(self, field_name):
         next_id = 0
         if self._table_exists("T_KEY_OBJECT"):

@@ -319,7 +319,13 @@ class DBConnector(QObject):
         Returns `True` if a tid handling is enabled according to the settings table (when the database has been created with `--createTidCol`).
         If t_ili_tids are used only because of a stable id definition in the model (with `OID as` in the topic or the class definition), this parameter is not set and this function will return `False`.
         """
-        return False
+        return {}
+
+    def get_ili2db_settings(self):
+        """
+        Returns the settings like they are without any name mapping etc.
+        """
+        return {}
 
 
 class DBConnectorError(Exception):
