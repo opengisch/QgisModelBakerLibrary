@@ -10,6 +10,14 @@ services:
     environment:
       - ALLOW_IP_RANGE="172.0.0.0/8"
 
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-CU11-ubuntu-20.04
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: <YourStrong!Passw0rd>
+    ports:
+      - "1433:1433"
+
   qgis:
     build:
       context: ..
@@ -22,3 +30,4 @@ services:
     links:
       - postgres11
       - postgres12
+      - mssql
