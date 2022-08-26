@@ -130,6 +130,8 @@ class Ili2DbCommandConfiguration(object):
         self.db_ili_version = None
 
     def append_args(self, args, values, consider_metaconfig=False):
+        # since passing metaconfig is not supported yet. see https://github.com/claeis/ili2db/issues/392 we disable the functionality by setting consider_metaconfig to false
+        consider_metaconfig = False
         if consider_metaconfig and self.metaconfig and values:
             if "ch.ehi.ili2db" in self.metaconfig.sections():
                 metaconfig_ili2db_params = self.metaconfig["ch.ehi.ili2db"]
