@@ -212,8 +212,11 @@ class DBConnector(QObject):
                     static_tables.append(record["tablename"])
                     continue
             if "tablename" in record:
-                if record["tablename"] in IGNORED_TABLES and (
-                    ignore_basket_tables or record["tablename"] not in BASKET_TABLES
+                if self.is_spatial_index_table(record["tablename"]) or (
+                    record["tablename"] in IGNORED_TABLES
+                    and (
+                        ignore_basket_tables or record["tablename"] not in BASKET_TABLES
+                    )
                 ):
                     static_tables.append(record["tablename"])
                     continue
@@ -223,6 +226,10 @@ class DBConnector(QObject):
                 referencing_detected_tables.append(record["referencing_table"])
 
         return static_tables + detected_tables + referencing_detected_tables
+
+    def is_spatial_index_table(self, tablename=str) -> bool:
+        """Note: Checks if the table is a technical table used for spatial indexing"""
+        return False
 
     def get_iliname_dbname_mapping(self, sqlnames=list()):
         """Note: the parameter sqlnames is only used for ili2db version 3 relation creation"""
