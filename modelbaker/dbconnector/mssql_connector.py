@@ -848,3 +848,17 @@ WHERE TABLE_SCHEMA='{schema}'
             if content:
                 return content[0] == "property"
         return False
+
+    def get_ili2db_settings(self):
+        result = {}
+        if self._table_exists(SETTINGS_TABLE):
+            cur = self.conn.cursor()
+            cur.execute(
+                """SELECT tag, setting
+                            FROM {schema}.{table}
+                            """.format(
+                    schema=self.schema, table=SETTINGS_TABLE
+                )
+            )
+            result = self._get_dict_result(cur)
+        return result

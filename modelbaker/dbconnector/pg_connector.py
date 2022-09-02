@@ -951,3 +951,17 @@ class PGConnector(DBConnector):
             if content:
                 return content[0] == "property"
         return False
+
+    def get_ili2db_settings(self):
+        result = {}
+        if self._table_exists(PG_SETTINGS_TABLE):
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                sql.SQL(
+                    """SELECT tag, setting
+                           FROM {}.{}
+                            """
+                ).format(sql.Identifier(self.schema), sql.Identifier(PG_SETTINGS_TABLE))
+            )
+            result = cur.fetchall()
+        return result
