@@ -477,6 +477,12 @@ class GPKGConnector(DBConnector):
             cursor.close()
         return bags_of_info
 
+    def is_spatial_index_table(self, tablename=str) -> bool:
+        """Note: Checks if the table is a technical table used for spatial indexing"""
+        if tablename and tablename[0:6] == "rtree_":
+            return True
+        return False
+
     def get_iliname_dbname_mapping(self, sqlnames=list()):
         """Note: the parameter sqlnames is only used for ili2db version 3 relation creation"""
         # Map domain ili name with its correspondent sql name
