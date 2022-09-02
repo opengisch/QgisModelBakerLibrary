@@ -65,15 +65,8 @@ pip install modelbaker
 │   ├── config.py
 │   ├── domain_relations_generator.py
 │   └── generator.py
-├── ilitoppingmaker
-│   ├── __init__.py
-│   ├── ili2dbsettings.py
-│   ├── ilidata.py
-│   ├── iliprojecttopping.py
-│   ├── ilitarget.py
-│   ├── metaconfig.py
 └── utils
-    ├── __init__.py
+│   ├── __init__.py
     ├── db_utils.py
     ├── globals.py
     ├── qgis_utils.py
