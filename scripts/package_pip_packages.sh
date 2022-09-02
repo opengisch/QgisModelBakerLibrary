@@ -2,9 +2,11 @@
 LIBS_DIR="modelbaker/libs"
 
 PGSERVICEPARSER=("pgserviceparser" "1.1.0")
+TOPPINGMAKER=("toppingmaker" "1.0.0")
 
 PACKAGES=(
   PGSERVICEPARSER[@]
+  TOPPINGMAKER[@]
 )
 
 #create lib folder
