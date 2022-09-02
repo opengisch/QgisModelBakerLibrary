@@ -128,7 +128,14 @@ class FormRelationWidget(object):
         if self.nm_relation:
             widget.setNmRelationId(self.nm_relation.id)
 
+        target_layer = (
+            self.nm_relation.referenced_layer
+            if self.nm_relation
+            else self.relation.referencing_layer
+        )
+
         if Qgis.QGIS_VERSION_INT >= 31800:
-            widget.setRelationWidgetTypeId("linking_relation_editor")
+            if not target_layer.geometry_column:
+                widget.setRelationWidgetTypeId("linking_relation_editor")
 
         return widget
