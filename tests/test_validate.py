@@ -280,6 +280,157 @@ class TestExport(unittest.TestCase):
             == "Intersection coord1 (81.785, 99.314)"
         )
 
+    def test_validate_skips(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration.ilifile = testdata_path("ilimodels/brutalism_const.ili")
+        importer.configuration.ilimodels = "Brutalism"
+        importer.configuration.dbfile = testdata_path("geopackage/data_brutalism.gpkg")
+        importer.configuration.srs_code = 2056
+        importer.configuration.create_basket_col = True
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Validate data
+        validator = ilivalidator.Validator()
+        validator.tool = DbIliMode.ili2gpkg
+        validator.configuration = ilivalidator_config(validator.tool)
+        validator.configuration.dbfile = importer.configuration.dbfile
+        validator.configuration.xtflog = os.path.join(
+            self.basetestpath,
+            "tmp_validation_result_{:%Y%m%d%H%M%S%f}.xtf".format(
+                datetime.datetime.now()
+            ),
+        )
+        validator.stdout.connect(self.print_info)
+        validator.stderr.connect(self.print_error)
+
+        # No skip
+        assert validator.run() == ilivalidator.Validator.ERROR
+        # check validation result
+        result_model = ilivalidator.ValidationResultModel()
+        result_model.configuration = validator.configuration
+        result_model.reload()
+        assert result_model.rowCount() == 4
+
+        expected_error_geometry = (
+            "value 1314393.469 is out of range in attribute Geometry"
+        )
+        expected_error_multiplicity_1 = "Attribute Name requires a value"
+        expected_error_multiplicity_2 = (
+            "Object should associate 1 to 1 target objects (instead of 0)"
+        )
+        expected_error_constraint = (
+            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true."
+        )
+        assert (
+            result_model.index(0, 0).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_geometry
+        )
+        assert (
+            result_model.index(0, 1).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_multiplicity_1
+        )
+        assert (
+            result_model.index(0, 2).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_multiplicity_2
+        )
+        assert (
+            result_model.index(0, 3).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_constraint
+        )
+
+        # Skip geometry errors
+        validator.configuration.skip_geometry_errors = True
+        assert validator.run() == ilivalidator.Validator.ERROR
+        # check validation result
+        result_model = ilivalidator.ValidationResultModel()
+        result_model.configuration = validator.configuration
+        result_model.reload()
+        assert result_model.rowCount() == 3
+        assert (
+            result_model.index(0, 1).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_multiplicity_1
+        )
+        assert (
+            result_model.index(0, 2).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_multiplicity_2
+        )
+        assert (
+            result_model.index(0, 3).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_constraint
+        )
+
+        # Multiplicity off
+        validator.configuration.skip_geometry_errors = False
+        validator.configuration.valid_config = testdata_path(
+            "validate/multiplicityOff.ini"
+        )
+        assert validator.run() == ilivalidator.Validator.ERROR
+        # check validation result
+        result_model = ilivalidator.ValidationResultModel()
+        result_model.configuration = validator.configuration
+        result_model.reload()
+        assert result_model.rowCount() == 2
+        assert (
+            result_model.index(0, 1).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_geometry
+        )
+        assert (
+            result_model.index(0, 2).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_constraint
+        )
+
+        # Constraint off
+        validator.configuration.valid_config = testdata_path(
+            "validate/constraintValidationOff.ini"
+        )
+        assert validator.run() == ilivalidator.Validator.ERROR
+        # check validation result
+        result_model = ilivalidator.ValidationResultModel()
+        result_model.configuration = validator.configuration
+        result_model.reload()
+        assert result_model.rowCount() == 3
+        assert (
+            result_model.index(0, 1).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_geometry
+        )
+        assert (
+            result_model.index(0, 2).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_multiplicity_1
+        )
+        assert (
+            result_model.index(0, 3).data(
+                ilivalidator.ValidationResultModel.Roles.MESSAGE
+            )
+            == expected_error_multiplicity_2
+        )
+
     def print_info(self, text):
         logging.info(text)
 

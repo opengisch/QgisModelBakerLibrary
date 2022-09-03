@@ -1,0 +1,43 @@
+
+INTERLIS 2.3;
+
+MODEL Brutalism (en)
+AT "https://signedav.github.io/"
+VERSION "2022-06-22" =
+
+    !! Model with lots of constraints to test.
+
+    IMPORTS GeometryCHLV95_V1, Units;
+
+    DOMAIN
+      Surface = SURFACE WITH (STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS > 0.005;
+
+      TOPIC Buildings =
+        OID AS INTERLIS.UUIDOID;
+
+        CLASS Resident =
+          Name: TEXT;
+          IsHuman: BOOLEAN;
+          !! a logical constraint
+          SET CONSTRAINT WHERE IsHuman:
+            DEFINED(Name);
+        END Resident;
+
+        CLASS Object =
+          !! a mandatory constraint
+          Name: MANDATORY TEXT;
+          !! a type constraint
+          Geometry: Surface;
+          !! a range constraint
+          Levels: 0 .. 200;
+        END Object;
+
+        ASSOCIATION Resident_Object =
+          !! a reference constraint
+          Resident -- {0..*} Resident;
+          Object -- {1} Object;
+        END Resident_Object;
+
+      END Buildings; !! of TOPIC
+
+END Brutalism. !! of MODEL
