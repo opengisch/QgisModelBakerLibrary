@@ -305,6 +305,7 @@ class TestExport(unittest.TestCase):
                 datetime.datetime.now()
             ),
         )
+        validator.configuration.dataset = "Baseset"
         validator.stdout.connect(self.print_info)
         validator.stderr.connect(self.print_error)
 
