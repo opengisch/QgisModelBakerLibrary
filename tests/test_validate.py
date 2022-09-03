@@ -312,7 +312,6 @@ class TestExport(unittest.TestCase):
         assert validator.run() == ilivalidator.Validator.ERROR
         # check validation result
         result_model = ilivalidator.ValidationResultModel()
-        result_model.configuration = validator.configuration
         result_model.reload()
         assert result_model.rowCount() == 4
 
