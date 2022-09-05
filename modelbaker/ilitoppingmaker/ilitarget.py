@@ -49,21 +49,23 @@ class IliTarget(Target):
         )
         self.default_version = version or datetime.datetime.now().strftime("%Y-%m-%d")
 
-    def ilidata_path_resolver(self, target, name, type):
-        _, relative_filedir_path = self.filedir_path(type)
+    @staticmethod
+    def ilidata_path_resolver(target, name, type):
+        _, relative_filedir_path = target.filedir_path(type)
 
-        id = self.unique_id_in_target_scope(slugify(f"{type}_{name}_001"))
+        id = target.unique_id_in_target_scope(slugify(f"{type}_{name}_001"))
         path = os.path.join(relative_filedir_path, name)
         type = type
         toppingfile = {"id": id, "path": path, "type": type}
         target.toppingfileinfo_list.append(toppingfile)
         return f"ilidata:{id}"
 
-    def unique_id_in_target_scope(self, id):
-        for toppingfileinfo in self.toppingfileinfo_list:
+    @staticmethod
+    def unique_id_in_target_scope(target, id):
+        for toppingfileinfo in target.toppingfileinfo_list:
             if "id" in toppingfileinfo and toppingfileinfo["id"] == id:
                 iterator = int(id[-3:])
                 iterator += 1
                 id = f"{id[:-3]}{iterator:03}"
-                return self.unique_id_in_target_scope(id)
+                return target.unique_id_in_target_scope(id)
         return id
