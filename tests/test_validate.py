@@ -281,17 +281,40 @@ class TestExport(unittest.TestCase):
         )
 
     def test_validate_skips(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration.ilifile = testdata_path("ilimodels/brutalism_const.ili")
+        importer.configuration.ilimodels = "Brutalism"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_skip_validation_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.create_basket_col = True
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        importer.configuration.disable_validation = True
+        assert importer.run() == iliimporter.Importer.SUCCESS
 
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2gpkg
         dataImporter.configuration = ilidataimporter_config(dataImporter.tool)
         dataImporter.configuration.ilimodels = "Brutalism"
-        dataImporter.configuration.dbfile = testdata_path(
-            "geopackage/data_brutalism.gpkg"
-        )
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.stdout.connect(self.print_info)
         dataImporter.stderr.connect(self.print_error)
+
+        # Import data to Baseset
+        dataImporter.configuration.dataset = "Baseset"
+        dataImporter.configuration.xtffile = testdata_path("xtf/test_validate_skip.xtf")
+        assert dataImporter.run() == iliimporter.Importer.ERROR
+        dataImporter.configuration.disable_validation = True
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
 
         # Validate data
         validator = ilivalidator.Validator()
@@ -304,15 +327,17 @@ class TestExport(unittest.TestCase):
                 datetime.datetime.now()
             ),
         )
-        validator.configuration.dataset = ""
-        validator.configuration.baskets = []
         validator.stdout.connect(self.print_info)
         validator.stderr.connect(self.print_error)
+
+        # Baseset dataset
+        validator.configuration.dataset = "Baseset"
 
         # No skip
         assert validator.run() == ilivalidator.Validator.ERROR
         # check validation result
         result_model = ilivalidator.ValidationResultModel()
+        result_model.configuration = validator.configuration
         result_model.reload()
         assert result_model.rowCount() == 4
 
@@ -333,19 +358,19 @@ class TestExport(unittest.TestCase):
             == expected_error_geometry
         )
         assert (
-            result_model.index(0, 1).data(
+            result_model.index(1, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_multiplicity_1
         )
         assert (
-            result_model.index(0, 2).data(
+            result_model.index(2, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_multiplicity_2
         )
         assert (
-            result_model.index(0, 3).data(
+            result_model.index(3, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_constraint
@@ -360,19 +385,19 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 3
         assert (
-            result_model.index(0, 1).data(
+            result_model.index(0, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_multiplicity_1
         )
         assert (
-            result_model.index(0, 2).data(
+            result_model.index(1, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_multiplicity_2
         )
         assert (
-            result_model.index(0, 3).data(
+            result_model.index(2, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_constraint
@@ -390,13 +415,13 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 2
         assert (
-            result_model.index(0, 1).data(
+            result_model.index(0, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_geometry
         )
         assert (
-            result_model.index(0, 2).data(
+            result_model.index(1, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_constraint
@@ -413,19 +438,19 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 3
         assert (
-            result_model.index(0, 1).data(
+            result_model.index(0, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_geometry
         )
         assert (
-            result_model.index(0, 2).data(
+            result_model.index(1, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_multiplicity_1
         )
         assert (
-            result_model.index(0, 3).data(
+            result_model.index(2, 0).data(
                 ilivalidator.ValidationResultModel.Roles.MESSAGE
             )
             == expected_error_multiplicity_2

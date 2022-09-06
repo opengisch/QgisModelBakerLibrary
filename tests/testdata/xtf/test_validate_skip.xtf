@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2gpkg-4.6.1-63db90def1260a503f0f2d4cb846686cd4851184" VERSION="2.3"><MODELS><MODEL NAME="Brutalism" VERSION="2022-06-22" URI="https://signedav.github.io/"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<Brutalism.Buildings BID="2c52fabf-e981-41c0-a69d-c416f26e8ad1">
+<Brutalism.Buildings.Resident TID="2bc9bcaf-4dcd-46dc-ae0f-4755a785faac"><Name>Dave</Name><IsHuman>true</IsHuman></Brutalism.Buildings.Resident>
+<Brutalism.Buildings.Object TID="fdfefead-1c5b-426f-83a0-49bb4a35d3bb"><Name>Building Supernice</Name><Geometry><SURFACE><BOUNDARY><POLYLINE><COORD><C1>2598627.409</C1><C2>1284894.540</C2></COORD><COORD><C1>2646102.248</C1><C2>1314393.469</C2></COORD><COORD><C1>2735981.799</C1><C2>1290425.589</C2></COORD><COORD><C1>2749809.422</C1><C2>1249403.640</C2></COORD><COORD><C1>2672835.653</C1><C2>1217139.186</C2></COORD><COORD><C1>2630891.863</C1><C2>1226818.522</C2></COORD><COORD><C1>2598627.409</C1><C2>1284894.540</C2></COORD></POLYLINE></BOUNDARY></SURFACE></Geometry><Levels>4</Levels></Brutalism.Buildings.Object>
+<Brutalism.Buildings.Object TID="f38792a5-8416-4144-b086-d47272ba88cb"><Geometry><SURFACE><BOUNDARY><POLYLINE><COORD><C1>2621212.527</C1><C2>1211147.216</C2></COORD><COORD><C1>2617064.240</C1><C2>1177500.000</C2></COORD><COORD><C1>2647024.090</C1><C2>1166437.901</C2></COORD><COORD><C1>2670531.049</C1><C2>1184874.732</C2></COORD><COORD><C1>2673757.495</C1><C2>1196397.752</C2></COORD><COORD><C1>2657625.268</C1><C2>1209764.454</C2></COORD><COORD><C1>2621212.527</C1><C2>1211147.216</C2></COORD></POLYLINE></BOUNDARY></SURFACE></Geometry><Levels>4</Levels></Brutalism.Buildings.Object>
+<Brutalism.Buildings.Resident TID="9b7e8268-f22a-4954-9729-673c5028ca9a"><Name>Selma</Name><IsHuman>false</IsHuman><Object REF="fdfefead-1c5b-426f-83a0-49bb4a35d3bb"></Object></Brutalism.Buildings.Resident>
+<Brutalism.Buildings.Resident TID="70cc098a-4c5c-452b-b5dc-65e419a16c19"><IsHuman>true</IsHuman><Object REF="fdfefead-1c5b-426f-83a0-49bb4a35d3bb"></Object></Brutalism.Buildings.Resident>
+</Brutalism.Buildings>
+</DATASECTION>
+</TRANSFER>
