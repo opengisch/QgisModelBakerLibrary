@@ -281,24 +281,23 @@ class TestExport(unittest.TestCase):
         )
 
     def test_validate_skips(self):
-        # Schema Import
-        importer = iliimporter.Importer()
-        importer.tool = DbIliMode.ili2gpkg
-        importer.configuration.ilifile = testdata_path("ilimodels/brutalism_const.ili")
-        importer.configuration.ilimodels = "Brutalism"
-        importer.configuration.dbfile = testdata_path("geopackage/data_brutalism.gpkg")
-        importer.configuration.srs_code = 2056
-        importer.configuration.create_basket_col = True
-        importer.configuration.inheritance = "smart2"
-        importer.stdout.connect(self.print_info)
-        importer.stderr.connect(self.print_error)
-        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import data
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2gpkg
+        dataImporter.configuration = ilidataimporter_config(dataImporter.tool)
+        dataImporter.configuration.ilimodels = "Brutalism"
+        dataImporter.configuration.dbfile = testdata_path(
+            "geopackage/data_brutalism.gpkg"
+        )
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
 
         # Validate data
         validator = ilivalidator.Validator()
         validator.tool = DbIliMode.ili2gpkg
         validator.configuration = ilivalidator_config(validator.tool)
-        validator.configuration.dbfile = importer.configuration.dbfile
+        validator.configuration.dbfile = dataImporter.configuration.dbfile
         validator.configuration.xtflog = os.path.join(
             self.basetestpath,
             "tmp_validation_result_{:%Y%m%d%H%M%S%f}.xtf".format(
