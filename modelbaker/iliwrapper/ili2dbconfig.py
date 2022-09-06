@@ -383,6 +383,8 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.baskets = list()
         self.with_exporttid = False
         self.xtflog = ""
+        self.skip_geometry_errors = False
+        self.valid_config = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         args = list()
@@ -409,6 +411,12 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.xtflog:
             self.append_args(args, ["--xtflog", self.xtflog])
+
+        if self.skip_geometry_errors:
+            self.append_args(args, ["--skipGeometryErrors"])
+
+        if self.valid_config:
+            self.append_args(args, ["--validConfig", self.valid_config])
 
         self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
 
