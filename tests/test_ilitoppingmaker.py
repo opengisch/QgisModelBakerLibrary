@@ -24,7 +24,7 @@ import os
 import tempfile
 
 from qgis.core import QgsProject, QgsVectorLayer
-from qgis.testing import unittest
+from qgis.testing import start_app, unittest
 
 import modelbaker.utils.db_utils as db_utils
 from modelbaker.dataobjects.project import Project
@@ -41,6 +41,8 @@ from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from modelbaker.iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 from tests.utils import testdata_path
+
+start_app()
 
 
 class IliToppingMakerTest(unittest.TestCase):
@@ -66,31 +68,6 @@ class IliToppingMakerTest(unittest.TestCase):
         countchecked = 0
         topping.parse_project(self.project, self.export_settings)
         for item in topping.layertree.items:
-            if item.name == "Layer One":
-                assert item.properties.qmlstylefile
-                assert not item.properties.definitionfile
-                assert not (item.properties.provider or item.properties.uri)
-                countchecked += 1
-            if item.name == "Layer Two":
-                assert not item.properties.qmlstylefile
-                assert not item.properties.definitionfile
-                assert item.properties.provider and item.properties.uri
-                countchecked += 1
-            if item.name == "Layer Three":
-                assert item.properties.qmlstylefile
-                assert item.properties.definitionfile
-                assert item.properties.provider and item.properties.uri
-                countchecked += 1
-            if item.name == "Layer Four":
-                assert not item.properties.qmlstylefile
-                assert item.properties.definitionfile
-                assert not (item.properties.provider or item.properties.uri)
-                countchecked += 1
-            if item.name == "Layer Five":
-                assert not item.properties.qmlstylefile
-                assert item.properties.definitionfile
-                assert not (item.properties.provider or item.properties.uri)
-                countchecked += 1
             if item.name == "Belasteter_Standort (Geo_Lage_Punkt)":
                 assert item.properties.qmlstylefile
                 assert not item.properties.definitionfile
@@ -99,12 +76,39 @@ class IliToppingMakerTest(unittest.TestCase):
             if item.name == "Belasteter_Standort":
                 assert not item.properties.qmlstylefile
                 assert not item.properties.definitionfile
-                assert item.properties.provider and item.propertiestem.uri
+                assert item.properties.provider and item.properties.uri
                 countchecked += 1
+            if item.name == "All of em":
+                for item in item.items:
+                    if item.name == "Layer One":
+                        assert item.properties.qmlstylefile
+                        assert not item.properties.definitionfile
+                        assert not (item.properties.provider or item.properties.uri)
+                        countchecked += 1
+                    if item.name == "Layer Two":
+                        assert not item.properties.qmlstylefile
+                        assert not item.properties.definitionfile
+                        assert item.properties.provider and item.properties.uri
+                        countchecked += 1
+                    if item.name == "Layer Three":
+                        assert item.properties.qmlstylefile
+                        assert item.properties.definitionfile
+                        assert item.properties.provider and item.properties.uri
+                        countchecked += 1
+                    if item.name == "Layer Four":
+                        assert not item.properties.qmlstylefile
+                        assert item.properties.definitionfile
+                        assert not (item.properties.provider or item.properties.uri)
+                        countchecked += 1
+                    if item.name == "Layer Five":
+                        assert not item.properties.qmlstylefile
+                        assert item.properties.definitionfile
+                        assert not (item.properties.provider or item.properties.uri)
+                        countchecked += 1
         assert countchecked == 7
 
         # let's pretend that we received the models from the parsed schemas of the project and selected Kbs_V1_5
-        assert topping.models == ["KbS_V1_5"]
+        topping.models = ["KbS_V1_5"]
 
         # let's pretend that the user selected some referencedata via filebrowser and maybe repos
         codetexte_xtf = testdata_path("xtf/KbS_Codetexte_V1_5_20211015.xtf")
@@ -117,6 +121,7 @@ class IliToppingMakerTest(unittest.TestCase):
         # we append a metaattr file (toml), and a postscript we select from a repo
         configuration = Ili2DbCommandConfiguration()
         configuration.dbfile = self.dbfile
+        configuration.tool = DbIliMode.ili2gpkg
 
         db_connector = db_utils.get_db_connector(configuration)
         if db_connector:
@@ -266,6 +271,7 @@ class IliToppingMakerTest(unittest.TestCase):
         qgis_project.addMapLayer(l4, False)
         qgis_project.addMapLayer(l5, False)
 
+        qgis_project.layerTreeRoot()
         biggroup = qgis_project.layerTreeRoot().addGroup("Big Group")
         biggroup.addLayer(l1)
         mediumgroup = biggroup.addGroup("Medium Group")
