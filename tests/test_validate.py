@@ -119,7 +119,7 @@ class TestExport(unittest.TestCase):
         assert result_model.rowCount() == 1
         assert (
             result_model.index(0, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )[0:36]
             == "Intersection coord1 (81.785, 99.314)"
         )
@@ -197,7 +197,7 @@ class TestExport(unittest.TestCase):
         assert result_model.rowCount() == 1
         assert (
             result_model.index(0, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )[0:36]
             == "Intersection coord1 (81.785, 99.314)"
         )
@@ -275,7 +275,7 @@ class TestExport(unittest.TestCase):
         assert result_model.rowCount() == 1
         assert (
             result_model.index(0, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )[0:36]
             == "Intersection coord1 (81.785, 99.314)"
         )
@@ -353,25 +353,25 @@ class TestExport(unittest.TestCase):
         )
         assert (
             result_model.index(0, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_geometry
         )
         assert (
             result_model.index(1, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_multiplicity_1
         )
         assert (
             result_model.index(2, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_multiplicity_2
         )
         assert (
             result_model.index(3, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_constraint
         )
@@ -386,19 +386,19 @@ class TestExport(unittest.TestCase):
         assert result_model.rowCount() == 3
         assert (
             result_model.index(0, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_multiplicity_1
         )
         assert (
             result_model.index(1, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_multiplicity_2
         )
         assert (
             result_model.index(2, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_constraint
         )
@@ -416,13 +416,13 @@ class TestExport(unittest.TestCase):
         assert result_model.rowCount() == 2
         assert (
             result_model.index(0, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_geometry
         )
         assert (
             result_model.index(1, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_constraint
         )
@@ -439,19 +439,19 @@ class TestExport(unittest.TestCase):
         assert result_model.rowCount() == 3
         assert (
             result_model.index(0, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_geometry
         )
         assert (
             result_model.index(1, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_multiplicity_1
         )
         assert (
             result_model.index(2, 0).data(
-                ilivalidator.ValidationResultModel.Roles.MESSAGE
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
             )
             == expected_error_multiplicity_2
         )
