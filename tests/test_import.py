@@ -293,12 +293,15 @@ class TestImport(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "any_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -344,12 +347,15 @@ class TestImport(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath, "tmp_basket_gpkg.gpkg"
         )
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -393,12 +399,15 @@ class TestImport(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "baskets_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
 

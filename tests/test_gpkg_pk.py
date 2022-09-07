@@ -129,6 +129,7 @@ class TestGpkgPrimaryKey(unittest.TestCase):
             ),
         )
         importer.configuration.inheritance = "smart1"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
