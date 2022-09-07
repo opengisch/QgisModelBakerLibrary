@@ -148,7 +148,7 @@ class IliData(object):
                 "DatasetIdx16.DataIndex.DatasetMetadata",
                 TID=str(uuid.uuid4()),
             )
-            dataset = IliData.DatasetMetadata(
+            dataset = DatasetMetadata(
                 toppingfileinfo.get("version", target.default_version),
                 toppingfileinfo.get("publishing_date", target.default_publishing_date),
                 toppingfileinfo.get("owner", target.default_owner),

@@ -62,7 +62,7 @@ class IliTarget(Target):
         """
         _, relative_filedir_path = target.filedir_path(type)
 
-        id = target.unique_id_in_target_scope(slugify(f"{type}_{name}_001"))
+        id = target.unique_id_in_target_scope(target, slugify(f"{type}_{name}_001"))
         path = os.path.join(relative_filedir_path, name)
         type = type
         toppingfile = {"id": id, "path": path, "type": type}
@@ -76,5 +76,5 @@ class IliTarget(Target):
                 iterator = int(id[-3:])
                 iterator += 1
                 id = f"{id[:-3]}{iterator:03}"
-                return target.unique_id_in_target_scope(id)
+                return target.unique_id_in_target_scope(target, id)
         return id
