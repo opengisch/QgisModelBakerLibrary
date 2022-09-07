@@ -27,82 +27,99 @@ import xml.etree.cElementTree as ET
 from .ilitarget import IliTarget
 
 
+class DatasetMetadata(object):
+    """
+    Class representing an object of an indexed toppingfile/referencdatafile to be stored in an element DatasetIdx16.DataIndex.DatasetMetadata.
+    """
+
+    def __init__(
+        self,
+        dataset_version: str = None,
+        publishing_date: str = None,
+        owner: str = None,
+        project_name: str = None,
+        id: str = None,
+        file_type: str = None,
+        file_path: str = None,
+        linking_models: list = [],
+    ):
+        self.id = id
+        self.file_type = file_type
+        self.file_path = file_path
+        self.linking_models = linking_models
+
+        self.version = dataset_version
+        self.publishing_date = publishing_date
+        self.owner = owner
+        self.project_name = project_name
+
+        self.title = f"QGIS {self.file_type} file for {self.project_name} - {os.path.splitext(os.path.basename(self.file_path))}"
+        self.file_mimetype = self._file_mime_type(self.file_path)
+
+    def _file_mime_type(self, file_path: str = None) -> str:
+        mimetype = mimetypes.guess_type(file_path)
+        if mimetype[0] is None:
+            # ugly fallback
+            return "text/plain"
+        return mimetype[0]
+
+    def make_xml_element(self, element):
+        """
+        Generates the content of an element of DatasetIdx16.DataIndex.DatasetMetadata.
+        """
+        ET.SubElement(element, "id").text = self.id
+        ET.SubElement(element, "version").text = self.version
+        ET.SubElement(element, "publishingDate").text = self.publishing_date
+        ET.SubElement(element, "owner").text = self.owner
+
+        title = ET.SubElement(element, "title")
+        datsetidx16_multilingualtext = ET.SubElement(
+            title, "DatasetIdx16.MultilingualText"
+        )
+        localisedtext = ET.SubElement(datsetidx16_multilingualtext, "LocalisedText")
+        datasetidx16_localisedtext = ET.SubElement(
+            localisedtext, "DatasetIdx16.LocalisedText"
+        )
+        ET.SubElement(datasetidx16_localisedtext, "Text").text = self.title
+
+        categories = ET.SubElement(element, "categories")
+        type_datasetidx16_code = ET.SubElement(categories, "DatasetIdx16.Code_")
+        ET.SubElement(
+            type_datasetidx16_code, "value"
+        ).text = f"http://codes.interlis.ch/type/{self.file_type}"
+
+        if self.file_type in ["metaconfig", "referencedata"]:
+            for linking_model in self.linking_models:
+                linking_model_datasetidx16_code = ET.SubElement(
+                    categories, "DatasetIdx16.Code_"
+                )
+                ET.SubElement(
+                    linking_model_datasetidx16_code, "value"
+                ).text = f"http://codes.interlis.ch/model/{linking_model}"
+
+        files = ET.SubElement(element, "files")
+        datsaetidx16_datafile = ET.SubElement(files, "DatasetIdx16.DataFile")
+        ET.SubElement(datsaetidx16_datafile, "fileFormat").text = self.file_mimetype
+        file = ET.SubElement(datsaetidx16_datafile, "file")
+        datsetidx16_file = ET.SubElement(file, "DatasetIdx16.File")
+        ET.SubElement(datsetidx16_file, "path").text = self.file_path
+
+
 class IliData(object):
-    class DatasetMetadata(object):
-        def __init__(
-            self,
-            dataset_version: str = None,
-            publishing_date: str = None,
-            owner: str = None,
-            project_name: str = None,
-            id: str = None,
-            file_type: str = None,
-            file_path: str = None,
-            linking_models: list = [],
-        ):
-            self.id = id
-            self.file_type = file_type
-            self.file_path = file_path
-            self.linking_models = linking_models
+    """
+    Class representing the top level content of the ilidata.xml used as "index" for all the toppingfiles/referencedatafile.
+    The ilidata.xml is based on the INTERLIS model DatasetIdx16.
 
-            self.version = dataset_version
-            self.publishing_date = publishing_date
-            self.owner = owner
-            self.project_name = project_name
-
-            self.title = f"QGIS {self.file_type} file for {self.project_name} - {os.path.splitext(os.path.basename(self.file_path))}"
-            self.file_mimetype = self._file_mime_type(self.file_path)
-
-        def _file_mime_type(self, file_path: str = None) -> str:
-            mimetype = mimetypes.guess_type(file_path)
-            if mimetype[0] is None:
-                # ugly fallback
-                return "text/plain"
-            return mimetype[0]
-
-        def make_xml_element(self, element):
-
-            ET.SubElement(element, "id").text = self.id
-            ET.SubElement(element, "version").text = self.version
-            ET.SubElement(element, "publishingDate").text = self.publishing_date
-            ET.SubElement(element, "owner").text = self.owner
-
-            title = ET.SubElement(element, "title")
-            datsetidx16_multilingualtext = ET.SubElement(
-                title, "DatasetIdx16.MultilingualText"
-            )
-            localisedtext = ET.SubElement(datsetidx16_multilingualtext, "LocalisedText")
-            datasetidx16_localisedtext = ET.SubElement(
-                localisedtext, "DatasetIdx16.LocalisedText"
-            )
-            ET.SubElement(datasetidx16_localisedtext, "Text").text = self.title
-
-            categories = ET.SubElement(element, "categories")
-            type_datasetidx16_code = ET.SubElement(categories, "DatasetIdx16.Code_")
-            ET.SubElement(
-                type_datasetidx16_code, "value"
-            ).text = f"http://codes.interlis.ch/type/{self.file_type}"
-
-            if self.file_type in ["metaconfig", "referencedata"]:
-                for linking_model in self.linking_models:
-                    linking_model_datasetidx16_code = ET.SubElement(
-                        categories, "DatasetIdx16.Code_"
-                    )
-                    ET.SubElement(
-                        linking_model_datasetidx16_code, "value"
-                    ).text = f"http://codes.interlis.ch/model/{linking_model}"
-
-            files = ET.SubElement(element, "files")
-            datsaetidx16_datafile = ET.SubElement(files, "DatasetIdx16.DataFile")
-            ET.SubElement(datsaetidx16_datafile, "fileFormat").text = self.file_mimetype
-            file = ET.SubElement(datsaetidx16_datafile, "file")
-            datsetidx16_file = ET.SubElement(file, "DatasetIdx16.File")
-            ET.SubElement(datsetidx16_file, "path").text = self.file_path
+    Every indexed toppingfile / referencedatafile is represented by an object of DatasetMetadata.
+    """
 
     def __init__(self):
         pass
 
     def generate_file(self, target: IliTarget, linking_models: list = []):
+        """
+        Generates the ilidata.xml file containing all the toppingfile listed in the targets toppingfileinfo_list and writes it to the targets folders.
+        """
         transfer = ET.Element("TRANSFER", xmlns="http://www.interlis.ch/INTERLIS2.3")
 
         headersection = ET.SubElement(

@@ -29,9 +29,9 @@ from .ili2dbsettings import Ili2dbSettings
 
 class MetaConfig(object):
     """
-    Contains the data needed to create a metaconfiguration file.
-        # configuration_section["ch.interlis.referenceData"] = ...
-        # configuration_section["qgis.modelbaker.projecttopping"] = ...
+    Class containing all the data needed to create the metaconfiguration file.
+    Having the section [CONFIGURATION] containing the links to the referencedata nd the projecttoppingfile.
+    And the section [ch.ehi.ili2db] containing all the ili2db settings.
     """
 
     METACONFIG_TYPE = "metaconfig"
@@ -54,6 +54,8 @@ class MetaConfig(object):
 
     def generate_files(self, target: Target):
         """
+        Example content:
+
         [CONFIGURATION]
         qgis.modelbaker.projecttopping=ilidata:ch.opengis.config.KbS_LV95_V1_4_projecttopping
         ch.interlis.referenceData=ilidata:ch.opengis.config.KbS_Codetexte_V1_4

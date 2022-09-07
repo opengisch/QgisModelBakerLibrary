@@ -20,6 +20,13 @@
 
 
 class Ili2dbSettings(dict):
+    """
+    Class keeping settings to be performed on ili2db.
+    As well as the files like pre-/postscript and metaattributefile (TOML/INI).
+
+    With the method parse_parameter_from_db we can fill it up according to a existing database schema (passing the specific extension of DBConnector).
+    """
+
     def __init__(self):
         self.parameters = {}
         self.metaattr_path = None
@@ -29,8 +36,9 @@ class Ili2dbSettings(dict):
 
     def parse_parameters_from_db(self, db_connector):
         """
-        We do only care about the settings "known" by model baker (set by user in GUI or by modelbaker in the background).
-        And we set them when they are set (and do not unset them when they are not set).
+        Fill the parameter list according to a existing database schema (passed by the specific extension of DBConnector).
+        It only considers the settings "known" by modelbaker (the parameters set by the user or by modelbaker per default).
+        The parameter are only set when they are available (and not unset when they are not available).
         """
 
         setting_records = db_connector.get_ili2db_settings()

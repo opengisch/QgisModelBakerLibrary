@@ -29,7 +29,7 @@ from .metaconfig import MetaConfig
 
 class IliProjectTopping(ProjectTopping):
     """
-    A project configuration resulting in a YAML file that contains:
+    Class keeping a projet configuration resulting in a YAML file optimized for INTERLIS projects.
     - layertree
     - layerorder
     - project variables (future)
@@ -37,7 +37,7 @@ class IliProjectTopping(ProjectTopping):
     - map themes (future)
     QML style files, QLR layer definition files and the source of a layer can be linked in the YAML file and are exported to the specific folders.
 
-    Optimised for INTERLIS projects having artefacts like ilidata, metaconfigfile (ini) etc. with methods to generate them.
+    And artefacts for INTERLIS use like ilidata, metaconfigfile (ini) and a target of IliTarget as well as the needed methods to generate them.
     """
 
     def __init__(
@@ -46,7 +46,7 @@ class IliProjectTopping(ProjectTopping):
         export_settings: ExportSettings = ExportSettings(),
         metaconfig=MetaConfig(),
     ):
-        # while ProjectTopping does not hold objects like target and export_settings (and those are passed by the function) the IliProjectTopping keeps it to set up the whole IliProjectTopping before create anything.
+        # While ProjectTopping does not hold objects like target and export_settings (and those are passed by the function) the IliProjectTopping keeps it to set up the whole IliProjectTopping before create anything.
         super().__init__()
         self.target = target
         self.export_settings = export_settings
@@ -60,10 +60,12 @@ class IliProjectTopping(ProjectTopping):
     def referencedata_paths(self):
         return self.metaconfig.referencedata_paths
 
-    def set_models(self, models: list = []):
+    @models.setter
+    def models(self, models: list):
         self.metaconfig.ili2db_settings.models = models
 
-    def set_referencedata_paths(self, paths: list = []):
+    @referencedata_paths.setter
+    def referencedata_paths(self, paths: list):
         self.metaconfig.referencedata_paths = paths
 
     def makeit(self, project: QgsProject = None):

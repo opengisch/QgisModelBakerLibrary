@@ -27,7 +27,8 @@ from ..libs.toppingmaker.utils import slugify
 
 class IliTarget(Target):
     """
-    Target extension of standard toppingmaker containing additional parameters like owner, publishing_date and version.
+    Extended class of toppingmaker.Target containing additional parameters like owner, publishing_date and version.
+    And a path_resolver adding an id to the toppingfile in the toppingfile_list.
     """
 
     def __init__(
@@ -51,6 +52,14 @@ class IliTarget(Target):
 
     @staticmethod
     def ilidata_path_resolver(target, name, type):
+        """
+        A path_resolver adding an id to the toppingfile in the toppingfile_list.
+
+        The id is created with the type (like defintionfile, metaconfig etc.) and the filename.
+        For uniqueness there is an incrementing number appended.
+
+        Returns the id with the prefix "ilidata:". When using it as link, modelbaker knows that it has to look the id up in the ilidata.xml.
+        """
         _, relative_filedir_path = target.filedir_path(type)
 
         id = target.unique_id_in_target_scope(slugify(f"{type}_{name}_001"))

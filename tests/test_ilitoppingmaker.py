@@ -104,11 +104,11 @@ class IliToppingMakerTest(unittest.TestCase):
         assert countchecked == 7
 
         # let's pretend that we received the models from the parsed schemas of the project and selected Kbs_V1_5
-        assert topping.set_models == ["KbS_V1_5"]
+        assert topping.models == ["KbS_V1_5"]
 
         # let's pretend that the user selected some referencedata via filebrowser and maybe repos
         codetexte_xtf = testdata_path("xtf/KbS_Codetexte_V1_5_20211015.xtf")
-        topping.set_referencedata_paths = [
+        topping.referencedata_paths = [
             codetexte_xtf,
             "ilidata:data_from_another_repo",
         ]
