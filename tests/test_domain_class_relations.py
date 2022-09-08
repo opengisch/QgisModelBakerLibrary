@@ -1497,6 +1497,7 @@ class TestDomainClassRelation(unittest.TestCase):
         )
         importer.configuration.srs_code = 21781
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -1957,6 +1958,7 @@ class TestDomainClassRelation(unittest.TestCase):
         )
         importer.configuration.srs_code = 21781
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -3752,6 +3754,7 @@ class TestDomainClassRelation(unittest.TestCase):
         )
         importer.configuration.srs_code = 21781
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS

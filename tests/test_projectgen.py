@@ -386,29 +386,26 @@ class TestProjectGen(unittest.TestCase):
                         assert tab.columnCount() == 1
 
         assert count == 1
-        assert (
-            set(
-                [
-                    "statusaltlv",
-                    "multilingualtext",
-                    "untersmassn",
-                    "multilingualmtext",
-                    "languagecode_iso639_1",
-                    "deponietyp",
-                    "zustaendigkeitkataster",
-                    "standorttyp",
-                    "localisedtext",
-                    "localisedmtext",
-                    "belasteter_standort",
-                    "deponietyp_",
-                    "egrid_",
-                    "untersmassn_",
-                    "parzellenidentifikation",
-                    "belasteter_standort_geo_lage_punkt",
-                ]
-            )
-            == set([layer.name for layer in available_layers])
-        )
+        assert set(
+            [
+                "statusaltlv",
+                "multilingualtext",
+                "untersmassn",
+                "multilingualmtext",
+                "languagecode_iso639_1",
+                "deponietyp",
+                "zustaendigkeitkataster",
+                "standorttyp",
+                "localisedtext",
+                "localisedmtext",
+                "belasteter_standort",
+                "deponietyp_",
+                "egrid_",
+                "untersmassn_",
+                "parzellenidentifikation",
+                "belasteter_standort_geo_lage_punkt",
+            ]
+        ) == set([layer.name for layer in available_layers])
 
     def test_kbs_geopackage(self):
         importer = iliimporter.Importer()
@@ -494,29 +491,26 @@ class TestProjectGen(unittest.TestCase):
                         assert tab.columnCount() == 1
 
         assert count == 1
-        assert (
-            set(
-                [
-                    "statusaltlv",
-                    "multilingualtext",
-                    "untersmassn",
-                    "multilingualmtext",
-                    "languagecode_iso639_1",
-                    "deponietyp",
-                    "zustaendigkeitkataster",
-                    "standorttyp",
-                    "localisedtext",
-                    "localisedmtext",
-                    "belasteter_standort",
-                    "deponietyp_",
-                    "egrid_",
-                    "untersmassn_",
-                    "parzellenidentifikation",
-                    "belasteter_standort_geo_lage_punkt",
-                ]
-            )
-            == set([layer.name for layer in available_layers])
-        )
+        assert set(
+            [
+                "statusaltlv",
+                "multilingualtext",
+                "untersmassn",
+                "multilingualmtext",
+                "languagecode_iso639_1",
+                "deponietyp",
+                "zustaendigkeitkataster",
+                "standorttyp",
+                "localisedtext",
+                "localisedmtext",
+                "belasteter_standort",
+                "deponietyp_",
+                "egrid_",
+                "untersmassn_",
+                "parzellenidentifikation",
+                "belasteter_standort_geo_lage_punkt",
+            ]
+        ) == set([layer.name for layer in available_layers])
 
     def test_naturschutz_postgis(self):
         importer = iliimporter.Importer()
@@ -528,6 +522,7 @@ class TestProjectGen(unittest.TestCase):
         importer.configuration.dbschema = "naturschutz_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -560,6 +555,7 @@ class TestProjectGen(unittest.TestCase):
                 datetime.datetime.now()
             ),
         )
+        importer.configuration.create_basket_col = True
         importer.configuration.inheritance = "smart1"
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
@@ -574,7 +570,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 24
+        assert len(ignored_layers) == 64
         assert len(available_layers) == 23
         assert len(relations) == 13
 
@@ -588,6 +584,7 @@ class TestProjectGen(unittest.TestCase):
         importer.configuration.dbschema = "naturschutz_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
 
@@ -623,6 +620,7 @@ class TestProjectGen(unittest.TestCase):
         importer.configuration.dbschema = "naturschutz_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -656,6 +654,7 @@ class TestProjectGen(unittest.TestCase):
                 datetime.datetime.now()
             ),
         )
+        importer.configuration.create_basket_col = True
         importer.configuration.inheritance = "smart1"
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
@@ -672,7 +671,7 @@ class TestProjectGen(unittest.TestCase):
         legend = generator.legend(available_layers)
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 26
+        assert len(ignored_layers) == 66
         assert len(available_layers) == 21
         assert len(relations) == 12
 
@@ -700,6 +699,7 @@ class TestProjectGen(unittest.TestCase):
         importer.configuration.dbschema = "naturschutz_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
 
@@ -737,6 +737,7 @@ class TestProjectGen(unittest.TestCase):
         importer.configuration.dbschema = "naturschutz_nometa_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -770,6 +771,7 @@ class TestProjectGen(unittest.TestCase):
                 datetime.datetime.now()
             ),
         )
+        importer.configuration.create_basket_col = True
         importer.configuration.inheritance = "smart1"
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
@@ -784,7 +786,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 18
+        assert len(ignored_layers) == 30
         assert len(available_layers) == 29
         assert len(relations) == 23
 
@@ -2476,12 +2478,15 @@ class TestProjectGen(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -2513,7 +2518,7 @@ class TestProjectGen(unittest.TestCase):
                 # default expression since it's not defined in model
                 count += 1
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField('t_ili_tid')
+                field_idx = fields.lookupField("t_ili_tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -2522,7 +2527,7 @@ class TestProjectGen(unittest.TestCase):
                 # no default expression since it's defined in model
                 count += 1
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField('t_ili_tid')
+                field_idx = fields.lookupField("t_ili_tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -2539,12 +2544,15 @@ class TestProjectGen(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath, "tmp_tid_gpkg.gpkg"
         )
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -2553,7 +2561,10 @@ class TestProjectGen(unittest.TestCase):
         uri = config_manager.get_uri()
 
         generator = Generator(
-            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance, consider_basket_handling=True
+            DbIliMode.ili2gpkg,
+            uri,
+            importer.configuration.inheritance,
+            consider_basket_handling=True,
         )
 
         available_layers = generator.layers()
@@ -2575,7 +2586,7 @@ class TestProjectGen(unittest.TestCase):
                 # default expression since it's not defined in model
                 count += 1
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField('T_Ili_Tid')
+                field_idx = fields.lookupField("T_Ili_Tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -2584,7 +2595,7 @@ class TestProjectGen(unittest.TestCase):
                 # default expression even when it's defined in model (since geopackage cannot create uuids)
                 count += 1
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField('T_Ili_Tid')
+                field_idx = fields.lookupField("T_Ili_Tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -2601,13 +2612,16 @@ class TestProjectGen(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
 
@@ -2622,7 +2636,10 @@ class TestProjectGen(unittest.TestCase):
         )
 
         generator = Generator(
-            DbIliMode.ili2mssql, uri, importer.configuration.inheritance, importer.configuration.dbschema
+            DbIliMode.ili2mssql,
+            uri,
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
         )
 
         available_layers = generator.layers()
@@ -2644,7 +2661,7 @@ class TestProjectGen(unittest.TestCase):
                 # default expression since it's not defined in model
                 count += 1
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField('t_ili_tid')
+                field_idx = fields.lookupField("t_ili_tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -2653,7 +2670,7 @@ class TestProjectGen(unittest.TestCase):
                 # no default expression since it's defined in model
                 count += 1
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField('t_ili_tid')
+                field_idx = fields.lookupField("t_ili_tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -3709,6 +3726,7 @@ class TestProjectGen(unittest.TestCase):
         importer.configuration.dbschema = "nue_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
+        importer.configuration.create_basket_col = True
         importer.configuration.srs_code = 21781
         importer.configuration.inheritance = "smart2"
         importer.stdout.connect(self.print_info)
