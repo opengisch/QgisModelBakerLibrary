@@ -355,8 +355,7 @@ class MssqlConnector(DBConnector):
             stmt = ""
 
             # TODO description column is missing
-            # TODO Remove 'distinct' when issue 255 is solved
-            stmt += ln + "SELECT distinct "
+            stmt += ln + "SELECT"
             stmt += ln + "     c.column_name"
             stmt += (
                 ln
