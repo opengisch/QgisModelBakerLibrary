@@ -429,7 +429,7 @@ class PGConnector(DBConnector):
 
                 fields_cur.execute(
                     """
-                    SELECT DISTINCT
+                    SELECT
                       c.column_name,
                       c.data_type,
                       c.numeric_scale,
