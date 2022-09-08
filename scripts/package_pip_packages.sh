@@ -2,7 +2,7 @@
 LIBS_DIR="modelbaker/libs"
 
 PGSERVICEPARSER=("pgserviceparser" "1.1.0")
-TOPPINGMAKER=("toppingmaker" "1.0.0")
+TOPPINGMAKER=("toppingmaker" "1.0.1")
 
 PACKAGES=(
   PGSERVICEPARSER[@]
