@@ -52,12 +52,19 @@ class IliToppingMakerTest(unittest.TestCase):
         cls.basetestpath = tempfile.mkdtemp()
         cls.toppingmaker_test_path = os.path.join(cls.basetestpath, "toppingmaker")
 
+    def setUp(self):
+        "Run before each test"
+        QgsProject.instance().clear()
+
         # create a project of KbS_V1_5 with some additional layers
         (
-            cls.project,
-            cls.dbfile,
-            cls.export_settings,
-        ) = cls.make_project_and_export_settings(cls)
+            self.project,
+            self.dbfile,
+            self.export_settings,
+        ) = self.make_project_and_export_settings()
+
+    def tearDown(self):
+        QgsProject.instance().clear()
 
     def test_workflow_stepbystep(self):
         # create topping maker without any constructor params
@@ -136,13 +143,13 @@ class IliToppingMakerTest(unittest.TestCase):
         )
 
         # Check if the settings are loaded from the database
-        assert topping.metaconfig.ili2db_settings.parameters["defaultSrsCode"] == 2056
         assert (
             topping.metaconfig.ili2db_settings.parameters["smart2Inheritance"] == True
         )
-        assert topping.metaconfig.ili2db_settings.parameters["strokeArcs"] == False
-        assert topping.metaconfig.ili2db_settings.parameters["importTid"] == True
+        assert topping.metaconfig.ili2db_settings.parameters["createTidCol"] == True
         assert topping.metaconfig.ili2db_settings.parameters["createBasketCol"] == True
+        # unset so not existing
+        assert not topping.metaconfig.ili2db_settings.parameters.get("strokeArcs", None)
 
         # ... and finally create the cake
 
@@ -168,7 +175,7 @@ class IliToppingMakerTest(unittest.TestCase):
 
         # generate ilidata
         ilidata = IliData()
-        ilidata_path = ilidata.generate_file(self.target, self.models)
+        ilidata_path = ilidata.generate_file(target, topping.models)
 
         # Check if written
         assert ilidata_path
@@ -217,7 +224,6 @@ class IliToppingMakerTest(unittest.TestCase):
             "tmp_kbs_v1_5_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
         )
         importer.configuration.dbfile = dbfile
-        importer.configuration.srs_code = 2056
         importer.configuration.create_basket_col = True
         importer.configuration.inheritance = "smart2"
         importer.configuration.stroke_arcs = False
@@ -271,7 +277,6 @@ class IliToppingMakerTest(unittest.TestCase):
         qgis_project.addMapLayer(l4, False)
         qgis_project.addMapLayer(l5, False)
 
-        qgis_project.layerTreeRoot()
         biggroup = qgis_project.layerTreeRoot().addGroup("Big Group")
         biggroup.addLayer(l1)
         mediumgroup = biggroup.addGroup("Medium Group")
@@ -326,7 +331,7 @@ class IliToppingMakerTest(unittest.TestCase):
         export_settings.set_setting_values(
             ExportSettings.ToppingType.SOURCE, None, "Layer Three", True
         )
-        qgis_project.write()
+
         return qgis_project, dbfile, export_settings
 
     def print_info(self, text):
