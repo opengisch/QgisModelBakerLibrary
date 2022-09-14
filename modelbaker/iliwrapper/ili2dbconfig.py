@@ -396,7 +396,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
             self.append_args(args, ["--models", self.ilimodels])
 
         if self.topics:
-            self.append_args(args, ["--dataset", self.topics])
+            self.append_args(args, ["--topics", self.topics])
 
         if self.dataset:
             self.append_args(args, ["--dataset", self.dataset])
