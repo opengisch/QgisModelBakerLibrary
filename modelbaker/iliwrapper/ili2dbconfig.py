@@ -137,10 +137,8 @@ class Ili2DbCommandConfiguration(object):
                 if values[0][2:] in metaconfig_ili2db_params.keys():
                     # since passing metaconfig is not supported yet. see https://github.com/claeis/ili2db/issues/392 we do not avoid adding the value to the args
                     print(
-                        self.tr(
-                            "Value {} from metaconfiguration file not considered. ".format(
-                                values[0][2:]
-                            )
+                        "Value {} from metaconfiguration file not considered. ".format(
+                            values[0][2:]
                         )
                     )
         args += values
