@@ -138,4 +138,13 @@ class FormRelationWidget(object):
             if not target_layer.geometry_column:
                 widget.setRelationWidgetTypeId("linking_relation_editor")
 
+                cardinality_max = self.relation.cardinality_max
+                if self.nm_relation:
+                    cardinality_max = self.nm_relation.cardinality_max
+
+                if cardinality_max == "1":
+                    configuration = widget.relationEditorConfiguration()
+                    configuration["one_to_one"] = True
+                    widget.setRelationEditorConfiguration(configuration)
+
         return widget
