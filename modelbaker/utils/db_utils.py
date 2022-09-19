@@ -17,28 +17,38 @@
  ***************************************************************************/
 """
 
-from qgis.core import QgsApplication, QgsAuthMethodConfig, QgsMessageLog
+from qgis.core import (
+    QgsApplication,
+    QgsAuthMethodConfig,
+    QgsDataSourceUri,
+    QgsMessageLog,
+)
 
 from ..db_factory.db_simple_factory import DbSimpleFactory
 from ..dbconnector.db_connector import DBConnectorError
 from ..iliwrapper.globals import DbIliMode
-from ..libs import pgserviceparser
+from ..libs import deprecation, pgserviceparser
 from .qt_utils import slugify
 
 
+@deprecation.deprecated(
+    deprecated_in="1.3",
+    removed_in="1.4",
+    current_version="1.3",
+    details="Use the def get_schema_identificator_from_sourceprovider function instead",
+)
 def get_schema_identificator_from_layersource(layer_source_provider, layer_source):
-    if (
-        layer_source_provider.name() == "postgres"
-        or layer_source_provider.name() == "mssql"
-    ):
+    return get_schema_identificator_from_sourceprovider(layer_source_provider)
+
+
+def get_schema_identificator_from_sourceprovider(provider):
+    if provider.name() == "postgres" or provider.name() == "mssql":
+        layer_source = QgsDataSourceUri(provider.dataSourceUri())
         return slugify(
             f"{layer_source.host()}_{layer_source.database()}_{layer_source.schema()}"
         )
-    elif (
-        layer_source_provider.name() == "ogr"
-        and layer_source_provider.storageType() == "GPKG"
-    ):
-        return slugify(layer_source.uri().split("|")[0].strip())
+    elif provider.name() == "ogr" and provider.storageType() == "GPKG":
+        return slugify(provider.dataSourceUri().split("|")[0].strip())
     return ""
 
 
@@ -60,6 +70,12 @@ def get_authconfig_map(authconfigid):
     return auth_cfg.configMap()
 
 
+@deprecation.deprecated(
+    deprecated_in="1.3",
+    removed_in="1.4",
+    current_version="1.3",
+    details="Use the def get_configuration_from_sourceprovider function instead",
+)
 def get_configuration_from_layersource(
     layer_source_provider, layer_source, configuration
 ):
@@ -71,9 +87,25 @@ def get_configuration_from_layersource(
         mode (DbIliMode): Kind of database like pg, gpkg or mssql
         configuration (Ili2DbCommandConfiguration): config with the determined parameters
     """
+    valid, mode = get_configuration_from_sourceprovider(
+        layer_source_provider, configuration
+    )
+    return valid, mode
+
+
+def get_configuration_from_sourceprovider(provider, configuration):
+    """
+    Determines the connection parameters from a layer source provider.
+    On service in postgres it preferences the static parameters over the ones in the service file if available.
+    Returns:
+        valid (boolean): if the needed database connection parameters are determined
+        mode (DbIliMode): Kind of database like pg, gpkg or mssql
+        configuration (Ili2DbCommandConfiguration): config with the determined parameters
+    """
     mode = ""
     valid = False
-    if layer_source_provider.name() == "postgres":
+    if provider.name() == "postgres":
+        layer_source = QgsDataSourceUri(provider.dataSourceUri())
         mode = DbIliMode.pg
         configuration.dbservice = layer_source.service()
         service_map = pgserviceparser.service_config(configuration.dbservice)
@@ -95,15 +127,13 @@ def get_configuration_from_layersource(
             and configuration.database
             and configuration.dbschema
         )
-    elif (
-        layer_source_provider.name() == "ogr"
-        and layer_source_provider.storageType() == "GPKG"
-    ):
+    elif provider.name() == "ogr" and provider.storageType() == "GPKG":
         mode = DbIliMode.gpkg
-        configuration.dbfile = layer_source.uri().split("|")[0].strip()
+        configuration.dbfile = provider.dataSourceUri().split("|")[0].strip()
         valid = bool(configuration.dbfile)
-    elif layer_source_provider.name() == "mssql":
+    elif provider.name() == "mssql":
         mode = DbIliMode.mssql
+        layer_source = QgsDataSourceUri(provider.dataSourceUri())
         configuration.dbhost = layer_source.host()
         configuration.dbusr = layer_source.username()
         configuration.dbpwd = layer_source.password()
