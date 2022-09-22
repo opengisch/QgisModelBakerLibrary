@@ -390,7 +390,7 @@ class Generator(QObject):
                             and record["strength"] == "COMPOSITE"
                             else QgsRelation.Association
                         )
-                        relation.cardinality_max = record["cardinality_max"]
+                        relation.cardinality_max = record.get("cardinality_max", None)
 
                         # For domain-class relations, if we have an extended domain, get its child name
                         child_name = None

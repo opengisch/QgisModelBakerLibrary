@@ -2470,6 +2470,251 @@ class TestProjectGen(unittest.TestCase):
             == QgsRelation.Composition
         )
 
+    def test_relation_cardinality_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels//OneToOneRelations.ili"
+        )
+        importer.configuration.ilimodels = "GeolTest"
+        importer.configuration.dbschema = "cardinality_max_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        contact_layer = None
+        for layer in available_layers:
+            if layer.name == "contact":
+                contact_layer = layer
+                break
+        assert contact_layer
+
+        tab_address = None
+        tab_identificator = None
+        tab_ahvnr = None
+        tab_job = None
+        efc = contact_layer.layer.editFormConfig()
+        for tab in efc.tabs():
+            if tab.name() == "address":
+                tab_address = tab
+            elif tab.name() == "identificator":
+                tab_identificator = tab
+            elif tab.name() == "ahvnr":
+                tab_ahvnr = tab
+            elif tab.name() == "job":
+                tab_job = tab
+        assert tab_address
+        assert tab_identificator
+        assert tab_ahvnr
+        assert tab_job
+
+        for child in tab_address.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
+        for child in tab_identificator.children():
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+
+        for child in tab_ahvnr.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
+        for child in tab_job.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
+    def test_relation_cardinality_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels//OneToOneRelations.ili"
+        )
+        importer.configuration.ilimodels = "GeolTest"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_cardinality_max_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        contact_layer = None
+        for layer in available_layers:
+            if layer.name == "contact":
+                contact_layer = layer
+                break
+        assert contact_layer
+
+        tab_address = None
+        tab_identificator = None
+        tab_ahvnr = None
+        tab_job = None
+        efc = contact_layer.layer.editFormConfig()
+        for tab in efc.tabs():
+            if tab.name() == "address":
+                tab_address = tab
+            elif tab.name() == "identificator":
+                tab_identificator = tab
+            elif tab.name() == "ahvnr":
+                tab_ahvnr = tab
+            elif tab.name() == "job":
+                tab_job = tab
+        assert tab_address
+        assert tab_identificator
+        assert tab_ahvnr
+        assert tab_job
+
+        for child in tab_address.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
+        for child in tab_identificator.children():
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+
+        for child in tab_ahvnr.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
+        for child in tab_job.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
+    def test_relation_cardinality_mssql(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2mssql
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels//OneToOneRelations.ili"
+        )
+        importer.configuration.ilimodels = "GeolTest"
+        importer.configuration.dbschema = "cardinality_max_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
+            drv="{ODBC Driver 17 for SQL Server}",
+            server=importer.configuration.dbhost,
+            db=importer.configuration.database,
+            uid=importer.configuration.dbusr,
+            pwd=importer.configuration.dbpwd,
+        )
+
+        generator = Generator(
+            DbIliMode.ili2mssql, uri, "smart2", importer.configuration.dbschema
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        contact_layer = None
+        for layer in available_layers:
+            if layer.name == "contact":
+                contact_layer = layer
+                break
+        assert contact_layer
+
+        tab_address = None
+        tab_identificator = None
+        tab_ahvnr = None
+        tab_job = None
+        efc = contact_layer.layer.editFormConfig()
+        for tab in efc.tabs():
+            if tab.name() == "address":
+                tab_address = tab
+            elif tab.name() == "identificator":
+                tab_identificator = tab
+            elif tab.name() == "ahvnr":
+                tab_ahvnr = tab
+            elif tab.name() == "job":
+                tab_job = tab
+        assert tab_address
+        assert tab_identificator
+        assert tab_ahvnr
+        assert tab_job
+
+        for child in tab_address.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
+        for child in tab_identificator.children():
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+
+        for child in tab_ahvnr.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
+        for child in tab_job.children():
+            self.assertIn("one_to_one", child.relationEditorConfiguration())
+            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+
     def test_tid_default_postgis(self):
         """
         When OID defined in INTERLIS - PostgreSQL creates uuid server side.
