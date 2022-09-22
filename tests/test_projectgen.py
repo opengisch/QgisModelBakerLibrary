@@ -2534,6 +2534,9 @@ class TestProjectGen(unittest.TestCase):
         assert tab_ahvnr
         assert tab_job
 
+        if Qgis.QGIS_VERSION_INT < 31800:
+            return
+
         for child in tab_address.children():
             self.assertIn("one_to_one", child.relationEditorConfiguration())
             self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
@@ -2615,6 +2618,9 @@ class TestProjectGen(unittest.TestCase):
         assert tab_identificator
         assert tab_ahvnr
         assert tab_job
+
+        if Qgis.QGIS_VERSION_INT < 31800:
+            return
 
         for child in tab_address.children():
             self.assertIn("one_to_one", child.relationEditorConfiguration())
@@ -2699,6 +2705,9 @@ class TestProjectGen(unittest.TestCase):
         assert tab_identificator
         assert tab_ahvnr
         assert tab_job
+
+        if Qgis.QGIS_VERSION_INT < 31800:
+            return
 
         for child in tab_address.children():
             self.assertIn("one_to_one", child.relationEditorConfiguration())
