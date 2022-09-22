@@ -502,12 +502,14 @@ class MssqlConnector(DBConnector):
                     colowner="owner" if self.ili_version() == 3 else "colowner",
                 )
 
-                cardinality_max_field = ",META_ATTRS.attr_value as cardinality_max"
+                cardinality_max_field = (
+                    ",META_ATTRS_CARDINALITY.attr_value as cardinality_max"
+                )
                 cardinality_max_join = """
-                LEFT JOIN {schema}.t_ili2db_attrname AS ATTRNAME
-                    ON ATTRNAME.sqlname = KCU1.COLUMN_NAME AND ATTRNAME.{colowner} = KCU1.TABLE_NAME AND ATTRNAME.target = KCU2.TABLE_NAME
-                LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS
-                    ON META_ATTRS.ilielement = ATTRNAME.iliname AND (META_ATTRS.attr_name = 'ili2db.ili.assocCardinalityMax' OR META_ATTRS.attr_name = 'ili2db.ili.attrCardinalityMax')
+                LEFT JOIN {schema}.t_ili2db_attrname AS ATTRNAME_CARDINALITY
+                    ON ATTRNAME_CARDINALITY.sqlname = KCU1.COLUMN_NAME AND ATTRNAME_CARDINALITY.{colowner} = KCU1.TABLE_NAME AND ATTRNAME_CARDINALITY.target = KCU2.TABLE_NAME
+                LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS_CARDINALITY
+                    ON META_ATTRS_CARDINALITY.ilielement = ATTRNAME_CARDINALITY.iliname AND (META_ATTRS_CARDINALITY.attr_name = 'ili2db.ili.assocCardinalityMax' OR META_ATTRS_CARDINALITY.attr_name = 'ili2db.ili.attrCardinalityMax')
                     """.format(
                     schema=self.schema,
                     colowner="owner" if self.ili_version() == 3 else "colowner",
