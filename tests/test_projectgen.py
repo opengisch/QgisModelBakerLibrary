@@ -2537,6 +2537,9 @@ class TestProjectGen(unittest.TestCase):
         if Qgis.QGIS_VERSION_INT < 31800:
             return
 
+        # At the moment the cardinality_max can be determined exactly only for structures,
+        # and the "one_to_one" mode will be set only to those. See also:
+        # https://github.com/opengisch/QgisModelBakerLibrary/pull/30#issuecomment-1257912535
         for child in tab_address.children():
             self.assertIn("one_to_one", child.relationEditorConfiguration())
             self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
@@ -2545,12 +2548,10 @@ class TestProjectGen(unittest.TestCase):
             self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
         for child in tab_ahvnr.children():
-            self.assertIn("one_to_one", child.relationEditorConfiguration())
-            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
         for child in tab_job.children():
-            self.assertIn("one_to_one", child.relationEditorConfiguration())
-            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
     def test_relation_cardinality_geopackage(self):
         # Schema Import
@@ -2622,6 +2623,9 @@ class TestProjectGen(unittest.TestCase):
         if Qgis.QGIS_VERSION_INT < 31800:
             return
 
+        # At the moment the cardinality_max can be determined exactly only for structures,
+        # and the "one_to_one" mode will be set only to those. See also:
+        # https://github.com/opengisch/QgisModelBakerLibrary/pull/30#issuecomment-1257912535
         for child in tab_address.children():
             self.assertIn("one_to_one", child.relationEditorConfiguration())
             self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
@@ -2630,12 +2634,10 @@ class TestProjectGen(unittest.TestCase):
             self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
         for child in tab_ahvnr.children():
-            self.assertIn("one_to_one", child.relationEditorConfiguration())
-            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
         for child in tab_job.children():
-            self.assertIn("one_to_one", child.relationEditorConfiguration())
-            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
     def test_relation_cardinality_mssql(self):
         # Schema Import
@@ -2709,6 +2711,9 @@ class TestProjectGen(unittest.TestCase):
         if Qgis.QGIS_VERSION_INT < 31800:
             return
 
+        # At the moment the cardinality_max can be determined exactly only for structures,
+        # and the "one_to_one" mode will be set only to those. See also:
+        # https://github.com/opengisch/QgisModelBakerLibrary/pull/30#issuecomment-1257912535
         for child in tab_address.children():
             self.assertIn("one_to_one", child.relationEditorConfiguration())
             self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
