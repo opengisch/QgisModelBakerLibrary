@@ -552,16 +552,8 @@ class PGConnector(DBConnector):
     def get_relations_info(self, filter_layer_list=[]):
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            schema_where1 = (
-                "AND KCU1.CONSTRAINT_SCHEMA = '{}'".format(self.schema)
-                if self.schema
-                else ""
-            )
-            schema_where2 = (
-                "AND KCU2.CONSTRAINT_SCHEMA = '{}'".format(self.schema)
-                if self.schema
-                else ""
-            )
+            schema_where1 = "AND KCU1.CONSTRAINT_SCHEMA = '{}'".format(self.schema)
+            schema_where2 = "AND KCU2.CONSTRAINT_SCHEMA = '{}'".format(self.schema)
             filter_layer_where = ""
             if filter_layer_list:
                 filter_layer_where = "AND KCU1.TABLE_NAME IN ('{}')".format(
@@ -571,6 +563,9 @@ class PGConnector(DBConnector):
             strength_field = ""
             strength_join = ""
             strength_group_by = ""
+            cardinality_max_field = ""
+            cardinality_max_join = ""
+            cardinality_max_group_by = ""
             if self._table_exists(PG_METAATTRS_TABLE):
                 strength_field = ", META_ATTRS.attr_value as strength"
                 strength_join = """
@@ -584,8 +579,22 @@ class PGConnector(DBConnector):
                 )
                 strength_group_by = ", META_ATTRS.attr_value"
 
+                cardinality_max_field = (
+                    ", META_ATTRS_CARDINALITY.attr_value as cardinality_max"
+                )
+                cardinality_max_join = """
+                            LEFT JOIN {schema}.t_ili2db_attrname AS ATTRNAME_CARDINALITY
+                             ON ATTRNAME_CARDINALITY.sqlname = KCU1.COLUMN_NAME AND ATTRNAME_CARDINALITY.{colowner} = KCU1.TABLE_NAME AND ATTRNAME_CARDINALITY.target = KCU2.TABLE_NAME
+                            LEFT JOIN {schema}.{t_ili2db_meta_attrs} AS META_ATTRS_CARDINALITY
+                             ON META_ATTRS_CARDINALITY.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_CARDINALITY.attr_name = 'ili2db.ili.attrCardinalityMax'""".format(
+                    schema=self.schema,
+                    t_ili2db_meta_attrs=PG_METAATTRS_TABLE,
+                    colowner="owner" if self.ili_version() == 3 else "colowner",
+                )
+                cardinality_max_group_by = ", META_ATTRS_CARDINALITY.attr_value"
+
             cur.execute(
-                """SELECT RC.CONSTRAINT_NAME, KCU1.TABLE_NAME AS referencing_table, KCU1.COLUMN_NAME AS referencing_column, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME AS referenced_table, KCU2.COLUMN_NAME AS referenced_column, KCU1.ORDINAL_POSITION{strength_field}
+                """SELECT RC.CONSTRAINT_NAME, KCU1.TABLE_NAME AS referencing_table, KCU1.COLUMN_NAME AS referencing_column, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME AS referenced_table, KCU2.COLUMN_NAME AS referenced_column, KCU1.ORDINAL_POSITION{strength_field}{cardinality_max_field}
                             FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
                             INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
                              ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME {schema_where1} {filter_layer_where}
@@ -593,7 +602,8 @@ class PGConnector(DBConnector):
                              ON KCU2.CONSTRAINT_CATALOG = RC.UNIQUE_CONSTRAINT_CATALOG AND KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
                              AND KCU2.ORDINAL_POSITION = KCU1.ORDINAL_POSITION {schema_where2}
                             {strength_join}
-                            GROUP BY RC.CONSTRAINT_NAME, KCU1.TABLE_NAME, KCU1.COLUMN_NAME, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME, KCU2.COLUMN_NAME, KCU1.ORDINAL_POSITION{strength_group_by}
+                            {cardinality_max_join}
+                            GROUP BY RC.CONSTRAINT_NAME, KCU1.TABLE_NAME, KCU1.COLUMN_NAME, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME, KCU2.COLUMN_NAME, KCU1.ORDINAL_POSITION{strength_group_by}{cardinality_max_group_by}
                             ORDER BY KCU1.ORDINAL_POSITION
                             """.format(
                     schema_where1=schema_where1,
@@ -602,6 +612,9 @@ class PGConnector(DBConnector):
                     strength_field=strength_field,
                     strength_join=strength_join,
                     strength_group_by=strength_group_by,
+                    cardinality_max_field=cardinality_max_field,
+                    cardinality_max_join=cardinality_max_join,
+                    cardinality_max_group_by=cardinality_max_group_by,
                 )
             )
             return cur

@@ -162,6 +162,7 @@ class DBConnector(QObject):
                 referenced_table_name
                 referenced_column_name
                 strength
+                cardinality_max
         """
         return []
 

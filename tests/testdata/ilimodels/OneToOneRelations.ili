@@ -1,0 +1,55 @@
+INTERLIS 2.3;
+
+MODEL GeolTest (en)
+AT "https://www.opengis.ch"
+VERSION "2022-04-06" =
+  DOMAIN
+
+  /** Struktur für die Modellierung von Adressen
+   */
+  STRUCTURE Address =
+    Street : TEXT;
+    Housenumber : TEXT;
+    PLZ : 0 .. 99999;
+    Locality : MANDATORY TEXT;
+    Country : MANDATORY TEXT;
+  END Address;
+
+  STRUCTURE Identificator =
+    Descritption : TEXT;
+  END Identificator;
+
+
+  TOPIC People =
+    OID AS INTERLIS.UUIDOID;
+
+    CLASS Contact =
+
+      Name : MANDATORY TEXT;
+      /** Adresse des Kontakts
+       */
+      Address : Address;
+      IDS : BAG {0..*} OF Identificator;
+    END Contact;
+
+    CLASS AHVNr =
+        Nbr: TEXT;
+    END AHVNr;
+
+    CLASS Job =
+        Nbr: TEXT;
+    END Job;
+
+    ASSOCIATION Contact_AHVNr =
+        Contact -- {0..1} Contact;
+        AHVNr -- {0..1} AHVNr;
+    END Contact_AHVNr;
+
+    ASSOCIATION Contact_Job =
+        Contact -- {0..1} Contact;
+        Job -- {0..*} Job;
+    END Contact_Job;
+
+  END People;
+
+END GeolTest.

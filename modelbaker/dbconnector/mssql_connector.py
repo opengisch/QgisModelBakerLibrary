@@ -488,6 +488,8 @@ class MssqlConnector(DBConnector):
 
             strength_field = ""
             strength_join = ""
+            cardinality_max_field = ""
+            cardinality_max_join = ""
             if self._table_exists(METAATTRS_TABLE):
                 strength_field = ",META_ATTRS.attr_value as strength"
                 strength_join = """
@@ -495,6 +497,19 @@ class MssqlConnector(DBConnector):
                     ON ATTRNAME.sqlname = KCU1.COLUMN_NAME AND ATTRNAME.{colowner} = KCU1.TABLE_NAME AND ATTRNAME.target = KCU2.TABLE_NAME
                 LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS
                     ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.assocKind'
+                    """.format(
+                    schema=self.schema,
+                    colowner="owner" if self.ili_version() == 3 else "colowner",
+                )
+
+                cardinality_max_field = (
+                    ",META_ATTRS_CARDINALITY.attr_value as cardinality_max"
+                )
+                cardinality_max_join = """
+                LEFT JOIN {schema}.t_ili2db_attrname AS ATTRNAME_CARDINALITY
+                    ON ATTRNAME_CARDINALITY.sqlname = KCU1.COLUMN_NAME AND ATTRNAME_CARDINALITY.{colowner} = KCU1.TABLE_NAME AND ATTRNAME_CARDINALITY.target = KCU2.TABLE_NAME
+                LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS_CARDINALITY
+                    ON META_ATTRS_CARDINALITY.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_CARDINALITY.attr_name = 'ili2db.ili.attrCardinalityMax'
                     """.format(
                     schema=self.schema,
                     colowner="owner" if self.ili_version() == 3 else "colowner",
@@ -510,6 +525,7 @@ class MssqlConnector(DBConnector):
                     ,KCU2.COLUMN_NAME AS referenced_column
                     ,KCU1.ORDINAL_POSITION AS ordinal_position
                     {strength_field}
+                    {cardinality_max_field}
                 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
 
                 INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
@@ -523,6 +539,7 @@ class MssqlConnector(DBConnector):
                     AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
                     AND KCU2.ORDINAL_POSITION = KCU1.ORDINAL_POSITION
                 {strength_join}
+                {cardinality_max_join}
 
                 WHERE 1=1 {schema_where1} {schema_where2} {filter_layer_where}
                 order by constraint_name, ordinal_position
@@ -532,6 +549,8 @@ class MssqlConnector(DBConnector):
                 filter_layer_where=filter_layer_where,
                 strength_field=strength_field,
                 strength_join=strength_join,
+                cardinality_max_field=cardinality_max_field,
+                cardinality_max_join=cardinality_max_join,
             )
             cur.execute(query)
             result = self._get_dict_result(cur)
