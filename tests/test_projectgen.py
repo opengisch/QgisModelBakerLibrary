@@ -2545,13 +2545,16 @@ class TestProjectGen(unittest.TestCase):
             self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_identificator.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_ahvnr.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
     def test_relation_cardinality_geopackage(self):
         # Schema Import
@@ -2631,13 +2634,16 @@ class TestProjectGen(unittest.TestCase):
             self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_identificator.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_ahvnr.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
     def test_relation_cardinality_mssql(self):
         # Schema Import
@@ -2719,13 +2725,16 @@ class TestProjectGen(unittest.TestCase):
             self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_identificator.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_ahvnr.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
-            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
+            if "one_to_one" in child.relationEditorConfiguration():
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
     def test_tid_default_postgis(self):
         """
