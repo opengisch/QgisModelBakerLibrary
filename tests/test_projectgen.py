@@ -2717,12 +2717,10 @@ class TestProjectGen(unittest.TestCase):
             self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
         for child in tab_ahvnr.children():
-            self.assertIn("one_to_one", child.relationEditorConfiguration())
-            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
         for child in tab_job.children():
-            self.assertIn("one_to_one", child.relationEditorConfiguration())
-            self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+            self.assertNotIn("one_to_one", child.relationEditorConfiguration())
 
     def test_tid_default_postgis(self):
         """

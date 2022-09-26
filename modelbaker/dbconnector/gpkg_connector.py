@@ -455,7 +455,7 @@ class GPKGConnector(DBConnector):
                         """SELECT META_ATTRS.attr_value as cardinality_max
                         FROM t_ili2db_attrname AS ATTRNAME
                         INNER JOIN t_ili2db_meta_attrs AS META_ATTRS
-                        ON META_ATTRS.ilielement = ATTRNAME.iliname AND (META_ATTRS.attr_name = 'ili2db.ili.assocCardinalityMax' OR META_ATTRS.attr_name = 'ili2db.ili.attrCardinalityMax')
+                        ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.attrCardinalityMax'
                         WHERE ATTRNAME.sqlname = '{referencing_column}' AND ATTRNAME.{colowner} = '{referencing_table}' AND ATTRNAME.target = '{referenced_table}'
                     """.format(
                             referencing_column=foreign_key["from"],
