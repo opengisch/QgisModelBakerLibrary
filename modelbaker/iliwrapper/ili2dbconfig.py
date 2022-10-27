@@ -412,6 +412,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.skip_geometry_errors:
             self.append_args(args, ["--skipGeometryErrors"])
+            self.append_args(args, ["--disableAreaValidation"])
 
         if self.valid_config:
             self.append_args(args, ["--validConfig", self.valid_config])
