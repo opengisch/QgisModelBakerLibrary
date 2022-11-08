@@ -29,5 +29,5 @@ services:
       - ${GITHUB_WORKSPACE}:/usr/src
     links:
       - postgres11
-      - postgres12
-      - mssql
+#      - postgres12
+#      - mssql
