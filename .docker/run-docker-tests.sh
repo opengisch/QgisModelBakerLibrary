@@ -21,13 +21,12 @@ set -e
 /usr/src/tests/testdata/mssql/setup-mssql.sh
 
 # Default to postgres12 unless another host has been defined (i.e. postgres11 from travis test matrix / docker-compose)
-export PGHOST=${PGHOST-postgres12}
+export PGHOST=${PGHOST:-postgres12}
 
 # rationale: Wait for postgres container to become available
-echo "Wait a moment while loading the database."
-while ! PGPASSWORD='docker' psql -h $PGHOST -U docker -p 5432 -l &> /dev/null
-do
-  printf "."
+echo "Wait a moment while loading the PG database: ${PGHOST}"
+until PGPASSWORD='docker' psql -h $PGHOST -U docker > /dev/null 2>&1; do
+  printf " 🐘"
   sleep 2
 done
 echo ""
