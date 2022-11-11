@@ -1,0 +1,11 @@
+layertree:
+    - "KbS_LV95_V1_4 Layers":
+        group: true
+        child-nodes:
+            - "Belasteter_Standort (Geo_Lage_Punkt)":
+                qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_default_style.qml"
+                styles:
+                    robot:
+                        qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_robot_style.qml"
+                    french:
+                        qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_french_style.qml"

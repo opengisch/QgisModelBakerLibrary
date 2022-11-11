@@ -386,6 +386,142 @@ class TestProjectTopping(unittest.TestCase):
         # check if the layers have been considered
         assert count == 2
 
+    def test_kbs_postgis_qml_multistyles(self):
+        """
+        Checks if "styles" and their qml style files can be applied by the layer tree
+        """
+
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(
+            importer.tool, self.toppings_test_path
+        )
+        importer.configuration.ilimodels = "KbS_LV95_V1_4"
+        importer.configuration.dbschema = "toppings_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = "2056"
+        importer.configuration.tomlfile = os.path.join(
+            self.toppings_test_path, "metaattributes/sh_KbS_LV95_V1_4.toml"
+        )
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            "smart2",
+            importer.configuration.dbschema,
+        )
+        available_layers = generator.layers()
+
+        assert len(available_layers) == 16
+
+        # load the projecttopping file
+        projecttopping_file_path = os.path.join(
+            self.toppings_test_path,
+            "projecttopping/opengis_projecttopping_multistyles_KbS_LV95_V1_4.yaml",
+        )
+
+        with open(projecttopping_file_path, "r") as yamlfile:
+            projecttopping_data = yaml.safe_load(yamlfile)
+            assert "layertree" in projecttopping_data
+            legend = generator.legend(
+                available_layers,
+                layertree_structure=projecttopping_data["layertree"],
+                path_resolver=lambda path: os.path.join(
+                    os.path.dirname(projecttopping_file_path), path
+                )
+                if path
+                else None,
+            )
+
+        # No layers added now - stays 16
+        assert len(available_layers) == 16
+
+        relations, _ = generator.relations(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.legend = legend
+        project.relations = relations
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+        count = 0
+
+        for layer in available_layers:
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_punkt"
+            ):
+                count += 1
+                style_manager = layer.layer.styleManager()
+
+                # default style
+                edit_form_config = layer.layer.editFormConfig()
+                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                tabs = edit_form_config.tabs()
+                assert len(tabs) == 5
+                assert tabs[0].name() == "Allgemein"
+                for field in layer.layer.fields():
+                    if field.name() == "bemerkung_rm":
+                        assert field.alias() == "Bemerkung Romanisch"
+                    if field.name() == "bemerkung_it":
+                        assert field.alias() == "Bemerkung Italienisch"
+                assert (
+                    layer.layer.displayExpression()
+                    == "'Default: '||standorttyp ||' - '||katasternummer"
+                )
+
+                # robot style (in binary)
+                style_manager.setCurrentStyle("robot")
+                edit_form_config = layer.layer.editFormConfig()
+                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                tabs = edit_form_config.tabs()
+                assert len(tabs) == 5
+                assert (
+                    tabs[0].name()
+                    == "01000111 01100101 01101110 01100101 01110010 01100001 01101100"
+                )
+                for field in layer.layer.fields():
+                    if field.name() == "bemerkung_rm":
+                        assert (
+                            field.alias()
+                            == "01100010 01100101 01101101 01100101 01110010 01101011 01110101 01101110 01100111 01011111 01110010 01101101"
+                        )
+                    if field.name() == "bemerkung_it":
+                        assert (
+                            field.alias()
+                            == "01100010 01100101 01101101 01100101 01110010 01101011 01110101 01101110 01100111 01011111 01101001 01110100"
+                        )
+                assert (
+                    layer.layer.displayExpression()
+                    == "'Robot: '||standorttyp ||' - '||katasternummer"
+                )
+
+                # french style (in french)
+                style_manager.setCurrentStyle("french")
+                edit_form_config = layer.layer.editFormConfig()
+                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                tabs = edit_form_config.tabs()
+                assert len(tabs) == 5
+                assert tabs[0].name() == "Général"
+                for field in layer.layer.fields():
+                    if field.name() == "bemerkung_rm":
+                        assert field.alias() == "Remarque en Romane"
+                    if field.name() == "bemerkung_it":
+                        assert field.alias() == "Remarque en Italien"
+                assert (
+                    layer.layer.displayExpression()
+                    == "'French: '||standorttyp ||' - '||katasternummer"
+                )
+
+        # check if the layers have been considered
+        assert count == 1
+
     def test_kbs_postgis_iliname(self):
         """
         Checks if layers can be loaded by it's iliname and geometry column.
