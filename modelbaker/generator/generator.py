@@ -549,6 +549,16 @@ class Generator(QObject):
                 current_node.qmlstylefile = path_resolver(
                     item_properties.get("qmlstylefile")
                 )
+                styles = {}
+                if "styles" in item_properties:
+                    for style_name in item_properties["styles"].keys():
+                        style_properties = item_properties["styles"][style_name]
+                        style_qmlstylefile = path_resolver(
+                            style_properties.get("qmlstylefile")
+                        )
+                        styles[style_name] = {"qmlstylefile": style_qmlstylefile}
+                current_node.styles = styles
+
         return current_node
 
     def legend(
