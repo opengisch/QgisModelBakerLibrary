@@ -85,7 +85,7 @@ class MetaConfig(object):
 
         if self.referencedata_paths:
             # generate toppingfiles of the reference data
-            referencedata_links = ",".join(
+            referencedata_links = ";".join(
                 [
                     self._generate_toppingfile_link(
                         target, MetaConfig.REFERENCEDATA_TYPE, path
@@ -98,7 +98,7 @@ class MetaConfig(object):
         ili2db_section = {}
 
         # append models and the ili2db parameters
-        ili2db_section["models"] = ",".join(self.ili2db_settings.models)
+        ili2db_section["models"] = ";".join(self.ili2db_settings.models)
         ili2db_section.update(self.ili2db_settings.parameters)
 
         # generate metaattr and prescript / postscript files
