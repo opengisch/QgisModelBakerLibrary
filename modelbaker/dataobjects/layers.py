@@ -57,6 +57,7 @@ class Layer(object):
         ili_name=None,
         definitionfile=None,
         qmlstylefile=None,
+        styles={},
     ):
         self.provider = provider
         self.uri = uri
@@ -101,6 +102,7 @@ class Layer(object):
 
         self.definitionfile = definitionfile
         self.qmlstylefile = qmlstylefile
+        self.styles = styles
 
         self.__form = Form()
 
@@ -124,6 +126,7 @@ class Layer(object):
         definition["ili_name"] = self.ili_name
         definition["definitionfile"] = self.definitionfile
         definition["qmlstylefile"] = self.qmlstylefile
+        definition["styles"] = self.styles
         definition["form"] = self.__form.dump()
         return definition
 
@@ -141,6 +144,7 @@ class Layer(object):
         self.ili_name = definition["ili_name"]
         self.definitionfile = definition["definitionfile"]
         self.qmlstylefile = definition["qmlstylefile"]
+        self.styles = definition["styles"]
         self.__form.load(definition["form"])
 
     def create(self):
@@ -197,9 +201,20 @@ class Layer(object):
         edit_form = self.__form.create(self, self.__layer, project)
         self.__layer.setEditFormConfig(edit_form)
 
-    def load_style(self):
+    def load_styles(self):
         if self.qmlstylefile:
             self.__layer.loadNamedStyle(self.qmlstylefile)
+        if self.styles:
+            for style_name in self.styles.keys():
+                # add the new style (because otherwise we overwrite the previous one)
+                self.__layer.styleManager().addStyleFromLayer(style_name)
+                self.__layer.styleManager().setCurrentStyle(style_name)
+                style_properties = self.styles[style_name]
+                style_qmlstylefile = style_properties.get("qmlstylefile")
+                if style_qmlstylefile:
+                    self.__layer.loadNamedStyle(style_qmlstylefile)
+            # set the default style
+            self.__layer.styleManager().setCurrentStyle("default")
 
     def _create_layer(self, uri, layer_name, provider):
         if provider and provider.lower() == "wms":
