@@ -241,7 +241,6 @@ class Project(QObject):
             root.setHasCustomLayerOrder(True)
 
         if self.mapthemes:
-            # i think this should be a part in the generator
             for name in self.mapthemes.keys():
                 map_theme_record = QgsMapThemeCollection.MapThemeRecord()
 
@@ -251,17 +250,19 @@ class Project(QObject):
                     if node_properties.get("group"):
                         # it's a group node
                         if node_properties.get("expanded"):
-                            map_theme_record.setHasExpandedStateInfo()
+                            map_theme_record.setHasExpandedStateInfo(True)
                             expanded_group_nodes = map_theme_record.expandedGroupNodes()
                             expanded_group_nodes.add(node_name)
                             map_theme_record.setExpandedGroupNodes(expanded_group_nodes)
                         if node_properties.get("checked"):
-                            map_theme_record.setHasCheckedStateInfo()
+                            # this has not been enabled what makes it impossible to control the checked state of a group
+                            # see https://github.com/SebastienPeillet/QGIS/commit/736e46daa640b8a9c66107b4f05319d6d2534ac5#discussion_r1037225879
+                            # map_theme_record.setHasCheckedStateInfo(True)
                             checked_group_nodes = map_theme_record.checkedGroupNodes()
                             checked_group_nodes.add(node_name)
                             map_theme_record.setCheckedGroupNodes(checked_group_nodes)
                     else:
-                        # it's a group node
+                        # it's not group node
                         if qgis_project.mapLayersByName(node_name)[0]:
                             map_theme_layer_record = (
                                 QgsMapThemeCollection.MapThemeLayerRecord()
@@ -276,20 +277,20 @@ class Project(QObject):
                                 )
                             # isVisible decides if at least one of the categories is visible (don't mix up with checked)
                             map_theme_layer_record.isVisible = node_properties.get(
-                                "visible"
+                                "visible", False
                             )
                             map_theme_layer_record.expandedLayerNode = (
-                                node_properties.get("expanded")
+                                node_properties.get("expanded", False)
                             )
                             if node_properties.get("expanded_items"):
                                 map_theme_layer_record.expandedLegendItems = set(
-                                    node_properties.get("expanded_items")
+                                    node_properties.get("expanded_items", [])
                                 )
                             if node_properties.get("checked_items"):
                                 # if the value "checked_items" is there, we need to consider it, even if it's empty.
                                 map_theme_layer_record.usingLegendItems = True
                                 map_theme_layer_record.checkedLegendItems = set(
-                                    node_properties.get("checked_items")
+                                    node_properties.get("checked_items", [])
                                 )
                             else:
                                 # if the value "checked_items" is not there, we don't considere it. This means all entries are checked.
