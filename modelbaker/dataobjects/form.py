@@ -128,23 +128,16 @@ class FormRelationWidget(object):
         if self.nm_relation:
             widget.setNmRelationId(self.nm_relation.id)
 
-        target_layer = (
-            self.nm_relation.referenced_layer
-            if self.nm_relation
-            else self.relation.referencing_layer
-        )
-
         if Qgis.QGIS_VERSION_INT >= 31800:
-            if not target_layer.geometry_column:
-                widget.setRelationWidgetTypeId("linking_relation_editor")
+            widget.setRelationWidgetTypeId("linking_relation_editor")
 
-                cardinality_max = self.relation.cardinality_max
-                if self.nm_relation:
-                    cardinality_max = self.nm_relation.cardinality_max
+            cardinality_max = self.relation.cardinality_max
+            if self.nm_relation:
+                cardinality_max = self.nm_relation.cardinality_max
 
-                if cardinality_max == "1":
-                    configuration = widget.relationEditorConfiguration()
-                    configuration["one_to_one"] = True
-                    widget.setRelationEditorConfiguration(configuration)
+            if cardinality_max == "1":
+                configuration = widget.relationEditorConfiguration()
+                configuration["one_to_one"] = True
+                widget.setRelationEditorConfiguration(configuration)
 
         return widget
