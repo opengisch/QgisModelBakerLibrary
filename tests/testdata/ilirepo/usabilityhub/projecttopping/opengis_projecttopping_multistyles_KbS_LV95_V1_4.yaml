@@ -75,12 +75,6 @@ mapthemes:
     "Belasteter_Standort (Geo_Lage_Punkt)":
       expanded: true
       visible: false
-    "EGRID_":
-      expanded: true
-      visible: false
-    "Deponietyp_":
-      expanded: true
-      visible: false
     "KbS_LV95_V1_4 Layers":
       group: true
       checked: false
