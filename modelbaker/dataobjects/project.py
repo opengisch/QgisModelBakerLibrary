@@ -75,6 +75,7 @@ class Project(QObject):
 
         definition["legend"] = legend
         definition["relations"] = relations
+        definition["mapthemes"] = self.mapthemes
 
         return definition
 
@@ -88,6 +89,8 @@ class Project(QObject):
             layer = Layer()
             layer.load(layer_definition)
             self.layers.append(layer)
+
+        self.mapthemes = definition["mapthemes"]
 
     def create(
         self, path: str, qgis_project: QgsProject, group: QgsLayerTreeGroup = None
