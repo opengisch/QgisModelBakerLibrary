@@ -1,11 +1,85 @@
 layertree:
-    - "KbS_LV95_V1_4 Layers":
-        group: true
-        child-nodes:
-            - "Belasteter_Standort (Geo_Lage_Punkt)":
-                qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_default_style.qml"
-                styles:
-                    robot:
-                        qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_robot_style.qml"
-                    french:
-                        qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_french_style.qml"
+  - "KbS_LV95_V1_4 Layers":
+      group: true
+      checked: true
+      expanded: true
+      child-nodes:
+        - "Belasteter_Standort (Geo_Lage_Punkt)":
+            qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_default_style.qml"
+            styles:
+              robot:
+                qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_robot_style.qml"
+              french:
+                qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_004_belasteterstandort_punkt_french_style.qml"
+        - "Belasteter_Standort (Geo_Lage_Polygon)":
+            qmlstylefile: "../layerstyle/opengisch_KbS_LV95_V1_4_001_belasteterstandort_polygon_categorized.qml"
+        - "Informationen":
+            group: true
+            checked: true
+            expanded: true
+            child-nodes:
+              - "EGRID_":
+              - "Deponietyp_":
+
+mapthemes:
+  "French Theme":
+    "Belasteter_Standort (Geo_Lage_Punkt)":
+      style: french
+      visible: true
+      expanded: true
+    "Belasteter_Standort (Geo_Lage_Polygon)":
+      visible: true
+      expanded: true
+      checked_items:
+        [
+        "{71f4f768-f5a0-4556-a526-e003f02430e8}",
+        "{fc472bf1-4694-4033-8a69-0ba5db267e92}",
+        "{fa7fd14d-afac-4d49-8ae6-054d6ef3ed4c}",
+        "{175249d7-9889-445f-b233-1acf85fefe30}",
+        "{88de6f70-cd62-4a3f-9cb0-5635c1d2cfeb}",
+        "{3f377bb8-7110-41e0-9fe5-32a4e802aa28}"
+        ]
+      expanded_items:
+        [
+        "{fa7fd14d-afac-4d49-8ae6-054d6ef3ed4c}",
+        "{88de6f70-cd62-4a3f-9cb0-5635c1d2cfeb}"
+        ]
+    "KbS_LV95_V1_4 Layers":
+      group: true
+      checked: true
+      expanded: true
+  "Robot Theme":
+    "Belasteter_Standort (Geo_Lage_Punkt)":
+      style: robot
+      expanded: true
+    "Belasteter_Standort (Geo_Lage_Polygon)":
+      visible: true
+      expanded: false
+      checked_items:
+        [
+        "{cd999ccf-a63e-4a1a-81fc-7b31473da49e}",
+        "{71f4f768-f5a0-4556-a526-e003f02430e8}",
+        "{fc472bf1-4694-4033-8a69-0ba5db267e92}",
+        "{175249d7-9889-445f-b233-1acf85fefe30}",
+        "{88de6f70-cd62-4a3f-9cb0-5635c1d2cfeb}",
+        ]
+      expanded_items:
+        [
+        "{fa7fd14d-afac-4d49-8ae6-054d6ef3ed4c}"
+        ]
+    "KbS_LV95_V1_4 Layers":
+      group: true
+      checked: true
+      expanded: true
+  "Group Checker Theme":
+    "Belasteter_Standort (Geo_Lage_Punkt)":
+      expanded: true
+      visible: false
+    "KbS_LV95_V1_4 Layers":
+      group: true
+      checked: false
+      expanded: false
+    "KbS_LV95_V1_4 Layers/Informationen":
+      group: true
+      checked: true
+      expanded: true

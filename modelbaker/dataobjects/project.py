@@ -26,6 +26,7 @@ from qgis.core import (
     QgsLayerTreeGroup,
     QgsMapLayer,
     QgsPrintLayout,
+    QgsMapThemeCollection,
     QgsProject,
     QgsReadWriteContext,
 )
@@ -54,6 +55,7 @@ class Project(QObject):
         self.relations = List[Relation]
         self.custom_project_variables = {}
         self.layouts = {}
+        self.mapthemes = {}
         self.context = context
 
         # {Layer_class_name: {dbattribute: {Layer_class, cardinality, Layer_domain, key_field, value_field]}
@@ -82,6 +84,7 @@ class Project(QObject):
         definition["relations"] = relations
         definition["custom_project_variables"] = self.custom_project_variables
         definition["layouts"] = self.layouts
+        definition["mapthemes"] = self.mapthemes
 
         return definition
 
@@ -99,6 +102,7 @@ class Project(QObject):
         self.custom_layer_order_structure = definition["custom_layer_order_structure"]
         self.custom_project_variables = definition["custom_project_variables"]
         self.layouts = definition["layouts"]
+        self.mapthemes = definition["mapthemes"]
 
     def create(
         self, path: str, qgis_project: QgsProject, group: QgsLayerTreeGroup = None
@@ -240,6 +244,8 @@ class Project(QObject):
             self.legend.create(qgis_project, group)
 
         self.load_custom_layer_order(qgis_project)
+        
+        self.load_mapthemes(qgis_project)
 
         self.load_custom_project_variables(qgis_project)
 
@@ -283,6 +289,66 @@ class Project(QObject):
                 # name it according the settings
                 layout.setName(layout_name)
                 qgis_project.layoutManager().addLayout(layout)
+
+    def load_mapthemes(self, qgis_project):
+        if self.mapthemes:
+            for name in self.mapthemes.keys():
+                map_theme_record = QgsMapThemeCollection.MapThemeRecord()
+
+                nodes = self.mapthemes[name]
+                for node_name in nodes.keys():
+                    node_properties = nodes[node_name]
+                    if node_properties.get("group"):
+                        # it's a group node
+                        if node_properties.get("expanded"):
+                            map_theme_record.setHasExpandedStateInfo(True)
+                            expanded_group_nodes = map_theme_record.expandedGroupNodes()
+                            expanded_group_nodes.add(node_name)
+                            map_theme_record.setExpandedGroupNodes(expanded_group_nodes)
+                        if node_properties.get("checked"):
+                            # setHasCheckedStateInfo(True) is not available in the API, what makes it impossible to control the checked state of a group
+                            # see https://github.com/SebastienPeillet/QGIS/commit/736e46daa640b8a9c66107b4f05319d6d2534ac5#discussion_r1037225879
+                            checked_group_nodes = map_theme_record.checkedGroupNodes()
+                            checked_group_nodes.add(node_name)
+                            map_theme_record.setCheckedGroupNodes(checked_group_nodes)
+                    else:
+                        # it's not group node
+                        if qgis_project.mapLayersByName(node_name)[0]:
+                            map_theme_layer_record = (
+                                QgsMapThemeCollection.MapThemeLayerRecord()
+                            )
+                            map_theme_layer_record.setLayer(
+                                qgis_project.mapLayersByName(node_name)[0]
+                            )
+                            if node_properties.get("style"):
+                                map_theme_layer_record.usingCurrentStyle = True
+                                map_theme_layer_record.currentStyle = (
+                                    node_properties.get("style")
+                                )
+                            # isVisible decides if at least one of the categories is visible (don't mix up with checked)
+                            map_theme_layer_record.isVisible = node_properties.get(
+                                "visible", False
+                            )
+                            map_theme_layer_record.expandedLayerNode = (
+                                node_properties.get("expanded", False)
+                            )
+                            if node_properties.get("expanded_items"):
+                                map_theme_layer_record.expandedLegendItems = set(
+                                    node_properties.get("expanded_items", [])
+                                )
+                            if node_properties.get("checked_items"):
+                                # if the value "checked_items" is there, we need to consider it, even if it's empty.
+                                map_theme_layer_record.usingLegendItems = True
+                                map_theme_layer_record.checkedLegendItems = set(
+                                    node_properties.get("checked_items", [])
+                                )
+                            else:
+                                # if the value "checked_items" is not there, we don't considere it. This means all entries are checked.
+                                map_theme_layer_record.usingLegendItems = False
+
+                            map_theme_record.addLayerRecord(map_theme_layer_record)
+
+                qgis_project.mapThemeCollection().insert(name, map_theme_record)
 
     def post_generate(self):
         for layer in self.layers:

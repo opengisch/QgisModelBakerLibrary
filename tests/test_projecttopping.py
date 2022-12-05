@@ -26,7 +26,7 @@ import shutil
 import tempfile
 
 import yaml
-from qgis.core import QgsEditFormConfig, QgsProject
+from qgis.core import QgsEditFormConfig, QgsLayerTreeModel, QgsProject
 from qgis.PyQt.QtCore import QEventLoop, Qt, QTimer
 from qgis.testing import start_app, unittest
 
@@ -521,6 +521,327 @@ class TestProjectTopping(unittest.TestCase):
 
         # check if the layers have been considered
         assert count == 1
+
+    def test_kbs_postgis_qml_mapthemes(self):
+        """
+        Checks if mapthemes can be applied to the project
+        """
+
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(
+            importer.tool, self.toppings_test_path
+        )
+        importer.configuration.ilimodels = "KbS_LV95_V1_4"
+        importer.configuration.dbschema = "toppings_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = "2056"
+        importer.configuration.tomlfile = os.path.join(
+            self.toppings_test_path, "metaattributes/sh_KbS_LV95_V1_4.toml"
+        )
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            "smart2",
+            importer.configuration.dbschema,
+        )
+        available_layers = generator.layers()
+
+        assert len(available_layers) == 16
+
+        # load the projecttopping file
+        projecttopping_file_path = os.path.join(
+            self.toppings_test_path,
+            "projecttopping/opengis_projecttopping_multistyles_KbS_LV95_V1_4.yaml",
+        )
+
+        with open(projecttopping_file_path, "r") as yamlfile:
+            projecttopping_data = yaml.safe_load(yamlfile)
+            assert "layertree" in projecttopping_data
+            legend = generator.legend(
+                available_layers,
+                layertree_structure=projecttopping_data["layertree"],
+                path_resolver=lambda path: os.path.join(
+                    os.path.dirname(projecttopping_file_path), path
+                )
+                if path
+                else None,
+            )
+            assert "mapthemes" in projecttopping_data
+            mapthemes = projecttopping_data["mapthemes"]
+
+        # No layers added now - stays 16
+        assert len(available_layers) == 16
+
+        relations, _ = generator.relations(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.legend = legend
+        project.relations = relations
+        project.mapthemes = mapthemes
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # 1. NO THEME:
+        # no map theme should be applied yet. The layer tree should be like it is defined in the YAML
+        layertree_root = qgis_project.layerTreeRoot()
+        layertree_model = QgsLayerTreeModel(layertree_root)
+
+        # group "KbS_LV95_V1_4 Layers" should be expanded and checked
+        main_group = layertree_root.findGroup("KbS_LV95_V1_4 Layers")
+        assert main_group is not None
+        assert main_group.isExpanded()
+        assert main_group.itemVisibilityChecked()
+
+        # group "Informationen" should be expanded and checked
+        information_group = main_group.findGroup("Informationen")
+        assert information_group is not None
+        assert main_group.isExpanded()
+        assert main_group.itemVisibilityChecked()
+
+        # Belasteter_Standort (Geo_Lage_Polygon) is expanded (default) and checked (default)
+        # Belasteter_Standord (Geo_Lage_Punkt) has the default style
+        count_default_state = 0
+        for layer in available_layers:
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_polygon"
+            ):
+                count_default_state += 1
+
+                layer_node = main_group.findLayer(layer.layer)
+                assert layer_node.isExpanded()
+                assert layer_node.itemVisibilityChecked()
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_punkt"
+            ):
+                count_default_state += 1
+
+                # default style display expression
+                assert (
+                    layer.layer.displayExpression()
+                    == "'Default: '||standorttyp ||' - '||katasternummer"
+                )
+        assert count_default_state == 2
+
+        # 2. "Group Checker Theme" THEME:
+        # let's apply the "Group Checker Theme"
+        qgis_project.mapThemeCollection().applyTheme(
+            "Group Checker Theme", layertree_root, layertree_model
+        )
+        layertree_root = qgis_project.layerTreeRoot()
+        layertree_model = QgsLayerTreeModel(layertree_root)
+
+        # group "KbS_LV95_V1_4 Layers" should NOT be expanded and NOT checked
+        main_group = layertree_root.findGroup("KbS_LV95_V1_4 Layers")
+        assert main_group is not None
+        assert not main_group.isExpanded()
+        # not yet possible to control group checked state: assert not main_group.itemVisibilityChecked()
+
+        # group "Informationen" should be expanded and checked
+        information_group = main_group.findGroup("Informationen")
+        assert information_group is not None
+        assert information_group.isExpanded()
+        # not yet possible to control group checked state: assert information_group.itemVisibilityChecked()
+
+        # Belasteter_Standort (Geo_Lage_Polygon) is NOT expanded and NOT checked
+        # Belasteter_Standord (Geo_Lage_Punkt) has the default style still
+        count_group_checker_state = 0
+        for layer in available_layers:
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_polygon"
+            ):
+                count_group_checker_state += 1
+
+                layer_node = main_group.findLayer(layer.layer)
+                # not in theme, so not enabled
+                assert not layer_node.itemVisibilityChecked()
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_punkt"
+            ):
+                count_group_checker_state += 1
+
+                # default style display expression
+                assert (
+                    layer.layer.displayExpression()
+                    == "'Default: '||standorttyp ||' - '||katasternummer"
+                )
+        assert count_group_checker_state == 2
+
+        # 3. "French Theme" THEME:
+        # let's apply the "French Theme"
+        qgis_project.mapThemeCollection().applyTheme(
+            "French Theme", layertree_root, layertree_model
+        )
+        layertree_root = qgis_project.layerTreeRoot()
+        layertree_model = QgsLayerTreeModel(layertree_root)
+
+        # group "KbS_LV95_V1_4 Layers" should be expanded and checked
+        main_group = layertree_root.findGroup("KbS_LV95_V1_4 Layers")
+        assert main_group is not None
+        assert main_group.isExpanded()
+        # not yet possible to control group checked state: assert main_group.itemVisibilityChecked()
+
+        # group "Informationen" should be NOT expanded and checked
+        information_group = main_group.findGroup("Informationen")
+        assert information_group is not None
+        assert not information_group.isExpanded()
+        # not yet possible to control group checked state: assert information_group.itemVisibilityChecked()
+
+        # Belasteter_Standort (Geo_Lage_Polygon) is expanded and checked...
+        # ... but some symbology items of it are unchecked
+        # Belasteter_Standord (Geo_Lage_Punkt) has the french style
+        count_french_state = 0
+        for layer in available_layers:
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_polygon"
+            ):
+                count_french_state += 1
+
+                layer_node = main_group.findLayer(layer.layer)
+                assert layer_node.isExpanded()
+                assert layer_node.itemVisibilityChecked()
+
+                # check if the symbology items are checked/unchecked right
+                expected_checked_items = [
+                    "{71f4f768-f5a0-4556-a526-e003f02430e8}",
+                    "{fc472bf1-4694-4033-8a69-0ba5db267e92}",
+                    "{fa7fd14d-afac-4d49-8ae6-054d6ef3ed4c}",
+                    "{175249d7-9889-445f-b233-1acf85fefe30}",
+                    "{88de6f70-cd62-4a3f-9cb0-5635c1d2cfeb}",
+                    "{3f377bb8-7110-41e0-9fe5-32a4e802aa28}",
+                ]
+
+                symbolitem_keys = [
+                    item.ruleKey()
+                    for item in layer.layer.renderer().legendSymbolItems()
+                ]
+                assert symbolitem_keys and len(symbolitem_keys) == 9
+
+                for symbolitem_key in symbolitem_keys:
+                    if symbolitem_key in expected_checked_items:
+                        assert layer.layer.renderer().legendSymbolItemChecked(
+                            symbolitem_key
+                        )
+                    else:
+                        assert not layer.layer.renderer().legendSymbolItemChecked(
+                            symbolitem_key
+                        )
+
+                # check if the symbology items are expanded/collapsed right
+                expected_expanded_items = [
+                    "{fa7fd14d-afac-4d49-8ae6-054d6ef3ed4c}",
+                    "{88de6f70-cd62-4a3f-9cb0-5635c1d2cfeb}",
+                ]
+
+                expanded_items = layer_node.customProperty("expandedLegendNodes")
+                assert expanded_items and len(expanded_items)
+                assert set(expanded_items) == set(expected_expanded_items)
+
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_punkt"
+            ):
+                count_french_state += 1
+
+                # french style display expression
+                assert (
+                    layer.layer.displayExpression()
+                    == "'French: '||standorttyp ||' - '||katasternummer"
+                )
+        assert count_french_state == 2
+
+        # 4. "Robot Theme" THEME:
+        # let's apply the "Robot Theme"
+        qgis_project.mapThemeCollection().applyTheme(
+            "Robot Theme", layertree_root, layertree_model
+        )
+        layertree_root = qgis_project.layerTreeRoot()
+        layertree_model = QgsLayerTreeModel(layertree_root)
+
+        # group "KbS_LV95_V1_4 Layers" should be expanded and checked
+        main_group = layertree_root.findGroup("KbS_LV95_V1_4 Layers")
+        assert main_group is not None
+        assert main_group.isExpanded()
+        # not yet possible to control group checked state: assert main_group.itemVisibilityChecked()
+
+        # group "Informationen" should be NOT expanded but checked
+        information_group = main_group.findGroup("Informationen")
+        assert information_group is not None
+        assert not information_group.isExpanded()
+        # not yet possible to control group checked state: assert information_group.itemVisibilityChecked()
+
+        # Belasteter_Standort (Geo_Lage_Polygon) is NOT expanded but checked...
+        # ... and some symbology items of it are unchecked
+        # Belasteter_Standord (Geo_Lage_Punkt) has the robot style
+        count_robot_state = 0
+        for layer in available_layers:
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_polygon"
+            ):
+                count_robot_state += 1
+
+                layer_node = main_group.findLayer(layer.layer)
+                assert not layer_node.isExpanded()
+                assert layer_node.itemVisibilityChecked()
+
+                # check if the symbology items are checked/unchecked right
+                expected_checked_items = [
+                    "{cd999ccf-a63e-4a1a-81fc-7b31473da49e}",
+                    "{71f4f768-f5a0-4556-a526-e003f02430e8}",
+                    "{fc472bf1-4694-4033-8a69-0ba5db267e92}",
+                    "{175249d7-9889-445f-b233-1acf85fefe30}",
+                    "{88de6f70-cd62-4a3f-9cb0-5635c1d2cfeb}",
+                ]
+
+                symbolitem_keys = [
+                    item.ruleKey()
+                    for item in layer.layer.renderer().legendSymbolItems()
+                ]
+                assert symbolitem_keys and len(symbolitem_keys) == 9
+
+                for symbolitem_key in symbolitem_keys:
+                    if symbolitem_key in expected_checked_items:
+                        assert layer.layer.renderer().legendSymbolItemChecked(
+                            symbolitem_key
+                        )
+                    else:
+                        assert not layer.layer.renderer().legendSymbolItemChecked(
+                            symbolitem_key
+                        )
+
+                # check if the symbology items are expanded/collapsed right
+                expected_expanded_items = ["{fa7fd14d-afac-4d49-8ae6-054d6ef3ed4c}"]
+
+                expanded_items = layer_node.customProperty("expandedLegendNodes")
+                assert expanded_items and len(expanded_items) == 1
+                assert set(expanded_items) == set(expected_expanded_items)
+
+            if (
+                layer.name == "belasteter_standort"
+                and layer.geometry_column == "geo_lage_punkt"
+            ):
+                count_robot_state += 1
+
+                # robot style display expression
+                assert (
+                    layer.layer.displayExpression()
+                    == "'Robot: '||standorttyp ||' - '||katasternummer"
+                )
+        assert count_robot_state == 2
 
     def test_kbs_postgis_iliname(self):
         """
