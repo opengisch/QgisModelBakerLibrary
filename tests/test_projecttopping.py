@@ -664,7 +664,7 @@ class TestProjectTopping(unittest.TestCase):
                 count_group_checker_state += 1
 
                 layer_node = main_group.findLayer(layer.layer)
-                assert not layer_node.isExpanded()
+                # not in theme, so not enabled
                 assert not layer_node.itemVisibilityChecked()
             if (
                 layer.name == "belasteter_standort"
@@ -725,15 +725,18 @@ class TestProjectTopping(unittest.TestCase):
                 ]
 
                 symbolitem_keys = [
-                    item.ruleKey() for item in layer.renderer().legendSymbolItems()
+                    item.ruleKey()
+                    for item in layer.layer.renderer().legendSymbolItems()
                 ]
                 assert symbolitem_keys and len(symbolitem_keys) == 9
 
                 for symbolitem_key in symbolitem_keys:
                     if symbolitem_key in expected_checked_items:
-                        assert layer.renderer().legendSymbolItemChecked(symbolitem_key)
+                        assert layer.layer.renderer().legendSymbolItemChecked(
+                            symbolitem_key
+                        )
                     else:
-                        assert not layer.renderer().legendSymbolItemChecked(
+                        assert not layer.layer.renderer().legendSymbolItemChecked(
                             symbolitem_key
                         )
 
@@ -792,7 +795,7 @@ class TestProjectTopping(unittest.TestCase):
                 count_robot_state += 1
 
                 layer_node = main_group.findLayer(layer.layer)
-                assert layer_node.isExpanded()
+                assert not layer_node.isExpanded()
                 assert layer_node.itemVisibilityChecked()
 
                 # check if the symbology items are checked/unchecked right
@@ -805,15 +808,18 @@ class TestProjectTopping(unittest.TestCase):
                 ]
 
                 symbolitem_keys = [
-                    item.ruleKey() for item in layer.renderer().legendSymbolItems()
+                    item.ruleKey()
+                    for item in layer.layer.renderer().legendSymbolItems()
                 ]
                 assert symbolitem_keys and len(symbolitem_keys) == 9
 
                 for symbolitem_key in symbolitem_keys:
                     if symbolitem_key in expected_checked_items:
-                        assert layer.renderer().legendSymbolItemChecked(symbolitem_key)
+                        assert layer.layer.renderer().legendSymbolItemChecked(
+                            symbolitem_key
+                        )
                     else:
-                        assert not layer.renderer().legendSymbolItemChecked(
+                        assert not layer.layer.renderer().legendSymbolItemChecked(
                             symbolitem_key
                         )
 
