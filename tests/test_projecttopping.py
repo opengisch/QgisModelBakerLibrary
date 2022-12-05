@@ -785,6 +785,119 @@ class TestProjectTopping(unittest.TestCase):
         }
         assert set([layer.name() for layer in qlr_group_layers]) == expected_qlr_layers
 
+    def test_kbs_postgis_layouts_and_variables(self):
+        """
+        Checks if print layouts can be applied to the project
+        """
+
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(
+            importer.tool, self.toppings_test_path
+        )
+        importer.configuration.ilimodels = "KbS_LV95_V1_4"
+        importer.configuration.dbschema = "toppings_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = "2056"
+        importer.configuration.tomlfile = os.path.join(
+            self.toppings_test_path, "metaattributes/sh_KbS_LV95_V1_4.toml"
+        )
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            "smart2",
+            importer.configuration.dbschema,
+        )
+        available_layers = generator.layers()
+
+        assert len(available_layers) == 16
+
+        # load the projecttopping file
+        projecttopping_file_path = os.path.join(
+            self.toppings_test_path,
+            "projecttopping/opengis_projecttopping_layouts_and_variables_KbS_LV95_V1_4.yaml",
+        )
+
+        with open(projecttopping_file_path, "r") as yamlfile:
+            projecttopping_data = yaml.safe_load(yamlfile)
+            assert "layertree" in projecttopping_data
+            legend = generator.legend(
+                available_layers,
+                layertree_structure=projecttopping_data["layertree"],
+                path_resolver=lambda path: os.path.join(
+                    os.path.dirname(projecttopping_file_path), path
+                )
+                if path
+                else None,
+            )
+            assert "variables" in projecttopping_data
+            custom_project_variables = projecttopping_data["variables"]
+            assert "layouts" in projecttopping_data
+            resolved_layouts = generator.resolved_layouts(
+                projecttopping_data["layouts"],
+                path_resolver=lambda path: os.path.join(
+                    os.path.dirname(projecttopping_file_path), path
+                )
+                if path
+                else None,
+            )
+
+        # No layers added now - stays 16
+        assert len(available_layers) == 16
+
+        relations, _ = generator.relations(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.legend = legend
+        project.relations = relations
+        project.custom_project_variables = custom_project_variables
+        project.layouts = resolved_layouts
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # test variables
+        custom_variables = qgis_project.customVariables()
+        assert custom_variables.get("First Variable") == "This is a test value."
+        assert custom_variables.get("Another Variable") == "2"
+        assert custom_variables.get("Variable with Structure") == [
+            "Not",
+            "The",
+            "Normal",
+            815,
+            "Case",
+        ]
+
+        # test print layout
+        checked_layout_count = 0
+        for layout in qgis_project.layoutManager().printLayouts():
+            if layout.name() == "Layout One":
+                assert layout.itemsModel()
+                # there are two items on layout one and an atlas item (so there are 3 rows)
+                assert layout.itemsModel().rowCount() == 3
+                # and an atlas is activated
+                assert layout.atlas()
+                # but coverage layer is not properly attached by QGIS
+                # assert layout.atlas().coverageLayer().name() == "Belasteter_Standort (Geo_Lage_Punkt)"
+                checked_layout_count += 1
+            if layout.name() == "Layout Two":
+                assert layout.itemsModel()
+                # there are three items on layout two and an atlas item (so there are 4 rows)
+                assert layout.itemsModel().rowCount() == 4
+                # and an atlas is activated
+                assert layout.atlas()
+                # but coverage layer is not properly attached by QGIS
+                # assert layout.atlas().coverageLayer().name() == "Belasteter_Standort (Geo_Lage_Polygon)"
+                checked_layout_count += 1
+        assert checked_layout_count == 2
+
     # that's the same like in generate_project.py and workflow_wizard.py
     def get_topping_file_list(self, base_config, id_list):
         topping_file_model = self.get_topping_file_model(
