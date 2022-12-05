@@ -29,7 +29,8 @@ from qgis.core import (
     QgsProject,
     QgsReadWriteContext,
 )
-from qgis.PyQt.QtCore import QDomDocument, QObject, pyqtSignal
+from qgis.PyQt.QtCore import QObject, pyqtSignal
+from qgis.PyQt.QtXml import QDomDocument
 
 from .layers import Layer
 from .legend import LegendGroup
@@ -263,11 +264,11 @@ class Project(QObject):
     def load_custom_project_variables(self, qgis_project):
         for key in self.custom_project_variables.keys():
             QgsExpressionContextUtils.setProjectVariable(
-                qgis_project, self.custom_project_variables[key]
+                qgis_project, key, self.custom_project_variables[key]
             )
 
     def load_layouts(self, qgis_project):
-        for layout_name in self.layouts:
+        for layout_name in self.layouts.keys():
             # create the layout
             layout = QgsPrintLayout(qgis_project)
             # initializes default settings for blank print layout canvas
