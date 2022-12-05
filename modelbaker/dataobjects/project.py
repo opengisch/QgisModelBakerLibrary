@@ -22,11 +22,14 @@ from typing import List
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsEditorWidgetSetup,
+    QgsExpressionContextUtils,
     QgsLayerTreeGroup,
     QgsMapLayer,
+    QgsPrintLayout,
     QgsProject,
+    QgsReadWriteContext,
 )
-from qgis.PyQt.QtCore import QObject, pyqtSignal
+from qgis.PyQt.QtCore import QDomDocument, QObject, pyqtSignal
 
 from .layers import Layer
 from .legend import LegendGroup
@@ -48,6 +51,8 @@ class Project(QObject):
         self.auto_transaction = auto_transaction
         self.evaluate_default_values = evaluate_default_values
         self.relations = List[Relation]
+        self.custom_project_variables = {}
+        self.layouts = {}
         self.context = context
 
         # {Layer_class_name: {dbattribute: {Layer_class, cardinality, Layer_domain, key_field, value_field]}
@@ -66,6 +71,7 @@ class Project(QObject):
         for layer in self.layers:
             legend.append(layer.dump())
 
+        definition["custom_layer_order_structure"] = self.custom_layer_order_structure
         relations = list()
 
         for relation in self.relations:
@@ -73,6 +79,8 @@ class Project(QObject):
 
         definition["legend"] = legend
         definition["relations"] = relations
+        definition["custom_project_variables"] = self.custom_project_variables
+        definition["layouts"] = self.layouts
 
         return definition
 
@@ -86,6 +94,10 @@ class Project(QObject):
             layer = Layer()
             layer.load(layer_definition)
             self.layers.append(layer)
+
+        self.custom_layer_order_structure = definition["custom_layer_order_structure"]
+        self.custom_project_variables = definition["custom_project_variables"]
+        self.layouts = definition["layouts"]
 
     def create(
         self, path: str, qgis_project: QgsProject, group: QgsLayerTreeGroup = None
@@ -226,6 +238,16 @@ class Project(QObject):
         if self.legend:
             self.legend.create(qgis_project, group)
 
+        self.load_custom_layer_order(qgis_project)
+
+        self.load_custom_project_variables(qgis_project)
+
+        self.load_layouts(qgis_project)
+
+        if path:
+            qgis_project.write(path)
+
+    def load_custom_layer_order(self, qgis_project):
         custom_layer_order = list()
         for custom_layer_name in self.custom_layer_order_structure:
             custom_layer = qgis_project.mapLayersByName(custom_layer_name)
@@ -238,8 +260,28 @@ class Project(QObject):
             root.setCustomLayerOrder(custom_layer_order)
             root.setHasCustomLayerOrder(True)
 
-        if path:
-            qgis_project.write(path)
+    def load_custom_project_variables(self, qgis_project):
+        for key in self.custom_project_variables.keys():
+            QgsExpressionContextUtils.setProjectVariable(
+                qgis_project, self.custom_project_variables[key]
+            )
+
+    def load_layouts(self, qgis_project):
+        for layout_name in self.layouts:
+            # create the layout
+            layout = QgsPrintLayout(qgis_project)
+            # initializes default settings for blank print layout canvas
+            layout.initializeDefaults()
+            # load template from file
+            templatefile = self.layouts[layout_name]["templatefile"]
+            with open(templatefile) as f:
+                template_file_content = f.read()
+                doc = QDomDocument()
+                doc.setContent(template_file_content)
+                layout.loadFromTemplate(doc, QgsReadWriteContext())
+                # name it according the settings
+                layout.setName(layout_name)
+                qgis_project.layoutManager().addLayout(layout)
 
     def post_generate(self):
         for layer in self.layers:
