@@ -255,9 +255,8 @@ class Project(QObject):
                             expanded_group_nodes.add(node_name)
                             map_theme_record.setExpandedGroupNodes(expanded_group_nodes)
                         if node_properties.get("checked"):
-                            # this has not been enabled what makes it impossible to control the checked state of a group
+                            # setHasCheckedStateInfo(True) is not available in the API, what makes it impossible to control the checked state of a group
                             # see https://github.com/SebastienPeillet/QGIS/commit/736e46daa640b8a9c66107b4f05319d6d2534ac5#discussion_r1037225879
-                            # map_theme_record.setHasCheckedStateInfo(True)
                             checked_group_nodes = map_theme_record.checkedGroupNodes()
                             checked_group_nodes.add(node_name)
                             map_theme_record.setCheckedGroupNodes(checked_group_nodes)
