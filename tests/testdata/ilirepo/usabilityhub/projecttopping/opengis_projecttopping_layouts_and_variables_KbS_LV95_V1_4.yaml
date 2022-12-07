@@ -1,0 +1,21 @@
+layertree:
+  - "Belasteter_Standort (Geo_Lage_Punkt)":
+  - "Belasteter_Standort (Geo_Lage_Polygon)":
+  - "Informationen":
+      group: true
+      checked: true
+      expanded: true
+      child-nodes:
+        - "EGRID_":
+        - "Deponietyp_":
+
+variables:
+  "First Variable": "This is a test value."
+  "Another Variable": "2"
+  "Variable with Structure": ["Not", "The", "Normal", 815, "Case"]
+
+layouts:
+  "Layout One":
+    templatefile: "../layouttemplate/opengisch_KbS_LV95_V1_4_layout_one.qpt"
+  "Layout Two":
+    templatefile: "../layouttemplate/opengisch_KbS_LV95_V1_4_layout_two.qpt"

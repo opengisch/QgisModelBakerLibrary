@@ -22,12 +22,16 @@ from typing import List
 from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsEditorWidgetSetup,
+    QgsExpressionContextUtils,
     QgsLayerTreeGroup,
     QgsMapLayer,
+    QgsPrintLayout,
     QgsMapThemeCollection,
     QgsProject,
+    QgsReadWriteContext,
 )
 from qgis.PyQt.QtCore import QObject, pyqtSignal
+from qgis.PyQt.QtXml import QDomDocument
 
 from .layers import Layer
 from .legend import LegendGroup
@@ -49,6 +53,8 @@ class Project(QObject):
         self.auto_transaction = auto_transaction
         self.evaluate_default_values = evaluate_default_values
         self.relations = List[Relation]
+        self.custom_variables = {}
+        self.layouts = {}
         self.mapthemes = {}
         self.context = context
 
@@ -68,6 +74,7 @@ class Project(QObject):
         for layer in self.layers:
             legend.append(layer.dump())
 
+        definition["custom_layer_order_structure"] = self.custom_layer_order_structure
         relations = list()
 
         for relation in self.relations:
@@ -75,6 +82,8 @@ class Project(QObject):
 
         definition["legend"] = legend
         definition["relations"] = relations
+        definition["custom_variables"] = self.custom_variables
+        definition["layouts"] = self.layouts
         definition["mapthemes"] = self.mapthemes
 
         return definition
@@ -90,6 +99,9 @@ class Project(QObject):
             layer.load(layer_definition)
             self.layers.append(layer)
 
+        self.custom_layer_order_structure = definition["custom_layer_order_structure"]
+        self.custom_variables = definition["custom_variables"]
+        self.layouts = definition["layouts"]
         self.mapthemes = definition["mapthemes"]
 
     def create(
@@ -231,6 +243,18 @@ class Project(QObject):
         if self.legend:
             self.legend.create(qgis_project, group)
 
+        self.load_custom_layer_order(qgis_project)
+        
+        self.load_mapthemes(qgis_project)
+
+        self.load_custom_variables(qgis_project)
+
+        self.load_layouts(qgis_project)
+
+        if path:
+            qgis_project.write(path)
+
+    def load_custom_layer_order(self, qgis_project):
         custom_layer_order = list()
         for custom_layer_name in self.custom_layer_order_structure:
             custom_layer = qgis_project.mapLayersByName(custom_layer_name)
@@ -243,6 +267,30 @@ class Project(QObject):
             root.setCustomLayerOrder(custom_layer_order)
             root.setHasCustomLayerOrder(True)
 
+    def load_custom_variables(self, qgis_project):
+        for key in self.custom_variables.keys():
+            QgsExpressionContextUtils.setProjectVariable(
+                qgis_project, key, self.custom_variables[key]
+            )
+
+    def load_layouts(self, qgis_project):
+        for layout_name in self.layouts.keys():
+            # create the layout
+            layout = QgsPrintLayout(qgis_project)
+            # initializes default settings for blank print layout canvas
+            layout.initializeDefaults()
+            # load template from file
+            templatefile = self.layouts[layout_name]["templatefile"]
+            with open(templatefile) as f:
+                template_file_content = f.read()
+                doc = QDomDocument()
+                doc.setContent(template_file_content)
+                layout.loadFromTemplate(doc, QgsReadWriteContext())
+                # name it according the settings
+                layout.setName(layout_name)
+                qgis_project.layoutManager().addLayout(layout)
+
+    def load_mapthemes(self, qgis_project):
         if self.mapthemes:
             for name in self.mapthemes.keys():
                 map_theme_record = QgsMapThemeCollection.MapThemeRecord()
@@ -301,8 +349,6 @@ class Project(QObject):
                             map_theme_record.addLayerRecord(map_theme_layer_record)
 
                 qgis_project.mapThemeCollection().insert(name, map_theme_record)
-        if path:
-            qgis_project.write(path)
 
     def post_generate(self):
         for layer in self.layers:

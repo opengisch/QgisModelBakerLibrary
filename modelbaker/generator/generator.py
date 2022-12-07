@@ -625,6 +625,19 @@ class Generator(QObject):
 
         return legend
 
+    def resolved_layouts(
+        self,
+        layouts={},
+        path_resolver=lambda path: path,
+    ):
+        resolved_layouts = {}
+        for layout_name in layouts.keys():
+            resolved_layouts[layout_name] = {}
+            resolved_layouts[layout_name]["templatefile"] = path_resolver(
+                layouts[layout_name].get("templatefile")
+            )
+        return resolved_layouts
+
     def db_or_schema_exists(self):
         return self._db_connector.db_or_schema_exists()
 
