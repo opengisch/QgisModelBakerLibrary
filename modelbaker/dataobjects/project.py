@@ -25,8 +25,8 @@ from qgis.core import (
     QgsExpressionContextUtils,
     QgsLayerTreeGroup,
     QgsMapLayer,
-    QgsPrintLayout,
     QgsMapThemeCollection,
+    QgsPrintLayout,
     QgsProject,
     QgsReadWriteContext,
 )
@@ -244,7 +244,7 @@ class Project(QObject):
             self.legend.create(qgis_project, group)
 
         self.load_custom_layer_order(qgis_project)
-        
+
         self.load_mapthemes(qgis_project)
 
         self.load_custom_variables(qgis_project)
@@ -313,7 +313,10 @@ class Project(QObject):
                             map_theme_record.setCheckedGroupNodes(checked_group_nodes)
                     else:
                         # it's not group node
-                        if qgis_project.mapLayersByName(node_name)[0]:
+                        if (
+                            qgis_project.mapLayersByName(node_name)
+                            and qgis_project.mapLayersByName(node_name)[0]
+                        ):
                             map_theme_layer_record = (
                                 QgsMapThemeCollection.MapThemeLayerRecord()
                             )
