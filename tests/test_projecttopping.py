@@ -1157,7 +1157,7 @@ class TestProjectTopping(unittest.TestCase):
                 else None,
             )
             assert "variables" in projecttopping_data
-            custom_project_variables = projecttopping_data["variables"]
+            custom_variables = projecttopping_data["variables"]
             assert "layouts" in projecttopping_data
             resolved_layouts = generator.resolved_layouts(
                 projecttopping_data["layouts"],
@@ -1177,7 +1177,7 @@ class TestProjectTopping(unittest.TestCase):
         project.layers = available_layers
         project.legend = legend
         project.relations = relations
-        project.custom_project_variables = custom_project_variables
+        project.custom_variables = custom_variables
         project.layouts = resolved_layouts
         project.post_generate()
 

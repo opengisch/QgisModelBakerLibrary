@@ -53,7 +53,7 @@ class Project(QObject):
         self.auto_transaction = auto_transaction
         self.evaluate_default_values = evaluate_default_values
         self.relations = List[Relation]
-        self.custom_project_variables = {}
+        self.custom_variables = {}
         self.layouts = {}
         self.mapthemes = {}
         self.context = context
@@ -82,7 +82,7 @@ class Project(QObject):
 
         definition["legend"] = legend
         definition["relations"] = relations
-        definition["custom_project_variables"] = self.custom_project_variables
+        definition["custom_variables"] = self.custom_variables
         definition["layouts"] = self.layouts
         definition["mapthemes"] = self.mapthemes
 
@@ -100,7 +100,7 @@ class Project(QObject):
             self.layers.append(layer)
 
         self.custom_layer_order_structure = definition["custom_layer_order_structure"]
-        self.custom_project_variables = definition["custom_project_variables"]
+        self.custom_variables = definition["custom_variables"]
         self.layouts = definition["layouts"]
         self.mapthemes = definition["mapthemes"]
 
@@ -247,7 +247,7 @@ class Project(QObject):
         
         self.load_mapthemes(qgis_project)
 
-        self.load_custom_project_variables(qgis_project)
+        self.load_custom_variables(qgis_project)
 
         self.load_layouts(qgis_project)
 
@@ -267,10 +267,10 @@ class Project(QObject):
             root.setCustomLayerOrder(custom_layer_order)
             root.setHasCustomLayerOrder(True)
 
-    def load_custom_project_variables(self, qgis_project):
-        for key in self.custom_project_variables.keys():
+    def load_custom_variables(self, qgis_project):
+        for key in self.custom_variables.keys():
             QgsExpressionContextUtils.setProjectVariable(
-                qgis_project, key, self.custom_project_variables[key]
+                qgis_project, key, self.custom_variables[key]
             )
 
     def load_layouts(self, qgis_project):
