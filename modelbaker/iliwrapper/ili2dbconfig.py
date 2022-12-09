@@ -131,16 +131,12 @@ class Ili2DbCommandConfiguration(object):
 
     def append_args(self, args, values, consider_metaconfig=False):
 
-        if consider_metaconfig and self.metaconfig and values:
+        if consider_metaconfig and self.metaconfig and self.metaconfig_id and values:
             if "ch.ehi.ili2db" in self.metaconfig.sections():
                 metaconfig_ili2db_params = self.metaconfig["ch.ehi.ili2db"]
                 if values[0][2:] in metaconfig_ili2db_params.keys():
-                    # since passing metaconfig is not supported yet. see https://github.com/claeis/ili2db/issues/392 we do not avoid adding the value to the args
-                    print(
-                        "Value {} from metaconfiguration file not considered. ".format(
-                            values[0][2:]
-                        )
-                    )
+                    # if the value is set in the metaconfig, then we do consider it instead
+                    return
         args += values
 
     def to_ili2db_args(self):
@@ -160,6 +156,9 @@ class Ili2DbCommandConfiguration(object):
 
         if self.tomlfile:
             self.append_args(args, ["--iliMetaAttrs", self.tomlfile])
+
+        if self.metaconfig_id:
+            self.append_args(args, ["--metaConfig", f"ilidata:self.metaconfig_id"])
 
         return args
 
@@ -235,11 +234,10 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--sqlEnableNull"])
-
         else:
-            self.append_args(args, ["--createNumChecks"])
-            self.append_args(args, ["--createUnique"])
-            self.append_args(args, ["--createFk"])
+            self.append_args(args, ["--createNumChecks"], True)
+            self.append_args(args, ["--createUnique"], True)
+            self.append_args(args, ["--createFk"], True)
 
         self.append_args(args, ["--createFkIdx"], True)
         self.append_args(args, ["--coalesceMultiSurface"], True)
@@ -269,12 +267,15 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.stroke_arcs:
             self.append_args(args, ["--strokeArcs"])
+        else:
+            self.append_args(args, ["--strokeArcs=False"])
 
         if self.create_basket_col:
             self.append_args(args, ["--createBasketCol"])
+        else:
+            self.append_args(args, ["--createBasketCol=False"])
 
-        if self.srs_auth != "EPSG":
-            self.append_args(args, ["--defaultSrsAuth", self.srs_auth])
+        self.append_args(args, ["--defaultSrsAuth", self.srs_auth])
 
         self.append_args(args, ["--defaultSrsCode", "{}".format(self.srs_code)])
 
