@@ -127,12 +127,15 @@ class Ili2DbCommandConfiguration(object):
         self.disable_validation = False
         self.metaconfig = None
         self.metaconfig_id = None
+        self.metaconfig_params_only = False
         self.db_ili_version = None
 
-    def append_args(self, args, values, consider_metaconfig=False):
+    def append_args(self, args, values, consider_metaconfig=False, force_append=False):
 
-        if consider_metaconfig and self.metaconfig and self.metaconfig_id and values:
-            if "ch.ehi.ili2db" in self.metaconfig.sections():
+        if not force_append and self.metaconfig and self.metaconfig_id and values:
+            if self.metaconfig_params_only:
+                return
+            if consider_metaconfig and "ch.ehi.ili2db" in self.metaconfig.sections():
                 metaconfig_ili2db_params = self.metaconfig["ch.ehi.ili2db"]
                 if values[0][2:] in metaconfig_ili2db_params.keys():
                     # if the value is set in the metaconfig, then we do consider it instead
@@ -148,8 +151,10 @@ class Ili2DbCommandConfiguration(object):
 
         proxy = QgsNetworkAccessManager.instance().fallbackProxy()
         if proxy.type() == QNetworkProxy.HttpProxy:
-            self.append_args(args, ["--proxy", proxy.hostName()])
-            self.append_args(args, ["--proxyPort", str(proxy.port())])
+            self.append_args(args, ["--proxy", proxy.hostName()], force_append=True)
+            self.append_args(
+                args, ["--proxyPort", str(proxy.port())], force_append=True
+            )
 
         if self.ilimodels:
             self.append_args(args, ["--models", self.ilimodels])
@@ -158,7 +163,11 @@ class Ili2DbCommandConfiguration(object):
             self.append_args(args, ["--iliMetaAttrs", self.tomlfile])
 
         if self.metaconfig_id:
-            self.append_args(args, ["--metaConfig", f"ilidata:{self.metaconfig_id}"])
+            self.append_args(
+                args,
+                ["--metaConfig", f"ilidata:{self.metaconfig_id}"],
+                force_append=True,
+            )
 
         return args
 
@@ -225,7 +234,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         args = list()
 
         if with_action:
-            self.append_args(args, ["--schemaimport"])
+            self.append_args(args, ["--schemaimport"], force_append=True)
 
         self.append_args(args, extra_args)
 
@@ -233,7 +242,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.append_args(args, ["--createEnumTabs"], True)
 
         if self.disable_validation:
-            self.append_args(args, ["--sqlEnableNull"])
+            self.append_args(args, ["--sqlEnableNull"], force_append=True)
         else:
             self.append_args(args, ["--createNumChecks"], True)
             self.append_args(args, ["--createUnique"], True)
@@ -285,10 +294,12 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         if self.post_script:
             self.append_args(args, ["--postScript", self.post_script])
 
-        self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
+        self.append_args(
+            args, Ili2DbCommandConfiguration.to_ili2db_args(self), force_append=True
+        )
 
         if self.ilifile:
-            self.append_args(args, [self.ilifile])
+            self.append_args(args, [self.ilifile], force_append=True)
 
         return args
 
