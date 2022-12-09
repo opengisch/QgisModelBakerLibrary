@@ -158,7 +158,7 @@ class Ili2DbCommandConfiguration(object):
             self.append_args(args, ["--iliMetaAttrs", self.tomlfile])
 
         if self.metaconfig_id:
-            self.append_args(args, ["--metaConfig", f"ilidata:self.metaconfig_id"])
+            self.append_args(args, ["--metaConfig", f"ilidata:{self.metaconfig_id}"])
 
         return args
 
