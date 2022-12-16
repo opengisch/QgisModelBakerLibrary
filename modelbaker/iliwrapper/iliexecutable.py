@@ -39,6 +39,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     stderr = pyqtSignal(str)
     process_started = pyqtSignal(str)
     process_finished = pyqtSignal(int, int)
+    cancel_process = pyqtSignal()
 
     __done_pattern = re.compile(r"Info: \.\.\.([a-z]+ )?done")
     __result = None
@@ -130,6 +131,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
 
     def run(self, edited_command=None):
         proc = QProcess()
+        self.cancel_process.connect(proc.terminate)
         proc.readyReadStandardError.connect(
             functools.partial(self.stderr_ready, proc=proc)
         )
