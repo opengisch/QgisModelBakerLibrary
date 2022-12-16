@@ -3,7 +3,7 @@ LIBS_DIR="modelbaker/libs"
 
 DEPRECATION=("deprecation" "2.1.0")
 PGSERVICEPARSER=("pgserviceparser" "1.1.0")
-TOPPINGMAKER=("toppingmaker" "1.2.4")
+TOPPINGMAKER=("toppingmaker" "1.2.5")
 
 PACKAGES=(
   DEPRECATION[@]
