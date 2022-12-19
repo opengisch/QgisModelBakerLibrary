@@ -161,6 +161,8 @@ class Ili2DbCommandConfiguration(object):
 
         if self.tomlfile:
             self.append_args(args, ["--iliMetaAttrs", self.tomlfile])
+        else:
+            self.append_args(args, ["--iliMetaAttrs", "NULL"])
 
         if self.metaconfig_id:
             self.append_args(
@@ -290,9 +292,13 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.pre_script:
             self.append_args(args, ["--preScript", self.pre_script])
+        else:
+            self.append_args(args, ["--preScript", "NULL"])
 
         if self.post_script:
             self.append_args(args, ["--postScript", self.post_script])
+        else:
+            self.append_args(args, ["--postScript", "NULL"])
 
         self.append_args(
             args, Ili2DbCommandConfiguration.to_ili2db_args(self), force_append=True
