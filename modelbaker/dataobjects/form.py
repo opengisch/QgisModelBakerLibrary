@@ -131,11 +131,7 @@ class FormRelationWidget(object):
         if Qgis.QGIS_VERSION_INT >= 31800:
             widget.setRelationWidgetTypeId("linking_relation_editor")
 
-            cardinality_max = self.relation.cardinality_max
-            if self.nm_relation:
-                cardinality_max = self.nm_relation.cardinality_max
-
-            if cardinality_max == "1":
+            if not self.nm_relation and self.relation.cardinality_max == "1":
                 configuration = widget.relationEditorConfiguration()
                 configuration["one_to_one"] = True
                 widget.setRelationEditorConfiguration(configuration)
