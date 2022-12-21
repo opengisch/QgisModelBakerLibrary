@@ -17,6 +17,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import os
 
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtNetwork import QNetworkProxy
@@ -167,7 +168,12 @@ class Ili2DbCommandConfiguration(object):
         if self.metaconfig_id:
             self.append_args(
                 args,
-                ["--metaConfig", f"ilidata:{self.metaconfig_id}"],
+                [
+                    "--metaConfig",
+                    f"ilidata:{self.metaconfig_id}"
+                    if not os.path.isfile(self.metaconfig_id)
+                    else self.metaconfig_id,
+                ],
                 force_append=True,
             )
 
@@ -238,7 +244,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         if with_action:
             self.append_args(args, ["--schemaimport"], force_append=True)
 
-        self.append_args(args, extra_args)
+        self.append_args(args, extra_args, force_append=True)
 
         self.append_args(args, ["--coalesceCatalogueRef"], True)
         self.append_args(args, ["--createEnumTabs"], True)
