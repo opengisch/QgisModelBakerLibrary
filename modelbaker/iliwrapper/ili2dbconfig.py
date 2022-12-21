@@ -17,7 +17,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-import os
 
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtNetwork import QNetworkProxy
@@ -168,12 +167,7 @@ class Ili2DbCommandConfiguration(object):
         if self.metaconfig_id:
             self.append_args(
                 args,
-                [
-                    "--metaConfig",
-                    f"ilidata:{self.metaconfig_id}"
-                    if not os.path.isfile(self.metaconfig_id)
-                    else self.metaconfig_id,
-                ],
+                ["--metaConfig", self.metaconfig_id],
                 force_append=True,
             )
 
