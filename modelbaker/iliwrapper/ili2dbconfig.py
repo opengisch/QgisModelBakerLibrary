@@ -164,6 +164,7 @@ class Ili2DbCommandConfiguration(object):
         else:
             self.append_args(args, ["--iliMetaAttrs", "NULL"])
 
+        # needs to start with "ilidata:" or should be a local file path
         if self.metaconfig_id:
             self.append_args(
                 args,
