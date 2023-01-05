@@ -2,7 +2,7 @@
    CHBASE - BASE MODULES OF THE SWISS FEDERATION FOR MINIMAL GEODATA MODELS
    ======
    BASISMODULE DES BUNDES           MODULES DE BASE DE LA CONFEDERATION
-   FÜR MINIMALE GEODATENMODELLE     POUR LES MODELES DE GEODONNEES MINIMAUX
+   FÃœR MINIMALE GEODATENMODELLE     POUR LES MODELES DE GEODONNEES MINIMAUX
 
    PROVIDER: GKG/KOGIS - GCS/COSIG             CONTACT: models@geo.admin.ch
    PUBLISHED: 2011-08-30
@@ -20,7 +20,7 @@ INTERLIS 2.3;
 */
 
 !! ########################################################################
-!!@technicalContact=models@geo.admin.ch
+!!@technicalContact=mailto:models@geo.admin.ch
 !!@furtherInformation=http://www.geo.admin.ch/internet/geoportal/de/home/topics/geobasedata/models.html
 TYPE MODEL InternationalCodes_V1 (en)
   AT "http://www.geo.admin.ch" VERSION "2011-08-30" =
@@ -55,7 +55,7 @@ TYPE MODEL InternationalCodes_V1 (en)
 END InternationalCodes_V1.
 
 !! ########################################################################
-!!@technicalContact=models@geo.admin.ch
+!!@technicalContact=mailto:models@geo.admin.ch
 !!@furtherInformation=http://www.geo.admin.ch/internet/geoportal/de/home/topics/geobasedata/models.html
 TYPE MODEL Localisation_V1 (en)
   AT "http://www.geo.admin.ch" VERSION "2011-08-30" =
@@ -85,7 +85,7 @@ TYPE MODEL Localisation_V1 (en)
 END Localisation_V1.
 
 !! ########################################################################
-!!@technicalContact=models@geo.admin.ch
+!!@technicalContact=mailto:models@geo.admin.ch
 !!@furtherInformation=http://www.geo.admin.ch/internet/geoportal/de/home/topics/geobasedata/models.html
 TYPE MODEL LocalisationCH_V1 (en)
   AT "http://www.geo.admin.ch" VERSION "2011-08-30" =
@@ -122,7 +122,7 @@ TYPE MODEL LocalisationCH_V1 (en)
 END LocalisationCH_V1.
 
 !! ########################################################################
-!!@technicalContact=models@geo.admin.ch
+!!@technicalContact=mailto:models@geo.admin.ch
 !!@furtherInformation=http://www.geo.admin.ch/internet/geoportal/de/home/topics/geobasedata/models.html
 MODEL Dictionaries_V1 (en)
   AT "http://www.geo.admin.ch" VERSION "2011-08-30" =
@@ -145,7 +145,7 @@ MODEL Dictionaries_V1 (en)
 END Dictionaries_V1.
 
 !! ########################################################################
-!!@technicalContact=models@geo.admin.ch
+!!@technicalContact=mailto:models@geo.admin.ch
 !!@furtherInformation=http://www.geo.admin.ch/internet/geoportal/de/home/topics/geobasedata/models.html
 MODEL DictionariesCH_V1 (en)
   AT "http://www.geo.admin.ch" VERSION "2011-08-30" =
