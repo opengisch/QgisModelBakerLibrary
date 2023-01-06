@@ -161,7 +161,8 @@ class Ili2DbCommandConfiguration(object):
 
         if self.tomlfile:
             self.append_args(args, ["--iliMetaAttrs", self.tomlfile])
-        else:
+
+        elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--iliMetaAttrs", "NULL"])
 
         # needs to start with "ilidata:" or should be a local file path
@@ -279,12 +280,12 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.stroke_arcs:
             self.append_args(args, ["--strokeArcs"])
-        else:
+        elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--strokeArcs=False"])
 
         if self.create_basket_col:
             self.append_args(args, ["--createBasketCol"])
-        else:
+        elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--createBasketCol=False"])
 
         self.append_args(args, ["--defaultSrsAuth", self.srs_auth])
@@ -293,12 +294,12 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.pre_script:
             self.append_args(args, ["--preScript", self.pre_script])
-        else:
+        elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--preScript", "NULL"])
 
         if self.post_script:
             self.append_args(args, ["--postScript", self.post_script])
-        else:
+        elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--postScript", "NULL"])
 
         self.append_args(
