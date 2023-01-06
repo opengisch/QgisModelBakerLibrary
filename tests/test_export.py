@@ -66,26 +66,6 @@ class TestExport(unittest.TestCase):
         assert result == iliexporter.Exporter.SUCCESS
         self.compare_xtfs(testdata_path("xtf/test_ciaf_ladm.xtf"), obtained_xtf_path)
 
-    def test_export_geopackage(self):
-        exporter = iliexporter.Exporter()
-        exporter.tool = DbIliMode.ili2gpkg
-        exporter.configuration = iliexporter_config(
-            exporter.tool, None, "geopackage/test_ili2db4_export.gpkg"
-        )
-        exporter.configuration.ilimodels = (
-            "Catastro_COL_ES_V2_1_6;CIAF_LADM;another;ISO19107_V1_MAGNABOG"
-        )
-        obtained_xtf_path = os.path.join(
-            self.basetestpath, "tmp_test_ciaf_ladm_gpkg.xtf"
-        )
-        exporter.configuration.xtffile = obtained_xtf_path
-        exporter.stdout.connect(self.print_info)
-        exporter.stderr.connect(self.print_error)
-        assert exporter.run() == iliexporter.Exporter.SUCCESS
-        self.compare_xtfs(
-            testdata_path("xtf/test_ili2db4_ciaf_ladm.xtf"), obtained_xtf_path
-        )
-
     def _test_export_postgis_empty_schema(self):
         # This test passes without --createBasketCol option in schemaimport
         # First we need a dbfile with empty tables

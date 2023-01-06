@@ -1046,7 +1046,7 @@ VERSION "2017-07-12 V2.1.6"  =
       Exactitud_Vertical : 0 .. 1000 [Catastro_COL_ES_V2_1_6.cm];
       Exactitud_Horizontal : MANDATORY 0 .. 1000 [Catastro_COL_ES_V2_1_6.cm];
       Confiabilidad : BOOLEAN;
-      Posicion_Interpolacion (EXTENDED) : Catastro_COL_ES_V2_1_6.COL_InterpolacionTipo;
+      Posicion_Interpolacion (EXTENDED) : MANDATORY Catastro_COL_ES_V2_1_6.COL_InterpolacionTipo;
       Monumentacion (EXTENDED) : MANDATORY Catastro_COL_ES_V2_1_6.COL_MonumentacionTipo;
       Nombre_Punto : TEXT*10;
     END PuntoLindero;
@@ -1065,7 +1065,7 @@ VERSION "2017-07-12 V2.1.6"  =
       Def_Punto : MANDATORY Catastro_COL_ES_V2_1_6.COL_DefPuntoTipo;
       Exactitud_Vertical : 0 .. 1000 [Catastro_COL_ES_V2_1_6.cm];
       Exactitud_Horizontal : 0 .. 1000 [Catastro_COL_ES_V2_1_6.cm];
-      Posicion_Interpolacion (EXTENDED) : Catastro_COL_ES_V2_1_6.COL_InterpolacionTipo;
+      Posicion_Interpolacion (EXTENDED) : MANDATORY Catastro_COL_ES_V2_1_6.COL_InterpolacionTipo;
       Monumentacion (EXTENDED) : MANDATORY Catastro_COL_ES_V2_1_6.COL_MonumentacionTipo;
       Nombre_Punto : TEXT*10;
     END PuntoLevantamiento;
@@ -1175,7 +1175,7 @@ VERSION "2017-07-12 V2.1.6"  =
     EXTENDS LA_Interesado =
       Numero_NIT : MANDATORY TEXT*20;
       Razon_Social : MANDATORY TEXT*100;
-      Tipo (EXTENDED) : Catastro_COL_ES_V2_1_6.COL_InteresadoJuridicoTipo;
+      Tipo (EXTENDED) : MANDATORY Catastro_COL_ES_V2_1_6.COL_InteresadoJuridicoTipo;
       Fecha_Constitucion : INTERLIS.XMLDate;
       Lugar_Inscripcion : TEXT*100;
       Nacionalidad : TEXT*20;

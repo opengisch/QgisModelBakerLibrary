@@ -27,7 +27,7 @@ INTERLIS 2.3;
 !! 2017-11-27 | KOGIS | Meta-Attributes @furtherInformation adapted and @CRS added (line 31, 44 and 50)
 !! 2017-12-04 | KOGIS | Meta-Attribute @CRS corrected
 
-!!@technicalContact=models@geo.admin.ch
+!!@technicalContact=mailto:models@geo.admin.ch
 !!@furtherInformation=https://www.geo.admin.ch/de/geoinformation-schweiz/geobasisdaten/geodata-models.html
 TYPE MODEL GeometryCHLV03_V1 (en)
   AT "http://www.geo.admin.ch" VERSION "2017-12-04" =
@@ -105,7 +105,7 @@ END GeometryCHLV03_V1.
 !! 2017-11-27 | KOGIS | Meta-Attributes @furtherInformation adapted and @CRS added (line 109, 122 and 128)
 !! 2017-12-04 | KOGIS | Meta-Attribute @CRS corrected
 
-!!@technicalContact=models@geo.admin.ch
+!!@technicalContact=mailto:models@geo.admin.ch
 !!@furtherInformation=https://www.geo.admin.ch/de/geoinformation-schweiz/geobasisdaten/geodata-models.html
 TYPE MODEL GeometryCHLV95_V1 (en)
   AT "http://www.geo.admin.ch" VERSION "2017-12-04" =
