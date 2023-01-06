@@ -30,7 +30,7 @@ from .ili2dbsettings import Ili2dbSettings
 class MetaConfig(object):
     """
     Class containing all the data needed to create the metaconfiguration file.
-    Having the section [CONFIGURATION] containing the links to the referencedata nd the projecttoppingfile.
+    Having the section [CONFIGURATION] containing the links to the referencedata and the projecttoppingfile as well as the setting to consider only the metaconfig params for ili2db.
     And the section [ch.ehi.ili2db] containing all the ili2db settings.
     """
 
@@ -42,6 +42,7 @@ class MetaConfig(object):
     def __init__(self):
         self.referencedata_paths = []
         self.projecttopping_path = None
+        self.metaconfigparamsonly = False
         self.ili2db_settings = Ili2dbSettings()
 
     def update_referencedata_paths(self, value: Union[list, bool]):
@@ -59,6 +60,7 @@ class MetaConfig(object):
         [CONFIGURATION]
         qgis.modelbaker.projecttopping=ilidata:ch.opengis.config.KbS_LV95_V1_4_projecttopping
         ch.interlis.referenceData=ilidata:ch.opengis.config.KbS_Codetexte_V1_4
+        qgis.modelbaker.metaConfigParamsOnly = true
 
         [ch.ehi.ili2db]
         defaultSrsCode = 2056
@@ -94,6 +96,9 @@ class MetaConfig(object):
                 ]
             )
             configuration_section["ch.interlis.referenceData"] = referencedata_links
+
+        if self.metaconfigparamsonly:
+            configuration_section["qgis.modelbaker.metaConfigParamsOnly"] = True
 
         ili2db_section = {}
 

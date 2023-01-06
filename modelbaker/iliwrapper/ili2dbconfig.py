@@ -127,20 +127,19 @@ class Ili2DbCommandConfiguration(object):
         self.disable_validation = False
         self.metaconfig = None
         self.metaconfig_id = None
+        self.metaconfig_params_only = False
         self.db_ili_version = None
 
-    def append_args(self, args, values, consider_metaconfig=False):
+    def append_args(self, args, values, consider_metaconfig=False, force_append=False):
 
-        if consider_metaconfig and self.metaconfig and values:
-            if "ch.ehi.ili2db" in self.metaconfig.sections():
+        if not force_append and self.metaconfig and self.metaconfig_id and values:
+            if self.metaconfig_params_only:
+                return
+            if consider_metaconfig and "ch.ehi.ili2db" in self.metaconfig.sections():
                 metaconfig_ili2db_params = self.metaconfig["ch.ehi.ili2db"]
                 if values[0][2:] in metaconfig_ili2db_params.keys():
-                    # since passing metaconfig is not supported yet. see https://github.com/claeis/ili2db/issues/392 we do not avoid adding the value to the args
-                    print(
-                        "Value {} from metaconfiguration file not considered. ".format(
-                            values[0][2:]
-                        )
-                    )
+                    # if the value is set in the metaconfig, then we do consider it instead
+                    return
         args += values
 
     def to_ili2db_args(self):
@@ -152,14 +151,27 @@ class Ili2DbCommandConfiguration(object):
 
         proxy = QgsNetworkAccessManager.instance().fallbackProxy()
         if proxy.type() == QNetworkProxy.HttpProxy:
-            self.append_args(args, ["--proxy", proxy.hostName()])
-            self.append_args(args, ["--proxyPort", str(proxy.port())])
+            self.append_args(args, ["--proxy", proxy.hostName()], force_append=True)
+            self.append_args(
+                args, ["--proxyPort", str(proxy.port())], force_append=True
+            )
 
         if self.ilimodels:
             self.append_args(args, ["--models", self.ilimodels])
 
         if self.tomlfile:
             self.append_args(args, ["--iliMetaAttrs", self.tomlfile])
+
+        elif self.db_ili_version is None or self.db_ili_version > 3:
+            self.append_args(args, ["--iliMetaAttrs", "NULL"])
+
+        # needs to start with "ilidata:" or should be a local file path
+        if self.metaconfig_id:
+            self.append_args(
+                args,
+                ["--metaConfig", self.metaconfig_id],
+                force_append=True,
+            )
 
         return args
 
@@ -226,20 +238,19 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         args = list()
 
         if with_action:
-            self.append_args(args, ["--schemaimport"])
+            self.append_args(args, ["--schemaimport"], force_append=True)
 
-        self.append_args(args, extra_args)
+        self.append_args(args, extra_args, force_append=True)
 
         self.append_args(args, ["--coalesceCatalogueRef"], True)
         self.append_args(args, ["--createEnumTabs"], True)
 
         if self.disable_validation:
-            self.append_args(args, ["--sqlEnableNull"])
-
+            self.append_args(args, ["--sqlEnableNull"], force_append=True)
         else:
-            self.append_args(args, ["--createNumChecks"])
-            self.append_args(args, ["--createUnique"])
-            self.append_args(args, ["--createFk"])
+            self.append_args(args, ["--createNumChecks"], True)
+            self.append_args(args, ["--createUnique"], True)
+            self.append_args(args, ["--createFk"], True)
 
         self.append_args(args, ["--createFkIdx"], True)
         self.append_args(args, ["--coalesceMultiSurface"], True)
@@ -269,25 +280,34 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.stroke_arcs:
             self.append_args(args, ["--strokeArcs"])
+        elif self.db_ili_version is None or self.db_ili_version > 3:
+            self.append_args(args, ["--strokeArcs=False"])
 
         if self.create_basket_col:
             self.append_args(args, ["--createBasketCol"])
+        elif self.db_ili_version is None or self.db_ili_version > 3:
+            self.append_args(args, ["--createBasketCol=False"])
 
-        if self.srs_auth != "EPSG":
-            self.append_args(args, ["--defaultSrsAuth", self.srs_auth])
+        self.append_args(args, ["--defaultSrsAuth", self.srs_auth])
 
         self.append_args(args, ["--defaultSrsCode", "{}".format(self.srs_code)])
 
         if self.pre_script:
             self.append_args(args, ["--preScript", self.pre_script])
+        elif self.db_ili_version is None or self.db_ili_version > 3:
+            self.append_args(args, ["--preScript", "NULL"])
 
         if self.post_script:
             self.append_args(args, ["--postScript", self.post_script])
+        elif self.db_ili_version is None or self.db_ili_version > 3:
+            self.append_args(args, ["--postScript", "NULL"])
 
-        self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
+        self.append_args(
+            args, Ili2DbCommandConfiguration.to_ili2db_args(self), force_append=True
+        )
 
         if self.ilifile:
-            self.append_args(args, [self.ilifile])
+            self.append_args(args, [self.ilifile], force_append=True)
 
         return args
 
