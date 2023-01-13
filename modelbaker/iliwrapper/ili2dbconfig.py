@@ -247,6 +247,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--sqlEnableNull"], force_append=True)
+            self.append_args(args, ["--sqlColsAsText"], force_append=True)
         else:
             self.append_args(args, ["--createNumChecks"], True)
             self.append_args(args, ["--createUnique"], True)
