@@ -355,6 +355,8 @@ class ImportDataConfiguration(SchemaImportConfiguration):
                 ),
             )
         else:
+            self.append_args(args, extra_args)
+
             self.append_args(
                 args, Ili2DbCommandConfiguration.to_ili2db_args(self), force_append=True
             )
