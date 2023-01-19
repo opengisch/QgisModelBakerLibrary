@@ -247,6 +247,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--sqlEnableNull"], force_append=True)
+            self.append_args(args, ["--sqlColsAsText"], force_append=True)
         else:
             self.append_args(args, ["--createNumChecks"], True)
             self.append_args(args, ["--createUnique"], True)
@@ -346,12 +347,19 @@ class ImportDataConfiguration(SchemaImportConfiguration):
         if self.baskets:
             self.append_args(args, ["--baskets", ";".join(self.baskets)])
 
-        self.append_args(
-            args,
-            SchemaImportConfiguration.to_ili2db_args(
-                self, extra_args=extra_args, with_action=False
-            ),
-        )
+        if self.with_schemaimport:
+            self.append_args(
+                args,
+                SchemaImportConfiguration.to_ili2db_args(
+                    self, extra_args=extra_args, with_action=False
+                ),
+            )
+        else:
+            self.append_args(args, extra_args)
+
+            self.append_args(
+                args, Ili2DbCommandConfiguration.to_ili2db_args(self), force_append=True
+            )
 
         self.append_args(args, [self.xtffile])
 
