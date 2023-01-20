@@ -42,13 +42,14 @@ def get_schema_identificator_from_layersource(layer_source_provider, layer_sourc
 
 
 def get_schema_identificator_from_sourceprovider(provider):
-    if provider.name() == "postgres" or provider.name() == "mssql":
-        layer_source = QgsDataSourceUri(provider.dataSourceUri())
-        return slugify(
-            f"{layer_source.host()}_{layer_source.database()}_{layer_source.schema()}"
-        )
-    elif provider.name() == "ogr" and provider.storageType() == "GPKG":
-        return slugify(provider.dataSourceUri().split("|")[0].strip())
+    if provider:
+        if provider.name() == "postgres" or provider.name() == "mssql":
+            layer_source = QgsDataSourceUri(provider.dataSourceUri())
+            return slugify(
+                f"{layer_source.host()}_{layer_source.database()}_{layer_source.schema()}"
+            )
+        elif provider.name() == "ogr" and provider.storageType() == "GPKG":
+            return slugify(provider.dataSourceUri().split("|")[0].strip())
     return ""
 
 
@@ -104,48 +105,53 @@ def get_configuration_from_sourceprovider(provider, configuration):
     """
     mode = ""
     valid = False
-    if provider.name() == "postgres":
-        layer_source = QgsDataSourceUri(provider.dataSourceUri())
-        mode = DbIliMode.pg
-        configuration.dbservice = layer_source.service()
-        service_map = pgserviceparser.service_config(configuration.dbservice)
-        if layer_source.authConfigId():
-            configuration.dbauthid = layer_source.authConfigId()
-            authconfig_map = get_authconfig_map(configuration.dbauthid)
-            configuration.dbusr = authconfig_map.get("username")
-            configuration.dbpwd = authconfig_map.get("password")
-        else:
-            configuration.dbusr = layer_source.username() or service_map.get("user")
-            configuration.dbpwd = layer_source.password() or service_map.get("password")
-        configuration.dbhost = layer_source.host() or service_map.get("host")
-        configuration.database = layer_source.database() or service_map.get("dbname")
-        configuration.dbschema = layer_source.schema()
-        valid = bool(
-            configuration.dbusr
-            and configuration.dbpwd
-            and configuration.dbhost
-            and configuration.database
-            and configuration.dbschema
-        )
-    elif provider.name() == "ogr" and provider.storageType() == "GPKG":
-        mode = DbIliMode.gpkg
-        configuration.dbfile = provider.dataSourceUri().split("|")[0].strip()
-        valid = bool(configuration.dbfile)
-    elif provider.name() == "mssql":
-        mode = DbIliMode.mssql
-        layer_source = QgsDataSourceUri(provider.dataSourceUri())
-        configuration.dbhost = layer_source.host()
-        configuration.dbusr = layer_source.username()
-        configuration.dbpwd = layer_source.password()
-        configuration.database = layer_source.database()
-        configuration.dbschema = layer_source.schema()
-        valid = bool(
-            configuration.dbusr
-            and configuration.dbpwd
-            and configuration.dbhost
-            and configuration.database
-            and configuration.dbschema
-        )
+    if provider:
+        if provider.name() == "postgres":
+            layer_source = QgsDataSourceUri(provider.dataSourceUri())
+            mode = DbIliMode.pg
+            configuration.dbservice = layer_source.service()
+            service_map = pgserviceparser.service_config(configuration.dbservice)
+            if layer_source.authConfigId():
+                configuration.dbauthid = layer_source.authConfigId()
+                authconfig_map = get_authconfig_map(configuration.dbauthid)
+                configuration.dbusr = authconfig_map.get("username")
+                configuration.dbpwd = authconfig_map.get("password")
+            else:
+                configuration.dbusr = layer_source.username() or service_map.get("user")
+                configuration.dbpwd = layer_source.password() or service_map.get(
+                    "password"
+                )
+            configuration.dbhost = layer_source.host() or service_map.get("host")
+            configuration.database = layer_source.database() or service_map.get(
+                "dbname"
+            )
+            configuration.dbschema = layer_source.schema()
+            valid = bool(
+                configuration.dbusr
+                and configuration.dbpwd
+                and configuration.dbhost
+                and configuration.database
+                and configuration.dbschema
+            )
+        elif provider.name() == "ogr" and provider.storageType() == "GPKG":
+            mode = DbIliMode.gpkg
+            configuration.dbfile = provider.dataSourceUri().split("|")[0].strip()
+            valid = bool(configuration.dbfile)
+        elif provider.name() == "mssql":
+            mode = DbIliMode.mssql
+            layer_source = QgsDataSourceUri(provider.dataSourceUri())
+            configuration.dbhost = layer_source.host()
+            configuration.dbusr = layer_source.username()
+            configuration.dbpwd = layer_source.password()
+            configuration.database = layer_source.database()
+            configuration.dbschema = layer_source.schema()
+            valid = bool(
+                configuration.dbusr
+                and configuration.dbpwd
+                and configuration.dbhost
+                and configuration.database
+                and configuration.dbschema
+            )
     return valid, mode
 
 
