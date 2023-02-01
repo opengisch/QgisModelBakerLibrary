@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
     begin                :    11.01.2019
@@ -89,7 +88,7 @@ class TestGpkgPrimaryKey(unittest.TestCase):
         project.create(None, qgis_project)
 
         obstacle_layer = next(
-            (layer for layer in available_layers if "obstacle" in layer.uri)
+            layer for layer in available_layers if "obstacle" in layer.uri
         )
 
         scopes = QgsExpressionContextUtils.globalProjectLayerScopes(
@@ -155,11 +154,9 @@ class TestGpkgPrimaryKey(unittest.TestCase):
         project.create(None, qgis_project)
 
         punktobjekt_layer = next(
-            (
                 layer
                 for layer in available_layers
                 if layer.name == "erholungsinfrastruktur_punktobjekt"
-            )
         )
 
         scopes = QgsExpressionContextUtils.globalProjectLayerScopes(

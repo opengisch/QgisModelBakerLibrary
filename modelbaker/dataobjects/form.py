@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -27,7 +26,7 @@ from qgis.core import (
 )
 
 
-class Form(object):
+class Form:
     def __init__(self):
         self.__elements = list()
 
@@ -63,7 +62,7 @@ class Form(object):
         self.__elements.append(element)
 
 
-class FormTab(object):
+class FormTab:
     def __init__(self, name, columns=1):
         self.name = name
         self.children = list()
@@ -82,7 +81,7 @@ class FormTab(object):
         return container
 
 
-class FormGroupBox(object):
+class FormGroupBox:
     def __init__(self, name, columns=1):
         self.name = name
         self.children = list()
@@ -101,7 +100,7 @@ class FormGroupBox(object):
         return container
 
 
-class FormFieldWidget(object):
+class FormFieldWidget:
     def __init__(self, name, field_name):
         self.name = name if name else field_name
         self.field_name = field_name
@@ -112,7 +111,7 @@ class FormFieldWidget(object):
         return widget
 
 
-class FormRelationWidget(object):
+class FormRelationWidget:
     def __init__(self, relation, nm_relation=None):
         self.relation = relation
         self.nm_relation = nm_relation

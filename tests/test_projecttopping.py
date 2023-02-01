@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -93,7 +92,7 @@ class TestProjectTopping(unittest.TestCase):
             "projecttopping/opengis_projecttopping_qlr_KbS_LV95_V1_4.yaml",
         )
 
-        with open(projecttopping_file_path, "r") as yamlfile:
+        with open(projecttopping_file_path) as yamlfile:
             projecttopping_data = yaml.safe_load(yamlfile)
             assert "layertree" in projecttopping_data
             legend = generator.legend(
@@ -154,7 +153,7 @@ class TestProjectTopping(unittest.TestCase):
             "RoadSign_Type",
             "The Road Signs",
         }
-        assert set([layer.name() for layer in qlr_group_layers]) == expected_qlr_layers
+        assert {layer.name() for layer in qlr_group_layers} == expected_qlr_layers
 
     def test_kbs_postgis_source_layers(self):
         """
@@ -201,7 +200,7 @@ class TestProjectTopping(unittest.TestCase):
         test_projecttopping_file_path = os.path.join(
             test_path, "testtree_{:%Y%m%d%H%M%S%f}.yaml".format(datetime.datetime.now())
         )
-        with open(projecttopping_file_path, "r") as file:
+        with open(projecttopping_file_path) as file:
             filedata = file.read()
 
             filedata = filedata.replace("{test_path}", os.path.join(test_path))
@@ -213,7 +212,7 @@ class TestProjectTopping(unittest.TestCase):
             with open(test_projecttopping_file_path, "w") as file:
                 file.write(filedata)
 
-        with open(test_projecttopping_file_path, "r") as yamlfile:
+        with open(test_projecttopping_file_path) as yamlfile:
             projecttopping_data = yaml.safe_load(yamlfile)
             assert "layertree" in projecttopping_data
             legend = generator.legend(
@@ -267,7 +266,7 @@ class TestProjectTopping(unittest.TestCase):
             "Another invalid layer",
         }
         assert (
-            set([layer.name() for layer in source_layers_group_layers])
+            {layer.name() for layer in source_layers_group_layers}
             == expected_source_layers
         )
 
@@ -332,7 +331,7 @@ class TestProjectTopping(unittest.TestCase):
             "projecttopping/opengis_projecttopping_qml_KbS_LV95_V1_4.yaml",
         )
 
-        with open(projecttopping_file_path, "r") as yamlfile:
+        with open(projecttopping_file_path) as yamlfile:
             projecttopping_data = yaml.safe_load(yamlfile)
             assert "layertree" in projecttopping_data
             legend = generator.legend(
@@ -424,7 +423,7 @@ class TestProjectTopping(unittest.TestCase):
             "projecttopping/opengis_projecttopping_multistyles_KbS_LV95_V1_4.yaml",
         )
 
-        with open(projecttopping_file_path, "r") as yamlfile:
+        with open(projecttopping_file_path) as yamlfile:
             projecttopping_data = yaml.safe_load(yamlfile)
             assert "layertree" in projecttopping_data
             legend = generator.legend(
@@ -560,7 +559,7 @@ class TestProjectTopping(unittest.TestCase):
             "projecttopping/opengis_projecttopping_multistyles_KbS_LV95_V1_4.yaml",
         )
 
-        with open(projecttopping_file_path, "r") as yamlfile:
+        with open(projecttopping_file_path) as yamlfile:
             projecttopping_data = yaml.safe_load(yamlfile)
             assert "layertree" in projecttopping_data
             legend = generator.legend(
@@ -885,7 +884,7 @@ class TestProjectTopping(unittest.TestCase):
             "projecttopping/opengis_projecttopping_iliname_KbS_LV95_V1_4.yaml",
         )
 
-        with open(projecttopping_file_path, "r") as yamlfile:
+        with open(projecttopping_file_path) as yamlfile:
             projecttopping_data = yaml.safe_load(yamlfile)
             assert "layertree" in projecttopping_data
             legend = generator.legend(
@@ -1021,7 +1020,7 @@ class TestProjectTopping(unittest.TestCase):
             "projecttopping/opengis_projecttopping_ilidata_KbS_LV95_V1_4.yaml",
         )
 
-        with open(projecttopping_file_path, "r") as yamlfile:
+        with open(projecttopping_file_path) as yamlfile:
             projecttopping_data = yaml.safe_load(yamlfile)
             assert "layertree" in projecttopping_data
             legend = generator.legend(
@@ -1104,7 +1103,7 @@ class TestProjectTopping(unittest.TestCase):
             "RoadSign_Type",
             "The Road Signs",
         }
-        assert set([layer.name() for layer in qlr_group_layers]) == expected_qlr_layers
+        assert {layer.name() for layer in qlr_group_layers} == expected_qlr_layers
 
     def test_kbs_postgis_layouts_and_variables(self):
         """
@@ -1144,7 +1143,7 @@ class TestProjectTopping(unittest.TestCase):
             "projecttopping/opengis_projecttopping_layouts_and_variables_KbS_LV95_V1_4.yaml",
         )
 
-        with open(projecttopping_file_path, "r") as yamlfile:
+        with open(projecttopping_file_path) as yamlfile:
             projecttopping_data = yaml.safe_load(yamlfile)
             assert "layertree" in projecttopping_data
             legend = generator.legend(

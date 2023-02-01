@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -102,9 +101,8 @@ class TestProjectGen(unittest.TestCase):
                 edit_form_config = layer.layer.editFormConfig()
                 assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
                 tabs = edit_form_config.tabs()
-                fields = set([field.name() for field in tabs[0].children()])
-                assert fields == set(
-                    [
+                fields = {field.name() for field in tabs[0].children()}
+                assert fields == {
                         "letzteanpassung",
                         "zustaendigkeitkataster",
                         "geo_lage_polygon",
@@ -123,8 +121,7 @@ class TestProjectGen(unittest.TestCase):
                         "bemerkung",
                         "geo_lage_punkt",
                         "bemerkung_de",
-                    ]
-                )
+                }
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
                     tab_list = [tab.name() for tab in tabs]
@@ -223,9 +220,8 @@ class TestProjectGen(unittest.TestCase):
                 edit_form_config = layer.layer.editFormConfig()
                 assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
                 tabs = edit_form_config.tabs()
-                fields = set([field.name() for field in tabs[0].children()])
-                assert fields == set(
-                    [
+                fields = {field.name() for field in tabs[0].children()}
+                assert fields == {
                         "letzteanpassung",
                         "zustaendigkeitkataster",
                         "geo_lage_polygon",
@@ -244,8 +240,7 @@ class TestProjectGen(unittest.TestCase):
                         "bemerkung_it",
                         "bemerkung_en",
                         "geo_lage_punkt",
-                    ]
-                )
+                }
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
                     tab_list = [tab.name() for tab in tabs]
@@ -343,9 +338,8 @@ class TestProjectGen(unittest.TestCase):
                 edit_form_config = layer.layer.editFormConfig()
                 assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
                 tabs = edit_form_config.tabs()
-                fields = set([field.name() for field in tabs[0].children()])
-                assert fields == set(
-                    [
+                fields = {field.name() for field in tabs[0].children()}
+                assert fields == {
                         "letzteanpassung",
                         "zustaendigkeitkataster",
                         "geo_lage_polygon",
@@ -363,8 +357,7 @@ class TestProjectGen(unittest.TestCase):
                         "standorttyp",
                         "bemerkung",
                         "bemerkung_de",
-                    ]
-                )
+                }
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
                     tab_list = [tab.name() for tab in tabs]
@@ -386,8 +379,7 @@ class TestProjectGen(unittest.TestCase):
                         assert tab.columnCount() == 1
 
         assert count == 1
-        assert set(
-            [
+        assert {
                 "statusaltlv",
                 "multilingualtext",
                 "untersmassn",
@@ -404,8 +396,7 @@ class TestProjectGen(unittest.TestCase):
                 "untersmassn_",
                 "parzellenidentifikation",
                 "belasteter_standort_geo_lage_punkt",
-            ]
-        ) == set([layer.name for layer in available_layers])
+        } == {layer.name for layer in available_layers}
 
     def test_kbs_geopackage(self):
         importer = iliimporter.Importer()
@@ -448,9 +439,8 @@ class TestProjectGen(unittest.TestCase):
                 edit_form_config = layer.layer.editFormConfig()
                 assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
                 tabs = edit_form_config.tabs()
-                fields = set([field.name() for field in tabs[0].children()])
-                assert fields == set(
-                    [
+                fields = {field.name() for field in tabs[0].children()}
+                assert fields == {
                         "letzteanpassung",
                         "zustaendigkeitkataster",
                         "geo_lage_polygon",
@@ -468,8 +458,7 @@ class TestProjectGen(unittest.TestCase):
                         "bemerkung_rm",
                         "bemerkung_it",
                         "bemerkung_en",
-                    ]
-                )
+                }
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
                     tab_list = [tab.name() for tab in tabs]
@@ -491,8 +480,7 @@ class TestProjectGen(unittest.TestCase):
                         assert tab.columnCount() == 1
 
         assert count == 1
-        assert set(
-            [
+        assert {
                 "statusaltlv",
                 "multilingualtext",
                 "untersmassn",
@@ -509,8 +497,7 @@ class TestProjectGen(unittest.TestCase):
                 "untersmassn_",
                 "parzellenidentifikation",
                 "belasteter_standort_geo_lage_punkt",
-            ]
-        ) == set([layer.name for layer in available_layers])
+        } == {layer.name for layer in available_layers}
 
     def test_naturschutz_postgis(self):
         importer = iliimporter.Importer()
@@ -2983,7 +2970,7 @@ class TestProjectGen(unittest.TestCase):
         system_group = qgis_project.layerTreeRoot().findGroup("system")
         assert system_group is not None
         system_group_layers = system_group.findLayers()
-        assert set([layer.name() for layer in system_group_layers]) == {
+        assert {layer.name() for layer in system_group_layers} == {
             "t_ili2db_dataset",
             "t_ili2db_basket",
         }
@@ -3075,7 +3062,7 @@ class TestProjectGen(unittest.TestCase):
         system_group = qgis_project.layerTreeRoot().findGroup("system")
         assert system_group is not None
         system_group_layers = system_group.findLayers()
-        assert set([layer.name() for layer in system_group_layers]) == {
+        assert {layer.name() for layer in system_group_layers} == {
             "T_ILI2DB_DATASET",
             "T_ILI2DB_BASKET",
         }
@@ -3278,7 +3265,7 @@ class TestProjectGen(unittest.TestCase):
         layertree_data_file_path = layertree_data_file_path_list[0]
 
         custom_layer_order_structure = list()
-        with open(layertree_data_file_path, "r") as yamlfile:
+        with open(layertree_data_file_path) as yamlfile:
             layertree_data = yaml.safe_load(yamlfile)
             assert "legend" in layertree_data
             legend = generator.legend(
@@ -3442,7 +3429,7 @@ class TestProjectGen(unittest.TestCase):
                     )
                     layer.layer.loadNamedStyle(style_file_path)
 
-        layer_names = set([layer.name for layer in available_layers])
+        layer_names = {layer.name for layer in available_layers}
         assert layer_names == {
             "untersuchungsmassnahmen_definition",
             "statusaltlv_definition",
@@ -3477,7 +3464,7 @@ class TestProjectGen(unittest.TestCase):
                 tabs = edit_form_config.tabs()
                 assert len(tabs) == 5
                 assert tabs[0].name() == "Allgemein"
-                field_names = set([field.name() for field in tabs[0].children()])
+                field_names = {field.name() for field in tabs[0].children()}
                 assert field_names == {
                     "geo_lage_polygon",
                     "bemerkung_de",
@@ -3664,7 +3651,7 @@ class TestProjectGen(unittest.TestCase):
         layertree_data_file_path = layertree_data_file_path_list[0]
 
         custom_layer_order_structure = list()
-        with open(layertree_data_file_path, "r") as yamlfile:
+        with open(layertree_data_file_path) as yamlfile:
             layertree_data = yaml.safe_load(yamlfile)
             assert "legend" in layertree_data
             legend = generator.legend(
@@ -3829,7 +3816,7 @@ class TestProjectGen(unittest.TestCase):
                     )
                     layer.layer.loadNamedStyle(style_file_path)
 
-        layer_names = set([layer.name for layer in available_layers])
+        layer_names = {layer.name for layer in available_layers}
         assert layer_names == {
             "untersuchungsmassnahmen_definition",
             "statusaltlv_definition",
@@ -3862,7 +3849,7 @@ class TestProjectGen(unittest.TestCase):
                 tabs = edit_form_config.tabs()
                 assert len(tabs) == 5
                 assert tabs[0].name() == "Allgemein"
-                field_names = set([field.name() for field in tabs[0].children()])
+                field_names = {field.name() for field in tabs[0].children()}
                 assert field_names == {
                     "geo_lage_polygon",
                     "bemerkung_de",
@@ -4009,14 +3996,12 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers()
 
         infra_po = next(
-            (
                 layer
                 for layer in available_layers
                 if layer.name == "erholungsinfrastruktur_punktobjekt"
-            )
         )
         naechste_kontrolle = next(
-            (field for field in infra_po.fields if field.name == "naechste_kontrolle")
+            field for field in infra_po.fields if field.name == "naechste_kontrolle"
         )
         assert naechste_kontrolle.alias == "Naechste_Kontrolle"
 

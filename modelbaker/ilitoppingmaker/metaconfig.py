@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -27,7 +26,7 @@ from ..libs.toppingmaker.utils import slugify
 from .ili2dbsettings import Ili2dbSettings
 
 
-class MetaConfig(object):
+class MetaConfig:
     """
     Class containing all the data needed to create the metaconfiguration file.
     Having the section [CONFIGURATION] containing the links to the referencedata and the projecttoppingfile as well as the setting to consider only the metaconfig params for ili2db.

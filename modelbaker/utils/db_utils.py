@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
         begin                : 18.08.2021
@@ -161,7 +160,7 @@ def get_db_connector(configuration):
         return db_factory.get_db_connector(uri_string, schema)
     except DBConnectorError as db_connector_error:
         QgsMessageLog.logMessage(
-            "There was an error connecting to the database. Check connection parameters. Error details: {0}".format(
+            "There was an error connecting to the database. Check connection parameters. Error details: {}".format(
                 db_connector_error
             ),
             "QGIS Model Baker",
@@ -169,7 +168,7 @@ def get_db_connector(configuration):
         return None
     except FileNotFoundError as file_not_found_error:
         QgsMessageLog.logMessage(
-            "There was an error connecting to the database. Check connection parameters. Error details: {0}".format(
+            "There was an error connecting to the database. Check connection parameters. Error details: {}".format(
                 file_not_found_error
             ),
             "QGIS Model Baker",

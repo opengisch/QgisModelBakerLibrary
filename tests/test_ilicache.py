@@ -71,11 +71,10 @@ class IliCacheTest(unittest.TestCase):
             "/testdata/ilirepo/23/ilimodels.xml",
         )
         assert "test_repo" in ilicache.repositories.keys()
-        models = set(
-            [e["name"] for e in next(elem for elem in ilicache.repositories.values())]
-        )
-        expected_models = set(
-            [
+        models = {
+            e["name"] for e in next(elem for elem in ilicache.repositories.values())
+        }
+        expected_models = {
                 "IliRepository09",
                 "IliRepository09",
                 "IliSite09",
@@ -140,8 +139,7 @@ class IliCacheTest(unittest.TestCase):
                 "AbstractSymbology",
                 "Time",
                 "IliRepository20",
-            ]
-        )
+        }
         assert models == expected_models
 
     def test_ilimodels_xml_parser_24(self):
@@ -152,11 +150,10 @@ class IliCacheTest(unittest.TestCase):
             "/testdata/ilirepo/24/ilimodels.xml",
         )
         assert "test_repo" in ilicache.repositories.keys()
-        models = set(
-            [e["name"] for e in next(elem for elem in ilicache.repositories.values())]
-        )
-        expected_models = set(
-            [
+        models = {
+            e["name"] for e in next(elem for elem in ilicache.repositories.values())
+        }
+        expected_models = {
                 "AbstractSymbology",
                 "CoordSys",
                 "RoadsExdm2ben",
@@ -165,8 +162,7 @@ class IliCacheTest(unittest.TestCase):
                 "StandardSymbology",
                 "Time",
                 "Units",
-            ]
-        )
+        }
         assert models == expected_models
 
     def test_ilimodels_xml_parser_24_local_files(self):
@@ -181,16 +177,13 @@ class IliCacheTest(unittest.TestCase):
             )
             in ilicache.repositories.keys()
         )
-        models = set(
-            [
+        models = {
                 model["name"]
                 for model in [
                     e for values in ilicache.repositories.values() for e in values
                 ]
-            ]
-        )
-        expected_models_of_ilimodels_xml = set(
-            [
+        }
+        expected_models_of_ilimodels_xml = {
                 "AbstractSymbology",
                 "CoordSys",
                 "RoadsExdm2ben",
@@ -199,10 +192,8 @@ class IliCacheTest(unittest.TestCase):
                 "StandardSymbology",
                 "Time",
                 "Units",
-            ]
-        )
-        expected_models_of_local_ili_files = set(
-            [
+        }
+        expected_models_of_local_ili_files = {
                 "KbS_Basis_V1_4",
                 "KbS_LV03_V1_4",
                 "KbS_LV95_V1_4",
@@ -225,8 +216,7 @@ class IliCacheTest(unittest.TestCase):
                 "CatalogueObjects_V1",
                 "PlanerischerGewaesserschutz_LV95_V1_1",
                 "PlanerischerGewaesserschutz_LV03_V1_1",
-            ]
-        )
+        }
 
         assert models == set.union(
             expected_models_of_ilimodels_xml, expected_models_of_local_ili_files
@@ -247,16 +237,13 @@ class IliCacheTest(unittest.TestCase):
             )
             in ilicache.repositories.keys()
         )
-        models = set(
-            [
+        models = {
                 model["name"]
                 for model in [
                     e for values in ilicache.repositories.values() for e in values
                 ]
-            ]
-        )
-        expected_models_of_ilimodels_xml = set(
-            [
+        }
+        expected_models_of_ilimodels_xml = {
                 "AbstractSymbology",
                 "CoordSys",
                 "RoadsExdm2ben",
@@ -265,10 +252,8 @@ class IliCacheTest(unittest.TestCase):
                 "StandardSymbology",
                 "Time",
                 "Units",
-            ]
-        )
-        expected_models_of_local_ili_files = set(
-            [
+        }
+        expected_models_of_local_ili_files = {
                 "KbS_Basis_V1_4",
                 "KbS_LV03_V1_4",
                 "KbS_LV95_V1_4",
@@ -291,8 +276,7 @@ class IliCacheTest(unittest.TestCase):
                 "CatalogueObjects_V1",
                 "PlanerischerGewaesserschutz_LV95_V1_1",
                 "PlanerischerGewaesserschutz_LV03_V1_1",
-            ]
-        )
+        }
         assert models == set.union(
             expected_models_of_ilimodels_xml, expected_models_of_local_ili_files
         )
@@ -308,12 +292,10 @@ class IliCacheTest(unittest.TestCase):
             os.path.join(test_path, "testdata", "ilirepo", "usabilityhub"),
         )
         assert "test_repo" in ilimetaconfigcache.repositories.keys()
-        metaconfigs = set(
-            [
+        metaconfigs = {
                 e["id"]
                 for e in next(elem for elem in ilimetaconfigcache.repositories.values())
-            ]
-        )
+        }
         expected_metaconfigs = {
             "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",
             "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",
@@ -393,12 +375,10 @@ class IliCacheTest(unittest.TestCase):
             in ilimetaconfigcache.repositories.keys()
         )
 
-        metaconfigs = set(
-            [
+        metaconfigs = {
                 e["id"]
                 for e in next(elem for elem in ilimetaconfigcache.repositories.values())
-            ]
-        )
+        }
         expected_metaconfigs = {
             "ch.opengis.ili.config.PlanerischerGewaesserschutz_config",
             "ch.opengis.ili.config.PlanerischerGewaesserschutz_config_localfile",
@@ -465,14 +445,12 @@ class IliCacheTest(unittest.TestCase):
             os.path.join(test_path, "testdata", "ilirepo", "usabilityhub"),
         )
         assert "test_repo" in ilireferencedatacache.repositories.keys()
-        referencedata = set(
-            [
+        referencedata = {
                 e["id"]
                 for e in next(
                     elem for elem in ilireferencedatacache.repositories.values()
                 )
-            ]
-        )
+        }
         expected_referencedata = {
             "ch.opengis.ili.catalogue.PlanerischerGewaesserschutz_Codetexte_V1_1",
             "ch.opengis.ili.catalogue.PlanerischerGewaesserschutz_Codetexte_V1_1_Duplikat",
@@ -522,14 +500,12 @@ class IliCacheTest(unittest.TestCase):
             in ilireferencedatacache.repositories.keys()
         )
 
-        referencedata = set(
-            [
+        referencedata = {
                 e["id"]
                 for e in next(
                     elem for elem in ilireferencedatacache.repositories.values()
                 )
-            ]
-        )
+        }
         expected_referencedata = {
             "ch.opengis.ili.catalogue.PlanerischerGewaesserschutz_Codetexte_V1_1",
             "ch.opengis.ili.catalogue.PlanerischerGewaesserschutz_Codetexte_V1_1_Duplikat",
@@ -579,14 +555,12 @@ class IliCacheTest(unittest.TestCase):
             os.path.join(test_path, "testdata", "ilirepo", "usabilityhub"),
         )
         assert "test_repo" in ilitoppingfilecache.repositories.keys()
-        files = set(
-            [
+        files = {
                 e["relative_file_path"]
                 for e in next(
                     elem for elem in ilitoppingfilecache.repositories.values()
                 )
-            ]
-        )
+        }
         expected_files = {
             "layerstyle/opengisch_KbS_LV95_V1_4_005_parzellenidentifikation.qml",
             "layerstyle/opengisch_KbS_LV95_V1_4_001_belasteterstandort_polygon.qml",
@@ -624,19 +598,14 @@ class IliCacheTest(unittest.TestCase):
                     int(IliToppingFileItemModel.Roles.RELATIVEFILEPATH)
                 )
             )
-            assert (
-                os.path.join(
-                    test_path,
-                    "testdata",
-                    "ilirepo",
-                    "usabilityhub",
-                    "layerstyle",
-                    "opengisch_KbS_LV95_V1_4_001_belasteterstandort_polygon.qml",
-                )
-                == matches_on_id[0].data(
-                    int(IliToppingFileItemModel.Roles.LOCALFILEPATH)
-                )
-            )
+            assert os.path.join(
+                test_path,
+                "testdata",
+                "ilirepo",
+                "usabilityhub",
+                "layerstyle",
+                "opengisch_KbS_LV95_V1_4_001_belasteterstandort_polygon.qml",
+            ) == matches_on_id[0].data(int(IliToppingFileItemModel.Roles.LOCALFILEPATH))
             assert "mailto:david@opengis.ch" == matches_on_id[0].data(
                 int(IliToppingFileItemModel.Roles.OWNER)
             )
@@ -665,14 +634,12 @@ class IliCacheTest(unittest.TestCase):
         # local files repository
         assert "local_files" in ilitoppingfilecache.repositories.keys()
 
-        files = set(
-            [
+        files = {
                 e["relative_file_path"]
                 for e in next(
                     elem for elem in ilitoppingfilecache.repositories.values()
                 )
-            ]
-        )
+        }
         expected_files = {
             "layerstyle/opengisch_KbS_LV95_V1_4_005_parzellenidentifikation.qml",
             "layerstyle/opengisch_KbS_LV95_V1_4_001_belasteterstandort_polygon.qml",
@@ -705,14 +672,12 @@ class IliCacheTest(unittest.TestCase):
         # local files repository
         assert "local_files" in ilitoppingfilecache.repositories.keys()
 
-        files = set(
-            [
+        files = {
                 e["relative_file_path"]
                 for e in next(
                     elem for elem in ilitoppingfilecache.repositories.values()
                 )
-            ]
-        )
+        }
         expected_files = {
             "layerstyle/opengisch_KbS_LV95_V1_4_005_parzellenidentifikation.qml",
             "layerstyle/opengisch_KbS_LV95_V1_4_001_belasteterstandort_polygon.qml",
@@ -732,10 +697,10 @@ class IliCacheTest(unittest.TestCase):
             "/testdata/ilirepo/invalid/ilimodels.xml",
         )
         assert "test_repo" in ilicache.repositories.keys()
-        models = set(
-            [e["name"] for e in next(elem for elem in ilicache.repositories.values())]
-        )
-        expected_models = set(["CoordSys", "AbstractSymbology"])
+        models = {
+            e["name"] for e in next(elem for elem in ilicache.repositories.values())
+        }
+        expected_models = {"CoordSys", "AbstractSymbology"}
         assert models == expected_models
 
     def test_ilidata_xml_parser_invalid(self):
@@ -749,12 +714,10 @@ class IliCacheTest(unittest.TestCase):
             os.path.join(test_path, "testdata", "ilirepo", "invalid"),
         )
         assert "test_repo" in ilimetaconfigcache.repositories.keys()
-        metaconfigs = set(
-            [
+        metaconfigs = {
                 e["id"]
                 for e in next(elem for elem in ilimetaconfigcache.repositories.values())
-            ]
-        )
+        }
         # not finding invalid metaconfig but the one with none as id
         expected_metaconfigs = {None, "ch.opengis.ili.config.valid"}
         assert metaconfigs == expected_metaconfigs

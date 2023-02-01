@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -27,7 +26,7 @@ class Updater(IliExecutable):
     """Executes an update operation on ili2db."""
 
     def __init__(self, parent=None):
-        super(Updater, self).__init__(parent)
+        super().__init__(parent)
 
     def _create_config(self):
         return UpdateDataConfiguration()

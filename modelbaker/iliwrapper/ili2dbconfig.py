@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -24,7 +23,7 @@ from qgis.PyQt.QtNetwork import QNetworkProxy
 from .ili2dbutils import get_all_modeldir_in_path
 
 
-class BaseConfiguration(object):
+class BaseConfiguration:
     def __init__(self):
         self.super_pg_user = "postgres"
         self.super_pg_password = "postgres"
@@ -103,7 +102,7 @@ class BaseConfiguration(object):
         return dirs
 
 
-class Ili2DbCommandConfiguration(object):
+class Ili2DbCommandConfiguration:
     def __init__(self):
         self.base_configuration = BaseConfiguration()
 

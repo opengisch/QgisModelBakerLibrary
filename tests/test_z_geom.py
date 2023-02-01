@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
     begin                :    12.03.2018
@@ -53,7 +52,7 @@ class TestGeomZ(unittest.TestCase):
         available_layers = generator.layers()
 
         obstacle_layer = next(
-            (layer for layer in available_layers if "obstacle" in layer.uri)
+            layer for layer in available_layers if "obstacle" in layer.uri
         )
         obstacle_layer.create()
         assert obstacle_layer.layer.wkbType() == QgsWkbTypes.PointZ

@@ -1,7 +1,7 @@
 from qgis.core import QgsRelation
 
 
-class Relation(object):
+class Relation:
     def __init__(self):
         self.referencing_layer = None
         self.referenced_layer = None
