@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -36,7 +35,7 @@ from ..generator.config import IGNORED_FIELDNAMES
 from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
 
 
-class Layer(object):
+class Layer:
     def __init__(
         self,
         provider=None,
@@ -287,7 +286,7 @@ class Layer(object):
                 if nm_relation and Qgis.QGIS_VERSION_INT < 31600:
                     logger = logging.getLogger(__name__)
                     logger.warning(
-                        'QGIS version older than 3.16. Relation editor widget for relation "{0}" will not be added.'.format(
+                        'QGIS version older than 3.16. Relation editor widget for relation "{}" will not be added.'.format(
                             nm_relation.name
                         )
                     )

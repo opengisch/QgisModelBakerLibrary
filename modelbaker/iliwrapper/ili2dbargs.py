@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -75,17 +74,20 @@ def _get_db_args(configuration, hide_password=False):
         db_args += ["--dbschema", configuration.dbschema or configuration.database]
 
         if configuration.sslmode:
-            temporary_filename = "{0}/modelbaker-dbargs.conf".format(QDir.tempPath())
+            temporary_filename = "{}/modelbaker-dbargs.conf".format(QDir.tempPath())
             temporary_file = QFile(temporary_filename)
             if temporary_file.open(QFile.WriteOnly):
-                temporary_file.write("sslmode={0}".format(configuration.sslmode)
-                                                  .encode('utf-8'))
+                temporary_file.write(
+                    "sslmode={}".format(configuration.sslmode).encode("utf-8")
+                )
                 temporary_file.close()
                 db_args += ["--dbparams", temporary_filename]
             else:
                 logger = logging.getLogger(__name__)
                 logger.warning(
-                    "Could not open termporary file for writing: '{0}'".format(temporary_filename)
+                    "Could not open termporary file for writing: '{}'".format(
+                        temporary_filename
+                    )
                 )
 
     elif configuration.tool in DbIliMode.ili2mssql:

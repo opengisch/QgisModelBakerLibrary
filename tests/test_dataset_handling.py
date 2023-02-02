@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -45,7 +44,9 @@ class TestDatasetHandling(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "any_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -110,7 +111,9 @@ class TestDatasetHandling(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath, "tmp_basket_gpkg.gpkg"
@@ -176,7 +179,9 @@ class TestDatasetHandling(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/PipeBasketTest_V1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/PipeBasketTest_V1.ili"
+        )
         importer.configuration.ilimodels = "PipeBasketTest"
         importer.configuration.dbschema = "baskets_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -239,16 +244,16 @@ class TestDatasetHandling(unittest.TestCase):
 
     def check_dataset_mutations(self, db_connector):
         # Create new dataset
-        assert set(
-            [record["datasetname"] for record in db_connector.get_datasets_info()]
-        ) == {"Winti", "Seuzach"}
+        assert {
+            record["datasetname"] for record in db_connector.get_datasets_info()
+        } == {"Winti", "Seuzach"}
         result = db_connector.create_dataset("Glarus Nord")
         assert result[0]
         assert len(db_connector.get_datasets_info()) == 3
         assert len(db_connector.get_baskets_info()) == 4
-        assert set(
-            [record["datasetname"] for record in db_connector.get_datasets_info()]
-        ) == {"Winti", "Seuzach", "Glarus Nord"}
+        assert {
+            record["datasetname"] for record in db_connector.get_datasets_info()
+        } == {"Winti", "Seuzach", "Glarus Nord"}
 
         # Get tid of 'Glarus Nord'
         glarus_nord_tid = [
@@ -276,9 +281,9 @@ class TestDatasetHandling(unittest.TestCase):
         result = db_connector.rename_dataset(glarus_nord_tid, "Glarus West")
         assert len(db_connector.get_datasets_info()) == 3
         assert len(db_connector.get_baskets_info()) == 6
-        assert set(
-            [record["datasetname"] for record in db_connector.get_datasets_info()]
-        ) == {"Winti", "Seuzach", "Glarus West"}
+        assert {
+            record["datasetname"] for record in db_connector.get_datasets_info()
+        } == {"Winti", "Seuzach", "Glarus West"}
 
     def print_info(self, text):
         logging.info(text)

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -22,12 +21,12 @@ import mimetypes
 import os
 import uuid
 import xml.dom.minidom as minidom
-import xml.etree.cElementTree as ET
+import xml.etree.ElementTree as ET
 
 from .ilitarget import IliTarget
 
 
-class DatasetMetadata(object):
+class DatasetMetadata:
     """
     Class representing an object of an indexed toppingfile/referencdatafile to be stored in an element DatasetIdx16.DataIndex.DatasetMetadata.
     """
@@ -105,7 +104,7 @@ class DatasetMetadata(object):
         ET.SubElement(datsetidx16_file, "path").text = self.file_path
 
 
-class IliData(object):
+class IliData:
     """
     Class representing the top level content of the ilidata.xml used as "index" for all the toppingfiles/referencedatafile.
     The ilidata.xml is based on the INTERLIS model DatasetIdx16.

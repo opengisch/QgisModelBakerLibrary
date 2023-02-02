@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -28,7 +27,7 @@ from .iliexecutable import IliExecutable
 class Importer(IliExecutable):
     def __init__(self, dataImport=False, parent=None):
         self.__data_import = dataImport
-        super(Importer, self).__init__(parent)
+        super().__init__(parent)
 
     def _create_config(self) -> Ili2DbCommandConfiguration:
         if self.__data_import:

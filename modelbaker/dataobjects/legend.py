@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -23,7 +22,7 @@ from qgis.core import QgsLayerDefinition, QgsLayerTreeLayer, QgsProject
 from ..utils.qgis_utils import get_group_non_recursive, get_suggested_index_for_layer
 
 
-class LegendGroup(object):
+class LegendGroup:
     def __init__(
         self, name=None, expanded=True, ignore_node_names=None, static_sorting=False
     ):

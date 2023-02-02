@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -302,7 +301,7 @@ class IliCache(QObject):
         models = list()
         re_model = re.compile(r"\s*MODEL\s*([\w\d_-]+).*")
         re_model_version = re.compile(r'VERSION "([ \w\d\._-]+)".*')
-        with open(ilipath, "r", encoding=encoding) as file:
+        with open(ilipath, encoding=encoding) as file:
             model = None
             for lineno, line in enumerate(file):
                 line = line.split("!!")[0]

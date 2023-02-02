@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -18,7 +17,7 @@
  ***************************************************************************/
 """
 
-import xml.etree.cElementTree as CET
+import xml.etree.ElementTree as CET
 from enum import Enum
 
 from PyQt5.QtCore import Qt
@@ -30,7 +29,7 @@ from .iliexecutable import IliExecutable
 
 class Validator(IliExecutable):
     def __init__(self, parent=None):
-        super(Validator, self).__init__(parent)
+        super().__init__(parent)
 
     def _create_config(self):
         return ValidateConfiguration()

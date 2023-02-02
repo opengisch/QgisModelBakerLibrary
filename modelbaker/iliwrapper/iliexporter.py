@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """
 /***************************************************************************
                               -------------------
@@ -23,7 +22,7 @@ from .iliexecutable import IliExecutable
 
 class Exporter(IliExecutable):
     def __init__(self, parent=None):
-        super(Exporter, self).__init__(parent)
+        super().__init__(parent)
         self.version = 4
 
     def _create_config(self) -> Ili2DbCommandConfiguration:
@@ -33,7 +32,7 @@ class Exporter(IliExecutable):
         return self.version
 
     def _args(self, hide_password):
-        args = super(Exporter, self)._args(hide_password)
+        args = super()._args(hide_password)
 
         if self.version == 3 and "--export3" in args:
             args.remove("--export3")
