@@ -59,7 +59,7 @@ class BaseConfiguration:
         self.debugging_enabled = settings.value("DebuggingEnabled", False, bool)
         self.logfile_path = settings.value("LogfilePath", "", str)
 
-    def to_ili2db_args(self, with_modeldir=True):
+    def to_ili2db_args(self, with_modeldir=True, with_usabilityhub_repo=False):
         """
         Create an ili2db command line argument string from this configuration
         """
@@ -73,6 +73,11 @@ class BaseConfiguration:
                 ]
                 str_model_directories = ";".join(str_model_directories)
                 args += ["--modeldir", str_model_directories]
+        if with_usabilityhub_repo:
+            if not self.custom_model_directories_enabled:
+                # Workaround for https://github.com/opengisch/QgisModelBaker/issues/784.
+                # Can be removed when ili2db has access to the UsabILIty Hub repository.
+                args += ["--modeldir", "https://models.opengis.ch/"]
         if self.debugging_enabled and self.logfile_path:
             args += ["--trace"]
             args += ["--log", self.logfile_path]
@@ -146,7 +151,9 @@ class Ili2DbCommandConfiguration:
         # Valid ili file, don't pass --modeldir (it can cause ili2db errors)
         with_modeldir = not self.ilifile
 
-        args = self.base_configuration.to_ili2db_args(with_modeldir=with_modeldir)
+        args = self.base_configuration.to_ili2db_args(
+            with_modeldir=with_modeldir, with_usabilityhub_repo=bool(self.metaconfig_id)
+        )
 
         proxy = QgsNetworkAccessManager.instance().fallbackProxy()
         if proxy.type() == QNetworkProxy.HttpProxy:
