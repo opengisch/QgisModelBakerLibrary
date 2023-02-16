@@ -14,7 +14,7 @@ on:
 jobs:
   # Run unit tests
   test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     strategy:
       matrix:
         qgis_version: [release-3_16, release-3_22, latest]
@@ -36,7 +36,7 @@ jobs:
   release:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
     if: startsWith(github.ref, 'refs/tags/v')
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
     - uses: actions/checkout@master
     - name: Set up Python 3.9
