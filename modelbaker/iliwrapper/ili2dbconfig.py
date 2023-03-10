@@ -77,7 +77,10 @@ class BaseConfiguration:
             if not self.custom_model_directories_enabled:
                 # Workaround for https://github.com/opengisch/QgisModelBaker/issues/784.
                 # Can be removed when ili2db has access to the UsabILIty Hub repository.
-                args += ["--modeldir", "https://models.opengis.ch/"]
+                args += [
+                    "--modeldir",
+                    "%ILI_FROM_DB;%XTF_DIR;http://models.interlis.ch/;%JAR_DIR;https://models.opengis.ch/",
+                ]
         if self.debugging_enabled and self.logfile_path:
             args += ["--trace"]
             args += ["--log", self.logfile_path]
