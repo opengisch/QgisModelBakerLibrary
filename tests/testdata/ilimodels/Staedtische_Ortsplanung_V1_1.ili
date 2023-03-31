@@ -2,7 +2,7 @@ INTERLIS 2.3;
 
 /* Extended Ortsplanung as city model importing cantonal (and with this the national) model and the national model */
 MODEL Staedtische_Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
-  IMPORTS Kantonale_Ortsplanung_V1_1;
+  IMPORTS Kantonale_Ortsplanung_V1_1, Staedtisches_Gewerbe_V1;
 
   !! Freizeit is an extension of the cantonal Konstruktionen (note that there is a constraint there)
   TOPIC Freizeit EXTENDS Kantonale_Ortsplanung_V1_1.Konstruktionen =
@@ -20,19 +20,17 @@ MODEL Staedtische_Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023
   !! Gewerbe is an extension of the cantonal Konstruktionen (note that there is a constraint there)
   TOPIC Gewerbe EXTENDS Kantonale_Ortsplanung_V1_1.Konstruktionen =
     OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Staedtisches_Gewerbe_V1.Firmen;
 
     CLASS Gebaeude (EXTENDED) =
       Nutzungsart : TEXT*99;
     END Gebaeude;
 
-    CLASS Firma =
-      Name : TEXT;
-    END Firma;
-
-    ASSOCIATION Gebaeude_Firma =
-      Firma -- {0..*} Firma;
+    ASSOCIATION Gebaeude_StadtFirma =
+      StadtFirma (EXTERNAL) -- {0..*} Staedtisches_Gewerbe_V1.Firmen.Firma;
       Gebaeude -- {0..*} Gebaeude;
-    END Gebaeude_Firma;
+    END Gebaeude_StadtFirma;
+
   END Gewerbe;
 
 END Staedtische_Ortsplanung_V1_1.
