@@ -1,0 +1,17 @@
+INTERLIS 2.3;
+
+/* Extended Ortsplanung as cantonal model importing national model */
+MODEL Kantonale_Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+  IMPORTS Ortsplanung_V1_1;
+
+  TOPIC Konstruktionen EXTENDS Ortsplanung_V1_1.Konstruktionen =
+    CLASS Gebaeude  (EXTENDED)=
+      Beschreibung: TEXT;
+      Referenzcode: TEXT;
+
+      !!@ ilivalid.msg = "Beschreibung and/or Referenzcode must be defined."
+      SET CONSTRAINT DEFINED (Beschreibung) OR DEFINED (Referenzcode);
+    END Gebaeude;
+  END Konstruktionen;
+
+END Kantonale_Ortsplanung_V1_1.
