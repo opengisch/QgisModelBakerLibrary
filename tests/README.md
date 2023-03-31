@@ -16,3 +16,8 @@ In one line, removing all containers.
 ```sh
 QGIS_TEST_VERSION=latest GITHUB_WORKSPACE=$PWD docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh; GITHUB_WORKSPACE=$PWD docker-compose -f .docker/docker-compose.gh.yml rm -s -f
 ```
+
+Run all test starting with ``test_array_`
+```sh
+[...] run-tests.sh -k test_array_ [...]
+```
