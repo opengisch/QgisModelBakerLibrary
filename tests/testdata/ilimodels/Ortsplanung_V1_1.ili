@@ -1,6 +1,6 @@
 INTERLIS 2.3;
 
-/* Ortsplanung as national model */
+/* Ortsplanung as national model importing the infrastrukture used for using geometry types and connectiong to strasse */
 MODEL Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
   IMPORTS Infrastruktur_V1;
 

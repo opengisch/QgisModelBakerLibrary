@@ -1,6 +1,6 @@
 INTERLIS 2.3;
 
-/* Extended Ortsplanung as city model importing cantonal (and with this the national) model and the national model */
+/* Extended Ortsplanung as city model importing cantonal (and with this the national) model and the city extension of the gewerbe model (and with this the national gewerbe).*/
 MODEL Staedtische_Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
   IMPORTS Kantonale_Ortsplanung_V1_1, Staedtisches_Gewerbe_V1;
 
