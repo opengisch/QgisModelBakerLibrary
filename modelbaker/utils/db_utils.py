@@ -26,18 +26,8 @@ from qgis.core import (
 from ..db_factory.db_simple_factory import DbSimpleFactory
 from ..dbconnector.db_connector import DBConnectorError
 from ..iliwrapper.globals import DbIliMode
-from ..libs import deprecation, pgserviceparser
+from ..libs import pgserviceparser
 from .qt_utils import slugify
-
-
-@deprecation.deprecated(
-    deprecated_in="1.3",
-    removed_in="1.4",
-    current_version="1.3",
-    details="Use the def get_schema_identificator_from_sourceprovider function instead",
-)
-def get_schema_identificator_from_layersource(layer_source_provider, layer_source):
-    return get_schema_identificator_from_sourceprovider(layer_source_provider)
 
 
 def get_schema_identificator_from_sourceprovider(provider):
@@ -67,29 +57,6 @@ def get_authconfig_map(authconfigid):
     auth_cfg = QgsAuthMethodConfig()
     auth_mgr.loadAuthenticationConfig(authconfigid, auth_cfg, True)
     return auth_cfg.configMap()
-
-
-@deprecation.deprecated(
-    deprecated_in="1.3",
-    removed_in="1.4",
-    current_version="1.3",
-    details="Use the def get_configuration_from_sourceprovider function instead",
-)
-def get_configuration_from_layersource(
-    layer_source_provider, layer_source, configuration
-):
-    """
-    Determines the connection parameters from a layer source.
-    On service in postgres it preferences the static parameters over the ones in the service file if available.
-    Returns:
-        valid (boolean): if the needed database connection parameters are determined
-        mode (DbIliMode): Kind of database like pg, gpkg or mssql
-        configuration (Ili2DbCommandConfiguration): config with the determined parameters
-    """
-    valid, mode = get_configuration_from_sourceprovider(
-        layer_source_provider, configuration
-    )
-    return valid, mode
 
 
 def get_configuration_from_sourceprovider(provider, configuration):
