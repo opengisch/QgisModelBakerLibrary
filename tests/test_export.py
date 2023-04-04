@@ -435,6 +435,327 @@ class TestExport(unittest.TestCase):
         assert exporter.run() == iliexporter.Exporter.SUCCESS
         self.compare_xtfs(testdata_path("xtf/test_ciaf_ladm.xtf"), obtained_xtf_path)
 
+    def test_exportmodels_gpkg(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "staedtische_ortsplanung_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import data
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Staedtische_Orstplanung_V1_1
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2gpkg
+        dataImporter.configuration = ilidataimporter_config(
+            dataImporter.tool, "ilimodels"
+        )
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
+        dataImporter.configuration.disable_validation = True
+        dataImporter.configuration.with_importtid = True
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_staedtische_ortsplanung_v1_1.xtf"
+        )
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+        # Export to city level (not setting --exportModels)
+        # means we will have here the objects in the Staedtische_Ortsplanung_V1_1 and Staedtisches_Gewerbe_V1 format
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Staedtische_Orstplanung_V1_1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2gpkg
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Staedtisches_Gewerbe_V1;Infrastruktur_V1"
+        )
+        exporter.configuration.dbfile = importer.configuration.dbfile
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_staedtische_ortsplanung_v1_1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_staedtische_ortsplanung_v1_1.xtf"),
+            obtained_xtf_path,
+        )
+
+        # Export to cantonal level (setting --exportModels KantonaleOrtsplanung_V1_1)
+        # means we will have here the objects in the KantonaleOrtsplanung_V1_1 and no Gewerbe_V1 stuff (since it's not usesd in Kantonale_Ortsplanung_V1_1)
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Kantonale_Ortsplanung_V1_1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2gpkg
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Infrastruktur_V1"
+        )
+        exporter.configuration.iliexportmodels = "Kantonale_Ortsplanung_V1_1"
+        exporter.configuration.dbfile = importer.configuration.dbfile
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_kantonale_ortsplanung_v1_1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_kantonale_ortsplanung_v1_1.xtf"), obtained_xtf_path
+        )
+
+        # Export to national level (setting --exportModels Ortsplanung_V1_1;Gewerbe_V1)
+        # means we will have here the objects in the Ortsplanung_V1_1 and  Gewerbe_V1 format
+        # we DON't disable the validation, since we have valid data for Ortsplanung_V1_1 and Gewerbe_V1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2gpkg
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Staedtisches_Gewerbe_V1;Infrastruktur_V1"
+        )
+        exporter.configuration.iliexportmodels = "Ortsplanung_V1_1;Gewerbe_V1"
+        exporter.configuration.dbfile = importer.configuration.dbfile
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_ortsplanung_v1_1_and_gewerbe_v1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_ortsplanung_v1_1_and_gewerbe_v1.xtf"),
+            obtained_xtf_path,
+        )
+
+    def test_exportmodels_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
+        importer.configuration.dbschema = (
+            "staedtische_ortsplanung_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import data
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Staedtische_Orstplanung_V1_1
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2pg
+        dataImporter.configuration = ilidataimporter_config(
+            dataImporter.tool, "ilimodels"
+        )
+        dataImporter.configuration.dbschema = importer.configuration.dbschema
+        dataImporter.configuration.disable_validation = True
+        dataImporter.configuration.with_importtid = True
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_staedtische_ortsplanung_v1_1.xtf"
+        )
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+        # Export to city level (not setting --exportModels)
+        # means we will have here the objects in the Staedtische_Ortsplanung_V1_1 and Staedtisches_Gewerbe_V1 format
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Staedtische_Orstplanung_V1_1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2pg
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Staedtisches_Gewerbe_V1;Infrastruktur_V1"
+        )
+        exporter.configuration.dbschema = importer.configuration.dbschema
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_staedtische_ortsplanung_v1_1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_staedtische_ortsplanung_v1_1.xtf"),
+            obtained_xtf_path,
+        )
+
+        # Export to cantonal level (setting --exportModels KantonaleOrtsplanung_V1_1)
+        # means we will have here the objects in the KantonaleOrtsplanung_V1_1 and no Gewerbe_V1 stuff (since it's not usesd in Kantonale_Ortsplanung_V1_1)
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Kantonale_Ortsplanung_V1_1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2pg
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Infrastruktur_V1"
+        )
+        exporter.configuration.iliexportmodels = "Kantonale_Ortsplanung_V1_1"
+        exporter.configuration.dbschema = importer.configuration.dbschema
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_kantonale_ortsplanung_v1_1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_kantonale_ortsplanung_v1_1.xtf"), obtained_xtf_path
+        )
+
+        # Export to national level (setting --exportModels Ortsplanung_V1_1;Gewerbe_V1)
+        # means we will have here the objects in the Ortsplanung_V1_1 and  Gewerbe_V1 format
+        # we DON't disable the validation, since we have valid data for Ortsplanung_V1_1 and Gewerbe_V1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2pg
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Staedtisches_Gewerbe_V1;Infrastruktur_V1"
+        )
+        exporter.configuration.iliexportmodels = "Ortsplanung_V1_1;Gewerbe_V1"
+        exporter.configuration.dbschema = importer.configuration.dbschema
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_ortsplanung_v1_1_and_gewerbe_v1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_ortsplanung_v1_1_and_gewerbe_v1.xtf"),
+            obtained_xtf_path,
+        )
+
+    def test_exportmodels_ili2mssql(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2mssql
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
+        importer.configuration.dbschema = (
+            "staedtische_ortsplanung_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import data
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Staedtische_Orstplanung_V1_1
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2mssql
+        dataImporter.configuration = ilidataimporter_config(
+            dataImporter.tool, "ilimodels"
+        )
+        dataImporter.configuration.dbschema = importer.configuration.dbschema
+        dataImporter.configuration.disable_validation = True
+        dataImporter.configuration.with_importtid = True
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_staedtische_ortsplanung_v1_1.xtf"
+        )
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+        # Export to city level (not setting --exportModels)
+        # means we will have here the objects in the Staedtische_Ortsplanung_V1_1 and Staedtisches_Gewerbe_V1 format
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Staedtische_Orstplanung_V1_1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2mssql
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Staedtisches_Gewerbe_V1;Infrastruktur_V1"
+        )
+        exporter.configuration.dbschema = importer.configuration.dbschema
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_staedtische_ortsplanung_v1_1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_staedtische_ortsplanung_v1_1.xtf"),
+            obtained_xtf_path,
+        )
+
+        # Export to cantonal level (setting --exportModels KantonaleOrtsplanung_V1_1)
+        # means we will have here the objects in the KantonaleOrtsplanung_V1_1 and no Gewerbe_V1 stuff (since it's not usesd in Kantonale_Ortsplanung_V1_1)
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Kantonale_Ortsplanung_V1_1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2mssql
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Infrastruktur_V1"
+        )
+        exporter.configuration.iliexportmodels = "Kantonale_Ortsplanung_V1_1"
+        exporter.configuration.dbschema = importer.configuration.dbschema
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_kantonale_ortsplanung_v1_1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_kantonale_ortsplanung_v1_1.xtf"), obtained_xtf_path
+        )
+
+        # Export to national level (setting --exportModels Ortsplanung_V1_1;Gewerbe_V1)
+        # means we will have here the objects in the Ortsplanung_V1_1 and  Gewerbe_V1 format
+        # we DON't disable the validation, since we have valid data for Ortsplanung_V1_1 and Gewerbe_V1
+        exporter = iliexporter.Exporter()
+        exporter.tool = DbIliMode.ili2mssql
+        exporter.configuration = iliexporter_config(exporter.tool, "ilimodels")
+        exporter.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Staedtisches_Gewerbe_V1;Infrastruktur_V1"
+        )
+        exporter.configuration.iliexportmodels = "Ortsplanung_V1_1;Gewerbe_V1"
+        exporter.configuration.dbschema = importer.configuration.dbschema
+        exporter.configuration.disable_validation = True
+        exporter.configuration.with_exporttid = True
+        obtained_xtf_path = os.path.join(
+            self.basetestpath, "tmp_result_ortsplanung_v1_1_and_gewerbe_v1.xtf"
+        )
+        exporter.configuration.xtffile = obtained_xtf_path
+        exporter.stdout.connect(self.print_info)
+        exporter.stderr.connect(self.print_error)
+        assert exporter.run() == iliexporter.Exporter.SUCCESS
+        self.compare_xtfs(
+            testdata_path("xtf/test_ortsplanung_v1_1_and_gewerbe_v1.xtf"),
+            obtained_xtf_path,
+        )
+
     def print_info(self, text):
         logging.info(text)
 
@@ -458,12 +779,15 @@ class TestExport(unittest.TestCase):
         len(datasection_children) == len(tmp_datasection_children)
 
         for topic in datasection_children:
-            tmp_topic = tmp_datasection.find(topic.tag)
-            assert tmp_topic is not None
+            tmp_topics = tmp_datasection.findall(topic.tag)
+            assert tmp_topics is not None
             classes = list(topic)
             for _class in classes:
                 success = False
-                for _tmp_class in tmp_topic.findall(_class.tag):
+                _tmp_classes = []
+                for tmp_topic in tmp_topics:
+                    _tmp_classes += tmp_topic.findall(_class.tag)
+                for _tmp_class in _tmp_classes:
                     for child in _class:
                         tmp_child = _tmp_class.find(child.tag)
                         if (

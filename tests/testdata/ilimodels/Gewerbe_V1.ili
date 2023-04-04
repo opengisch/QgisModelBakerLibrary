@@ -1,0 +1,12 @@
+INTERLIS 2.3;
+
+/*National company register */
+MODEL Gewerbe_V1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+
+  TOPIC Firmen =
+    CLASS Firma =
+      Name : TEXT;
+    END Firma;
+  END Firmen;
+
+END Gewerbe_V1.
