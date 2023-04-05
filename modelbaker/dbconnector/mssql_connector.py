@@ -593,7 +593,7 @@ class MssqlConnector(DBConnector):
                 )
             )
 
-            models = cur.fetchall()
+            models = self._get_dict_result(cur)
 
             cur.execute(
                 """SELECT modelname, content
@@ -603,7 +603,7 @@ class MssqlConnector(DBConnector):
                 )
             )
 
-            contents = cur.fetchall()
+            contents = self._get_dict_result(cur)
 
             result = dict()
             list_result = []
