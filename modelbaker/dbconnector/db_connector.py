@@ -248,11 +248,14 @@ class DBConnector(QObject):
         return {}
 
     def get_models(self):
+        """
+        Returns the models in use, the ili-file content and the direct parents of the model.
+        """
         return {}
 
     def ili_version(self):
         """
-        Returns the version of the ili2db application that was used to create the schema
+        Returns the version of the ili2db application that was used to create the schema.
         """
         return None
 

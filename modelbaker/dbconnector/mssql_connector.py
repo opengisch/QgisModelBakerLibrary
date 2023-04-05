@@ -582,11 +582,18 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_models(self):
-        """Needed for exportmodels"""
-        result = {}
         # Get MODELS
         if self.schema:
             cur = self.conn.cursor()
+
+            cur.execute(
+                """SELECT distinct split_part(iliname,'.',1) as modelname
+                            FROM {schema}.t_ili2db_trafo""".format(
+                    schema=self.schema
+                )
+            )
+
+            models = cur.fetchall()
 
             cur.execute(
                 """SELECT modelname, content
@@ -595,9 +602,28 @@ class MssqlConnector(DBConnector):
                     schema=self.schema
                 )
             )
-            result = self._get_dict_result(cur)
 
-        return result
+            contents = cur.fetchall()
+
+            result = dict()
+            list_result = []
+
+            for content in contents:
+                for model in models:
+                    if model["modelname"] in re.sub(
+                        r"(?:\{[^\}]*\}|\s)", "", content["modelname"]
+                    ):
+                        result["modelname"] = model["modelname"]
+                        result["content"] = content["content"]
+                        match = re.search(
+                            re.escape(model["modelname"]) + r"\{\s([^\}]*)\}",
+                            content["modelname"],
+                        )
+                        result["parents"] = match.group(1).split() if match else []
+                        list_result.append(result)
+                        result = dict()
+            return list_result
+        return {}
 
     def get_classili_classdb_mapping(self, models_info, extended_classes):
         result = {}
