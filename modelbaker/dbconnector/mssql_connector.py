@@ -587,7 +587,7 @@ class MssqlConnector(DBConnector):
             cur = self.conn.cursor()
 
             cur.execute(
-                """SELECT distinct split_part(iliname,'.',1) as modelname
+                """SELECT distinct left(iliname, charindex('.', iliname)-1) as modelname
                             FROM {schema}.t_ili2db_trafo""".format(
                     schema=self.schema
                 )
