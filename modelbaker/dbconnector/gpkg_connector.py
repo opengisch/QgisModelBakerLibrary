@@ -574,7 +574,6 @@ class GPKGConnector(DBConnector):
         return cursor
 
     def get_models(self):
-        """Needed for exportmodels"""
         # Get MODELS
         cursor = self.conn.cursor()
 
@@ -602,6 +601,11 @@ class GPKGConnector(DBConnector):
                 ):
                     result["modelname"] = model["modelname"]
                     result["content"] = content["content"]
+                    match = re.search(
+                        re.escape(model["modelname"]) + r"\{\s([^\}]*)\}",
+                        content["modelname"],
+                    )
+                    result["parents"] = match.group(1).split() if match else []
                     list_result.append(result)
                     result = dict()
 
