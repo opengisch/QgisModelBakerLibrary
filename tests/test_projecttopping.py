@@ -265,10 +265,9 @@ class TestProjectTopping(unittest.TestCase):
             "An invalid layer",
             "Another invalid layer",
         }
-        assert (
-            {layer.name() for layer in source_layers_group_layers}
-            == expected_source_layers
-        )
+        assert {
+            layer.name() for layer in source_layers_group_layers
+        } == expected_source_layers
 
         for layer in source_layers_group_layers:
             qgis_layer = layer.layer()
@@ -277,7 +276,7 @@ class TestProjectTopping(unittest.TestCase):
                 print(qgis_layer.dataProvider().dataSourceUri())
                 assert (
                     qgis_layer.dataProvider().dataSourceUri()
-                    == "contextualWMSLegend=0&crs=EPSG:2056&dpiMode=7&featureCount=10&format=image/jpeg&layers=ch.bav.kataster-belasteter-standorte-oev_lines&styles=default&url=https://wms.geo.admin.ch/?%0ASERVICE%3DWMS%0A%26VERSION%3D1.3.0%0A%26REQUEST%3DGetCapabilities"
+                    == "contextualWMSLegend=0&crs=EPSG:2056&dpiMode=7&featureCount=10&format=image/jpeg&layers=ch.bav.kataster-belasteter-standorte-oev&styles=default&url=https://wms.geo.admin.ch/?%0ASERVICE%3DWMS%0A%26VERSION%3D1.3.0%0A%26REQUEST%3DGetCapabilities"
                 )
                 assert qgis_layer.isValid()
             if layer.name() == "Local Zuständigkeit Kataster":

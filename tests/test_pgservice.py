@@ -141,7 +141,6 @@ class TestPgservice(unittest.TestCase):
         for layer in available_layers:
             if layer.name == "landcover":
                 source_provider = layer.layer.dataProvider()
-                print(layer.layer.dataProvider().dataSourceUri())
                 source = QgsDataSourceUri(layer.layer.dataProvider().dataSourceUri())
                 assert source.service() == "sevys_service"
                 assert source.database() == ""
@@ -149,8 +148,8 @@ class TestPgservice(unittest.TestCase):
                 assert source.password() == ""
 
                 validate_configuration = ValidateConfiguration()
-                valid, mode = db_utils.get_configuration_from_layersource(
-                    source_provider, source, validate_configuration
+                valid, mode = db_utils.get_configuration_from_sourceprovider(
+                    source_provider, validate_configuration
                 )
                 assert valid
 
@@ -251,7 +250,6 @@ class TestPgservice(unittest.TestCase):
         for layer in available_layers:
             if layer.name == "landcover":
                 source_provider = layer.layer.dataProvider()
-                print(layer.layer.dataProvider().dataSourceUri())
                 source = QgsDataSourceUri(layer.layer.dataProvider().dataSourceUri())
                 assert source.service() == "manis_service"
                 assert source.database() == ""
@@ -259,8 +257,8 @@ class TestPgservice(unittest.TestCase):
                 assert source.password() == "manis_password"
 
                 validate_configuration = ValidateConfiguration()
-                valid, mode = db_utils.get_configuration_from_layersource(
-                    source_provider, source, validate_configuration
+                valid, mode = db_utils.get_configuration_from_sourceprovider(
+                    source_provider, validate_configuration
                 )
                 assert valid
 

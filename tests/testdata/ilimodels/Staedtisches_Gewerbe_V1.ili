@@ -1,0 +1,17 @@
+INTERLIS 2.3;
+
+/*Extended Gewerbe as city model importing the national model */
+MODEL Staedtisches_Gewerbe_V1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+  IMPORTS Gewerbe_V1;
+
+  TOPIC Firmen EXTENDS Gewerbe_V1.Firmen =
+    OID AS INTERLIS.UUIDOID;
+
+    CLASS Firma (EXTENDED)=
+      EthischeBeurteilung : TEXT;
+      !!@ ilivalid.msg = "Needs an ethical evaluation (EthischeBeurteilung)"
+      SET CONSTRAINT DEFINED (EthischeBeurteilung);
+    END Firma;
+  END Firmen;
+
+END Staedtisches_Gewerbe_V1.

@@ -416,6 +416,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.topics = ""
         self.dataset = ""
         self.baskets = list()
+        self.iliexportmodels = ""
         self.with_exporttid = False
         self.xtflog = ""
         self.skip_geometry_errors = False
@@ -431,6 +432,9 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.ilimodels:
             self.append_args(args, ["--models", self.ilimodels])
+
+        if self.iliexportmodels:
+            self.append_args(args, ["--exportModels", self.iliexportmodels])
 
         if self.topics:
             self.append_args(args, ["--topics", self.topics])

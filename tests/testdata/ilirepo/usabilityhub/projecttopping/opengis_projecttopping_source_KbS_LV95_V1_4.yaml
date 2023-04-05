@@ -17,6 +17,6 @@ layertree:
                 uri: "dbname='gis' host='{PGHOST}' user='docker' password='docker' key='t_id' checkPrimaryKeyUnicity='1' table=\"{test_schema}\".\"zustaendigkeitkataster\""
             - "Local WMS": #direct source definition for WMS
                 provider: "wms"
-                uri: "contextualWMSLegend=0&crs=EPSG:2056&dpiMode=7&featureCount=10&format=image/jpeg&layers=ch.bav.kataster-belasteter-standorte-oev_lines&styles=default&url=https://wms.geo.admin.ch/?%0ASERVICE%3DWMS%0A%26VERSION%3D1.3.0%0A%26REQUEST%3DGetCapabilities"
+                uri: "contextualWMSLegend=0&crs=EPSG:2056&dpiMode=7&featureCount=10&format=image/jpeg&layers=ch.bav.kataster-belasteter-standorte-oev&styles=default&url=https://wms.geo.admin.ch/?%0ASERVICE%3DWMS%0A%26VERSION%3D1.3.0%0A%26REQUEST%3DGetCapabilities"
             - "An invalid layer": # no qlr, no layer from ili, no source
             - "Another invalid layer": # no qlr, no layer from ili, no source

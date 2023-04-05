@@ -455,6 +455,154 @@ class TestExport(unittest.TestCase):
             == expected_error_multiplicity_2
         )
 
+    def test_validate_exportmodels_gpkg(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "staedtische_ortsplanung_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import data
+        # we disable the validation, since we have some mistakes (on purpose) in the xtf concerning Staedtische_Orstplanung_V1_1
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2gpkg
+        dataImporter.configuration = ilidataimporter_config(
+            dataImporter.tool, "ilimodels"
+        )
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
+        dataImporter.configuration.disable_validation = True
+        dataImporter.configuration.with_importtid = True
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_staedtische_ortsplanung_v1_1.xtf"
+        )
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+        # Validate at city level (not setting --exportModels)
+        # means validation will fail - we encouter the constraint failure from Staedtische_Ortsplanung_V1_1, Staedtisches_Gewerbe_V1 and Kantonale_Ortsplanung_V1_1
+        validator = ilivalidator.Validator()
+        validator.tool = DbIliMode.ili2gpkg
+        validator.configuration = ilivalidator_config(validator.tool, "ilimodels")
+        validator.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Staedtisches_Gewerbe_V1;Infrastruktur_V1"
+        )
+        validator.configuration.dbfile = dataImporter.configuration.dbfile
+        validator.configuration.xtflog = os.path.join(
+            self.basetestpath,
+            "tmp_test_staedtische_ortsplanung_v1_1_result_{:%Y%m%d%H%M%S%f}.xtf".format(
+                datetime.datetime.now()
+            ),
+        )
+        validator.stdout.connect(self.print_info)
+        validator.stderr.connect(self.print_error)
+        # No skip
+        assert validator.run() == ilivalidator.Validator.ERROR
+
+        # check validation result
+        result_model = ilivalidator.ValidationResultModel()
+        result_model.configuration = validator.configuration
+        result_model.reload()
+        assert result_model.rowCount() == 3
+
+        expected_staedtische_gewerbe_error = (
+            "Needs an ethical evaluation (EthischeBeurteilung)"
+        )
+        expected_kantonale_ortsplanung_error = (
+            "Beschreibung and/or Referenzcode must be defined."
+        )
+        expected_staedtische_ortsplanung_error = "Beschreibung needed when top secret."
+
+        assert (
+            result_model.index(0, 0).data(
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+            )
+            == expected_staedtische_gewerbe_error
+        )
+        assert (
+            result_model.index(1, 0).data(
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+            )
+            == expected_kantonale_ortsplanung_error
+        )
+        assert (
+            result_model.index(2, 0).data(
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+            )
+            == expected_staedtische_ortsplanung_error
+        )
+
+        # Validate at cantonal level (setting --exportModels KantonaleOrtsplanung_V1_1)
+        # means validation will fail - we encouter the constraint failure from Kantonale_Ortsplanung_V1_1
+        validator = ilivalidator.Validator()
+        validator.tool = DbIliMode.ili2gpkg
+        validator.configuration = ilivalidator_config(validator.tool, "ilimodels")
+        validator.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Infrastruktur_V1"
+        )
+        validator.configuration.iliexportmodels = "Kantonale_Ortsplanung_V1_1"
+        validator.configuration.dbfile = dataImporter.configuration.dbfile
+        validator.configuration.xtflog = os.path.join(
+            self.basetestpath,
+            "tmp_test_kantonale_ortsplanung_v1_1_result_{:%Y%m%d%H%M%S%f}.xtf".format(
+                datetime.datetime.now()
+            ),
+        )
+        validator.stdout.connect(self.print_info)
+        validator.stderr.connect(self.print_error)
+        # No skip
+        assert validator.run() == ilivalidator.Validator.ERROR
+
+        # check validation result
+        result_model = ilivalidator.ValidationResultModel()
+        result_model.configuration = validator.configuration
+        result_model.reload()
+        assert result_model.rowCount() == 1
+
+        expected_kantonale_ortsplanung_error = (
+            "Beschreibung and/or Referenzcode must be defined."
+        )
+
+        assert (
+            result_model.index(0, 0).data(
+                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+            )
+            == expected_kantonale_ortsplanung_error
+        )
+
+        # Validate at national level (setting --exportModels Ortsplanung_V1_1;Gewerbe_V1)
+        # means validation will succeed.
+        validator = ilivalidator.Validator()
+        validator.tool = DbIliMode.ili2gpkg
+        validator.configuration = ilivalidator_config(validator.tool, "ilimodels")
+        validator.configuration.ilimodels = (
+            "Staedtische_Ortsplanung_V1_1;Staedtisches_Gewerbe_V1;Infrastruktur_V1"
+        )
+        validator.configuration.iliexportmodels = "Ortsplanung_V1_1;Gewerbe_V1"
+        validator.configuration.dbfile = dataImporter.configuration.dbfile
+        validator.configuration.xtflog = os.path.join(
+            self.basetestpath,
+            "tmp_test_kantonale_ortsplanung_v1_1_result_{:%Y%m%d%H%M%S%f}.xtf".format(
+                datetime.datetime.now()
+            ),
+        )
+        validator.stdout.connect(self.print_info)
+        validator.stderr.connect(self.print_error)
+        # No skip
+        assert validator.run() == ilivalidator.Validator.SUCCESS
+
     def print_info(self, text):
         logging.info(text)
 

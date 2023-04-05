@@ -1,0 +1,32 @@
+INTERLIS 2.3;
+
+/* Ortsplanung as national model importing the infrastrukture used for using geometry types and connectiong to strasse */
+MODEL Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+  IMPORTS Infrastruktur_V1;
+
+  TOPIC Konstruktionen =
+    DEPENDS ON Infrastruktur_V1.Strassen;
+
+    CLASS Gebaeude  =
+      Name : MANDATORY TEXT*99;
+      Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
+    END Gebaeude;
+
+    CLASS BesitzerIn =
+      Vorname : MANDATORY TEXT*99;
+      Nachname : MANDATORY TEXT*99;
+    END BesitzerIn;
+
+    ASSOCIATION Gebaeude_BesitzerIn =
+      BesitzerIn -- {0..1} BesitzerIn;
+      Gebaeude -- {0..*} Gebaeude;
+    END Gebaeude_BesitzerIn;
+
+    ASSOCIATION Gebaeude_Strasse =
+      Strasse (EXTERNAL) -- {0..1} Infrastruktur_V1.Strassen.Strasse;
+      Gebaeude -- {0..*} Gebaeude;
+    END Gebaeude_Strasse;
+
+  END Konstruktionen;
+
+END Ortsplanung_V1_1.
