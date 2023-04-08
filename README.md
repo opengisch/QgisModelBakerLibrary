@@ -81,7 +81,7 @@ pip install modelbaker
 ```
 
 ### ili2db
-In the current release we use ili2db version 4.6.1
+In the current release we use ili2db version 4.10
 
 ## Infos for Devs
 
@@ -91,7 +91,7 @@ Is enforced with pre-commit. To use, make:
 ```
 pip install pre-commit
 pre-commit install
-```
+```00
 And to run it over all the files (with infile changes):
 ```
 pre-commit run --color=always --all-file
