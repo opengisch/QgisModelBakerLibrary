@@ -24,7 +24,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 from enum import Enum
 
-from PyQt5.QtCore import QObject, Qt, pyqtSignal
+from PyQt5.QtCore import QObject, QSortFilterProxyModel, Qt, pyqtSignal
 from PyQt5.QtGui import QPalette, QRegion, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QGridLayout, QItemDelegate, QLabel, QStyle, QWidget
 from qgis.core import Qgis, QgsMessageLog
@@ -46,6 +46,9 @@ class IliCache(QObject):
         self.base_configuration = configuration
         self.single_ili_file = single_ili_file
         self.model = IliModelItemModel()
+        self.sorted_model = QSortFilterProxyModel()
+        self.sorted_model.setSourceModel(self.model)
+        self.sorted_model.sort(0, Qt.AscendingOrder)
         self.directories = None
         if self.base_configuration:
             self.directories = self.base_configuration.model_directories
@@ -365,7 +368,7 @@ class IliModelItemModel(QStandardItemModel):
 
                 item = QStandardItem()
                 item.setData(model["name"], int(Qt.DisplayRole))
-                item.setData(model["name"], int(Qt.EditRole))
+                item.setData(model["name"], int(Qt.EditRole))  # considered in completer
                 item.setData(model["repository"], int(IliModelItemModel.Roles.ILIREPO))
                 item.setData(model["version"], int(IliModelItemModel.Roles.VERSION))
 
@@ -432,7 +435,8 @@ class IliDataCache(IliCache):
         self.model.modelReset.connect(
             lambda: self.model_refreshed.emit(self.model.rowCount())
         )
-
+        self.sorted_model.setSourceModel(self.model)
+        self.sorted_model.sort(0, Qt.AscendingOrder)
         self.filter_models = models.split(";") if models else []
         self.type = type
         self.directories = (
@@ -762,6 +766,8 @@ class IliToppingFileCache(IliDataCache):
         IliDataCache.__init__(self, configuration)
         self.cache_path = os.path.expanduser("~/.ilitoppingfilescache")
         self.model = IliToppingFileItemModel()
+        self.sorted_model.setSourceModel(self.model)
+        self.sorted_model.sort(0, Qt.AscendingOrder)
         self.file_ids = file_ids
         self.tool_dir = (
             tool_dir
