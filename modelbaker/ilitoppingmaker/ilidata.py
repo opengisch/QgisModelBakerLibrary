@@ -52,7 +52,9 @@ class DatasetMetadata:
         self.owner = owner
         self.project_name = project_name
 
-        self.title = f"QGIS {self.file_type} file for {self.project_name} - {os.path.splitext(os.path.basename(self.file_path))}"
+        # the title is mostly what is displayed in a specific context
+        self.title = self.project_name
+        self.short_description = f"QGIS {self.file_type} file for {self.project_name} - {os.path.splitext(os.path.basename(self.file_path))}"
         self.file_mimetype = self._file_mime_type(self.file_path)
 
     def _file_mime_type(self, file_path: str = None) -> str:
@@ -80,6 +82,16 @@ class DatasetMetadata:
             localisedtext, "DatasetIdx16.LocalisedText"
         )
         ET.SubElement(datasetidx16_localisedtext, "Text").text = self.title
+
+        short_description = ET.SubElement(element, "shortDescription")
+        datsetidx16_multilingualtext = ET.SubElement(
+            short_description, "DatasetIdx16.MultilingualMText"
+        )
+        localisedtext = ET.SubElement(datsetidx16_multilingualtext, "LocalisedText")
+        datasetidx16_localisedtext = ET.SubElement(
+            localisedtext, "DatasetIdx16.LocalisedMText"
+        )
+        ET.SubElement(datasetidx16_localisedtext, "Text").text = self.short_description
 
         categories = ET.SubElement(element, "categories")
         type_datasetidx16_code = ET.SubElement(categories, "DatasetIdx16.Code_")
