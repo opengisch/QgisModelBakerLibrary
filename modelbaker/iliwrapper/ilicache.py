@@ -535,6 +535,42 @@ class IliDataCache(IliCache):
                                     }
                                     title.append(title_information)
 
+                    short_description = list()
+
+                    for short_description_element in metaconfig_metadata.findall(
+                        "ili23:shortDescription", self.ns
+                    ):
+                        for (
+                            multilingual_text_element
+                        ) in short_description_element.findall(
+                            "ili23:DatasetIdx16.MultilingualMText", self.ns
+                        ):
+                            for (
+                                localised_text_element
+                            ) in multilingual_text_element.findall(
+                                "ili23:LocalisedText", self.ns
+                            ):
+                                for (
+                                    localised_text_element
+                                ) in localised_text_element.findall(
+                                    "ili23:DatasetIdx16.LocalisedMText", self.ns
+                                ):
+                                    short_description_information = {
+                                        "language": self.get_element_text(
+                                            localised_text_element.find(
+                                                "ili23:Language", self.ns
+                                            )
+                                        ),
+                                        "text": self.get_element_text(
+                                            localised_text_element.find(
+                                                "ili23:Text", self.ns
+                                            )
+                                        ),
+                                    }
+                                    short_description.append(
+                                        short_description_information
+                                    )
+
                     model_link_names = []
                     for basket_element in metaconfig_metadata.findall(
                         "ili23:baskets", self.ns
@@ -592,6 +628,12 @@ class IliDataCache(IliCache):
                                         metaconfig["title"] = title
                                     else:
                                         metaconfig["title"] = None
+                                    if short_description is not None:
+                                        metaconfig[
+                                            "short_description"
+                                        ] = short_description
+                                    else:
+                                        metaconfig["short_description"] = None
 
                                     metaconfig["model_link_names"] = model_link_names
                                     repo_metaconfigs.append(metaconfig)
@@ -654,6 +696,7 @@ class IliDataItemModel(QStandardItemModel):
         ID = Qt.UserRole + 7
         URL = Qt.UserRole + 8
         MODEL_LINKS = Qt.UserRole + 9
+        SHORT_DESCRIPTION = Qt.UserRole + 10
 
         def __int__(self):
             return self.value
@@ -679,8 +722,16 @@ class IliDataItemModel(QStandardItemModel):
                     # since there is no multilanguage handling we take the first entry
                     display_value = dataitem["title"][0]["text"]
 
+                short_description = None
+                if (
+                    dataitem["short_description"]
+                    and "text" in dataitem["short_description"][0]
+                ):
+                    short_description = dataitem["short_description"][0]["text"]
+
                 item.setData(display_value, int(Qt.DisplayRole))
                 item.setData(display_value, int(Qt.EditRole))
+                item.setData(short_description, int(Qt.ToolTipRole))
                 item.setData(dataitem["id"], int(IliDataItemModel.Roles.ID))
                 item.setData(
                     dataitem["repository"], int(IliDataItemModel.Roles.ILIREPO)
@@ -694,6 +745,9 @@ class IliDataItemModel(QStandardItemModel):
                 item.setData(dataitem["owner"], int(IliDataItemModel.Roles.OWNER))
                 item.setData(dataitem["title"], int(IliDataItemModel.Roles.TITLE))
                 item.setData(dataitem["url"], int(IliDataItemModel.Roles.URL))
+                item.setData(
+                    short_description, int(IliDataItemModel.Roles.SHORT_DESCRIPTION)
+                )
 
                 item.setData(
                     dataitem["model_link_names"],
@@ -722,7 +776,7 @@ class MetaConfigCompleterDelegate(QItemDelegate):
         self.repository_label = QLabel()
         self.repository_label.setAlignment(Qt.AlignRight)
         self.widget.layout().addWidget(self.metaconfig_label, 0, 0)
-        self.widget.layout().addWidget(self.repository_label, 0, 2)
+        self.widget.layout().addWidget(self.repository_label, 0, 1)
 
     def paint(self, painter, option, index):
         option.index = index
@@ -730,13 +784,11 @@ class MetaConfigCompleterDelegate(QItemDelegate):
 
     def drawDisplay(self, painter, option, rect, text):
         repository = option.index.data(int(IliDataItemModel.Roles.ILIREPO))
-        models = option.index.data(int(IliDataItemModel.Roles.MODELS))
-        owner = option.index.data(int(IliDataItemModel.Roles.OWNER))
         display_text = option.index.data(int(Qt.DisplayRole))
 
         self.repository_label.setText(
-            '<font color="#666666"><i>of {owner} with {models} at {repository}</i></font>'.format(
-                owner=owner, models="/".join(models), repository=repository
+            '<font color="#666666"><i>{repository}</i></font>'.format(
+                repository=repository
             )
         )
         self.metaconfig_label.setText(
