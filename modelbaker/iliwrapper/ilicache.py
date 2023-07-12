@@ -156,11 +156,12 @@ class IliCache(QObject):
                 ),
             )
 
-    def clear_cache():
-        if not QDir().exists(IliCache.CACHE_PATH):
+    @classmethod
+    def clear_cache(cls):
+        if not QDir().exists(cls.CACHE_PATH):
             return
 
-        shutil.rmtree(IliCache.CACHE_PATH, ignore_errors=False, onerror=None)
+        shutil.rmtree(cls.CACHE_PATH, ignore_errors=False, onerror=None)
 
     def _process_ilisite(self, file):
         """
@@ -457,12 +458,6 @@ class IliDataCache(IliCache):
     def process_model_directory(self, path):
         # download remote and local repositories
         self.download_repository(path)
-
-    def clear_cache():
-        if not QDir().exists(IliToppingFileCache.CACHE_PATH):
-            return
-
-        shutil.rmtree(IliToppingFileCache.CACHE_PATH, ignore_errors=False, onerror=None)
 
     def _process_informationfile(self, file, netloc, url):
         """
@@ -894,12 +889,6 @@ class IliToppingFileCache(IliDataCache):
             self.downloaded_files.append(dataset_id)
         if len(self.downloaded_files) == len(self.file_ids) == self.model.rowCount():
             self.download_finished.emit()
-
-    def clear_cache():
-        if not QDir().exists(IliToppingFileCache.CACHE_PATH):
-            return
-
-        shutil.rmtree(IliToppingFileCache.CACHE_PATH, ignore_errors=False, onerror=None)
 
     def _process_informationfile(self, file, netloc, url):
         """
