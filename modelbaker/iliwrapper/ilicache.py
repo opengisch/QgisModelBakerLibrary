@@ -20,11 +20,12 @@ import glob
 import logging
 import os
 import re
+import shutil
 import urllib.parse
 import xml.etree.ElementTree as ET
 from enum import Enum
 
-from PyQt5.QtCore import QObject, QSortFilterProxyModel, Qt, pyqtSignal
+from PyQt5.QtCore import QDir, QObject, QSortFilterProxyModel, Qt, pyqtSignal
 from PyQt5.QtGui import QPalette, QRegion, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QGridLayout, QItemDelegate, QLabel, QStyle, QWidget
 from qgis.core import Qgis, QgsMessageLog
@@ -38,9 +39,10 @@ class IliCache(QObject):
 
     new_message = pyqtSignal(int, str)
 
+    CACHE_PATH = os.path.expanduser("~/.ilicache")
+
     def __init__(self, configuration, single_ili_file=None):
         QObject.__init__(self)
-        self.cache_path = os.path.expanduser("~/.ilicache")
         self.information_file = "ilimodels.xml"
         self.repositories = dict()
         self.base_configuration = configuration
@@ -95,7 +97,7 @@ class IliCache(QObject):
             return os.path.join(url, file)
         else:
             netloc = "" if netloc is None else netloc
-            return os.path.join(self.cache_path, netloc, file)
+            return os.path.join(self.CACHE_PATH, netloc, file)
 
     def download_repository(self, url):
         """
@@ -123,10 +125,10 @@ class IliCache(QObject):
                     self.tr("Could not find local file  {}").format(ilisite_url)
                 )
         else:
-            netloc_dir = os.path.join(self.cache_path, netloc)
+            netloc_dir = os.path.join(self.CACHE_PATH, netloc)
             os.makedirs(netloc_dir, exist_ok=True)
             information_file_path = os.path.join(netloc_dir, self.information_file)
-            ilisite_path = os.path.join(self.cache_path, netloc, "ilisite.xml")
+            ilisite_path = os.path.join(self.CACHE_PATH, netloc, "ilisite.xml")
 
             # download ilimodels.xml
             download_file(
@@ -153,6 +155,12 @@ class IliCache(QObject):
                     )
                 ),
             )
+
+    def clear_cache():
+        if not QDir().exists(IliCache.CACHE_PATH):
+            return
+
+        shutil.rmtree(IliCache.CACHE_PATH, ignore_errors=False, onerror=None)
 
     def _process_ilisite(self, file):
         """
@@ -426,9 +434,10 @@ class IliDataCache(IliCache):
     file_download_failed = pyqtSignal(str, str)
     model_refreshed = pyqtSignal(int)
 
+    CACHE_PATH = os.path.expanduser("~/.ilimetaconfigcache")
+
     def __init__(self, configuration, type="metaconfig", models=None):
         IliCache.__init__(self, configuration)
-        self.cache_path = os.path.expanduser("~/.ilimetaconfigcache")
         self.information_file = "ilidata.xml"
 
         self.model = IliDataItemModel()
@@ -448,6 +457,12 @@ class IliDataCache(IliCache):
     def process_model_directory(self, path):
         # download remote and local repositories
         self.download_repository(path)
+
+    def clear_cache():
+        if not QDir().exists(IliToppingFileCache.CACHE_PATH):
+            return
+
+        shutil.rmtree(IliToppingFileCache.CACHE_PATH, ignore_errors=False, onerror=None)
 
     def _process_informationfile(self, file, netloc, url):
         """
@@ -665,7 +680,7 @@ class IliDataCache(IliCache):
                     self.tr("Could not find local file  {}").format(file_url),
                 )
         else:
-            file_path = os.path.join(self.cache_path, netloc, file)
+            file_path = os.path.join(self.CACHE_PATH, netloc, file)
             file_dir = os.path.dirname(file_path)
             os.makedirs(file_dir, exist_ok=True)
 
@@ -814,9 +829,10 @@ class IliToppingFileCache(IliDataCache):
     file_ids can contain ilidata: or file: information
     """
 
+    CACHE_PATH = os.path.expanduser("~/.ilitoppingfilescache")
+
     def __init__(self, configuration, file_ids=None, tool_dir=None):
         IliDataCache.__init__(self, configuration)
-        self.cache_path = os.path.expanduser("~/.ilitoppingfilescache")
         self.model = IliToppingFileItemModel()
         self.sorted_model.setSourceModel(self.model)
         self.sorted_model.sort(0, Qt.AscendingOrder)
@@ -878,6 +894,12 @@ class IliToppingFileCache(IliDataCache):
             self.downloaded_files.append(dataset_id)
         if len(self.downloaded_files) == len(self.file_ids) == self.model.rowCount():
             self.download_finished.emit()
+
+    def clear_cache():
+        if not QDir().exists(IliToppingFileCache.CACHE_PATH):
+            return
+
+        shutil.rmtree(IliToppingFileCache.CACHE_PATH, ignore_errors=False, onerror=None)
 
     def _process_informationfile(self, file, netloc, url):
         """
