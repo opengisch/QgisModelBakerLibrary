@@ -54,6 +54,7 @@ class Layer:
         is_basket_table=False,
         is_dataset_table=False,
         ili_name=None,
+        is_relevant=True,
         definitionfile=None,
         qmlstylefile=None,
         styles={},

@@ -47,6 +47,7 @@ class Generator(QObject):
         parent=None,
         mgmt_uri=None,
         consider_basket_handling=False,
+        optimize_extended=True #TRUE for-relevance-tests: should be false after
     ):
         """
         Creates a new Generator objects.
@@ -68,6 +69,7 @@ class Generator(QObject):
         self._db_connector.stdout.connect(self.print_info)
         self._db_connector.new_message.connect(self.append_print_message)
         self.basket_handling = consider_basket_handling and self.get_basket_handling()
+        self.optimize_extended = optimize_extended
 
         self._additional_ignored_layers = (
             []
@@ -137,6 +139,8 @@ class Generator(QObject):
                 record.get("tablename") == self._db_connector.dataset_table_name
             )
 
+            is_relevant = bool(record.get("relevance")) if self.optimize_extended else True
+
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
                 short_name = None
@@ -185,7 +189,7 @@ class Generator(QObject):
                                 + match.group(1).split(".")[-1]
                                 + ")"
                             )
-                alias = short_name
+                alias = short_name if is_relevant else f"{short_name} !IRRELEVANT!" #for-relevance-tests
 
             display_expression = ""
             if is_basket_table:
@@ -224,6 +228,7 @@ class Generator(QObject):
                 is_basket_table,
                 is_dataset_table,
                 record.get("ili_name"),
+                is_relevant
             )
 
             # Configure fields for current table
