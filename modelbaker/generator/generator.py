@@ -17,6 +17,7 @@
  ***************************************************************************/
 """
 import re
+from enum import Enum
 
 from qgis.core import QgsApplication, QgsRelation, QgsWkbTypes
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QObject, pyqtSignal
@@ -37,6 +38,11 @@ class Generator(QObject):
     stdout = pyqtSignal(str)
     new_message = pyqtSignal(int, str)
 
+    class OptimizeStrategy(Enum):
+        NONE = 0
+        RENAME = 1
+        HIDE = 2
+
     def __init__(
         self,
         tool,
@@ -47,7 +53,7 @@ class Generator(QObject):
         parent=None,
         mgmt_uri=None,
         consider_basket_handling=False,
-        optimize_extended=True #TRUE for-relevance-tests: should be false after
+        optimize_strategy=Generator.OptimizeStrategy.HIDE #HIDE for-relevance-tests: should be NONE after
     ):
         """
         Creates a new Generator objects.
@@ -69,7 +75,7 @@ class Generator(QObject):
         self._db_connector.stdout.connect(self.print_info)
         self._db_connector.new_message.connect(self.append_print_message)
         self.basket_handling = consider_basket_handling and self.get_basket_handling()
-        self.optimize_extended = optimize_extended
+        self.optimize_strategy = optimize_strategy
 
         self._additional_ignored_layers = (
             []
@@ -139,7 +145,7 @@ class Generator(QObject):
                 record.get("tablename") == self._db_connector.dataset_table_name
             )
 
-            is_relevant = bool(record.get("relevance")) if self.optimize_extended else True
+            is_relevant = bool(record.get("relevance")) if self.optimize_strategy != Generator.OptimizeStrategy.NONE else True
 
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
