@@ -163,7 +163,7 @@ class Generator(QObject):
                         table_appearance_count[record["tablename"]] > 1
                         and "geometry_column" in record
                     ):
-                        # multiple layers for this table - append geometry column to name
+                        # table loaded multiple times (because of multiple geometry columns) - append geometry column to name (for PG source layers)
                         fields_info = self.get_fields_info(record["tablename"])
                         for field_info in fields_info:
                             if field_info["column_name"] == record["geometry_column"]:
@@ -188,7 +188,7 @@ class Generator(QObject):
                         if match.group(0) == match.group(1):
                             short_name = match.group(1).split(".")[-1]
                         else:
-                            # additional brackets in the the name - extended layer in geopackage
+                            # table does not fit in match group (on multigeometry in geopackage they are named with "...OriginalName.GeometryColumn (OriginalName)" so we want the GeometryColumn appended in brackets
                             short_name = (
                                 match.group(1).split(".")[-2]
                                 + " ("
@@ -363,6 +363,14 @@ class Generator(QObject):
                 layer.fields.append(field)
 
             layers.append(layer)
+
+        #rename ambiguous layers with topic prefix
+        ambiguous_aliases = [l.alias for l in layers if layers.count(l.alias)>1]
+        for layer in layers:
+            if layer.alias in ambiguous_aliases:
+                if layer.ili_name:
+                    if layer.ili_name.count(".") > 1:
+                        layer.alias = layer.ili_name.split('.')[1] + "_" +layer.alias
 
         self.print_messages()
 
