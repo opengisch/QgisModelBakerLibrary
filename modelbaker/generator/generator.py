@@ -364,27 +364,25 @@ class Generator(QObject):
 
             layers.append(layer)
 
-        #rename ambiguous layers with topic prefix
-        aliases = [l.alias for l in layers]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
-        for layer in layers:
-            if layer.alias in ambiguous_aliases:
-                if layer.ili_name:
-                    if layer.ili_name.count(".") > 1:
-                        layer.alias = layer.ili_name.split('.')[1] + "." +layer.alias
-
-        #rename ambiguous layers with models prefix
-        aliases = [l.alias for l in layers]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
-        for layer in layers:
-            if layer.alias in ambiguous_aliases:
-                if layer.ili_name:
-                    if layer.ili_name.count(".") > 1:
-                        layer.alias = layer.ili_name.split('.')[0] + "." +layer.alias
+        #append topic name to ambiguous layers
+        self._rename_ambiguous_layers(layers)
+        #append moel name to still ambiguous layers
+        self._rename_ambiguous_layers(layers, second_pass=True)
 
         self.print_messages()
 
         return layers
+
+    def _rename_ambiguous_layers(self, layers, second_pass = False):
+        #rename ambiguous layers with topic (on not second_pass) or model (on second_pass) prefix 
+        #on irrelevant layers only if we don't ride OptimizeStrategy.HIDE
+        aliases = [l.alias for l in layers if l.is_relevant or self.optimize_strategy != self.OptimizeStrategy.HIDE]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        for layer in layers:
+            if layer.alias in ambiguous_aliases:
+                if layer.ili_name:
+                    if layer.ili_name.count(".") > 1:
+                        layer.alias = layer.ili_name.split('.')[(0 if second_pass else 1)] + "." +layer.alias
 
     def relations(self, layers, filter_layer_list=[]):
         relations_info = self.get_relations_info(filter_layer_list)
