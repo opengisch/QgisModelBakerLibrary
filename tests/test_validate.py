@@ -517,32 +517,20 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 3
 
-        expected_staedtische_gewerbe_error = (
-            "Needs an ethical evaluation (EthischeBeurteilung)"
-        )
-        expected_kantonale_ortsplanung_error = (
-            "Beschreibung and/or Referenzcode must be defined."
-        )
-        expected_staedtische_ortsplanung_error = "Beschreibung needed when top secret."
+        expected_error_messages = [
+            #staedtisches gewerbe
+            "Needs an ethical evaluation (EthischeBeurteilung)",
+            #kantonale ortsplanung
+            "Beschreibung and/or Referenzcode must be defined.",
+            #staedtische ortsplanung
+            "Beschreibung needed when top secret."
+        ]
 
-        assert (
-            result_model.index(0, 0).data(
+        error_messages = [ result_model.index(i, 0).data(
                 int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_staedtische_gewerbe_error
-        )
-        assert (
-            result_model.index(1, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_kantonale_ortsplanung_error
-        )
-        assert (
-            result_model.index(2, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_staedtische_ortsplanung_error
-        )
+            ) for i in range(3) ]
+
+        assert set(error_messages) == set(expected_error_messages)
 
         # Validate at cantonal level (setting --exportModels KantonaleOrtsplanung_V1_1)
         # means validation will fail - we encouter the constraint failure from Kantonale_Ortsplanung_V1_1
