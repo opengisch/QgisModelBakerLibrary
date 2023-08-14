@@ -99,6 +99,8 @@ class Layer:
                 self.model_topic_name = (
                     f"{self.ili_name.split('.')[0]}.{self.ili_name.split('.')[1]}"
                 )
+        
+        self.is_relevant = is_relevant
 
         self.definitionfile = definitionfile
         self.qmlstylefile = qmlstylefile

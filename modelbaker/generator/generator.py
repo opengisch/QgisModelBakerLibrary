@@ -145,7 +145,7 @@ class Generator(QObject):
                 record.get("tablename") == self._db_connector.dataset_table_name
             )
 
-            is_relevant = bool(record.get("relevance")) if self.optimize_strategy != Generator.OptimizeStrategy.NONE else True
+            is_relevant = bool(record.get("relevance")) # it can be not relevant and still be displayed (in case of NONE) if self.optimize_strategy != Generator.OptimizeStrategy.NONE else True
 
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
@@ -195,7 +195,7 @@ class Generator(QObject):
                                 + match.group(1).split(".")[-1]
                                 + ")"
                             )
-                alias = short_name #for-relevance-tests if is_relevant else f"{short_name} !IRRELEVANT!" #for-relevance-tests
+                alias = short_name #for-relevance-tests if is_relevant else f"{short_name} !IRRELEVANT!" 
 
             display_expression = ""
             if is_basket_table:
