@@ -60,4 +60,13 @@ MODEL Polymorphic_Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023
 
   END Hallen;
 
+  !! An indipendend topic just having "coincidentally" the same name and the same named class (but no extensions involved here)
+  TOPIC Konstruktionen =
+    OID AS INTERLIS.UUIDOID;
+
+    CLASS Gebaeude =
+      Name: TEXT;
+    END Gebaeude;
+  END Konstruktionen;
+
 END Polymorphic_Ortsplanung_V1_1.

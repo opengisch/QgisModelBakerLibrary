@@ -53,7 +53,7 @@ class Generator(QObject):
         parent=None,
         mgmt_uri=None,
         consider_basket_handling=False,
-        optimize_strategy=Generator.OptimizeStrategy.HIDE #HIDE for-relevance-tests: should be NONE after
+        optimize_strategy=2 #HIDE for-relevance-tests: should be NONE after
     ):
         """
         Creates a new Generator objects.
@@ -195,7 +195,7 @@ class Generator(QObject):
                                 + match.group(1).split(".")[-1]
                                 + ")"
                             )
-                alias = short_name if is_relevant else f"{short_name} !IRRELEVANT!" #for-relevance-tests
+                alias = short_name #for-relevance-tests if is_relevant else f"{short_name} !IRRELEVANT!" #for-relevance-tests
 
             display_expression = ""
             if is_basket_table:
@@ -365,12 +365,22 @@ class Generator(QObject):
             layers.append(layer)
 
         #rename ambiguous layers with topic prefix
-        ambiguous_aliases = [l.alias for l in layers if layers.count(l.alias)>1]
+        aliases = [l.alias for l in layers]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
         for layer in layers:
             if layer.alias in ambiguous_aliases:
                 if layer.ili_name:
                     if layer.ili_name.count(".") > 1:
-                        layer.alias = layer.ili_name.split('.')[1] + "_" +layer.alias
+                        layer.alias = layer.ili_name.split('.')[1] + "." +layer.alias
+
+        #rename ambiguous layers with models prefix
+        aliases = [l.alias for l in layers]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        for layer in layers:
+            if layer.alias in ambiguous_aliases:
+                if layer.ili_name:
+                    if layer.ili_name.count(".") > 1:
+                        layer.alias = layer.ili_name.split('.')[0] + "." +layer.alias
 
         self.print_messages()
 
