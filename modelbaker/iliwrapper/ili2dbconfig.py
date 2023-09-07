@@ -421,6 +421,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.xtflog = ""
         self.skip_geometry_errors = False
         self.valid_config = ""
+        self.xtffile = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         args = list()
@@ -448,6 +449,9 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         if self.with_exporttid:
             self.append_args(args, ["--exportTid"])
 
+        if self.db_ili_version == 3:
+            self.append_args(args, ["--export3"])
+            
         if self.xtflog:
             self.append_args(args, ["--xtflog", self.xtflog])
 
@@ -457,6 +461,9 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.valid_config:
             self.append_args(args, ["--validConfig", self.valid_config])
+        
+        if self.db_ili_version == 3:
+            self.append_args(args, [self.xtffile])
 
         self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
 
