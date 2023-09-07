@@ -30,10 +30,21 @@ from .iliexecutable import IliExecutable
 class Validator(IliExecutable):
     def __init__(self, parent=None):
         super().__init__(parent)
+        self.version = 4
 
     def _create_config(self):
         return ValidateConfiguration()
+        
+    def _get_ili2db_version(self):
+        return self.version
+        
+    def _args(self, hide_password):
+        args = super()._args(hide_password)
 
+        if self.version == 3 and "--export3" in args:
+            args.remove("--export3")
+
+        return args
 
 class ValidationResultModel(QStandardItemModel):
     """
