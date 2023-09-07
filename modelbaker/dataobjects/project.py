@@ -36,6 +36,7 @@ from qgis.PyQt.QtXml import QDomDocument
 from .layers import Layer
 from .legend import LegendGroup
 from .relations import Relation
+from ..utils.globals import OptimizeStrategy
 
 ENUM_THIS_CLASS_COLUMN = "thisclass"
 
@@ -43,7 +44,7 @@ ENUM_THIS_CLASS_COLUMN = "thisclass"
 class Project(QObject):
     layer_added = pyqtSignal(str)
 
-    def __init__(self, auto_transaction=True, evaluate_default_values=True, context={}):
+    def __init__(self, auto_transaction=True, evaluate_default_values=True, context={}, optimize_strategy = OptimizeStrategy.NONE):
         QObject.__init__(self)
         self.crs = None
         self.name = "Not set"
@@ -57,6 +58,7 @@ class Project(QObject):
         self.layouts = {}
         self.mapthemes = {}
         self.context = context
+        self.optimize_strategy = optimize_strategy
 
         # {Layer_class_name: {dbattribute: {Layer_class, cardinality, Layer_domain, key_field, value_field]}
         self.bags_of_enum = dict()

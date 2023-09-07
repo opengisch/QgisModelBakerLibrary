@@ -25,3 +25,9 @@ class DbActionType(Enum):
     GENERATE = 1
     IMPORT_DATA = 2
     EXPORT = 3
+
+class OptimizeStrategy(Enum):
+    """Defines the strategy that should be used for extended models."""
+    NONE = 0
+    GROUP = 1
+    HIDE = 2

@@ -28,6 +28,7 @@ from ..dataobjects.legend import LegendGroup
 from ..dataobjects.relations import Relation
 from ..db_factory.db_simple_factory import DbSimpleFactory
 from ..utils.qt_utils import slugify
+from ..utils.globals import OptimizeStrategy
 from .config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES, READONLY_FIELDNAMES
 from .domain_relations_generator import DomainRelationGenerator
 
@@ -37,11 +38,6 @@ class Generator(QObject):
 
     stdout = pyqtSignal(str)
     new_message = pyqtSignal(int, str)
-
-    class OptimizeStrategy(Enum):
-        NONE = 0
-        GROUP = 1
-        HIDE = 2
 
     def __init__(
         self,
@@ -53,7 +49,7 @@ class Generator(QObject):
         parent=None,
         mgmt_uri=None,
         consider_basket_handling=False,
-        optimize_strategy = None, 
+        optimize_strategy = OptimizeStrategy.NONE, 
     ):
         """
         Creates a new Generator objects.
@@ -75,7 +71,7 @@ class Generator(QObject):
         self._db_connector.stdout.connect(self.print_info)
         self._db_connector.new_message.connect(self.append_print_message)
         self.basket_handling = consider_basket_handling and self.get_basket_handling()
-        self.optimize_strategy = optimize_strategy if optimize_strategy is not None else self.OptimizeStrategy.NONE
+        self.optimize_strategy = optimize_strategy
 
         self._additional_ignored_layers = (
             []
@@ -145,7 +141,7 @@ class Generator(QObject):
                 record.get("tablename") == self._db_connector.dataset_table_name
             )
 
-            is_relevant = bool(record.get("relevance")) # it can be not relevant and still be displayed (in case of NONE) if self.optimize_strategy != Generator.OptimizeStrategy.NONE else True
+            is_relevant = bool(record.get("relevance")) # it can be not relevant and still be displayed (in case of NONE) if self.optimize_strategy != OptimizeStrategy.NONE else True
 
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
@@ -376,7 +372,7 @@ class Generator(QObject):
     def _rename_ambiguous_layers(self, layers, second_pass = False):
         #rename ambiguous layers with topic (on not second_pass) or model (on second_pass) prefix 
         #on irrelevant layers only if we don't ride OptimizeStrategy.HIDE
-        aliases = [l.alias for l in layers if l.is_relevant or self.optimize_strategy != self.OptimizeStrategy.HIDE]
+        aliases = [l.alias for l in layers if l.is_relevant or self.optimize_strategy != OptimizeStrategy.HIDE]
         ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
         for layer in layers:
             if layer.alias in ambiguous_aliases:
@@ -403,7 +399,11 @@ class Generator(QObject):
                 and record["referenced_table"] in layer_map.keys()
             ):
                 for referencing_layer in layer_map[record["referencing_table"]]:
+                    if not referencing_layer.is_relevant and self.optimize_strategy == OptimizeStrategy.HIDE:
+                        continue
                     for referenced_layer in layer_map[record["referenced_table"]]:
+                        if not referenced_layer.is_relevant and self.optimize_strategy == OptimizeStrategy.HIDE:
+                            continue
                         relation = Relation()
                         relation.referencing_layer = referencing_layer
                         relation.referenced_layer = referenced_layer
@@ -607,7 +607,7 @@ class Generator(QObject):
         else:
             irrelevant_layers = []
             relevant_layers = []
-            if self.optimize_strategy == self.OptimizeStrategy.NONE:
+            if self.optimize_strategy == OptimizeStrategy.NONE:
                 relevant_layers = layers 
             else:
                 for layer in layers:
@@ -645,7 +645,7 @@ class Generator(QObject):
                 legend.append(system)
             
             # when the irrelevant layers should be grouped (but visible), we make the structure for them and append it to a group
-            if self.optimize_strategy == self.OptimizeStrategy.GROUP:
+            if self.optimize_strategy == OptimizeStrategy.GROUP:
                 point_layers, line_layers, polygon_layers, domain_layers, table_layers, system_layers = self._separated_legend_layers(irrelevant_layers)
 
                 # create base group
