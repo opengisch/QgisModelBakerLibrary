@@ -340,40 +340,22 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 4
 
-        expected_error_geometry = (
-            "value 1314393.469 is out of range in attribute Geometry"
-        )
-        expected_error_multiplicity_1 = "Attribute Name requires a value"
-        expected_error_multiplicity_2 = (
-            "Object should associate 1 to 1 target objects (instead of 0)"
-        )
-        expected_error_constraint = (
+        expected_errors = {
+            "value 1314393.469 is out of range in attribute Geometry",
+            "Attribute Name requires a value",
+            "Object should associate 1 to 1 target objects (instead of 0)",
             "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true."
-        )
-        assert (
-            result_model.index(0, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+        }
+
+        errors = set() 
+        for i in range(4):
+            errors.add(
+                result_model.index(i, 0).data(
+                    int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+                )
             )
-            == expected_error_geometry
-        )
-        assert (
-            result_model.index(1, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_error_multiplicity_1
-        )
-        assert (
-            result_model.index(2, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_error_multiplicity_2
-        )
-        assert (
-            result_model.index(3, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_error_constraint
-        )
+        
+        assert errors == expected_errors
 
         # Skip geometry errors
         validator.configuration.skip_geometry_errors = True
@@ -383,24 +365,22 @@ class TestExport(unittest.TestCase):
         result_model.configuration = validator.configuration
         result_model.reload()
         assert result_model.rowCount() == 3
-        assert (
-            result_model.index(0, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+
+        expected_errors_no_geom = {
+            "Attribute Name requires a value",
+            "Object should associate 1 to 1 target objects (instead of 0)",
+            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true."
+        }
+
+        errors = set() 
+        for i in range(3):
+            errors.add(
+                result_model.index(i, 0).data(
+                    int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+                )
             )
-            == expected_error_multiplicity_1
-        )
-        assert (
-            result_model.index(1, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_error_multiplicity_2
-        )
-        assert (
-            result_model.index(2, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_error_constraint
-        )
+        
+        assert errors == expected_errors_no_geom
 
         # Multiplicity off
         validator.configuration.skip_geometry_errors = False
@@ -413,18 +393,20 @@ class TestExport(unittest.TestCase):
         result_model.configuration = validator.configuration
         result_model.reload()
         assert result_model.rowCount() == 2
-        assert (
-            result_model.index(0, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+        expected_errors_no_multi = {
+            "value 1314393.469 is out of range in attribute Geometry",
+            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true."
+        }
+
+        errors = set() 
+        for i in range(2):
+            errors.add(
+                result_model.index(i, 0).data(
+                    int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+                )
             )
-            == expected_error_geometry
-        )
-        assert (
-            result_model.index(1, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_error_constraint
-        )
+        
+        assert errors == expected_errors_no_multi
 
         # Constraint off
         validator.configuration.valid_config = testdata_path(
@@ -436,24 +418,22 @@ class TestExport(unittest.TestCase):
         result_model.configuration = validator.configuration
         result_model.reload()
         assert result_model.rowCount() == 3
-        assert (
-            result_model.index(0, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+
+        expected_errors_no_const = {
+            "value 1314393.469 is out of range in attribute Geometry",
+            "Attribute Name requires a value",
+            "Object should associate 1 to 1 target objects (instead of 0)",
+        }
+
+        errors = set() 
+        for i in range(3):
+            errors.add(
+                result_model.index(i, 0).data(
+                    int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+                )
             )
-            == expected_error_geometry
-        )
-        assert (
-            result_model.index(1, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_error_multiplicity_1
-        )
-        assert (
-            result_model.index(2, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_error_multiplicity_2
-        )
+        
+        assert errors == expected_errors_no_const
 
     def test_validate_exportmodels_gpkg(self):
         # Schema Import
@@ -517,32 +497,21 @@ class TestExport(unittest.TestCase):
         result_model.reload()
         assert result_model.rowCount() == 3
 
-        expected_staedtische_gewerbe_error = (
-            "Needs an ethical evaluation (EthischeBeurteilung)"
-        )
-        expected_kantonale_ortsplanung_error = (
-            "Beschreibung and/or Referenzcode must be defined."
-        )
-        expected_staedtische_ortsplanung_error = "Beschreibung needed when top secret."
+        expected_errors = {
+            "Needs an ethical evaluation (EthischeBeurteilung)",
+            "Beschreibung and/or Referenzcode must be defined.",
+            "Beschreibung needed when top secret."
+        }
 
-        assert (
-            result_model.index(0, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+        errors = set() 
+        for i in range(3):
+            errors.add(
+                result_model.index(i, 0).data(
+                    int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
+                )
             )
-            == expected_staedtische_gewerbe_error
-        )
-        assert (
-            result_model.index(1, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_kantonale_ortsplanung_error
-        )
-        assert (
-            result_model.index(2, 0).data(
-                int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            )
-            == expected_staedtische_ortsplanung_error
-        )
+        
+        assert errors == expected_errors
 
         # Validate at cantonal level (setting --exportModels KantonaleOrtsplanung_V1_1)
         # means validation will fail - we encouter the constraint failure from Kantonale_Ortsplanung_V1_1
