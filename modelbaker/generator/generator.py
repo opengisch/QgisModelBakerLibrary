@@ -141,7 +141,7 @@ class Generator(QObject):
                 record.get("tablename") == self._db_connector.dataset_table_name
             )
 
-            is_relevant = bool(record.get("relevance")) # it can be not relevant and still be displayed (in case of NONE) if self.optimize_strategy != OptimizeStrategy.NONE else True
+            is_relevant = bool(record.get("relevance")) # it can be not relevant and still be displayed (in case of NONE)
 
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
