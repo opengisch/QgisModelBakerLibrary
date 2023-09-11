@@ -31,7 +31,7 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication, QSettings
 
-from ..generator.config import IGNORED_FIELDNAMES
+from ..generator.config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES
 from ..utils.globals import OptimizeStrategy
 from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
 
@@ -281,13 +281,6 @@ class Layer:
                             ):
                                 continue
 
-                            # relations to the same table with different geometries should not be added
-                            if (
-                                self.srid
-                                and nm_relation.referenced_layer.srid == self.srid
-                            ):
-                                continue
-
                             if nm_relation.referenced_layer.is_basket_table:
                                 continue
 
@@ -347,7 +340,7 @@ class Layer:
 
         remaining_fields = set()
         for field in self.fields:
-            if field.name not in IGNORED_FIELDNAMES:
+            if field.name not in IGNORED_FIELDNAMES + BASKET_FIELDNAMES:
                 remaining_fields.add(field.name)
 
         # Remove all fields that are referencing fields
