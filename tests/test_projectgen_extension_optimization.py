@@ -1125,14 +1125,14 @@ class TestProjectExtOptimization(unittest.TestCase):
             "Feld",
             "Buntbrache",
             "Brutstelle",
-            "Bauplanung_V1_1.Natur.Park",
-            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
             "Kantonale_Bauplanung_V1_1.Natur.Tierart",
             "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
             "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
-            "Bauplanung_V1_1.Natur.Tierart",
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
             "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
             "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Tierart",
             "Bauart",
         ]
         assert set(aliases) == set(expected_aliases)
@@ -1140,7 +1140,12 @@ class TestProjectExtOptimization(unittest.TestCase):
         # irrelevant layers are detected
         assert len(irrelevant_layer_ilinames) > 0
         expected_irrelevant_layer_ilinames = [
-            "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Tierart",
+            "Bauplanung_V1_1.Natur.Feld",  # because extended multiple times
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
@@ -1199,16 +1204,272 @@ class TestProjectExtOptimization(unittest.TestCase):
             if layer.layer.name() == "Strasse":
                 efc = layer.layer.editFormConfig()
                 # one general and four relation editors
-                assert len(efc.tabs()) == 9
+                assert len(efc.tabs()) == 4
                 for tab in efc.tabs():
+                    print(f"-------- {tab.name()}")
+                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
+                        count += 1
+                        assert len(tab.children()) == 1
                     if tab.name() == "gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1gewerbe_gebaeude":
+        # should find 3 (one times gebaeude and two times kantnl_ng_v1_1konstruktionen_gebaeude because it's extended)
+        assert count == 3
+
+        QgsProject.instance().clear()
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        aliases = [l.alias for l in available_layers]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
+
+        # check no ambiguous layers exists
+        assert len(ambiguous_aliases) == 0
+        expected_aliases = [
+            "Strasse",
+            "Sonnenblumenfeld",
+            "Kartoffelfeld",
+            "KantonaleBuntbrache",
+            "Kantonale_Bauplanung_V1_1.Natur.Park",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Feld",
+            "Buntbrache",
+            "Brutstelle",
+            "Kantonale_Bauplanung_V1_1.Natur.Tierart",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Tierart",
+            "Bauart",
+        ]
+        assert set(aliases) == set(expected_aliases)
+
+        # irrelevant layers are detected
+        assert len(irrelevant_layer_ilinames) > 0
+        expected_irrelevant_layer_ilinames = [
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Tierart",
+            "Bauplanung_V1_1.Natur.Feld",  # because extended multiple times
+        ]
+        assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+
+        project = Project(optimize_strategy=strategy)
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        all_layers = root.findLayers()
+        assert len(all_layers) == 18
+
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Natur.Park",
+            "Strasse",
+            "Sonnenblumenfeld",
+            "Buntbrache",
+            "Brutstelle",
+            "KantonaleBuntbrache",
+            "Kartoffelfeld",
+        }
+
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {
+            "Bauart",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Natur.Tierart",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
+        }
+
+        base_group = root.findGroup("base layers")
+        assert base_group
+
+        grouped_base_layers = {
+            l.name() for l in base_group.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+
+        assert grouped_base_layers == {
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Feld",
+        }
+
+        base_table_group = base_group.findGroup("base tables")
+        assert base_table_group
+
+        grouped_base_tables = {
+            l.name()
+            for l in base_table_group.children()
+            if isinstance(l, QgsLayerTreeLayer)
+        }
+
+        assert grouped_base_tables == {
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Tierart",
+        }
+
+        # check relations - all are there
+        relations = list(qgis_project.relationManager().relations().values())
+        assert len(relations) == 18
+
+        # strasse should have relation editors to all layers (3/2) - since extended relation it's two times
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                efc = layer.layer.editFormConfig()
+                # one general and four relation editors
+                assert len(efc.tabs()) == 2
+                for tab in efc.tabs():
+                    print(f"-------- {tab.name()}")
+                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-        # should find 2
-        assert count == 2
+                    if tab.name() == "gebaeude":  # this should not happen
+                        count += 1
+                        assert len(tab.children()) == 1
+        # should find 1 (one times kantnl_ng_v1_1konstruktionen_gebaeude)
+        assert count == 1
+
+        QgsProject.instance().clear()
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        aliases = [l.alias for l in available_layers]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
+
+        # ambiguous aliases exist, since we don't rename them when they are hidden anyway
+        assert len(ambiguous_aliases) == 10
+        expected_aliases = [
+            "Strasse",
+            "Sonnenblumenfeld",
+            "Kartoffelfeld",
+            "KantonaleBuntbrache",
+            "Park",
+            "Gebaeude",
+            "Buntbrache",
+            "Brutstelle",
+            "Tierart",
+            "Strassen_Gebaeude",
+            "Material",
+            "Bauart",
+            "Feld",
+        ]
+        assert set(aliases) == set(expected_aliases)
+
+        # irrelevant layers are detected
+        assert len(irrelevant_layer_ilinames) > 0
+        expected_irrelevant_layer_ilinames = [
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Tierart",
+            "Bauplanung_V1_1.Natur.Feld",  # because extended multiple times
+        ]
+        assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+
+        project = Project(optimize_strategy=strategy)
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        all_layers = root.findLayers()
+        assert len(all_layers) == 12
+
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {
+            "Gebaeude",
+            "Park",
+            "Strasse",
+            "Park",
+            "Sonnenblumenfeld",
+            "Buntbrache",
+            "Brutstelle",
+            "KantonaleBuntbrache",
+            "Kartoffelfeld",
+        }
+
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {"Bauart", "Strassen_Gebaeude", "Tierart", "Material"}
+
+        # check relations - all are there
+        relations = list(qgis_project.relationManager().relations().values())
+        assert len(relations) == 7
+
+        # strasse should have relation editors to only relevant layers
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                efc = layer.layer.editFormConfig()
+                # one general and four relation editors
+                assert len(efc.tabs()) == 2
+                for tab in efc.tabs():
+                    print(f"-------- {tab.name()}")
+                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
+                        count += 1
+                        assert len(tab.children()) == 1
+                    if tab.name() == "gebaeude":  # this should not happen
+                        count += 1
+                        assert len(tab.children()) == 1
+        # should find 1 (one times kantnl_ng_v1_1konstruktionen_gebaeude)
+        assert count == 1
 
         QgsProject.instance().clear()
 
