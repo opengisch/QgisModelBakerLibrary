@@ -25,8 +25,8 @@ MODEL Bauplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07-13" =
       Materialien: BAG {1..*} OF Material;
       Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
       Test : Bauplanung_V1_1.Bauart;
-    END Gebaeude;    
-    
+    END Gebaeude;
+
     /*new many-to-many association*/
     ASSOCIATION Strassen_Gebaeude =
       Strasse (EXTERNAL) -- {0..*} Infrastruktur_V1.Strassen.Strasse;
@@ -35,7 +35,7 @@ MODEL Bauplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07-13" =
 
   END Konstruktionen;
 
-  TOPIC Natur = 
+  TOPIC Natur =
     CLASS Park =
       Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
     END Park;
@@ -60,11 +60,11 @@ MODEL Bauplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07-13" =
       Brutstelle -- {1..*} Brutstelle;
     END Brutstelle_Tierart;
 
-    CLASS Buntbrache = 
+    CLASS Buntbrache =
       Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
     END Buntbrache;
 
-    CLASS Feld = 
+    CLASS Feld =
       Name : TEXT;
       Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
     END Feld;

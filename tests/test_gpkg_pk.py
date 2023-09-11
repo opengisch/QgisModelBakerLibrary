@@ -154,9 +154,9 @@ class TestGpkgPrimaryKey(unittest.TestCase):
         project.create(None, qgis_project)
 
         punktobjekt_layer = next(
-                layer
-                for layer in available_layers
-                if layer.name == "erholungsinfrastruktur_punktobjekt"
+            layer
+            for layer in available_layers
+            if layer.name == "erholungsinfrastruktur_punktobjekt"
         )
 
         scopes = QgsExpressionContextUtils.globalProjectLayerScopes(

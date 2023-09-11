@@ -17,7 +17,6 @@
  ***************************************************************************/
 """
 import re
-from enum import Enum
 
 from qgis.core import QgsApplication, QgsRelation, QgsWkbTypes
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QObject, pyqtSignal
@@ -27,8 +26,8 @@ from ..dataobjects.layers import Layer
 from ..dataobjects.legend import LegendGroup
 from ..dataobjects.relations import Relation
 from ..db_factory.db_simple_factory import DbSimpleFactory
-from ..utils.qt_utils import slugify
 from ..utils.globals import OptimizeStrategy
+from ..utils.qt_utils import slugify
 from .config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES, READONLY_FIELDNAMES
 from .domain_relations_generator import DomainRelationGenerator
 
@@ -49,7 +48,7 @@ class Generator(QObject):
         parent=None,
         mgmt_uri=None,
         consider_basket_handling=False,
-        optimize_strategy = OptimizeStrategy.NONE, 
+        optimize_strategy=OptimizeStrategy.NONE,
     ):
         """
         Creates a new Generator objects.
@@ -141,7 +140,9 @@ class Generator(QObject):
                 record.get("tablename") == self._db_connector.dataset_table_name
             )
 
-            is_relevant = bool(record.get("relevance")) # it can be not relevant and still be displayed (in case of NONE)
+            is_relevant = bool(
+                record.get("relevance")
+            )  # it can be not relevant and still be displayed (in case of NONE)
 
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
@@ -191,7 +192,7 @@ class Generator(QObject):
                                 + match.group(1).split(".")[-1]
                                 + ")"
                             )
-                alias = short_name #for-relevance-tests if is_relevant else f"{short_name} !IRRELEVANT!" 
+                alias = short_name  # for-relevance-tests if is_relevant else f"{short_name} !IRRELEVANT!"
 
             display_expression = ""
             if is_basket_table:
@@ -230,7 +231,7 @@ class Generator(QObject):
                 is_basket_table,
                 is_dataset_table,
                 record.get("ili_name"),
-                is_relevant
+                is_relevant,
             )
 
             # Configure fields for current table
@@ -360,25 +361,33 @@ class Generator(QObject):
 
             layers.append(layer)
 
-        #append topic name to ambiguous layers
+        # append topic name to ambiguous layers
         self._rename_ambiguous_layers(layers)
-        #append moel name to still ambiguous layers
+        # append moel name to still ambiguous layers
         self._rename_ambiguous_layers(layers, second_pass=True)
 
         self.print_messages()
 
         return layers
 
-    def _rename_ambiguous_layers(self, layers, second_pass = False):
-        #rename ambiguous layers with topic (on not second_pass) or model (on second_pass) prefix 
-        #on irrelevant layers only if we don't ride OptimizeStrategy.HIDE
-        aliases = [l.alias for l in layers if l.is_relevant or self.optimize_strategy != OptimizeStrategy.HIDE]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+    def _rename_ambiguous_layers(self, layers, second_pass=False):
+        # rename ambiguous layers with topic (on not second_pass) or model (on second_pass) prefix
+        # on irrelevant layers only if we don't ride OptimizeStrategy.HIDE
+        aliases = [
+            l.alias
+            for l in layers
+            if l.is_relevant or self.optimize_strategy != OptimizeStrategy.HIDE
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
         for layer in layers:
             if layer.alias in ambiguous_aliases:
                 if layer.ili_name:
                     if layer.ili_name.count(".") > 1:
-                        layer.alias = layer.ili_name.split('.')[(0 if second_pass else 1)] + "." +layer.alias
+                        layer.alias = (
+                            layer.ili_name.split(".")[(0 if second_pass else 1)]
+                            + "."
+                            + layer.alias
+                        )
 
     def relations(self, layers, filter_layer_list=[]):
         relations_info = self.get_relations_info(filter_layer_list)
@@ -399,10 +408,16 @@ class Generator(QObject):
                 and record["referenced_table"] in layer_map.keys()
             ):
                 for referencing_layer in layer_map[record["referencing_table"]]:
-                    if not referencing_layer.is_relevant and self.optimize_strategy == OptimizeStrategy.HIDE:
+                    if (
+                        not referencing_layer.is_relevant
+                        and self.optimize_strategy == OptimizeStrategy.HIDE
+                    ):
                         continue
                     for referenced_layer in layer_map[record["referenced_table"]]:
-                        if not referenced_layer.is_relevant and self.optimize_strategy == OptimizeStrategy.HIDE:
+                        if (
+                            not referenced_layer.is_relevant
+                            and self.optimize_strategy == OptimizeStrategy.HIDE
+                        ):
                             continue
                         relation = Relation()
                         relation.referencing_layer = referencing_layer
@@ -608,7 +623,7 @@ class Generator(QObject):
             irrelevant_layers = []
             relevant_layers = []
             if self.optimize_strategy == OptimizeStrategy.NONE:
-                relevant_layers = layers 
+                relevant_layers = layers
             else:
                 for layer in layers:
                     if layer.is_relevant:
@@ -616,7 +631,14 @@ class Generator(QObject):
                     else:
                         irrelevant_layers.append(layer)
 
-            point_layers, line_layers, polygon_layers, domain_layers, table_layers, system_layers = self._separated_legend_layers(relevant_layers)
+            (
+                point_layers,
+                line_layers,
+                polygon_layers,
+                domain_layers,
+                table_layers,
+                system_layers,
+            ) = self._separated_legend_layers(relevant_layers)
 
             for l in polygon_layers:
                 legend.append(l)
@@ -627,29 +649,44 @@ class Generator(QObject):
 
             # create groups
             if len(table_layers):
-                tables = LegendGroup(QCoreApplication.translate("LegendGroup", "tables"))
+                tables = LegendGroup(
+                    QCoreApplication.translate("LegendGroup", "tables")
+                )
                 for layer in table_layers:
                     tables.append(layer)
                 legend.append(tables)
             if len(domain_layers):
-                domains = LegendGroup(QCoreApplication.translate("LegendGroup", "domains"))
+                domains = LegendGroup(
+                    QCoreApplication.translate("LegendGroup", "domains")
+                )
                 domains.expanded = False
                 for layer in domain_layers:
                     domains.append(layer)
                 legend.append(domains)
             if len(system_layers):
-                system = LegendGroup(QCoreApplication.translate("LegendGroup", "system"))
+                system = LegendGroup(
+                    QCoreApplication.translate("LegendGroup", "system")
+                )
                 system.expanded = False
                 for layer in system_layers:
                     system.append(layer)
                 legend.append(system)
-            
+
             # when the irrelevant layers should be grouped (but visible), we make the structure for them and append it to a group
             if self.optimize_strategy == OptimizeStrategy.GROUP:
-                point_layers, line_layers, polygon_layers, domain_layers, table_layers, system_layers = self._separated_legend_layers(irrelevant_layers)
+                (
+                    point_layers,
+                    line_layers,
+                    polygon_layers,
+                    domain_layers,
+                    table_layers,
+                    system_layers,
+                ) = self._separated_legend_layers(irrelevant_layers)
 
                 # create base group
-                base_group = LegendGroup(QCoreApplication.translate("LegendGroup", "base layers"))
+                base_group = LegendGroup(
+                    QCoreApplication.translate("LegendGroup", "base layers")
+                )
                 base_group.expanded = False
                 base_group.checked = False
 
@@ -662,17 +699,21 @@ class Generator(QObject):
 
                 # create groups
                 if len(table_layers):
-                    tables = LegendGroup(QCoreApplication.translate("LegendGroup", "base tables"))
+                    tables = LegendGroup(
+                        QCoreApplication.translate("LegendGroup", "base tables")
+                    )
                     for layer in table_layers:
                         tables.append(layer)
                     base_group.append(tables)
                 if len(domain_layers):
-                    domains = LegendGroup(QCoreApplication.translate("LegendGroup", "base domains"))
+                    domains = LegendGroup(
+                        QCoreApplication.translate("LegendGroup", "base domains")
+                    )
                     domains.expanded = False
                     for layer in domain_layers:
                         domains.append(layer)
                     base_group.append(domains)
-                
+
                 legend.append(base_group)
 
         return legend
@@ -706,8 +747,14 @@ class Generator(QObject):
                 else:
                     table_layers.append(layer)
 
-        return point_layers, line_layers, polygon_layers, domain_layers, table_layers, system_layers
-
+        return (
+            point_layers,
+            line_layers,
+            polygon_layers,
+            domain_layers,
+            table_layers,
+            system_layers,
+        )
 
     def resolved_layouts(
         self,

@@ -3,7 +3,7 @@ INTERLIS 2.3;
 /* Model to test several types of extended classes */
 MODEL Polymorphic_Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07-13" =
   IMPORTS Ortsplanung_V1_1,Infrastruktur_V1;
-  
+
   TOPIC Gewerbe EXTENDS Ortsplanung_V1_1.Konstruktionen =
     OID AS INTERLIS.UUIDOID;
     DEPENDS ON Infrastruktur_V1.Strassen;
@@ -22,7 +22,7 @@ MODEL Polymorphic_Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023
       Unterhaltungsart : TEXT*99;
     END Gebaeude;
 
-  END Freizeit;  
+  END Freizeit;
 
   TOPIC IndustrieGewerbe EXTENDS Polymorphic_Ortsplanung_V1_1.Gewerbe =
     OID AS INTERLIS.UUIDOID;

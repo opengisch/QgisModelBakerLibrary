@@ -103,24 +103,24 @@ class TestProjectGen(unittest.TestCase):
                 tabs = edit_form_config.tabs()
                 fields = {field.name() for field in tabs[0].children()}
                 assert fields == {
-                        "letzteanpassung",
-                        "zustaendigkeitkataster",
-                        "geo_lage_polygon",
-                        "inbetrieb",
-                        "ersteintrag",
-                        "bemerkung_en",
-                        "bemerkung_rm",
-                        "katasternummer",
-                        "bemerkung_it",
-                        "nachsorge",
-                        "url_kbs_auszug",
-                        "url_standort",
-                        "statusaltlv",
-                        "bemerkung_fr",
-                        "standorttyp",
-                        "bemerkung",
-                        "geo_lage_punkt",
-                        "bemerkung_de",
+                    "letzteanpassung",
+                    "zustaendigkeitkataster",
+                    "geo_lage_polygon",
+                    "inbetrieb",
+                    "ersteintrag",
+                    "bemerkung_en",
+                    "bemerkung_rm",
+                    "katasternummer",
+                    "bemerkung_it",
+                    "nachsorge",
+                    "url_kbs_auszug",
+                    "url_standort",
+                    "statusaltlv",
+                    "bemerkung_fr",
+                    "standorttyp",
+                    "bemerkung",
+                    "geo_lage_punkt",
+                    "bemerkung_de",
                 }
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
@@ -222,24 +222,24 @@ class TestProjectGen(unittest.TestCase):
                 tabs = edit_form_config.tabs()
                 fields = {field.name() for field in tabs[0].children()}
                 assert fields == {
-                        "letzteanpassung",
-                        "zustaendigkeitkataster",
-                        "geo_lage_polygon",
-                        "inbetrieb",
-                        "ersteintrag",
-                        "katasternummer",
-                        "nachsorge",
-                        "url_kbs_auszug",
-                        "url_standort",
-                        "statusaltlv",
-                        "standorttyp",
-                        "bemerkung",
-                        "bemerkung_de",
-                        "bemerkung_fr",
-                        "bemerkung_rm",
-                        "bemerkung_it",
-                        "bemerkung_en",
-                        "geo_lage_punkt",
+                    "letzteanpassung",
+                    "zustaendigkeitkataster",
+                    "geo_lage_polygon",
+                    "inbetrieb",
+                    "ersteintrag",
+                    "katasternummer",
+                    "nachsorge",
+                    "url_kbs_auszug",
+                    "url_standort",
+                    "statusaltlv",
+                    "standorttyp",
+                    "bemerkung",
+                    "bemerkung_de",
+                    "bemerkung_fr",
+                    "bemerkung_rm",
+                    "bemerkung_it",
+                    "bemerkung_en",
+                    "geo_lage_punkt",
                 }
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
@@ -340,23 +340,23 @@ class TestProjectGen(unittest.TestCase):
                 tabs = edit_form_config.tabs()
                 fields = {field.name() for field in tabs[0].children()}
                 assert fields == {
-                        "letzteanpassung",
-                        "zustaendigkeitkataster",
-                        "geo_lage_polygon",
-                        "inbetrieb",
-                        "ersteintrag",
-                        "bemerkung_en",
-                        "bemerkung_rm",
-                        "katasternummer",
-                        "bemerkung_it",
-                        "nachsorge",
-                        "url_kbs_auszug",
-                        "url_standort",
-                        "statusaltlv",
-                        "bemerkung_fr",
-                        "standorttyp",
-                        "bemerkung",
-                        "bemerkung_de",
+                    "letzteanpassung",
+                    "zustaendigkeitkataster",
+                    "geo_lage_polygon",
+                    "inbetrieb",
+                    "ersteintrag",
+                    "bemerkung_en",
+                    "bemerkung_rm",
+                    "katasternummer",
+                    "bemerkung_it",
+                    "nachsorge",
+                    "url_kbs_auszug",
+                    "url_standort",
+                    "statusaltlv",
+                    "bemerkung_fr",
+                    "standorttyp",
+                    "bemerkung",
+                    "bemerkung_de",
                 }
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
@@ -380,22 +380,22 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 1
         assert {
-                "statusaltlv",
-                "multilingualtext",
-                "untersmassn",
-                "multilingualmtext",
-                "languagecode_iso639_1",
-                "deponietyp",
-                "zustaendigkeitkataster",
-                "standorttyp",
-                "localisedtext",
-                "localisedmtext",
-                "belasteter_standort",
-                "deponietyp_",
-                "egrid_",
-                "untersmassn_",
-                "parzellenidentifikation",
-                "belasteter_standort_geo_lage_punkt",
+            "statusaltlv",
+            "multilingualtext",
+            "untersmassn",
+            "multilingualmtext",
+            "languagecode_iso639_1",
+            "deponietyp",
+            "zustaendigkeitkataster",
+            "standorttyp",
+            "localisedtext",
+            "localisedmtext",
+            "belasteter_standort",
+            "deponietyp_",
+            "egrid_",
+            "untersmassn_",
+            "parzellenidentifikation",
+            "belasteter_standort_geo_lage_punkt",
         } == {layer.name for layer in available_layers}
 
     def test_kbs_geopackage(self):
@@ -441,23 +441,23 @@ class TestProjectGen(unittest.TestCase):
                 tabs = edit_form_config.tabs()
                 fields = {field.name() for field in tabs[0].children()}
                 assert fields == {
-                        "letzteanpassung",
-                        "zustaendigkeitkataster",
-                        "geo_lage_polygon",
-                        "inbetrieb",
-                        "ersteintrag",
-                        "katasternummer",
-                        "nachsorge",
-                        "url_kbs_auszug",
-                        "url_standort",
-                        "statusaltlv",
-                        "standorttyp",
-                        "bemerkung",
-                        "bemerkung_de",
-                        "bemerkung_fr",
-                        "bemerkung_rm",
-                        "bemerkung_it",
-                        "bemerkung_en",
+                    "letzteanpassung",
+                    "zustaendigkeitkataster",
+                    "geo_lage_polygon",
+                    "inbetrieb",
+                    "ersteintrag",
+                    "katasternummer",
+                    "nachsorge",
+                    "url_kbs_auszug",
+                    "url_standort",
+                    "statusaltlv",
+                    "standorttyp",
+                    "bemerkung",
+                    "bemerkung_de",
+                    "bemerkung_fr",
+                    "bemerkung_rm",
+                    "bemerkung_it",
+                    "bemerkung_en",
                 }
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
@@ -481,22 +481,22 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 1
         assert {
-                "statusaltlv",
-                "multilingualtext",
-                "untersmassn",
-                "multilingualmtext",
-                "languagecode_iso639_1",
-                "deponietyp",
-                "zustaendigkeitkataster",
-                "standorttyp",
-                "localisedtext",
-                "localisedmtext",
-                "belasteter_standort",
-                "deponietyp_",
-                "egrid_",
-                "untersmassn_",
-                "parzellenidentifikation",
-                "belasteter_standort_geo_lage_punkt",
+            "statusaltlv",
+            "multilingualtext",
+            "untersmassn",
+            "multilingualmtext",
+            "languagecode_iso639_1",
+            "deponietyp",
+            "zustaendigkeitkataster",
+            "standorttyp",
+            "localisedtext",
+            "localisedmtext",
+            "belasteter_standort",
+            "deponietyp_",
+            "egrid_",
+            "untersmassn_",
+            "parzellenidentifikation",
+            "belasteter_standort_geo_lage_punkt",
         } == {layer.name for layer in available_layers}
 
     def test_naturschutz_postgis(self):
@@ -3996,9 +3996,9 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers()
 
         infra_po = next(
-                layer
-                for layer in available_layers
-                if layer.name == "erholungsinfrastruktur_punktobjekt"
+            layer
+            for layer in available_layers
+            if layer.name == "erholungsinfrastruktur_punktobjekt"
         )
         naechste_kontrolle = next(
             field for field in infra_po.fields if field.name == "naechste_kontrolle"

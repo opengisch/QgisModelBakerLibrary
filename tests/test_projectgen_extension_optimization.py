@@ -17,31 +17,20 @@
  ***************************************************************************/
 """
 
-import configparser
 import datetime
 import logging
 import os
 import pathlib
-import shutil
 import tempfile
-from decimal import Decimal
 
-import yaml
-from qgis.core import Qgis, QgsEditFormConfig, QgsProject, QgsRelation, QgsLayerTreeLayer
-from qgis.PyQt.QtCore import QEventLoop, Qt, QTimer
+from qgis.core import QgsLayerTreeLayer, QgsProject
 from qgis.testing import start_app, unittest
+
 from modelbaker.dataobjects.project import Project
 from modelbaker.db_factory.gpkg_command_config_manager import GpkgCommandConfigManager
 from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
-from modelbaker.iliwrapper.ilicache import (
-    IliDataCache,
-    IliDataItemModel,
-    IliToppingFileCache,
-    IliToppingFileItemModel,
-)
-
 from modelbaker.utils.globals import OptimizeStrategy
 from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
 
@@ -58,13 +47,13 @@ class TestProjectExtOptimization(unittest.TestCase):
         """Run before all tests."""
         cls.basetestpath = tempfile.mkdtemp()
 
-    '''
+    """
     Those tests check if:
     - no ambiguous layers exists - they are all named properly and unique
     - irrelevant layers are detected (according to the assumptions below)
     - irrelevant layers are handled according the the chosen strategy: hidden or grouped
     - relations (and their widgets) are handled according to the stategy (not created when hidden, not in the forms used when grouped)
-    
+
     Assumption:
     Since it appears almost impossible to care for all the cases, I need to make some assumptions what mostly would be the case.
     - When you extend a base class with the same name, you intend to "replace" it, otherwise you would rename it.
@@ -75,17 +64,18 @@ class TestProjectExtOptimization(unittest.TestCase):
     - Polymorphic_Ortsplanung_V1_1 containing several topics extending the same class
     - Staedtische_Ortsplanung_V1_1 containing several extention levels on the same class
     - Bauplanung_V1_1 containing structures and extending assocciations
-    '''
-
+    """
 
     def test_extopt_staedtische_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Staedtische_Ortsplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
-        importer.configuration.dbschema = "optimal_staedtische_{:%Y%m%d%H%M%S%f}".format(
-            datetime.datetime.now()
+        importer.configuration.dbschema = (
+            "optimal_staedtische_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
         )
 
         importer.configuration.srs_code = 2056
@@ -104,29 +94,41 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         available_layers = generator.layers()
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        [l.ili_name for l in available_layers if not l.is_relevant]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases = ['BesitzerIn', 'Freizeit.Gebaeude', 'Gebaeude_StadtFirma', 'Gewerbe.Gebaeude', 'Gewerbe_V1.Firmen.Firma', 'Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Staedtisches_Gewerbe_V1.Firmen.Firma', 'Strasse']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gebaeude_StadtFirma",
+            "Gewerbe.Gebaeude",
+            "Gewerbe_V1.Firmen.Firma",
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Staedtisches_Gewerbe_V1.Firmen.Firma",
+            "Strasse",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
-        #todo assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames = ['Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Gewerbe_V1.Firmen.Firma']
-        #todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        # todo assert len(irrelevant_layer_ilinames) > 0
+        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        
     def test_extopt_staedtische_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Staedtische_Ortsplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
-            "tmp_optimal_staedtische_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+            "tmp_optimal_staedtische_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
         )
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
@@ -141,26 +143,47 @@ class TestProjectExtOptimization(unittest.TestCase):
         ### 1. OptimizeStrategy.NONE ###
         strategy = OptimizeStrategy.NONE
 
-        generator = Generator(tool=DbIliMode.ili2gpkg, uri=uri, inheritance="smart2",  optimize_strategy = strategy )
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
-        
+
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
-        expected_aliases = ['BesitzerIn', 'Freizeit.Gebaeude', 'Gebaeude_StadtFirma', 'Gewerbe.Gebaeude', 'Gewerbe_V1.Firmen.Firma', 'Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Staedtisches_Gewerbe_V1.Firmen.Firma', 'Strasse']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gebaeude_StadtFirma",
+            "Gewerbe.Gebaeude",
+            "Gewerbe_V1.Firmen.Firma",
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Staedtisches_Gewerbe_V1.Firmen.Firma",
+            "Strasse",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
         assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames = ['Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Gewerbe_V1.Firmen.Firma']
+        expected_irrelevant_layer_ilinames = [
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Gewerbe_V1.Firmen.Firma",
+        ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        project = Project(optimize_strategy = strategy )
+        project = Project(optimize_strategy=strategy)
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -176,11 +199,24 @@ class TestProjectExtOptimization(unittest.TestCase):
         all_layers = root.findLayers()
         assert len(all_layers) == 9
 
-        geometry_layers = set([l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)])
-        assert geometry_layers == {'Strasse', 'Freizeit.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Gewerbe.Gebaeude'}
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {
+            "Strasse",
+            "Freizeit.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Gewerbe.Gebaeude",
+        }
 
-        tables_layers = set([l.name() for l in root.findGroup('tables').children()])
-        assert tables_layers == {'Staedtisches_Gewerbe_V1.Firmen.Firma', 'Gewerbe_V1.Firmen.Firma', 'Gebaeude_StadtFirma', 'BesitzerIn'}
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {
+            "Staedtisches_Gewerbe_V1.Firmen.Firma",
+            "Gewerbe_V1.Firmen.Firma",
+            "Gebaeude_StadtFirma",
+            "BesitzerIn",
+        }
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
@@ -214,27 +250,48 @@ class TestProjectExtOptimization(unittest.TestCase):
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
 
-        generator = Generator(tool=DbIliMode.ili2gpkg, uri=uri, inheritance="smart2", optimize_strategy = strategy )
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
-        
+
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases = ['BesitzerIn', 'Freizeit.Gebaeude', 'Gebaeude_StadtFirma', 'Gewerbe.Gebaeude', 'Gewerbe_V1.Firmen.Firma', 'Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Staedtisches_Gewerbe_V1.Firmen.Firma', 'Strasse']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gebaeude_StadtFirma",
+            "Gewerbe.Gebaeude",
+            "Gewerbe_V1.Firmen.Firma",
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Staedtisches_Gewerbe_V1.Firmen.Firma",
+            "Strasse",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
         assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames = ['Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Gewerbe_V1.Firmen.Firma']
+        expected_irrelevant_layer_ilinames = [
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Gewerbe_V1.Firmen.Firma",
+        ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        project = Project(optimize_strategy = strategy )
+        project = Project(optimize_strategy=strategy)
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -250,18 +307,29 @@ class TestProjectExtOptimization(unittest.TestCase):
         all_layers = root.findLayers()
         assert len(all_layers) == 9
 
-        geometry_layers = set([l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)])
-        assert geometry_layers == {'Strasse', 'Freizeit.Gebaeude', 'Gewerbe.Gebaeude'}
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {"Strasse", "Freizeit.Gebaeude", "Gewerbe.Gebaeude"}
 
-        tables_layers = set([l.name() for l in root.findGroup('tables').children()])
-        assert tables_layers == {'Staedtisches_Gewerbe_V1.Firmen.Firma', 'Gebaeude_StadtFirma', 'BesitzerIn'}
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {
+            "Staedtisches_Gewerbe_V1.Firmen.Firma",
+            "Gebaeude_StadtFirma",
+            "BesitzerIn",
+        }
 
-        base_group = root.findGroup('base layers')
+        base_group = root.findGroup("base layers")
         assert base_group
 
-        grouped_base_layers = set([l.name() for l in base_group.children() if isinstance(l, QgsLayerTreeLayer)])
+        grouped_base_layers = {
+            l.name() for l in base_group.children() if isinstance(l, QgsLayerTreeLayer)
+        }
 
-        assert grouped_base_layers == {'Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude'}
+        assert grouped_base_layers == {
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+        }
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
@@ -273,7 +341,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             if layer.layer.name() == "Strasse":
                 efc = layer.layer.editFormConfig()
                 # one general and two relation editors
-                assert len(efc.tabs()) == 3 
+                assert len(efc.tabs()) == 3
                 for tab in efc.tabs():
                     if tab.name() == "stadtscng_v1_1freizeit_gebaeude":
                         count += 1
@@ -281,9 +349,11 @@ class TestProjectExtOptimization(unittest.TestCase):
                     if tab.name() == "stadtscng_v1_1gewerbe_gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude": #should not happen
+                    if (
+                        tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude"
+                    ):  # should not happen
                         count += 1
-                    if tab.name() == "gebaeude": #should not happen
+                    if tab.name() == "gebaeude":  # should not happen
                         count += 1
         # should find only 2
         assert count == 2
@@ -293,27 +363,46 @@ class TestProjectExtOptimization(unittest.TestCase):
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
 
-        generator = Generator(tool=DbIliMode.ili2gpkg, uri=uri, inheritance="smart2" ,optimize_strategy = strategy )
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
-        
+
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # ambiguous aliases exist, since we don't rename them when they are hidden anyway
         assert len(ambiguous_aliases) == 4
-        expected_aliases = ['BesitzerIn', 'Freizeit.Gebaeude', 'Gebaeude_StadtFirma', 'Gewerbe.Gebaeude', 'Konstruktionen.Gebaeude', 'Firma', 'Strasse']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gebaeude_StadtFirma",
+            "Gewerbe.Gebaeude",
+            "Konstruktionen.Gebaeude",
+            "Firma",
+            "Strasse",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
         assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames = ['Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Gewerbe_V1.Firmen.Firma']
+        expected_irrelevant_layer_ilinames = [
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Gewerbe_V1.Firmen.Firma",
+        ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        project = Project(optimize_strategy = strategy )
+        project = Project(optimize_strategy=strategy)
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -329,11 +418,13 @@ class TestProjectExtOptimization(unittest.TestCase):
         all_layers = root.findLayers()
         assert len(all_layers) == 6
 
-        geometry_layers = set([l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)])
-        assert geometry_layers == {'Strasse', 'Freizeit.Gebaeude', 'Gewerbe.Gebaeude'}
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {"Strasse", "Freizeit.Gebaeude", "Gewerbe.Gebaeude"}
 
-        tables_layers = set([l.name() for l in root.findGroup('tables').children()])
-        assert tables_layers == {'Firma', 'Gebaeude_StadtFirma', 'BesitzerIn'}
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {"Firma", "Gebaeude_StadtFirma", "BesitzerIn"}
 
         # check relations - only 13 are here
         relations = list(qgis_project.relationManager().relations().values())
@@ -345,7 +436,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             if layer.layer.name() == "Strasse":
                 efc = layer.layer.editFormConfig()
                 # one general and two relation editors
-                assert len(efc.tabs()) == 3 
+                assert len(efc.tabs()) == 3
                 for tab in efc.tabs():
                     if tab.name() == "stadtscng_v1_1freizeit_gebaeude":
                         count += 1
@@ -353,9 +444,11 @@ class TestProjectExtOptimization(unittest.TestCase):
                     if tab.name() == "stadtscng_v1_1gewerbe_gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude": #should not happen
+                    if (
+                        tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude"
+                    ):  # should not happen
                         count += 1
-                    if tab.name() == "gebaeude": #should not happen
+                    if tab.name() == "gebaeude":  # should not happen
                         count += 1
         # should find only 2
         assert count == 2
@@ -364,10 +457,12 @@ class TestProjectExtOptimization(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Staedtische_Ortsplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
-        importer.configuration.dbschema = "optimal_staedtische_{:%Y%m%d%H%M%S%f}".format(
-            datetime.datetime.now()
+        importer.configuration.dbschema = (
+            "optimal_staedtische_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
         )
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
@@ -391,24 +486,35 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         available_layers = generator.layers()
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        [l.ili_name for l in available_layers if not l.is_relevant]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases = ['BesitzerIn', 'Freizeit.Gebaeude', 'Gebaeude_StadtFirma', 'Gewerbe.Gebaeude', 'Gewerbe_V1.Firmen.Firma', 'Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Staedtisches_Gewerbe_V1.Firmen.Firma', 'Strasse']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gebaeude_StadtFirma",
+            "Gewerbe.Gebaeude",
+            "Gewerbe_V1.Firmen.Firma",
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Staedtisches_Gewerbe_V1.Firmen.Firma",
+            "Strasse",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
-        #todo assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames = ['Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Gewerbe_V1.Firmen.Firma']
-        #todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        # todo assert len(irrelevant_layer_ilinames) > 0
+        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
     def test_extopt_polymorphic_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Polymorphic_Ortsplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Polymorphic_Ortsplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Polymorphic_Ortsplanung_V1_1"
         importer.configuration.dbschema = "optimal_polymorph_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -430,28 +536,43 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         available_layers = generator.layers()
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        [l.ili_name for l in available_layers if not l.is_relevant]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases =  ['BesitzerIn', 'Freizeit.Gebaeude', 'Gewerbe.Gebaeude', 'Hallen.Gebaeude', 'IndustrieGewerbe.Gebaeude', 'Markthalle', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Strasse', 'TurnhalleTyp1', 'TurnhalleTyp2']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gewerbe.Gebaeude",
+            "Hallen.Gebaeude",
+            "IndustrieGewerbe.Gebaeude",
+            "Markthalle",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Strasse",
+            "TurnhalleTyp1",
+            "TurnhalleTyp2",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
-        #todo assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames =  ['Ortsplanung_V1_1.Konstruktionen.Gebaeude']
-        #todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        # todo assert len(irrelevant_layer_ilinames) > 0
+        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
     def test_extopt_polymorphic_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Polymorphic_Ortsplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Polymorphic_Ortsplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Polymorphic_Ortsplanung_V1_1"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
-            "tmp_optimal_polymorph_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+            "tmp_optimal_polymorph_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
         )
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
@@ -466,27 +587,48 @@ class TestProjectExtOptimization(unittest.TestCase):
         ### 1. OptimizeStrategy.NONE ###
         strategy = OptimizeStrategy.NONE
 
-        generator = Generator(tool=DbIliMode.ili2gpkg, uri=uri, inheritance="smart2" ,optimize_strategy = strategy )
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases =  ['BesitzerIn', 'Freizeit.Gebaeude', 'Gewerbe.Gebaeude', 'Hallen.Gebaeude', 'IndustrieGewerbe.Gebaeude', 'Markthalle', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Strasse', 'TurnhalleTyp1', 'TurnhalleTyp2']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gewerbe.Gebaeude",
+            "Hallen.Gebaeude",
+            "IndustrieGewerbe.Gebaeude",
+            "Markthalle",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Strasse",
+            "TurnhalleTyp1",
+            "TurnhalleTyp2",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
         assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames =  ['Ortsplanung_V1_1.Konstruktionen.Gebaeude']
+        expected_irrelevant_layer_ilinames = [
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+        ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        project = Project(optimize_strategy = strategy )
+        project = Project(optimize_strategy=strategy)
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -502,11 +644,26 @@ class TestProjectExtOptimization(unittest.TestCase):
         all_layers = root.findLayers()
         assert len(all_layers) == 11
 
-        geometry_layers = set([l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)])
-        assert geometry_layers == {'IndustrieGewerbe.Gebaeude', 'Strasse', 'Freizeit.Gebaeude', 'Markthalle', 'TurnhalleTyp2', 'Hallen.Gebaeude', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'TurnhalleTyp1', 'Gewerbe.Gebaeude'}
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {
+            "IndustrieGewerbe.Gebaeude",
+            "Strasse",
+            "Freizeit.Gebaeude",
+            "Markthalle",
+            "TurnhalleTyp2",
+            "Hallen.Gebaeude",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "TurnhalleTyp1",
+            "Gewerbe.Gebaeude",
+        }
 
-        tables_layers = set([l.name() for l in root.findGroup('tables').children()])
-        assert tables_layers == {'Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'BesitzerIn'}
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {
+            "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "BesitzerIn",
+        }
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
@@ -552,27 +709,48 @@ class TestProjectExtOptimization(unittest.TestCase):
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
 
-        generator = Generator(tool=DbIliMode.ili2gpkg, uri=uri, inheritance="smart2" ,optimize_strategy = strategy )
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases =  ['BesitzerIn', 'Freizeit.Gebaeude', 'Gewerbe.Gebaeude', 'Hallen.Gebaeude', 'IndustrieGewerbe.Gebaeude', 'Markthalle', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Strasse', 'TurnhalleTyp1', 'TurnhalleTyp2']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gewerbe.Gebaeude",
+            "Hallen.Gebaeude",
+            "IndustrieGewerbe.Gebaeude",
+            "Markthalle",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Strasse",
+            "TurnhalleTyp1",
+            "TurnhalleTyp2",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
         assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames =  ['Ortsplanung_V1_1.Konstruktionen.Gebaeude']
+        expected_irrelevant_layer_ilinames = [
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+        ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        project = Project(optimize_strategy = strategy )
+        project = Project(optimize_strategy=strategy)
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -588,18 +766,34 @@ class TestProjectExtOptimization(unittest.TestCase):
         all_layers = root.findLayers()
         assert len(all_layers) == 11
 
-        geometry_layers = set([l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)])
-        assert geometry_layers == {'IndustrieGewerbe.Gebaeude', 'Strasse', 'Freizeit.Gebaeude', 'Markthalle', 'TurnhalleTyp2', 'Hallen.Gebaeude', 'TurnhalleTyp1', 'Gewerbe.Gebaeude'}
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {
+            "IndustrieGewerbe.Gebaeude",
+            "Strasse",
+            "Freizeit.Gebaeude",
+            "Markthalle",
+            "TurnhalleTyp2",
+            "Hallen.Gebaeude",
+            "TurnhalleTyp1",
+            "Gewerbe.Gebaeude",
+        }
 
-        tables_layers = set([l.name() for l in root.findGroup('tables').children()])
-        assert tables_layers == {'Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'BesitzerIn'}
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {
+            "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "BesitzerIn",
+        }
 
-        base_group = root.findGroup('base layers')
+        base_group = root.findGroup("base layers")
         assert base_group
 
-        grouped_base_layers = set([l.name() for l in base_group.children() if isinstance(l, QgsLayerTreeLayer)])
+        grouped_base_layers = {
+            l.name() for l in base_group.children() if isinstance(l, QgsLayerTreeLayer)
+        }
 
-        assert grouped_base_layers == {'Ortsplanung_V1_1.Konstruktionen.Gebaeude'}
+        assert grouped_base_layers == {"Ortsplanung_V1_1.Konstruktionen.Gebaeude"}
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
@@ -613,7 +807,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 8
                 for tab in efc.tabs():
-                    if tab.name() == "gebaeude": # this should not happen 
+                    if tab.name() == "gebaeude":  # this should not happen
                         count += 1
                         assert len(tab.children()) == 1
                     if tab.name() == "polymrpng_v1_1gewerbe_gebaeude":
@@ -645,27 +839,47 @@ class TestProjectExtOptimization(unittest.TestCase):
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
 
-        generator = Generator(tool=DbIliMode.ili2gpkg, uri=uri, inheritance="smart2" ,optimize_strategy = strategy )
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # ambiguous aliases exist, since we don't rename them when they are hidden anyway
         assert len(ambiguous_aliases) == 2
-        expected_aliases =  ['BesitzerIn', 'Freizeit.Gebaeude', 'Gewerbe.Gebaeude', 'Hallen.Gebaeude', 'IndustrieGewerbe.Gebaeude', 'Markthalle', 'Konstruktionen.Gebaeude', 'Strasse', 'TurnhalleTyp1', 'TurnhalleTyp2']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gewerbe.Gebaeude",
+            "Hallen.Gebaeude",
+            "IndustrieGewerbe.Gebaeude",
+            "Markthalle",
+            "Konstruktionen.Gebaeude",
+            "Strasse",
+            "TurnhalleTyp1",
+            "TurnhalleTyp2",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
         assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames =  ['Ortsplanung_V1_1.Konstruktionen.Gebaeude']
+        expected_irrelevant_layer_ilinames = [
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+        ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        project = Project(optimize_strategy = strategy )
+        project = Project(optimize_strategy=strategy)
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -681,11 +895,22 @@ class TestProjectExtOptimization(unittest.TestCase):
         all_layers = root.findLayers()
         assert len(all_layers) == 10
 
-        geometry_layers = set([l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)])
-        assert geometry_layers == {'IndustrieGewerbe.Gebaeude', 'Strasse', 'Freizeit.Gebaeude', 'Markthalle', 'TurnhalleTyp2', 'Hallen.Gebaeude', 'TurnhalleTyp1', 'Gewerbe.Gebaeude'}
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {
+            "IndustrieGewerbe.Gebaeude",
+            "Strasse",
+            "Freizeit.Gebaeude",
+            "Markthalle",
+            "TurnhalleTyp2",
+            "Hallen.Gebaeude",
+            "TurnhalleTyp1",
+            "Gewerbe.Gebaeude",
+        }
 
-        tables_layers = set([l.name() for l in root.findGroup('tables').children()])
-        assert tables_layers == {'Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'BesitzerIn'}
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {"Konstruktionen.Gebaeude", "BesitzerIn"}
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
@@ -699,7 +924,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 8
                 for tab in efc.tabs():
-                    if tab.name() == "gebaeude": # this should not happen 
+                    if tab.name() == "gebaeude":  # this should not happen
                         count += 1
                         assert len(tab.children()) == 1
                     if tab.name() == "polymrpng_v1_1gewerbe_gebaeude":
@@ -732,7 +957,9 @@ class TestProjectExtOptimization(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Polymorphic_Ortsplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Polymorphic_Ortsplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Polymorphic_Ortsplanung_V1_1"
         importer.configuration.dbschema = "optimal_polymorph_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -759,24 +986,37 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         available_layers = generator.layers()
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        [l.ili_name for l in available_layers if not l.is_relevant]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases =  ['BesitzerIn', 'Freizeit.Gebaeude', 'Gewerbe.Gebaeude', 'Hallen.Gebaeude', 'IndustrieGewerbe.Gebaeude', 'Markthalle', 'Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude', 'Strasse', 'TurnhalleTyp1', 'TurnhalleTyp2']
+        expected_aliases = [
+            "BesitzerIn",
+            "Freizeit.Gebaeude",
+            "Gewerbe.Gebaeude",
+            "Hallen.Gebaeude",
+            "IndustrieGewerbe.Gebaeude",
+            "Markthalle",
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+            "Strasse",
+            "TurnhalleTyp1",
+            "TurnhalleTyp2",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
-        #todo assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames =  ['Ortsplanung_V1_1.Konstruktionen.Gebaeude']
-        #todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        # todo assert len(irrelevant_layer_ilinames) > 0
+        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
     def test_extopt_baustruct_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Kantonale_Bauplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Kantonale_Bauplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Kantonale_Bauplanung_V1_1"
         importer.configuration.dbschema = "optimal_baustruct_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -798,29 +1038,50 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         available_layers = generator.layers()
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        [l.ili_name for l in available_layers if not l.is_relevant]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases = ["Bauart", "Bauplanung_V1_1.Konstruktionen.Gebaeude", "Bauplanung_V1_1.Konstruktionen.Material", "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude", "Bauplanung_V1_1.Natur.Park", "Bauplanung_V1_1.Natur.Tierart", "Brutstelle", "Buntbrache", "Feld", "KantonaleBuntbrache", "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude", "Kantonale_Bauplanung_V1_1.Konstruktionen.Material", "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude", "Kantonale_Bauplanung_V1_1.Natur.Park", "Kantonale_Bauplanung_V1_1.Natur.Tierart", "Kartoffelfeld", "Sonnenblumenfeld", "Strasse"]
+        expected_aliases = [
+            "Bauart",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Natur.Tierart",
+            "Brutstelle",
+            "Buntbrache",
+            "Feld",
+            "KantonaleBuntbrache",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Natur.Park",
+            "Kantonale_Bauplanung_V1_1.Natur.Tierart",
+            "Kartoffelfeld",
+            "Sonnenblumenfeld",
+            "Strasse",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
-        #todo assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames = ["Bauplanung_V1_1.Konstruktionen.Material", "Bauplanung_V1_1.Konstruktionen.Gebaeude", "Bauplanung_V1_1.Natur.Tierart", "Bauplanung_V1_1.Natur.Park"]
-        #todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        # todo assert len(irrelevant_layer_ilinames) > 0
+        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        
     def test_extopt_baustruct_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Kantonale_Bauplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Kantonale_Bauplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Kantonale_Bauplanung_V1_1"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
-            "tmp_optimal_baustruct_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+            "tmp_optimal_baustruct_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
         )
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
@@ -835,27 +1096,55 @@ class TestProjectExtOptimization(unittest.TestCase):
         ### 1. OptimizeStrategy.NONE ###
         strategy = OptimizeStrategy.NONE
 
-        generator = Generator(tool=DbIliMode.ili2gpkg, uri=uri, inheritance="smart2",optimize_strategy = strategy )
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases =  ['Strasse', 'Sonnenblumenfeld', 'Kartoffelfeld', 'KantonaleBuntbrache', 'Kantonale_Bauplanung_V1_1.Natur.Park', 'Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude', 'Feld', 'Buntbrache', 'Brutstelle', 'Bauplanung_V1_1.Natur.Park', 'Bauplanung_V1_1.Konstruktionen.Gebaeude', 'Kantonale_Bauplanung_V1_1.Natur.Tierart', 'Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude', 'Kantonale_Bauplanung_V1_1.Konstruktionen.Material', 'Bauplanung_V1_1.Natur.Tierart', 'Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude', 'Bauplanung_V1_1.Konstruktionen.Material', 'Bauart']
+        expected_aliases = [
+            "Strasse",
+            "Sonnenblumenfeld",
+            "Kartoffelfeld",
+            "KantonaleBuntbrache",
+            "Kantonale_Bauplanung_V1_1.Natur.Park",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Feld",
+            "Buntbrache",
+            "Brutstelle",
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Natur.Tierart",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Tierart",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauart",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
         assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames =  ['Ortsplanung_V1_1.Konstruktionen.Gebaeude']
+        expected_irrelevant_layer_ilinames = [
+            "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+        ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        project = Project(optimize_strategy = strategy )
+        project = Project(optimize_strategy=strategy)
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -871,11 +1160,33 @@ class TestProjectExtOptimization(unittest.TestCase):
         all_layers = root.findLayers()
         assert len(all_layers) == 18
 
-        geometry_layers = set([l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)])
-        assert geometry_layers == {'Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude', 'Kantonale_Bauplanung_V1_1.Natur.Park', 'Strasse', 'Bauplanung_V1_1.Natur.Park', 'Sonnenblumenfeld', 'Buntbrache', 'Brutstelle', 'KantonaleBuntbrache', 'Feld', 'Kartoffelfeld', 'Bauplanung_V1_1.Konstruktionen.Gebaeude'}
+        geometry_layers = {
+            l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
+        }
+        assert geometry_layers == {
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Natur.Park",
+            "Strasse",
+            "Bauplanung_V1_1.Natur.Park",
+            "Sonnenblumenfeld",
+            "Buntbrache",
+            "Brutstelle",
+            "KantonaleBuntbrache",
+            "Feld",
+            "Kartoffelfeld",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+        }
 
-        tables_layers = set([l.name() for l in root.findGroup('tables').children()])
-        assert tables_layers == {'Bauart', 'Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude', 'Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude', 'Kantonale_Bauplanung_V1_1.Natur.Tierart', 'Bauplanung_V1_1.Konstruktionen.Material', 'Kantonale_Bauplanung_V1_1.Konstruktionen.Material', 'Bauplanung_V1_1.Natur.Tierart'}
+        tables_layers = {l.name() for l in root.findGroup("tables").children()}
+        assert tables_layers == {
+            "Bauart",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Natur.Tierart",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Natur.Tierart",
+        }
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
@@ -905,7 +1216,9 @@ class TestProjectExtOptimization(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/Kantonale_Bauplanung_V1_1.ili")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Kantonale_Bauplanung_V1_1.ili"
+        )
         importer.configuration.ilimodels = "Kantonale_Bauplanung_V1_1"
         importer.configuration.dbschema = "optimal_baustruct_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -932,18 +1245,36 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         available_layers = generator.layers()
         aliases = [l.alias for l in available_layers]
-        irrelevant_layer_ilinames = [l.ili_name for l in available_layers if not l.is_relevant ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias)>1]
+        [l.ili_name for l in available_layers if not l.is_relevant]
+        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
-        expected_aliases = ["Bauart", "Bauplanung_V1_1.Konstruktionen.Gebaeude", "Bauplanung_V1_1.Konstruktionen.Material", "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude", "Bauplanung_V1_1.Natur.Park", "Bauplanung_V1_1.Natur.Tierart", "Brutstelle", "Buntbrache", "Feld", "KantonaleBuntbrache", "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude", "Kantonale_Bauplanung_V1_1.Konstruktionen.Material", "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude", "Kantonale_Bauplanung_V1_1.Natur.Park", "Kantonale_Bauplanung_V1_1.Natur.Tierart", "Kartoffelfeld", "Sonnenblumenfeld", "Strasse"]
+        expected_aliases = [
+            "Bauart",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Bauplanung_V1_1.Natur.Park",
+            "Bauplanung_V1_1.Natur.Tierart",
+            "Brutstelle",
+            "Buntbrache",
+            "Feld",
+            "KantonaleBuntbrache",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Natur.Park",
+            "Kantonale_Bauplanung_V1_1.Natur.Tierart",
+            "Kartoffelfeld",
+            "Sonnenblumenfeld",
+            "Strasse",
+        ]
         assert set(aliases) == set(expected_aliases)
 
         # irrelevant layers are detected
-        #todo assert len(irrelevant_layer_ilinames) > 0
-        expected_irrelevant_layer_ilinames = ["Bauplanung_V1_1.Konstruktionen.Material", "Bauplanung_V1_1.Konstruktionen.Gebaeude", "Bauplanung_V1_1.Natur.Tierart", "Bauplanung_V1_1.Natur.Park"]
-        #todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        # todo assert len(irrelevant_layer_ilinames) > 0
+        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
     def print_info(self, text):
         logging.info(text)

@@ -33,10 +33,10 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 from qgis.PyQt.QtXml import QDomDocument
 
+from ..utils.globals import OptimizeStrategy
 from .layers import Layer
 from .legend import LegendGroup
 from .relations import Relation
-from ..utils.globals import OptimizeStrategy
 
 ENUM_THIS_CLASS_COLUMN = "thisclass"
 
@@ -44,7 +44,13 @@ ENUM_THIS_CLASS_COLUMN = "thisclass"
 class Project(QObject):
     layer_added = pyqtSignal(str)
 
-    def __init__(self, auto_transaction=True, evaluate_default_values=True, context={}, optimize_strategy = OptimizeStrategy.NONE):
+    def __init__(
+        self,
+        auto_transaction=True,
+        evaluate_default_values=True,
+        context={},
+        optimize_strategy=OptimizeStrategy.NONE,
+    ):
         QObject.__init__(self)
         self.crs = None
         self.name = "Not set"

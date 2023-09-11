@@ -518,17 +518,20 @@ class TestExport(unittest.TestCase):
         assert result_model.rowCount() == 3
 
         expected_error_messages = [
-            #staedtisches gewerbe
+            # staedtisches gewerbe
             "Needs an ethical evaluation (EthischeBeurteilung)",
-            #kantonale ortsplanung
+            # kantonale ortsplanung
             "Beschreibung and/or Referenzcode must be defined.",
-            #staedtische ortsplanung
-            "Beschreibung needed when top secret."
+            # staedtische ortsplanung
+            "Beschreibung needed when top secret.",
         ]
 
-        error_messages = [ result_model.index(i, 0).data(
+        error_messages = [
+            result_model.index(i, 0).data(
                 int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
-            ) for i in range(3) ]
+            )
+            for i in range(3)
+        ]
 
         assert set(error_messages) == set(expected_error_messages)
 

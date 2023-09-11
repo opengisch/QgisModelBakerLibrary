@@ -32,8 +32,8 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QCoreApplication, QSettings
 
 from ..generator.config import IGNORED_FIELDNAMES
-from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
 from ..utils.globals import OptimizeStrategy
+from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
 
 
 class Layer:
@@ -100,7 +100,7 @@ class Layer:
                 self.model_topic_name = (
                     f"{self.ili_name.split('.')[0]}.{self.ili_name.split('.')[1]}"
                 )
-        
+
         self.is_relevant = is_relevant
 
         self.definitionfile = definitionfile
@@ -254,7 +254,10 @@ class Layer:
             relations_to_add = []
             for relation in project.relations:
                 if relation.referenced_layer == self:
-                    if not relation.referencing_layer.is_relevant and project.optimize_strategy == OptimizeStrategy.GROUP:
+                    if (
+                        not relation.referencing_layer.is_relevant
+                        and project.optimize_strategy == OptimizeStrategy.GROUP
+                    ):
                         continue
 
                     # 1:n relation will be added only if does not point to a pure link table
@@ -272,9 +275,12 @@ class Layer:
                             if nm_relation.referenced_layer == self:
                                 continue
 
-                            if not nm_relation.referenced_layer.is_relevant and project.optimize_strategy == OptimizeStrategy.GROUP:
+                            if (
+                                not nm_relation.referenced_layer.is_relevant
+                                and project.optimize_strategy == OptimizeStrategy.GROUP
+                            ):
                                 continue
-                                
+
                             # relations to the same table with different geometries should not be added
                             if (
                                 self.srid

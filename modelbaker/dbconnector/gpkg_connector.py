@@ -140,14 +140,14 @@ class GPKGConnector(DBConnector):
                     GROUP BY tablename
                 )  as coord_decimals,
                 substr(c.iliname, 0, instr(c.iliname, '.')) AS model,
-                attrs.sqlname as attribute_name, 
+                attrs.sqlname as attribute_name,
                 {relevance_field},""".format(
-                        relevance_field="""CASE WHEN c.iliname IN (
+                relevance_field="""CASE WHEN c.iliname IN (
                             -- used to get the class names from the full names
                             WITH names AS (
                             WITH class_level_name AS(
                                 WITH topic_level_name AS (
-                                    SELECT 
+                                    SELECT
                                     thisClass as fullname,
                                     substr(thisClass, 0, instr(thisClass, '.')) as model,
                                     substr(ltrim(thisClass,substr(thisClass, 0, instr(thisClass, '.'))),2) as topicclass
@@ -168,16 +168,16 @@ class GPKGConnector(DBConnector):
                             WHERE baseClass IS NOT NULL
                             -- in a different model
                             AND base_names.model != extend_names.model
-                            AND ( 
+                            AND (
                                 -- with the same name
                                 base_names.class = extend_names.class
-                                OR 
+                                OR
                                 -- multiple times in the same extended model
                                 (SELECT COUNT(baseClass) FROM T_ILI2DB_INHERITANCE JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
                             )
-                        ) 
+                        )
                         THEN FALSE ELSE TRUE END AS relevance"""
-                )
+            )
             interlis_joins = """LEFT JOIN T_ILI2DB_TABLE_PROP p
                    ON p.tablename = s.name
                       AND p.tag = 'ch.ehi.ili2db.tableKind'

@@ -26,7 +26,7 @@ MODEL Kantonale_Bauplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07
 
   END Konstruktionen;
 
-  TOPIC Natur EXTENDS Bauplanung_V1_1.Natur = 
+  TOPIC Natur EXTENDS Bauplanung_V1_1.Natur =
 
     CLASS Park (EXTENDED) =
       Details: TEXT;
@@ -37,18 +37,18 @@ MODEL Kantonale_Bauplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07
     END Tierart;
 
     !! Extension with another name
-    CLASS KantonaleBuntbrache EXTENDS Buntbrache= 
+    CLASS KantonaleBuntbrache EXTENDS Buntbrache=
       Gemeinde: TEXT;
     END KantonaleBuntbrache;
 
     !! Multiple extensions
-    CLASS Kartoffelfeld EXTENDS Feld = 
+    CLASS Kartoffelfeld EXTENDS Feld =
       Anzahl: 1 .. 1000;
     END Kartoffelfeld;
-    CLASS Sonnenblumenfeld EXTENDS Feld = 
+    CLASS Sonnenblumenfeld EXTENDS Feld =
       Art: TEXT;
     END Sonnenblumenfeld;
 
   END Natur;
-  
+
 END Kantonale_Bauplanung_V1_1.
