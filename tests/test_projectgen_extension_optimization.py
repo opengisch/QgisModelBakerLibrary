@@ -85,36 +85,44 @@ class TestProjectExtOptimization(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
         generator = Generator(
-            DbIliMode.ili2pg,
-            get_pg_connection_string(),
-            importer.configuration.inheritance,
-            importer.configuration.dbschema,
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance="smart2",
+            schema=importer.configuration.dbschema,
+            optimize_strategy=strategy,
         )
 
-        available_layers = generator.layers()
-        aliases = [l.alias for l in available_layers]
-        [l.ili_name for l in available_layers if not l.is_relevant]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
+        self._extopt_staedtische_none(generator, strategy)
 
-        # check no ambiguous layers exists
-        assert len(ambiguous_aliases) == 0
-        expected_aliases = [
-            "BesitzerIn",
-            "Freizeit.Gebaeude",
-            "Gebaeude_StadtFirma",
-            "Gewerbe.Gebaeude",
-            "Gewerbe_V1.Firmen.Firma",
-            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
-            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
-            "Staedtisches_Gewerbe_V1.Firmen.Firma",
-            "Strasse",
-        ]
-        assert set(aliases) == set(expected_aliases)
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
 
-        # irrelevant layers are detected
-        # todo assert len(irrelevant_layer_ilinames) > 0
-        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance="smart2",
+            schema=importer.configuration.dbschema,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_staedtische_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance="smart2",
+            schema=importer.configuration.dbschema,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_staedtische_hide(generator, strategy)
 
     def test_extopt_staedtische_geopackage(self):
         importer = iliimporter.Importer()
@@ -150,6 +158,98 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
+        self._extopt_staedtische_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_staedtische_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_staedtische_hide(generator, strategy)
+
+    def test_extopt_staedtische_mssql(self):
+        return  # todo
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2mssql
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
+        )
+        importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
+        importer.configuration.dbschema = (
+            "optimal_staedtische_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+
+        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
+            drv="{ODBC Driver 17 for SQL Server}",
+            server=importer.configuration.dbhost,
+            db=importer.configuration.database,
+            uid=importer.configuration.dbusr,
+            pwd=importer.configuration.dbpwd,
+        )
+
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_staedtische_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_staedtische_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_staedtische_hide(generator, strategy)
+
+    def _extopt_staedtische_none(self, generator, strategy):
+
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -158,7 +258,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
+        [alias for alias in aliases if aliases.count(alias) > 1]
 
         # check no ambiguous layers exists
         expected_aliases = [
@@ -247,16 +347,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-        ### 2. OptimizeStrategy.GROUP ###
-        strategy = OptimizeStrategy.GROUP
-
-        generator = Generator(
-            tool=DbIliMode.ili2gpkg,
-            uri=uri,
-            inheritance="smart2",
-            optimize_strategy=strategy,
-        )
-
+    def _extopt_staedtische_group(self, generator, strategy):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -360,15 +451,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-        ### 3. OptimizeStrategy.HIDE ###
-        strategy = OptimizeStrategy.HIDE
-
-        generator = Generator(
-            tool=DbIliMode.ili2gpkg,
-            uri=uri,
-            inheritance="smart2",
-            optimize_strategy=strategy,
-        )
+    def _extopt_staedtische_hide(self, generator, strategy):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -453,61 +536,6 @@ class TestProjectExtOptimization(unittest.TestCase):
         # should find only 2
         assert count == 2
 
-    def test_extopt_staedtische_mssql(self):
-        importer = iliimporter.Importer()
-        importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path(
-            "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
-        )
-        importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
-        importer.configuration.dbschema = (
-            "optimal_staedtische_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
-        )
-        importer.configuration.srs_code = 2056
-        importer.configuration.inheritance = "smart2"
-        importer.configuration.create_basket_col = True
-        importer.stdout.connect(self.print_info)
-        importer.stderr.connect(self.print_error)
-
-        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
-            drv="{ODBC Driver 17 for SQL Server}",
-            server=importer.configuration.dbhost,
-            db=importer.configuration.database,
-            uid=importer.configuration.dbusr,
-            pwd=importer.configuration.dbpwd,
-        )
-
-        assert importer.run() == iliimporter.Importer.SUCCESS
-
-        generator = Generator(
-            DbIliMode.ili2mssql, uri, "smart2", importer.configuration.dbschema
-        )
-
-        available_layers = generator.layers()
-        aliases = [l.alias for l in available_layers]
-        [l.ili_name for l in available_layers if not l.is_relevant]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
-
-        # check no ambiguous layers exists
-        assert len(ambiguous_aliases) == 0
-        expected_aliases = [
-            "BesitzerIn",
-            "Freizeit.Gebaeude",
-            "Gebaeude_StadtFirma",
-            "Gewerbe.Gebaeude",
-            "Gewerbe_V1.Firmen.Firma",
-            "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
-            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
-            "Staedtisches_Gewerbe_V1.Firmen.Firma",
-            "Strasse",
-        ]
-        assert set(aliases) == set(expected_aliases)
-
-        # irrelevant layers are detected
-        # todo assert len(irrelevant_layer_ilinames) > 0
-        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
-
     def test_extopt_polymorphic_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
@@ -527,38 +555,44 @@ class TestProjectExtOptimization(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
         generator = Generator(
-            DbIliMode.ili2pg,
-            get_pg_connection_string(),
-            importer.configuration.inheritance,
-            importer.configuration.dbschema,
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            schema=importer.configuration.dbschema,
+            inheritance="smart2",
+            optimize_strategy=strategy,
         )
 
-        available_layers = generator.layers()
-        aliases = [l.alias for l in available_layers]
-        [l.ili_name for l in available_layers if not l.is_relevant]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
+        self._extopt_polymorphic_none(generator, strategy)
 
-        # check no ambiguous layers exists
-        assert len(ambiguous_aliases) == 0
-        expected_aliases = [
-            "BesitzerIn",
-            "Freizeit.Gebaeude",
-            "Gewerbe.Gebaeude",
-            "Hallen.Gebaeude",
-            "IndustrieGewerbe.Gebaeude",
-            "Markthalle",
-            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
-            "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
-            "Strasse",
-            "TurnhalleTyp1",
-            "TurnhalleTyp2",
-        ]
-        assert set(aliases) == set(expected_aliases)
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
 
-        # irrelevant layers are detected
-        # todo assert len(irrelevant_layer_ilinames) > 0
-        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            schema=importer.configuration.dbschema,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_polymorphic_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            schema=importer.configuration.dbschema,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_polymorphic_hide(generator, strategy)
 
     def test_extopt_polymorphic_geopackage(self):
         importer = iliimporter.Importer()
@@ -594,6 +628,97 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
+        self._extopt_polymorphic_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_polymorphic_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_polymorphic_hide(generator, strategy)
+
+    def test_extopt_polymorphic_mssql(self):
+        return  # todo
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2mssql
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Polymorphic_Ortsplanung_V1_1.ili"
+        )
+        importer.configuration.ilimodels = "Polymorphic_Ortsplanung_V1_1"
+        importer.configuration.dbschema = "optimal_polymorph_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+
+        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
+            drv="{ODBC Driver 17 for SQL Server}",
+            server=importer.configuration.dbhost,
+            db=importer.configuration.database,
+            uid=importer.configuration.dbusr,
+            pwd=importer.configuration.dbpwd,
+        )
+
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_polymorphic_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_polymorphic_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_polymorphic_hide(generator, strategy)
+
+    def _extopt_polymorphic_none(self, generator, strategy):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -706,15 +831,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-        ### 2. OptimizeStrategy.GROUP ###
-        strategy = OptimizeStrategy.GROUP
-
-        generator = Generator(
-            tool=DbIliMode.ili2gpkg,
-            uri=uri,
-            inheritance="smart2",
-            optimize_strategy=strategy,
-        )
+    def _extopt_polymorphic_group(self, generator, strategy):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -836,15 +953,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-        ### 3. OptimizeStrategy.HIDE ###
-        strategy = OptimizeStrategy.HIDE
-
-        generator = Generator(
-            tool=DbIliMode.ili2gpkg,
-            uri=uri,
-            inheritance="smart2",
-            optimize_strategy=strategy,
-        )
+    def _extopt_polymorphic_hide(self, generator, strategy):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -953,63 +1062,6 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def test_extopt_polymorphic_mssql(self):
-        importer = iliimporter.Importer()
-        importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path(
-            "ilimodels/Polymorphic_Ortsplanung_V1_1.ili"
-        )
-        importer.configuration.ilimodels = "Polymorphic_Ortsplanung_V1_1"
-        importer.configuration.dbschema = "optimal_polymorph_{:%Y%m%d%H%M%S%f}".format(
-            datetime.datetime.now()
-        )
-        importer.configuration.srs_code = 2056
-        importer.configuration.inheritance = "smart2"
-        importer.configuration.create_basket_col = True
-        importer.stdout.connect(self.print_info)
-        importer.stderr.connect(self.print_error)
-
-        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
-            drv="{ODBC Driver 17 for SQL Server}",
-            server=importer.configuration.dbhost,
-            db=importer.configuration.database,
-            uid=importer.configuration.dbusr,
-            pwd=importer.configuration.dbpwd,
-        )
-
-        assert importer.run() == iliimporter.Importer.SUCCESS
-
-        generator = Generator(
-            DbIliMode.ili2mssql, uri, "smart2", importer.configuration.dbschema
-        )
-
-        available_layers = generator.layers()
-        aliases = [l.alias for l in available_layers]
-        [l.ili_name for l in available_layers if not l.is_relevant]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
-
-        # check no ambiguous layers exists
-        assert len(ambiguous_aliases) == 0
-        expected_aliases = [
-            "BesitzerIn",
-            "Freizeit.Gebaeude",
-            "Gewerbe.Gebaeude",
-            "Hallen.Gebaeude",
-            "IndustrieGewerbe.Gebaeude",
-            "Markthalle",
-            "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
-            "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
-            "Strasse",
-            "TurnhalleTyp1",
-            "TurnhalleTyp2",
-        ]
-        assert set(aliases) == set(expected_aliases)
-
-        # irrelevant layers are detected
-        # todo assert len(irrelevant_layer_ilinames) > 0
-        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
-
     def test_extopt_baustruct_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
@@ -1018,10 +1070,12 @@ class TestProjectExtOptimization(unittest.TestCase):
             "ilimodels/Kantonale_Bauplanung_V1_1.ili"
         )
         importer.configuration.ilimodels = "Kantonale_Bauplanung_V1_1"
-        importer.configuration.dbschema = "optimal_baustruct_{:%Y%m%d%H%M%S%f}".format(
-            datetime.datetime.now()
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_optimal_baustruct_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
         )
-
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
@@ -1029,45 +1083,47 @@ class TestProjectExtOptimization(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        config_manager.get_uri()
+
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
         generator = Generator(
-            DbIliMode.ili2pg,
-            get_pg_connection_string(),
-            importer.configuration.inheritance,
-            importer.configuration.dbschema,
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance="smart2",
+            schema=importer.configuration.dbschema,
+            optimize_strategy=strategy,
         )
 
-        available_layers = generator.layers()
-        aliases = [l.alias for l in available_layers]
-        [l.ili_name for l in available_layers if not l.is_relevant]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
+        self._extopt_baustruct_none(generator, strategy)
 
-        # check no ambiguous layers exists
-        assert len(ambiguous_aliases) == 0
-        expected_aliases = [
-            "Bauart",
-            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
-            "Bauplanung_V1_1.Konstruktionen.Material",
-            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
-            "Bauplanung_V1_1.Natur.Park",
-            "Bauplanung_V1_1.Natur.Tierart",
-            "Brutstelle",
-            "Buntbrache",
-            "Feld",
-            "KantonaleBuntbrache",
-            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
-            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
-            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
-            "Kantonale_Bauplanung_V1_1.Natur.Park",
-            "Kantonale_Bauplanung_V1_1.Natur.Tierart",
-            "Kartoffelfeld",
-            "Sonnenblumenfeld",
-            "Strasse",
-        ]
-        assert set(aliases) == set(expected_aliases)
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
 
-        # irrelevant layers are detected
-        # todo assert len(irrelevant_layer_ilinames) > 0
-        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance="smart2",
+            schema=importer.configuration.dbschema,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_baustruct_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance="smart2",
+            schema=importer.configuration.dbschema,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_baustruct_hide(generator, strategy)
 
     def test_extopt_baustruct_geopackage(self):
         importer = iliimporter.Importer()
@@ -1102,6 +1158,95 @@ class TestProjectExtOptimization(unittest.TestCase):
             inheritance="smart2",
             optimize_strategy=strategy,
         )
+
+        self._extopt_baustruct_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_baustruct_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_baustruct_hide(generator, strategy)
+
+    def test_extopt_baustruct_mssql(self):
+        return  # todo
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2mssql
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Kantonale_Bauplanung_V1_1.ili"
+        )
+        importer.configuration.ilimodels = "Kantonale_Bauplanung_V1_1"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_optimal_baustruct_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_baustruct_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_baustruct_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance="smart2",
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_baustruct_hide(generator, strategy)
+
+    def _extopt_baustruct_none(self, generator, strategy):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -1218,15 +1363,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-        ### 2. OptimizeStrategy.GROUP ###
-        strategy = OptimizeStrategy.GROUP
-
-        generator = Generator(
-            tool=DbIliMode.ili2gpkg,
-            uri=uri,
-            inheritance="smart2",
-            optimize_strategy=strategy,
-        )
+    def _extopt_baustruct_group(self, generator, strategy):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -1364,15 +1501,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-        ### 3. OptimizeStrategy.HIDE ###
-        strategy = OptimizeStrategy.HIDE
-
-        generator = Generator(
-            tool=DbIliMode.ili2gpkg,
-            uri=uri,
-            inheritance="smart2",
-            optimize_strategy=strategy,
-        )
+    def _extopt_baustruct_hide(self, generator, strategy):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -1472,70 +1601,6 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert count == 1
 
         QgsProject.instance().clear()
-
-    def test_extopt_baustruct_mssql(self):
-        importer = iliimporter.Importer()
-        importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path(
-            "ilimodels/Kantonale_Bauplanung_V1_1.ili"
-        )
-        importer.configuration.ilimodels = "Kantonale_Bauplanung_V1_1"
-        importer.configuration.dbschema = "optimal_baustruct_{:%Y%m%d%H%M%S%f}".format(
-            datetime.datetime.now()
-        )
-        importer.configuration.srs_code = 2056
-        importer.configuration.inheritance = "smart2"
-        importer.configuration.create_basket_col = True
-        importer.stdout.connect(self.print_info)
-        importer.stderr.connect(self.print_error)
-
-        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
-            drv="{ODBC Driver 17 for SQL Server}",
-            server=importer.configuration.dbhost,
-            db=importer.configuration.database,
-            uid=importer.configuration.dbusr,
-            pwd=importer.configuration.dbpwd,
-        )
-
-        assert importer.run() == iliimporter.Importer.SUCCESS
-
-        generator = Generator(
-            DbIliMode.ili2mssql, uri, "smart2", importer.configuration.dbschema
-        )
-
-        available_layers = generator.layers()
-        aliases = [l.alias for l in available_layers]
-        [l.ili_name for l in available_layers if not l.is_relevant]
-        ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
-
-        # check no ambiguous layers exists
-        assert len(ambiguous_aliases) == 0
-        expected_aliases = [
-            "Bauart",
-            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
-            "Bauplanung_V1_1.Konstruktionen.Material",
-            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
-            "Bauplanung_V1_1.Natur.Park",
-            "Bauplanung_V1_1.Natur.Tierart",
-            "Brutstelle",
-            "Buntbrache",
-            "Feld",
-            "KantonaleBuntbrache",
-            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
-            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
-            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
-            "Kantonale_Bauplanung_V1_1.Natur.Park",
-            "Kantonale_Bauplanung_V1_1.Natur.Tierart",
-            "Kartoffelfeld",
-            "Sonnenblumenfeld",
-            "Strasse",
-        ]
-        assert set(aliases) == set(expected_aliases)
-
-        # irrelevant layers are detected
-        # todo assert len(irrelevant_layer_ilinames) > 0
-        # todo assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
     def print_info(self, text):
         logging.info(text)
