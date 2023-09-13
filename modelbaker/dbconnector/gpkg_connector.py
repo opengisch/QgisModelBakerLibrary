@@ -155,7 +155,8 @@ class GPKGConnector(DBConnector):
                                 )
                                 SELECT *, ltrim(topicclass,substr(topicclass, 0, instr(topicclass, '.'))) as class_with_dot
                                 FROM topic_level_name
-                            ) select fullname, model, topicclass, substr(class_with_dot, instr(class_with_dot,'.')+1) as class
+                            )
+                            SELECT fullname, model, topicclass, substr(class_with_dot, instr(class_with_dot,'.')+1) as class
                             FROM class_level_name
                             )
                             SELECT i.baseClass as base
