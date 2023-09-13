@@ -195,37 +195,33 @@ class PGConnector(DBConnector):
                 relevance = """
                         CASE WHEN c.iliname IN (
                             WITH names AS (
-                                WITH class_level_name AS(
-                                    WITH topic_level_name AS (
-                                        SELECT
-                                        thisClass as fullname,
-                                        substring(thisClass from 1 for position('.' in thisClass)-1) as model,
-                                        substring(thisClass from position('.' in thisClass)+1) as topicclass
-                                        FROM {schema}.t_ili2db_inheritance
-                                    )
-                                    SELECT *, ltrim(topicclass,substring(topicclass from 1 for position('.' in topicclass)-1)) as class_with_dot
-                                    FROM topic_level_name
+                                WITH topic_level_name AS (
+                                    SELECT
+                                    thisClass as fullname,
+                                    substring(thisClass from 1 for position('.' in thisClass)-1) as model,
+                                    substring(thisClass from position('.' in thisClass)+1) as topicclass
+                                    FROM {schema}.t_ili2db_inheritance
                                 )
-                                SELECT fullname, model, topicclass, substring(class_with_dot from position('.' in class_with_dot)+1) as class
-                                FROM class_level_name
-                                )
-                                SELECT i.baseClass as base
-                                FROM {schema}.t_ili2db_inheritance i
-                                LEFT JOIN names extend_names
-                                ON thisClass = extend_names.fullname
-                                LEFT JOIN names base_names
-                                ON baseClass = base_names.fullname
-                                -- it's extended
-                                WHERE baseClass IS NOT NULL
-                                -- in a different model
-                                AND base_names.model != extend_names.model
-                                AND (
-                                    -- with the same name
-                                    base_names.class = extend_names.class
-                                    OR
-                                    -- multiple times in the same extended model
-                                    (SELECT COUNT(baseClass) FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
-                                )
+                                SELECT fullname, model, topicclass, substring(topicclass, position('.' in topicclass)+1) as class
+                                FROM topic_level_name
+                            )
+                            SELECT i.baseClass as base
+                            FROM {schema}.t_ili2db_inheritance i
+                            LEFT JOIN names extend_names
+                            ON thisClass = extend_names.fullname
+                            LEFT JOIN names base_names
+                            ON baseClass = base_names.fullname
+                            -- it's extended
+                            WHERE baseClass IS NOT NULL
+                            -- in a different model
+                            AND base_names.model != extend_names.model
+                            AND (
+                                -- with the same name
+                                base_names.class = extend_names.class
+                                OR
+                                -- multiple times in the same extended model
+                                (SELECT COUNT(baseClass) FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
+                            )
                         )
                         THEN FALSE ELSE TRUE END AS relevance
                     """.format(

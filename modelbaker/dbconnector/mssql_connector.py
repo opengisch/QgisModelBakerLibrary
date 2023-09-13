@@ -173,6 +173,39 @@ class MssqlConnector(DBConnector):
                 stmt += ln + "    , tgeomtype.setting AS simple_type"
                 stmt += ln + "    , null AS formatted_type"
                 stmt += ln + "    , attrs.sqlname AS attribute_name"
+                stmt += (
+                    ln
+                    + """  , CASE WHEN c.iliname IN (
+                                        SELECT i.baseClass as base
+                                        FROM {schema}.t_ili2db_inheritance i
+                                        LEFT JOIN (
+                                            SELECT fullname, model, topicclass, substring(topicclass, charindex('.',topicclass)+1,len(topicclass)) as class
+                                            FROM (
+                                                SELECT
+                                                    thisClass as fullname,
+                                                    substring(thisClass, 1, charindex('.', thisClass)-1) as model,
+                                                    substring(thisClass, charindex('.', thisClass)-1, len(thisClass)) as topicclass
+                                                FROM {schema}.t_ili2db_inheritance
+                                            )
+                                        ) AS extend_names
+                                        ON thisClass = extend_names.fullname
+                                        LEFT JOIN names base_names
+                                        ON baseClass = base_names.fullname
+                                        -- it's extended
+                                        WHERE baseClass IS NOT NULL
+                                        -- in a different model
+                                        AND base_names.model != extend_names.model
+                                        AND (
+                                            -- with the same name
+                                            base_names.class = extend_names.class
+                                            OR
+                                            -- multiple times in the same extended model
+                                            (SELECT COUNT(baseClass) FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
+                                        )
+                                    )
+                                    THEN FALSE ELSE TRUE AS relevance
+                """
+                )
             stmt += ln + "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS Tab"
             stmt += ln + "INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS Col"
             stmt += ln + "    ON Col.Constraint_Name = Tab.Constraint_Name"

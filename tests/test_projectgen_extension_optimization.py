@@ -91,7 +91,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
@@ -104,7 +104,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
@@ -117,7 +117,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
@@ -154,7 +154,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -166,7 +166,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -178,14 +178,14 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
         self._extopt_staedtische_hide(generator, strategy)
 
     def test_extopt_staedtische_mssql(self):
-        return  # todo
+        return  # to do
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
@@ -218,7 +218,8 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
@@ -230,7 +231,8 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
@@ -242,7 +244,8 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
@@ -562,7 +565,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
             schema=importer.configuration.dbschema,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -575,7 +578,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
             schema=importer.configuration.dbschema,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -588,7 +591,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
             schema=importer.configuration.dbschema,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -624,7 +627,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -636,7 +639,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -648,14 +651,14 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
         self._extopt_polymorphic_hide(generator, strategy)
 
     def test_extopt_polymorphic_mssql(self):
-        return  # todo
+        return  # to do
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
@@ -688,7 +691,8 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
@@ -700,7 +704,8 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
@@ -712,7 +717,8 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
@@ -1070,11 +1076,8 @@ class TestProjectExtOptimization(unittest.TestCase):
             "ilimodels/Kantonale_Bauplanung_V1_1.ili"
         )
         importer.configuration.ilimodels = "Kantonale_Bauplanung_V1_1"
-        importer.configuration.dbfile = os.path.join(
-            self.basetestpath,
-            "tmp_optimal_baustruct_{:%Y%m%d%H%M%S%f}.gpkg".format(
-                datetime.datetime.now()
-            ),
+        importer.configuration.dbschema = "optimal_baustruct_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
         )
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
@@ -1083,16 +1086,13 @@ class TestProjectExtOptimization(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
-        config_manager = GpkgCommandConfigManager(importer.configuration)
-        config_manager.get_uri()
-
         ### 1. OptimizeStrategy.NONE ###
         strategy = OptimizeStrategy.NONE
 
         generator = Generator(
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
@@ -1105,7 +1105,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
@@ -1118,7 +1118,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
@@ -1155,7 +1155,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -1167,7 +1167,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
@@ -1179,14 +1179,14 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2gpkg,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
 
         self._extopt_baustruct_hide(generator, strategy)
 
     def test_extopt_baustruct_mssql(self):
-        return  # todo
+        return  # to do
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool)
@@ -1194,21 +1194,23 @@ class TestProjectExtOptimization(unittest.TestCase):
             "ilimodels/Kantonale_Bauplanung_V1_1.ili"
         )
         importer.configuration.ilimodels = "Kantonale_Bauplanung_V1_1"
-        importer.configuration.dbfile = os.path.join(
-            self.basetestpath,
-            "tmp_optimal_baustruct_{:%Y%m%d%H%M%S%f}.gpkg".format(
-                datetime.datetime.now()
-            ),
+        importer.configuration.dbschema = "optimal_polymorph_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
         )
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
-        assert importer.run() == iliimporter.Importer.SUCCESS
 
-        config_manager = GpkgCommandConfigManager(importer.configuration)
-        uri = config_manager.get_uri()
+        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
+            drv="{ODBC Driver 17 for SQL Server}",
+            server=importer.configuration.dbhost,
+            db=importer.configuration.database,
+            uid=importer.configuration.dbusr,
+            pwd=importer.configuration.dbpwd,
+        )
+        assert importer.run() == iliimporter.Importer.SUCCESS
 
         ### 1. OptimizeStrategy.NONE ###
         strategy = OptimizeStrategy.NONE
@@ -1216,7 +1218,8 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
@@ -1228,7 +1231,8 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
@@ -1240,24 +1244,25 @@ class TestProjectExtOptimization(unittest.TestCase):
         generator = Generator(
             tool=DbIliMode.ili2mssql,
             uri=uri,
-            inheritance="smart2",
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
             optimize_strategy=strategy,
         )
 
         self._extopt_baustruct_hide(generator, strategy)
 
     def _extopt_baustruct_none(self, generator, strategy):
-
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
-
+        print(available_layers)
         aliases = [l.alias for l in available_layers]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
         ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
+        print(aliases)
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
         expected_aliases = [
