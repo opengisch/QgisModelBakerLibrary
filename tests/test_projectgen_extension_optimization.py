@@ -1255,14 +1255,12 @@ class TestProjectExtOptimization(unittest.TestCase):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
-        print(available_layers)
         aliases = [l.alias for l in available_layers]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
         ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
 
-        print(aliases)
         # check no ambiguous layers exists
         assert len(ambiguous_aliases) == 0
         expected_aliases = [
@@ -1348,7 +1346,6 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert len(relations) == 18
 
         # strasse should have relation editors to all layers (2/2)
-        # for-relevance-tests hier werden diese relation editoren nicht ins formular geschoben. Ich weiss nicht weshalb...
         count = 0
         for layer in project.layers:
             if layer.layer.name() == "Strasse":
@@ -1356,7 +1353,6 @@ class TestProjectExtOptimization(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 4
                 for tab in efc.tabs():
-                    print(f"-------- {tab.name()}")
                     if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
@@ -1494,7 +1490,6 @@ class TestProjectExtOptimization(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 2
                 for tab in efc.tabs():
-                    print(f"-------- {tab.name()}")
                     if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
@@ -1595,7 +1590,6 @@ class TestProjectExtOptimization(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 2
                 for tab in efc.tabs():
-                    print(f"-------- {tab.name()}")
                     if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
                         count += 1
                         assert len(tab.children()) == 1

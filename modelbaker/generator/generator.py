@@ -144,6 +144,8 @@ class Generator(QObject):
                 record.get("relevance", True)
             )  # it can be not relevant and still be displayed (in case of NONE)
 
+            relevant_topics = record.get("relevant_topics").split(",")
+
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
                 short_name = None
@@ -192,7 +194,7 @@ class Generator(QObject):
                                 + match.group(1).split(".")[-1]
                                 + ")"
                             )
-                alias = short_name  # for-relevance-tests if is_relevant else f"{short_name} !IRRELEVANT!"
+                alias = short_name
 
             display_expression = ""
             if is_basket_table:
@@ -232,6 +234,7 @@ class Generator(QObject):
                 is_dataset_table,
                 record.get("ili_name"),
                 is_relevant,
+                relevant_topics,
             )
 
             # Configure fields for current table

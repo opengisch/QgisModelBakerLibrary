@@ -141,7 +141,8 @@ class GPKGConnector(DBConnector):
                 )  as coord_decimals,
                 substr(c.iliname, 0, instr(c.iliname, '.')) AS model,
                 attrs.sqlname as attribute_name,
-                {relevance_field},""".format(
+                {relevance_field},
+                {relevant_topics}""".format(
                 relevance_field="""CASE WHEN c.iliname IN (
                             -- used to get the class names from the full names
                             WITH names AS (
@@ -177,7 +178,20 @@ class GPKGConnector(DBConnector):
                                 (SELECT COUNT(baseClass) FROM T_ILI2DB_INHERITANCE JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
                             )
                         )
-                        THEN FALSE ELSE TRUE END AS relevance"""
+                        THEN FALSE ELSE TRUE END AS relevance""",
+                # relevant topics are emitted by going recursively through the inheritance table. If something of this topic where the current class is located has been extended, it gets the top extended topics as a list
+                relevant_topics="""
+                    WITH RECURSIVE children(level, childTopic, baseTopic) AS (
+                        SELECT 0 as level, substr( thisClass, 0, instr(substr( thisClass, instr(thisClass, '.')+1), '.')+instr(thisClass, '.')) as childTopic , substr( baseClass, 0, instr(substr( baseClass, instr(baseClass, '.')+1), '.')+instr(baseClass, '.')) as baseTopic
+                        FROM T_ILI2DB_INHERITANCE
+                        WHERE baseTopic = substr( c.iliname, 0, instr(substr( c.iliname, instr(c.iliname, '.')+1), '.')+instr(c.iliname, '.'))
+                        UNION
+                        SELECT children.level+1 as level, substr( inheritance.thisClass, 0, instr(substr( inheritance.thisClass, instr(inheritance.thisClass, '.')+1), '.')+instr(inheritance.thisClass, '.')) as childTopic , substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) as baseTopic FROM children
+                        JOIN T_ILI2DB_INHERITANCE as inheritance ON substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) = children.childTopic
+                    )
+                    SELECT group_concat(childTopic) FROM children WHERE level = (SELECT MAX(level) FROM children)
+                    ) as relevant_topics,
+                """,
             )
             interlis_joins = """LEFT JOIN T_ILI2DB_TABLE_PROP p
                    ON p.tablename = s.name
@@ -792,12 +806,26 @@ class GPKGConnector(DBConnector):
             cursor.execute(
                 """
                     SELECT DISTINCT substr(CN.IliName, 0, instr(CN.IliName, '.')) as model,
-                    substr(substr(CN.IliName, instr(CN.IliName, '.')+1),0, instr(substr(CN.IliName, instr(CN.IliName, '.')+1),'.')) as topic
+                    substr(substr(CN.IliName, instr(CN.IliName, '.')+1),0, instr(substr(CN.IliName, instr(CN.IliName, '.')+1),'.')) as topic,
+                    {relevance}
                     FROM T_ILI2DB_CLASSNAME as CN
                     JOIN T_ILI2DB_TABLE_PROP as TP
                     ON CN.sqlname = TP.tablename
 					WHERE topic != '' and TP.setting != 'ENUM'
-                """
+                """.format(
+                    # it's relevant, when it's not extended
+                    # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not.
+                    relevance="""
+                        CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
+                        SELECT substr( thisClass, 0, instr(substr( thisClass, instr(thisClass, '.')+1), '.')+instr(thisClass, '.')) as childTopic , substr( baseClass, 0, instr(substr( baseClass, instr(baseClass, '.')+1), '.')+instr(baseClass, '.')) as baseTopic
+                        FROM T_ILI2DB_INHERITANCE
+                        WHERE baseTopic = substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) -- model.topic
+                        UNION
+                        SELECT substr( inheritance.thisClass, 0, instr(substr( inheritance.thisClass, instr(inheritance.thisClass, '.')+1), '.')+instr(inheritance.thisClass, '.')) as childTopic , substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) as baseTopic FROM children
+                        JOIN T_ILI2DB_INHERITANCE as inheritance ON substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) = children.childTopic
+                        )SELECT count(childTopic) FROM children)>0 THEN FALSE ELSE TRUE END AS relevance
+                    """
+                )
             )
             contents = cursor.fetchall()
             cursor.close()
