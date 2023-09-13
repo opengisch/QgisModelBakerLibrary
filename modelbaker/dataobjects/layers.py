@@ -56,6 +56,7 @@ class Layer:
         is_dataset_table=False,
         ili_name=None,
         is_relevant=True,
+        relevant_topics=[],
         definitionfile=None,
         qmlstylefile=None,
         styles={},
@@ -102,6 +103,7 @@ class Layer:
                 )
 
         self.is_relevant = is_relevant
+        self.relevant_topics = relevant_topics
 
         self.definitionfile = definitionfile
         self.qmlstylefile = qmlstylefile
@@ -127,6 +129,8 @@ class Layer:
         definition["coordinateprecision"] = self.coordinate_precision
         definition["modeltopicname"] = self.model_topic_name
         definition["ili_name"] = self.ili_name
+        definition["is_relevant"] = self.is_relevant
+        definition["relevant_topics"] = self.relevant_topics
         definition["definitionfile"] = self.definitionfile
         definition["qmlstylefile"] = self.qmlstylefile
         definition["styles"] = self.styles
@@ -145,6 +149,8 @@ class Layer:
         self.coordinate_precision = definition["coordinateprecision"]
         self.model_topic_name = definition["modeltopicname"]
         self.ili_name = definition["ili_name"]
+        self.is_relevant = definition["is_relevant"]
+        self.relevant_topics = definition["relevant_topics"]
         self.definitionfile = definition["definitionfile"]
         self.qmlstylefile = definition["qmlstylefile"]
         self.styles = definition["styles"]
