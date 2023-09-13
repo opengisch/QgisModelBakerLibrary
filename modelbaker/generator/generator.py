@@ -141,7 +141,7 @@ class Generator(QObject):
             )
 
             is_relevant = bool(
-                record.get("relevance")
+                record.get("relevance", True)
             )  # it can be not relevant and still be displayed (in case of NONE)
 
             alias = record["table_alias"] if "table_alias" in record else None
