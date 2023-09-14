@@ -144,7 +144,14 @@ class Generator(QObject):
                 record.get("relevance", True)
             )  # it can be not relevant and still be displayed (in case of NONE)
 
-            relevant_topics = record.get("relevant_topics").split(",")
+            all_topics = (
+                record.get("all_topics").split(",") if record.get("all_topics") else []
+            )
+            relevant_topics = (
+                record.get("relevant_topics").split(",")
+                if record.get("relevant_topics")
+                else []
+            )
 
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
@@ -234,6 +241,7 @@ class Generator(QObject):
                 is_dataset_table,
                 record.get("ili_name"),
                 is_relevant,
+                all_topics,
                 relevant_topics,
             )
 

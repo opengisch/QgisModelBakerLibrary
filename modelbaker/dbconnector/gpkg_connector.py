@@ -142,7 +142,7 @@ class GPKGConnector(DBConnector):
                 substr(c.iliname, 0, instr(c.iliname, '.')) AS model,
                 attrs.sqlname as attribute_name,
                 {relevance_field},
-                {relevant_topics}""".format(
+                {topics},""".format(
                 relevance_field="""CASE WHEN c.iliname IN (
                             -- used to get the class names from the full names
                             WITH names AS (
@@ -179,19 +179,37 @@ class GPKGConnector(DBConnector):
                             )
                         )
                         THEN FALSE ELSE TRUE END AS relevance""",
-                # relevant topics are emitted by going recursively through the inheritance table. If something of this topic where the current class is located has been extended, it gets the top extended topics as a list
-                relevant_topics="""
-                    WITH RECURSIVE children(level, childTopic, baseTopic) AS (
-                        SELECT 0 as level, substr( thisClass, 0, instr(substr( thisClass, instr(thisClass, '.')+1), '.')+instr(thisClass, '.')) as childTopic , substr( baseClass, 0, instr(substr( baseClass, instr(baseClass, '.')+1), '.')+instr(baseClass, '.')) as baseTopic
+                # topics - where this class or an instance of it is located - are emitted by going recursively through the inheritance table.
+                # if something of this topic where the current class is located has been extended, it gets the next child topic.
+                # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
+                topics="""(SELECT group_concat(childTopic) FROM {topic_pedigree}) as all_topics,
+                        (SELECT group_concat(childTopic) FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics""".format(
+                    topic_pedigree="""(WITH RECURSIVE children(is_a_base, childTopic, baseTopic) AS (
+                        SELECT
+                        (CASE
+                            WHEN substr( thisClass, 0, instr(substr( thisClass, instr(thisClass, '.')+1), '.')+instr(thisClass, '.')) IN (SELECT substr( i.baseClass, 0, instr(substr( i.baseClass, instr(i.baseClass, '.')+1), '.')+instr(i.baseClass, '.')) FROM T_ILI2DB_INHERITANCE i WHERE substr( i.thisClass, 0, instr(i.thisClass, '.') ) != substr( i.baseClass, 0, instr(i.baseClass, '.')))
+                            THEN TRUE
+                            ELSE FALSE
+                        END) AS is_a_base,
+                        substr( thisClass, 0, instr(substr( thisClass, instr(thisClass, '.')+1), '.')+instr(thisClass, '.')) as childTopic,
+                        substr( baseClass, 0, instr(substr( baseClass, instr(baseClass, '.')+1), '.')+instr(baseClass, '.')) as baseTopic
                         FROM T_ILI2DB_INHERITANCE
                         WHERE baseTopic = substr( c.iliname, 0, instr(substr( c.iliname, instr(c.iliname, '.')+1), '.')+instr(c.iliname, '.'))
                         UNION
-                        SELECT children.level+1 as level, substr( inheritance.thisClass, 0, instr(substr( inheritance.thisClass, instr(inheritance.thisClass, '.')+1), '.')+instr(inheritance.thisClass, '.')) as childTopic , substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) as baseTopic FROM children
-                        JOIN T_ILI2DB_INHERITANCE as inheritance ON substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) = children.childTopic
+                        SELECT
+                        (CASE
+                            WHEN substr( thisClass, 0, instr(substr( thisClass, instr(thisClass, '.')+1), '.')+instr(thisClass, '.')) IN (SELECT substr( i.baseClass, 0, instr(substr( i.baseClass, instr(i.baseClass, '.')+1), '.')+instr(i.baseClass, '.')) FROM T_ILI2DB_INHERITANCE i WHERE substr( i.thisClass, 0, instr(i.thisClass, '.')) != substr( i.baseClass, 0,instr(i.baseClass, '.')))
+                            THEN TRUE
+                            ELSE FALSE
+                        END) AS is_a_base,
+                        substr( inheritance.thisClass, 0, instr(substr( inheritance.thisClass, instr(inheritance.thisClass, '.')+1), '.')+instr(inheritance.thisClass, '.')) as childTopic ,
+                        substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) as baseTopic FROM children
+                        JOIN T_ILI2DB_INHERITANCE as inheritance
+                        ON substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(inheritance.baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
+                        WHERE substr( inheritance.thisClass, 0, instr(substr( inheritance.thisClass, instr(inheritance.thisClass, '.')+1), '.')+instr(inheritance.thisClass, '.')) != children.childTopic --break the recursion when the coming childTopic will be the same
                     )
-                    SELECT group_concat(childTopic) FROM children WHERE level = (SELECT MAX(level) FROM children)
-                    ) as relevant_topics,
-                """,
+                    SELECT childTopic, baseTopic, is_a_base FROM children)"""
+                ),
             )
             interlis_joins = """LEFT JOIN T_ILI2DB_TABLE_PROP p
                    ON p.tablename = s.name

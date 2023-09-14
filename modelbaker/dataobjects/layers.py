@@ -56,7 +56,8 @@ class Layer:
         is_dataset_table=False,
         ili_name=None,
         is_relevant=True,
-        relevant_topics=[],
+        all_topics=[],  # all the topics this class (or an instance of it) are located
+        relevant_topics=[],  # the topics of the most extended instance of it only
         definitionfile=None,
         qmlstylefile=None,
         styles={},
@@ -103,6 +104,7 @@ class Layer:
                 )
 
         self.is_relevant = is_relevant
+        self.all_topics = all_topics
         self.relevant_topics = relevant_topics
 
         self.definitionfile = definitionfile
@@ -130,6 +132,7 @@ class Layer:
         definition["modeltopicname"] = self.model_topic_name
         definition["ili_name"] = self.ili_name
         definition["is_relevant"] = self.is_relevant
+        definition["all_topics"] = self.all_topics
         definition["relevant_topics"] = self.relevant_topics
         definition["definitionfile"] = self.definitionfile
         definition["qmlstylefile"] = self.qmlstylefile
@@ -150,6 +153,7 @@ class Layer:
         self.model_topic_name = definition["modeltopicname"]
         self.ili_name = definition["ili_name"]
         self.is_relevant = definition["is_relevant"]
+        self.all_topics = definition["all_topics"]
         self.relevant_topics = definition["relevant_topics"]
         self.definitionfile = definition["definitionfile"]
         self.qmlstylefile = definition["qmlstylefile"]

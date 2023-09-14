@@ -348,6 +348,36 @@ class TestProjectExtOptimization(unittest.TestCase):
         # should find 4
         assert count == 4
 
+        # check relevant topics
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":  # Strasse from Infrastruktur_V1_1
+                count += 1
+                assert set(layer.all_topics) == {""}
+                assert set(layer.relevant_topics) == {""}
+            if layer.layer.name() == "BesitzerIn":  # BesitzerIn from Ortsplanung_V1_1
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Kantonale_Ortsplanung_V1_1.Konstruktionen",
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+            if (
+                layer.layer.name() == "Staedtisches_Gewerbe_V1.Firmen.Firma"
+            ):  # Firma from Staedtisches_Gewerbe_V1
+                count += 1
+                assert set(layer.all_topics) == {""}
+                assert set(layer.relevant_topics) == {""}
+            if layer.layer.name() == "Gewerbe_V1.Firmen.Firma":  # Firma from Gewerbe_V1
+                count += 1
+                assert set(layer.all_topics) == {"Staedtisches_Gewerbe_V1.Firmen"}
+                assert set(layer.relevant_topics) == {"Staedtisches_Gewerbe_V1.Firmen"}
+        assert count == 4
+
         QgsProject.instance().clear()
 
     def _extopt_staedtische_group(self, generator, strategy):
@@ -450,7 +480,38 @@ class TestProjectExtOptimization(unittest.TestCase):
                     if tab.name() == "gebaeude":  # should not happen
                         count += 1
         # should find only 2
+
         assert count == 2
+
+        # check relevant topics
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":  # Strasse from Infrastruktur_V1_1
+                count += 1
+                assert set(layer.all_topics) == {""}
+                assert set(layer.relevant_topics) == {""}
+            if layer.layer.name() == "BesitzerIn":  # BesitzerIn from Ortsplanung_V1_1
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Kantonale_Ortsplanung_V1_1.Konstruktionen",
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+            if (
+                layer.layer.name() == "Staedtisches_Gewerbe_V1.Firmen.Firma"
+            ):  # Firma from Staedtisches_Gewerbe_V1
+                count += 1
+                assert set(layer.all_topics) == {""}
+                assert set(layer.relevant_topics) == {""}
+            if layer.layer.name() == "Gewerbe_V1.Firmen.Firma":  # Firma from Gewerbe_V1
+                count += 1
+                assert set(layer.all_topics) == {"Staedtisches_Gewerbe_V1.Firmen"}
+                assert set(layer.relevant_topics) == {"Staedtisches_Gewerbe_V1.Firmen"}
+        assert count == 4
 
         QgsProject.instance().clear()
 
@@ -538,6 +599,32 @@ class TestProjectExtOptimization(unittest.TestCase):
                         count += 1
         # should find only 2
         assert count == 2
+
+        # check relevant topics
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":  # Strasse from Infrastruktur_V1_1
+                count += 1
+                assert set(layer.all_topics) == {""}
+                assert set(layer.relevant_topics) == {""}
+            if layer.layer.name() == "BesitzerIn":  # BesitzerIn from Ortsplanung_V1_1
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Kantonale_Ortsplanung_V1_1.Konstruktionen",
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+            if layer.layer.name() == "Firma":  # Firma from Staedtisches_Gewerbe_V1
+                count += 1
+                assert set(layer.all_topics) == {""}
+                assert set(layer.relevant_topics) == {""}
+        assert count == 3
+
+        QgsProject.instance().clear()
 
     def test_extopt_polymorphic_postgis(self):
         importer = iliimporter.Importer()
