@@ -202,7 +202,7 @@ class PGConnector(DBConnector):
                                     substring(thisClass from position('.' in thisClass)+1) as topicclass
                                     FROM {schema}.t_ili2db_inheritance
                                 )
-                                SELECT fullname, model, topicclass, substring(topicclass, position('.' in topicclass)+1) as class
+                                SELECT fullname, model, topicclass, substring(topicclass from position('.' in topicclass)+1) as class
                                 FROM topic_level_name
                             )
                             SELECT i.baseClass as base
@@ -223,10 +223,46 @@ class PGConnector(DBConnector):
                                 (SELECT COUNT(baseClass) FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
                             )
                         )
-                        THEN FALSE ELSE TRUE END AS relevance
+                        THEN FALSE ELSE TRUE END AS relevance,
                     """.format(
                     schema=self.schema
                 )
+
+                # topics - where this class or an instance of it is located - are emitted by going recursively through the inheritance table.
+                # if something of this topic where the current class is located has been extended, it gets the next child topic.
+                # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
+                topics = """(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics,
+                        (SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics""".format(
+                    topic_pedigree="""(WITH RECURSIVE children(is_a_base, childTopic, baseTopic) AS (
+                        SELECT
+                        (CASE
+                            WHEN substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) IN (SELECT substring( i.baseClass from 1 for position('.' in substring( i.baseClass from position('.' in i.baseClass)+1))+position('.' in i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass from 1 for  position('.' in i.thisClass) ) != substring( i.baseClass from 1 for  position('.' in i.baseClass)))
+                            THEN TRUE
+                            ELSE FALSE
+                        END) AS is_a_base,
+                        substring( thisClass from 1 for position('.' in substring( thisClass, position('.' in thisClass)+1))+position('.' in thisClass)-1) as childTopic,
+                        substring( baseClass from 1 for position('.' in substring( baseClass, position('.' in baseClass)+1))+position('.' in baseClass)-1) as baseTopic
+                        FROM {schema}.T_ILI2DB_INHERITANCE
+                        WHERE substring( baseClass from 1 for position('.' in substring( baseClass, position('.' in baseClass)+1))+position('.' in baseClass)-1) = substring( c.iliname from 1 for position('.' in substring( c.iliname from position('.' in c.iliname)+1))+position('.' in c.iliname)-1)
+                        UNION
+                        SELECT
+                        (CASE
+                            WHEN substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) IN (SELECT substring( i.baseClass from 1 for position('.' in substring( i.baseClass from position('.' in i.baseClass)+1))+position('.' in i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass from 1 for  position('.' in i.thisClass)) != substring( i.baseClass from 1 for position('.' in i.baseClass)))
+                            THEN TRUE
+                            ELSE FALSE
+                        END) AS is_a_base,
+                        substring( inheritance.thisClass from 1 for position('.' in substring( inheritance.thisClass from position('.' in inheritance.thisClass)+1))+position('.' in inheritance.thisClass)-1) as childTopic ,
+                        substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) as baseTopic
+                        FROM children
+                        JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance
+                        ON substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in inheritance.baseClass)+1))+position('.' in inheritance.baseClass)-1) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
+                        WHERE substring( inheritance.thisClass from 1 for position('.' in substring( inheritance.thisClass from position('.' in inheritance.thisClass)+1))+position('.' in inheritance.thisClass)-1) != children.childTopic --break the recursion when the coming childTopic will be the same
+                    )
+                    SELECT childTopic, baseTopic, is_a_base FROM children) AS kiddies""".format(
+                        schema=self.schema
+                    )
+                )
+
                 domain_left_join = """LEFT JOIN {}.t_ili2db_table_prop p
                               ON p.tablename = tbls.tablename
                               AND p.tag = 'ch.ehi.ili2db.tableKind'""".format(
@@ -269,6 +305,7 @@ class PGConnector(DBConnector):
                           g.type AS simple_type,
                           format_type(ga.atttypid, ga.atttypmod) as formatted_type,
                           {relevance}
+                          {topics}
                         FROM pg_catalog.pg_tables tbls
                         LEFT JOIN pg_index i
                           ON i.indrelid = CONCAT(tbls.schemaname, '."', tbls.tablename, '"')::regclass
@@ -294,6 +331,7 @@ class PGConnector(DBConnector):
                     extent=extent,
                     coord_decimals=coord_decimals,
                     relevance=relevance,
+                    topics=topics,
                     domain_left_join=domain_left_join,
                     alias_left_join=alias_left_join,
                     model_where=model_where,
@@ -931,13 +969,26 @@ class PGConnector(DBConnector):
             cur.execute(
                 """
                     SELECT DISTINCT (string_to_array(cn.iliname, '.'))[1] as model,
-                    (string_to_array(cn.iliname, '.'))[2] as topic
+                    (string_to_array(cn.iliname, '.'))[2] as topic,
+                    {relevance}
                     FROM {schema}.t_ili2db_classname as cn
                     JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
 					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and tp.setting != 'ENUM'
                 """.format(
-                    schema=self.schema
+                    schema=self.schema,
+                    relevance="""
+                        CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
+                        SELECT substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) as childTopic , substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) as baseTopic
+                        FROM {schema}.T_ILI2DB_INHERITANCE
+                        WHERE substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) = substring( CN.IliName from 1 for position('.' in substring( CN.IliName from position('.' in CN.IliName)+1))+position('.' in CN.IliName)-1) -- model.topic
+                        UNION
+                        SELECT substring( inheritance.thisClass from 1 for position('.' in substring( inheritance.thisClass from position('.' in inheritance.thisClass)+1))+position('.' in inheritance.thisClass)-1) as childTopic , substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) as baseTopic FROM children
+                        JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance ON substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) = children.childTopic
+                        )SELECT count(childTopic) FROM children)>0 THEN FALSE ELSE TRUE END AS relevance
+                    """.format(
+                        schema=self.schema
+                    ),
                 )
             )
             return cur.fetchall()
