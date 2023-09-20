@@ -175,7 +175,7 @@ class GPKGConnector(DBConnector):
                                 base_names.class = extend_names.class
                                 OR
                                 -- multiple times in the same extended model
-                                (SELECT COUNT(baseClass) FROM T_ILI2DB_INHERITANCE JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
+                                (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM T_ILI2DB_INHERITANCE JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
                             )
                         )
                         THEN FALSE ELSE TRUE END AS relevance""",

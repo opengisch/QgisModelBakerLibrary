@@ -219,8 +219,8 @@ class PGConnector(DBConnector):
                                 -- with the same name
                                 base_names.class = extend_names.class
                                 OR
-                                -- multiple times in the same extended model
-                                (SELECT COUNT(baseClass) FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
+                                -- multiple times in a same extended model
+                                (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
                             )
                         )
                         THEN FALSE ELSE TRUE END AS relevance,
