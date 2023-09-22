@@ -200,11 +200,47 @@ class MssqlConnector(DBConnector):
                                             base_names.class = extend_names.class
                                             OR
                                             -- multiple times in the same extended model
-                                            (SELECT COUNT(baseClass) FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model)>1
+                                            (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
                                         )
                                     )
-                                    THEN FALSE ELSE TRUE AS relevance
+                                    THEN 0 ELSE 1 AS relevance
                 """
+                )
+                # topics - where this class or an instance of it is located - are emitted by going recursively through the inheritance table.
+                # if something of this topic where the current class is located has been extended, it gets the next child topic.
+                # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
+                stmt += (
+                    ln
+                    + """  ,(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics
+                            ,(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics""".format(
+                        topic_pedigree="""(WITH RECURSIVE children(is_a_base, childTopic, baseTopic) AS (
+                                    SELECT
+                                    (CASE
+                                        WHEN substring( thisClass, 1, CHARINEX('.', substring( thisClass, CHARINEX('.', thisClass)+1))+CHARINEX('.', thisClass)-1) IN (SELECT substring( i.baseClass, 1, CHARINEX('.', substring( i.baseClass, CHARINEX('.', i.baseClass)+1))+CHARINEX('.', i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass, 1,  CHARINEX('.', i.thisClass) ) != substring( i.baseClass, 1,  CHARINEX('.', i.baseClass)))
+                                        THEN 1
+                                        ELSE 0
+                                    END) AS is_a_base,
+                                    substring( thisClass, 1, CHARINEX('.', substring( thisClass, CHARINEX('.', thisClass)+1))+CHARINEX('.', thisClass)-1) as childTopic,
+                                    substring( baseClass, 1, CHARINEX('.', substring( baseClass, CHARINEX('.', baseClass)+1))+CHARINEX('.', baseClass)-1) as baseTopic
+                                    FROM {schema}.T_ILI2DB_INHERITANCE
+                                    WHERE substring( baseClass, 1, CHARINEX('.', substring( baseClass, CHARINEX('.', baseClass)+1))+CHARINEX('.', baseClass)-1) = substring( c.iliname, 1, CHARINEX('.', substring( c.iliname, CHARINEX('.', c.iliname)+1))+CHARINEX('.', c.iliname)-1)
+                                    UNION
+                                    SELECT
+                                    (CASE
+                                        WHEN substring( thisClass, 1, CHARINEX('.', substring( thisClass, CHARINEX('.', thisClass)+1))+CHARINEX('.', thisClass)-1) IN (SELECT substring( i.baseClass, 1, CHARINEX('.', substring( i.baseClass, CHARINEX('.', i.baseClass)+1))+CHARINEX('.', i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass, 1,  CHARINEX('.', i.thisClass)) != substring( i.baseClass, 1, CHARINEX('.', i.baseClass)))
+                                        THEN 1
+                                        ELSE 0
+                                    END) AS is_a_base,
+                                    substring( inheritance.thisClass, 1, CHARINEX('.', substring( inheritance.thisClass, CHARINEX('.', inheritance.thisClass)+1))+CHARINEX('.', inheritance.thisClass)-1) as childTopic ,
+                                    substring( inheritance.baseClass, 1, CHARINEX('.', substring( inheritance.baseClass, CHARINEX('.', baseClass)+1))+CHARINEX('.', inheritance.baseClass)-1) as baseTopic
+                                    FROM children
+                                    JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance
+                                    ON substring( inheritance.baseClass, 1, CHARINEX('.', substring( inheritance.baseClass, CHARINEX('.', inheritance.baseClass)+1))+CHARINEX('.', inheritance.baseClass)-1) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
+                                    WHERE substring( inheritance.thisClass, 1, CHARINEX('.', substring( inheritance.thisClass, CHARINEX('.', inheritance.thisClass)+1))+CHARINEX('.', inheritance.thisClass)-1) != children.childTopic -- break the recursion when the coming childTopic will be the same
+                                )
+                                SELECT childTopic, baseTopic, is_a_base FROM children) AS kiddies
+                            """
+                    )
                 )
             stmt += ln + "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS Tab"
             stmt += ln + "INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS Col"
@@ -245,6 +281,9 @@ class MssqlConnector(DBConnector):
             )
             stmt = stmt.format(schema=self.schema)
 
+            print("\n\n\n\n\n\n***********************************\n\n\n\n")
+            print(stmt)
+            print("\n\n\n\n\n\n***********************************\n\n\n\n")
             if not metadata_exists:
                 stmt = self._def_cursor(stmt)
 
@@ -852,13 +891,26 @@ WHERE TABLE_SCHEMA='{schema}'
             cur.execute(
                 """
                     SELECT DISTINCT PARSENAME(cn.iliname,1) as model,
-                    PARSENAME(cn.iliname,2) as topic
+                    PARSENAME(cn.iliname,2) as topic,
+                    {relevance}
                     FROM {schema}.t_ili2db_classname as cn
                     JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
 					WHERE PARSENAME(cn.iliname,3) != '' and tp.setting != 'ENUM'
                 """.format(
-                    schema=self.schema
+                    schema=self.schema,
+                    relevance="""
+                        CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
+                        SELECT substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1))+CHARINDEX('.', thisClass)-1) as childTopic , substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', baseClass)-1) as baseTopic
+                        FROM {schema}.T_ILI2DB_INHERITANCE
+                        WHERE substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', baseClass)-1) = substring( CN.IliName, 1, CHARINDEX('.', substring( CN.IliName, CHARINDEX('.', CN.IliName)+1))+CHARINDEX('.', CN.IliName)-1) -- model.topic
+                        UNION
+                        SELECT substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1))+CHARINDEX('.', inheritance.thisClass)-1) as childTopic , substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', inheritance.baseClass)-1) as baseTopic FROM children
+                        JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance ON substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', inheritance.baseClass)-1) = children.childTopic
+                        )SELECT count(childTopic) FROM children)>0 THEN 0 ELSE 1 END AS relevance
+                    """.format(
+                        schema=self.schema
+                    ),
                 )
             )
             result = self._get_dict_result(cur)
