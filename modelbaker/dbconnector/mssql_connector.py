@@ -184,7 +184,7 @@ class MssqlConnector(DBConnector):
                                                 SELECT
                                                     thisClass as fullname,
                                                     substring(thisClass, 1, charindex('.', thisClass)-1) as model,
-                                                    substring(thisClass, charindex('.', thisClass)-1, len(thisClass)) as topicclass
+                                                    substring(thisClass, charindex('.', thisClass)+1, len(thisClass)) as topicclass
                                                 FROM {schema}.t_ili2db_inheritance
                                             )
                                         ) AS extend_names
