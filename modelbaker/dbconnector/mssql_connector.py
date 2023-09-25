@@ -281,9 +281,6 @@ class MssqlConnector(DBConnector):
             )
             stmt = stmt.format(schema=self.schema)
 
-            print("\n\n\n\n\n\n***********************************\n\n\n\n")
-            print(stmt)
-            print("\n\n\n\n\n\n***********************************\n\n\n\n")
             if not metadata_exists:
                 stmt = self._def_cursor(stmt)
 
