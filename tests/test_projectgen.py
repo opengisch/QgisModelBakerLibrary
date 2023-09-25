@@ -4204,6 +4204,15 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 1
 
+        count = 0
+        # when the referencing layer is a structure, it should be a composition
+        for relation in relations:
+            if relation.referencing_layer.name == "maphierref":
+                assert relation.strength == QgsRelation.Composition
+                count += 1
+
+        assert count == 2
+
     def print_info(self, text):
         logging.info(text)
 

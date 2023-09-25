@@ -324,6 +324,9 @@ class JavaNotFoundError(FileNotFoundError):
     If not, no executable was found at all.
     """
 
+    JAVA_DOWNLOAD_URL = "https://adoptium.net/download/"
+    PLUGIN_CONFIGURATION_URL = "https://opengisch.github.io/QgisModelBaker/user_guide/plugin_configuration/#interlis-settings"
+
     def __init__(self, java_version=None):
         super().__init__()
 
@@ -344,10 +347,17 @@ class JavaNotFoundError(FileNotFoundError):
         if self.java_version:
             return QCoreApplication.translate(
                 "ili2dbutils",
-                'Wrong java version found. Qgis Model Baker requires at least java version 8. Please <a href="https://java.com/en/download/">install Java</a> and or <a href="#configure">configure a custom java path</a>.<br/><br/>Java Version:<br/>{}',
-            ).format(self.html_java_version)
+                'Wrong java version found. Qgis Model Baker requires at least java version 8. Please <a href="{0}">install Java</a> and or <a href="{1}">configure a custom java path</a>.<br/><br/>Java Version:<br/>{2}',
+            ).format(
+                JavaNotFoundError.JAVA_DOWNLOAD_URL,
+                JavaNotFoundError.PLUGIN_CONFIGURATION_URL,
+                self.html_java_version,
+            )
         else:
             return QCoreApplication.translate(
                 "ili2dbutils",
-                'Java 8 could not be found. Please <a href="https://java.com/en/download/">install Java</a> and or <a href="#configure">configure a custom java path</a>.',
+                'Java 8 could not be found. Please <a href="{}">install Java</a> and or <a href="{}">configure a custom java path</a>.'.format(
+                    JavaNotFoundError.JAVA_DOWNLOAD_URL,
+                    JavaNotFoundError.PLUGIN_CONFIGURATION_URL,
+                ),
             )

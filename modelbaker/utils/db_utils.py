@@ -84,6 +84,7 @@ def get_configuration_from_sourceprovider(provider, configuration):
             configuration.dbusr = layer_source.username() or service_map.get("user")
             configuration.dbpwd = layer_source.password() or service_map.get("password")
         configuration.dbhost = layer_source.host() or service_map.get("host")
+        configuration.dbport = layer_source.port() or service_map.get("port")
         configuration.database = layer_source.database() or service_map.get("dbname")
         configuration.dbschema = layer_source.schema()
         valid = bool(

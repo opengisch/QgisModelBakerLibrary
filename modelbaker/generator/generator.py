@@ -439,7 +439,7 @@ class Generator(QObject):
                         relation.strength = (
                             QgsRelation.Composition
                             if "strength" in record
-                            and record["strength"] == "COMPOSITE"
+                            and record["strength"] == "COMPOSITE" or referencing_layer.is_structure
                             else QgsRelation.Association
                         )
                         relation.cardinality_max = record.get("cardinality_max", None)
