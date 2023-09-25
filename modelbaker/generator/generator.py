@@ -374,7 +374,7 @@ class Generator(QObject):
 
         # append topic name to ambiguous layers
         self._rename_ambiguous_layers(layers)
-        # append moel name to still ambiguous layers
+        # append model name to still ambiguous layers
         self._rename_ambiguous_layers(layers, second_pass=True)
 
         self.print_messages()
