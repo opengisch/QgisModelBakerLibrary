@@ -161,6 +161,8 @@ class PGConnector(DBConnector):
             model_where = ""
             attribute_name = ""
             attribute_left_join = ""
+            relevance = ""
+            topics = ""
 
             if self.metadata_exists():
                 kind_settings_field = "p.setting AS kind_settings,"
