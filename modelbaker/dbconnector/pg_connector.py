@@ -234,7 +234,7 @@ class PGConnector(DBConnector):
                 # if something of this topic where the current class is located has been extended, it gets the next child topic.
                 # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
                 topics = """(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics,
-                        (SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics""".format(
+                        (SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics,""".format(
                     topic_pedigree="""(WITH RECURSIVE children(is_a_base, childTopic, baseTopic) AS (
                         SELECT
                         (CASE
@@ -304,10 +304,10 @@ class PGConnector(DBConnector):
                           {extent}
                           {attribute_name}
                           {coord_decimals}
-                          g.type AS simple_type,
-                          format_type(ga.atttypid, ga.atttypmod) as formatted_type,
                           {relevance}
                           {topics}
+                          g.type AS simple_type,
+                          format_type(ga.atttypid, ga.atttypmod) as formatted_type
                         FROM pg_catalog.pg_tables tbls
                         LEFT JOIN pg_index i
                           ON i.indrelid = CONCAT(tbls.schemaname, '."', tbls.tablename, '"')::regclass
