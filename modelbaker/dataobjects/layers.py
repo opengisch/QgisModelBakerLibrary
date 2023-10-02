@@ -282,7 +282,7 @@ class Layer:
                             if nm_relation == relation:
                                 continue
 
-                            if nm_relation.referenced_layer == self:
+                            if nm_relation.referenced_layer.ili_name == self.ili_name:
                                 continue
 
                             if (

@@ -909,26 +909,13 @@ WHERE TABLE_SCHEMA='{schema}'
             cur.execute(
                 """
                     SELECT DISTINCT PARSENAME(cn.iliname,1) as model,
-                    PARSENAME(cn.iliname,2) as topic,
-                    {relevance}
+                    PARSENAME(cn.iliname,2) as topic
                     FROM {schema}.t_ili2db_classname as cn
                     JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
 					WHERE PARSENAME(cn.iliname,3) != '' and tp.setting != 'ENUM'
                 """.format(
-                    schema=self.schema,
-                    relevance="""
-                        CASE WHEN (WITH children(childTopic, baseTopic) AS (
-                        SELECT substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1))+CHARINDEX('.', thisClass)-1) as childTopic , substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', baseClass)-1) as baseTopic
-                        FROM {schema}.T_ILI2DB_INHERITANCE
-                        WHERE substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', baseClass)-1) = substring( CN.IliName, 1, CHARINDEX('.', substring( CN.IliName, CHARINDEX('.', CN.IliName)+1))+CHARINDEX('.', CN.IliName)-1) -- model.topic
-                        UNION
-                        SELECT substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1))+CHARINDEX('.', inheritance.thisClass)-1) as childTopic , substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', inheritance.baseClass)-1) as baseTopic FROM children
-                        JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance ON substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', inheritance.baseClass)-1) = children.childTopic
-                        )SELECT count(childTopic) FROM children)>0 THEN 0 ELSE 1 END AS relevance
-                    """.format(
-                        schema=self.schema
-                    ),
+                    schema=self.schema
                 )
             )
             result = self._get_dict_result(cur)
