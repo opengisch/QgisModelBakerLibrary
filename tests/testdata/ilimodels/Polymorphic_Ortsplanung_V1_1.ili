@@ -1,0 +1,72 @@
+INTERLIS 2.3;
+
+/* Model to test several types of extended classes */
+MODEL Polymorphic_Ortsplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07-13" =
+  IMPORTS Ortsplanung_V1_1,Infrastruktur_V1;
+
+  TOPIC Gewerbe EXTENDS Ortsplanung_V1_1.Konstruktionen =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Infrastruktur_V1.Strassen;
+
+    CLASS Gebaeude (EXTENDED) =
+      Firma : TEXT*99;
+    END Gebaeude;
+
+  END Gewerbe;
+
+  TOPIC Freizeit EXTENDS Ortsplanung_V1_1.Konstruktionen =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Infrastruktur_V1.Strassen;
+
+    CLASS Gebaeude (EXTENDED) =
+      Unterhaltungsart : TEXT*99;
+    END Gebaeude;
+
+  END Freizeit;
+
+  TOPIC IndustrieGewerbe EXTENDS Polymorphic_Ortsplanung_V1_1.Gewerbe =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Infrastruktur_V1.Strassen;
+
+    CLASS Gebaeude (EXTENDED) =
+      Sektion : TEXT*99;
+    END Gebaeude;
+
+  END IndustrieGewerbe;
+
+  TOPIC Hallen EXTENDS Ortsplanung_V1_1.Konstruktionen =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Infrastruktur_V1.Strassen;
+
+    CLASS Gebaeude (EXTENDED) =
+      Groesse : TEXT*99;
+    END Gebaeude;
+
+    CLASS Markthalle EXTENDS Gebaeude =
+      Standplaetze : 1 .. 100;
+    END Markthalle;
+
+    CLASS Turnhalle (ABSTRACT) EXTENDS Gebaeude =
+      Bodenbelag :TEXT*99;
+    END Turnhalle;
+
+    CLASS TurnhalleTyp1 EXTENDS Turnhalle =
+      AnzahlKoerbe : 1 .. 8;
+    END TurnhalleTyp1;
+
+    CLASS TurnhalleTyp2 EXTENDS Turnhalle =
+      AnzahlTore : 1 .. 8;
+    END TurnhalleTyp2;
+
+  END Hallen;
+
+  !! An indipendend topic just having "coincidentally" the same name and the same named class (but no extensions involved here)
+  TOPIC Konstruktionen =
+    OID AS INTERLIS.UUIDOID;
+
+    CLASS Gebaeude =
+      Name: TEXT;
+    END Gebaeude;
+  END Konstruktionen;
+
+END Polymorphic_Ortsplanung_V1_1.

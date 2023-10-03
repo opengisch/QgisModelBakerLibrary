@@ -1,0 +1,54 @@
+INTERLIS 2.3;
+
+/* Extended Bauplanung as cantonal model importing national model.
+Extending STRUCTURE and a many-to-many ASSOCIATION */
+MODEL Kantonale_Bauplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07-13" =
+  IMPORTS Bauplanung_V1_1, Infrastruktur_V1;
+
+  TOPIC Konstruktionen EXTENDS Bauplanung_V1_1.Konstruktionen =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Infrastruktur_V1.Strassen;
+
+    DOMAIN
+      STRUCTURE Material (EXTENDED) =
+        Details : MANDATORY TEXT;
+      END Material;
+
+    CLASS Gebaeude (EXTENDED) =
+      DetailMaterialien: BAG {1..*} OF Material;
+    END Gebaeude;
+
+    /*extension of many-to-many association */
+    ASSOCIATION Strassen_Gebaeude (EXTENDED) =
+      Strasse (EXTENDED,EXTERNAL) -- {1..*} Infrastruktur_V1.Strassen.Strasse;
+      Gebaeude (EXTENDED) -- {1..*} Gebaeude;
+    END Strassen_Gebaeude;
+
+  END Konstruktionen;
+
+  TOPIC Natur EXTENDS Bauplanung_V1_1.Natur =
+
+    CLASS Park (EXTENDED) =
+      Details: TEXT;
+    END Park;
+
+    CLASS Tierart (EXTENDED) =
+      Details: TEXT;
+    END Tierart;
+
+    !! Extension with another name
+    CLASS KantonaleBuntbrache EXTENDS Buntbrache=
+      Gemeinde: TEXT;
+    END KantonaleBuntbrache;
+
+    !! Multiple extensions
+    CLASS Kartoffelfeld EXTENDS Feld =
+      Anzahl: 1 .. 1000;
+    END Kartoffelfeld;
+    CLASS Sonnenblumenfeld EXTENDS Feld =
+      Art: TEXT;
+    END Sonnenblumenfeld;
+
+  END Natur;
+
+END Kantonale_Bauplanung_V1_1.

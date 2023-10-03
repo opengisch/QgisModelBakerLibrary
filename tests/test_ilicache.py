@@ -75,70 +75,70 @@ class IliCacheTest(unittest.TestCase):
             e["name"] for e in next(elem for elem in ilicache.repositories.values())
         }
         expected_models = {
-                "IliRepository09",
-                "IliRepository09",
-                "IliSite09",
-                "IlisMeta07",
-                "AbstractSymbology",
-                "CoordSys",
-                "RoadsExdm2ben_10",
-                "RoadsExdm2ien_10",
-                "RoadsExgm2ien_10",
-                "StandardSymbology",
-                "Time",
-                "Units",
-                "AbstractSymbology",
-                "CoordSys",
-                "RoadsExdm2ben",
-                "RoadsExdm2ien",
-                "RoadsExgm2ien",
-                "StandardSymbology",
-                "Time",
-                "Units",
-                "GM03Core",
-                "GM03Comprehensive",
-                "CodeISO",
-                "GM03_2Core",
-                "GM03_2Comprehensive",
-                "CodeISO",
-                "GM03_2_1Core",
-                "GM03_2_1Comprehensive",
-                "IlisMeta07",
-                "Units",
-                "IlisMeta07",
-                "IliRepository09",
-                "StandardSymbology",
-                "StandardSymbology",
-                "GM03Core",
-                "GM03_2Core",
-                "GM03_2_1Core",
-                "CoordSys",
-                "INTERLIS_ext",
-                "StandardSymbology",
-                "INTERLIS_ext",
-                "IliVErrors",
-                "RoadsExdm2ien_10",
-                "RoadsExdm2ien",
-                "CoordSys",
-                "StandardSymbology",
-                "Units",
-                "Time",
-                "Time",
-                "Base",
-                "Base_f",
-                "SIA405_Base",
-                "SIA405_Base_f",
-                "Base_LV95",
-                "Base_f_MN95",
-                "SIA405_Base_LV95",
-                "SIA405_Base_f_MN95",
-                "Math",
-                "Text",
-                "DatasetIdx16",
-                "AbstractSymbology",
-                "AbstractSymbology",
-                "Time",
-                "IliRepository20",
+            "IliRepository09",
+            "IliRepository09",
+            "IliSite09",
+            "IlisMeta07",
+            "AbstractSymbology",
+            "CoordSys",
+            "RoadsExdm2ben_10",
+            "RoadsExdm2ien_10",
+            "RoadsExgm2ien_10",
+            "StandardSymbology",
+            "Time",
+            "Units",
+            "AbstractSymbology",
+            "CoordSys",
+            "RoadsExdm2ben",
+            "RoadsExdm2ien",
+            "RoadsExgm2ien",
+            "StandardSymbology",
+            "Time",
+            "Units",
+            "GM03Core",
+            "GM03Comprehensive",
+            "CodeISO",
+            "GM03_2Core",
+            "GM03_2Comprehensive",
+            "CodeISO",
+            "GM03_2_1Core",
+            "GM03_2_1Comprehensive",
+            "IlisMeta07",
+            "Units",
+            "IlisMeta07",
+            "IliRepository09",
+            "StandardSymbology",
+            "StandardSymbology",
+            "GM03Core",
+            "GM03_2Core",
+            "GM03_2_1Core",
+            "CoordSys",
+            "INTERLIS_ext",
+            "StandardSymbology",
+            "INTERLIS_ext",
+            "IliVErrors",
+            "RoadsExdm2ien_10",
+            "RoadsExdm2ien",
+            "CoordSys",
+            "StandardSymbology",
+            "Units",
+            "Time",
+            "Time",
+            "Base",
+            "Base_f",
+            "SIA405_Base",
+            "SIA405_Base_f",
+            "Base_LV95",
+            "Base_f_MN95",
+            "SIA405_Base_LV95",
+            "SIA405_Base_f_MN95",
+            "Math",
+            "Text",
+            "DatasetIdx16",
+            "AbstractSymbology",
+            "AbstractSymbology",
+            "Time",
+            "IliRepository20",
         }
         assert models == expected_models
 
@@ -154,14 +154,14 @@ class IliCacheTest(unittest.TestCase):
             e["name"] for e in next(elem for elem in ilicache.repositories.values())
         }
         expected_models = {
-                "AbstractSymbology",
-                "CoordSys",
-                "RoadsExdm2ben",
-                "RoadsExdm2ien",
-                "RoadsExgm2ien",
-                "StandardSymbology",
-                "Time",
-                "Units",
+            "AbstractSymbology",
+            "CoordSys",
+            "RoadsExdm2ben",
+            "RoadsExdm2ien",
+            "RoadsExgm2ien",
+            "StandardSymbology",
+            "Time",
+            "Units",
         }
         assert models == expected_models
 
@@ -178,44 +178,44 @@ class IliCacheTest(unittest.TestCase):
             in ilicache.repositories.keys()
         )
         models = {
-                model["name"]
-                for model in [
-                    e for values in ilicache.repositories.values() for e in values
-                ]
+            model["name"]
+            for model in [
+                e for values in ilicache.repositories.values() for e in values
+            ]
         }
         expected_models_of_ilimodels_xml = {
-                "AbstractSymbology",
-                "CoordSys",
-                "RoadsExdm2ben",
-                "RoadsExdm2ien",
-                "RoadsExgm2ien",
-                "StandardSymbology",
-                "Time",
-                "Units",
+            "AbstractSymbology",
+            "CoordSys",
+            "RoadsExdm2ben",
+            "RoadsExdm2ien",
+            "RoadsExgm2ien",
+            "StandardSymbology",
+            "Time",
+            "Units",
         }
         expected_models_of_local_ili_files = {
-                "KbS_Basis_V1_4",
-                "KbS_LV03_V1_4",
-                "KbS_LV95_V1_4",
-                "RoadsSimple",
-                "Abfallsammelstellen_ZEBA_LV03_V1",
-                "Abfallsammelstellen_ZEBA_LV95_V1",
-                "DictionariesCH_V1",
-                "GeometryCHLV03_V1",
-                "S",
-                "AdministrativeUnitsCH_V1",
-                "CHAdminCodes_V1",
-                "Localisation_V1",
-                "LE",
-                "LocalisationCH_V1",
-                "Dictionaries_V1",
-                "CatalogueObjectTrees_V1",
-                "AdministrativeUnits_V1",
-                "GeometryCHLV95_V1",
-                "InternationalCodes_V1",
-                "CatalogueObjects_V1",
-                "PlanerischerGewaesserschutz_LV95_V1_1",
-                "PlanerischerGewaesserschutz_LV03_V1_1",
+            "KbS_Basis_V1_4",
+            "KbS_LV03_V1_4",
+            "KbS_LV95_V1_4",
+            "RoadsSimple",
+            "Abfallsammelstellen_ZEBA_LV03_V1",
+            "Abfallsammelstellen_ZEBA_LV95_V1",
+            "DictionariesCH_V1",
+            "GeometryCHLV03_V1",
+            "S",
+            "AdministrativeUnitsCH_V1",
+            "CHAdminCodes_V1",
+            "Localisation_V1",
+            "LE",
+            "LocalisationCH_V1",
+            "Dictionaries_V1",
+            "CatalogueObjectTrees_V1",
+            "AdministrativeUnits_V1",
+            "GeometryCHLV95_V1",
+            "InternationalCodes_V1",
+            "CatalogueObjects_V1",
+            "PlanerischerGewaesserschutz_LV95_V1_1",
+            "PlanerischerGewaesserschutz_LV03_V1_1",
         }
 
         assert models == set.union(
@@ -238,44 +238,44 @@ class IliCacheTest(unittest.TestCase):
             in ilicache.repositories.keys()
         )
         models = {
-                model["name"]
-                for model in [
-                    e for values in ilicache.repositories.values() for e in values
-                ]
+            model["name"]
+            for model in [
+                e for values in ilicache.repositories.values() for e in values
+            ]
         }
         expected_models_of_ilimodels_xml = {
-                "AbstractSymbology",
-                "CoordSys",
-                "RoadsExdm2ben",
-                "RoadsExdm2ien",
-                "RoadsExgm2ien",
-                "StandardSymbology",
-                "Time",
-                "Units",
+            "AbstractSymbology",
+            "CoordSys",
+            "RoadsExdm2ben",
+            "RoadsExdm2ien",
+            "RoadsExgm2ien",
+            "StandardSymbology",
+            "Time",
+            "Units",
         }
         expected_models_of_local_ili_files = {
-                "KbS_Basis_V1_4",
-                "KbS_LV03_V1_4",
-                "KbS_LV95_V1_4",
-                "RoadsSimple",
-                "Abfallsammelstellen_ZEBA_LV03_V1",
-                "Abfallsammelstellen_ZEBA_LV95_V1",
-                "DictionariesCH_V1",
-                "GeometryCHLV03_V1",
-                "S",
-                "AdministrativeUnitsCH_V1",
-                "CHAdminCodes_V1",
-                "Localisation_V1",
-                "LE",
-                "LocalisationCH_V1",
-                "Dictionaries_V1",
-                "CatalogueObjectTrees_V1",
-                "AdministrativeUnits_V1",
-                "GeometryCHLV95_V1",
-                "InternationalCodes_V1",
-                "CatalogueObjects_V1",
-                "PlanerischerGewaesserschutz_LV95_V1_1",
-                "PlanerischerGewaesserschutz_LV03_V1_1",
+            "KbS_Basis_V1_4",
+            "KbS_LV03_V1_4",
+            "KbS_LV95_V1_4",
+            "RoadsSimple",
+            "Abfallsammelstellen_ZEBA_LV03_V1",
+            "Abfallsammelstellen_ZEBA_LV95_V1",
+            "DictionariesCH_V1",
+            "GeometryCHLV03_V1",
+            "S",
+            "AdministrativeUnitsCH_V1",
+            "CHAdminCodes_V1",
+            "Localisation_V1",
+            "LE",
+            "LocalisationCH_V1",
+            "Dictionaries_V1",
+            "CatalogueObjectTrees_V1",
+            "AdministrativeUnits_V1",
+            "GeometryCHLV95_V1",
+            "InternationalCodes_V1",
+            "CatalogueObjects_V1",
+            "PlanerischerGewaesserschutz_LV95_V1_1",
+            "PlanerischerGewaesserschutz_LV03_V1_1",
         }
         assert models == set.union(
             expected_models_of_ilimodels_xml, expected_models_of_local_ili_files
@@ -293,8 +293,8 @@ class IliCacheTest(unittest.TestCase):
         )
         assert "test_repo" in ilimetaconfigcache.repositories.keys()
         metaconfigs = {
-                e["id"]
-                for e in next(elem for elem in ilimetaconfigcache.repositories.values())
+            e["id"]
+            for e in next(elem for elem in ilimetaconfigcache.repositories.values())
         }
         expected_metaconfigs = {
             "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",
@@ -376,8 +376,8 @@ class IliCacheTest(unittest.TestCase):
         )
 
         metaconfigs = {
-                e["id"]
-                for e in next(elem for elem in ilimetaconfigcache.repositories.values())
+            e["id"]
+            for e in next(elem for elem in ilimetaconfigcache.repositories.values())
         }
         expected_metaconfigs = {
             "ch.opengis.ili.config.PlanerischerGewaesserschutz_config",
@@ -446,10 +446,8 @@ class IliCacheTest(unittest.TestCase):
         )
         assert "test_repo" in ilireferencedatacache.repositories.keys()
         referencedata = {
-                e["id"]
-                for e in next(
-                    elem for elem in ilireferencedatacache.repositories.values()
-                )
+            e["id"]
+            for e in next(elem for elem in ilireferencedatacache.repositories.values())
         }
         expected_referencedata = {
             "ch.opengis.ili.catalogue.PlanerischerGewaesserschutz_Codetexte_V1_1",
@@ -501,10 +499,8 @@ class IliCacheTest(unittest.TestCase):
         )
 
         referencedata = {
-                e["id"]
-                for e in next(
-                    elem for elem in ilireferencedatacache.repositories.values()
-                )
+            e["id"]
+            for e in next(elem for elem in ilireferencedatacache.repositories.values())
         }
         expected_referencedata = {
             "ch.opengis.ili.catalogue.PlanerischerGewaesserschutz_Codetexte_V1_1",
@@ -556,10 +552,8 @@ class IliCacheTest(unittest.TestCase):
         )
         assert "test_repo" in ilitoppingfilecache.repositories.keys()
         files = {
-                e["relative_file_path"]
-                for e in next(
-                    elem for elem in ilitoppingfilecache.repositories.values()
-                )
+            e["relative_file_path"]
+            for e in next(elem for elem in ilitoppingfilecache.repositories.values())
         }
         expected_files = {
             "layerstyle/opengisch_KbS_LV95_V1_4_005_parzellenidentifikation.qml",
@@ -635,10 +629,8 @@ class IliCacheTest(unittest.TestCase):
         assert "local_files" in ilitoppingfilecache.repositories.keys()
 
         files = {
-                e["relative_file_path"]
-                for e in next(
-                    elem for elem in ilitoppingfilecache.repositories.values()
-                )
+            e["relative_file_path"]
+            for e in next(elem for elem in ilitoppingfilecache.repositories.values())
         }
         expected_files = {
             "layerstyle/opengisch_KbS_LV95_V1_4_005_parzellenidentifikation.qml",
@@ -673,10 +665,8 @@ class IliCacheTest(unittest.TestCase):
         assert "local_files" in ilitoppingfilecache.repositories.keys()
 
         files = {
-                e["relative_file_path"]
-                for e in next(
-                    elem for elem in ilitoppingfilecache.repositories.values()
-                )
+            e["relative_file_path"]
+            for e in next(elem for elem in ilitoppingfilecache.repositories.values())
         }
         expected_files = {
             "layerstyle/opengisch_KbS_LV95_V1_4_005_parzellenidentifikation.qml",
@@ -715,8 +705,8 @@ class IliCacheTest(unittest.TestCase):
         )
         assert "test_repo" in ilimetaconfigcache.repositories.keys()
         metaconfigs = {
-                e["id"]
-                for e in next(elem for elem in ilimetaconfigcache.repositories.values())
+            e["id"]
+            for e in next(elem for elem in ilimetaconfigcache.repositories.values())
         }
         # not finding invalid metaconfig but the one with none as id
         expected_metaconfigs = {None, "ch.opengis.ili.config.valid"}

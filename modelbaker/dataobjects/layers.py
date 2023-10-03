@@ -31,7 +31,8 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication, QSettings
 
-from ..generator.config import IGNORED_FIELDNAMES
+from ..generator.config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES
+from ..utils.globals import OptimizeStrategy
 from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
 
 
@@ -54,6 +55,9 @@ class Layer:
         is_basket_table=False,
         is_dataset_table=False,
         ili_name=None,
+        is_relevant=True,
+        all_topics=[],  # all the topics this class (or an instance of it) are located
+        relevant_topics=[],  # the topics of the most extended instance of it only
         definitionfile=None,
         qmlstylefile=None,
         styles={},
@@ -99,6 +103,10 @@ class Layer:
                     f"{self.ili_name.split('.')[0]}.{self.ili_name.split('.')[1]}"
                 )
 
+        self.is_relevant = is_relevant
+        self.all_topics = all_topics
+        self.relevant_topics = relevant_topics
+
         self.definitionfile = definitionfile
         self.qmlstylefile = qmlstylefile
         self.styles = styles
@@ -123,6 +131,9 @@ class Layer:
         definition["coordinateprecision"] = self.coordinate_precision
         definition["modeltopicname"] = self.model_topic_name
         definition["ili_name"] = self.ili_name
+        definition["is_relevant"] = self.is_relevant
+        definition["all_topics"] = self.all_topics
+        definition["relevant_topics"] = self.relevant_topics
         definition["definitionfile"] = self.definitionfile
         definition["qmlstylefile"] = self.qmlstylefile
         definition["styles"] = self.styles
@@ -141,6 +152,9 @@ class Layer:
         self.coordinate_precision = definition["coordinateprecision"]
         self.model_topic_name = definition["modeltopicname"]
         self.ili_name = definition["ili_name"]
+        self.is_relevant = definition["is_relevant"]
+        self.all_topics = definition["all_topics"]
+        self.relevant_topics = definition["relevant_topics"]
         self.definitionfile = definition["definitionfile"]
         self.qmlstylefile = definition["qmlstylefile"]
         self.styles = definition["styles"]
@@ -250,6 +264,11 @@ class Layer:
             relations_to_add = []
             for relation in project.relations:
                 if relation.referenced_layer == self:
+                    if (
+                        not relation.referencing_layer.is_relevant
+                        and project.optimize_strategy == OptimizeStrategy.GROUP
+                    ):
+                        continue
 
                     # 1:n relation will be added only if does not point to a pure link table
                     if (
@@ -263,13 +282,12 @@ class Layer:
                             if nm_relation == relation:
                                 continue
 
-                            if nm_relation.referenced_layer == self:
+                            if nm_relation.referenced_layer.ili_name == self.ili_name:
                                 continue
 
-                            # relations to the same table with different geometries should not be added
                             if (
-                                self.srid
-                                and nm_relation.referenced_layer.srid == self.srid
+                                not nm_relation.referenced_layer.is_relevant
+                                and project.optimize_strategy == OptimizeStrategy.GROUP
                             ):
                                 continue
 
@@ -332,7 +350,7 @@ class Layer:
 
         remaining_fields = set()
         for field in self.fields:
-            if field.name not in IGNORED_FIELDNAMES:
+            if field.name not in IGNORED_FIELDNAMES + BASKET_FIELDNAMES:
                 remaining_fields.add(field.name)
 
         # Remove all fields that are referencing fields

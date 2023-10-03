@@ -496,7 +496,7 @@ class TestExport(unittest.TestCase):
         result_model.configuration = validator.configuration
         result_model.reload()
         assert result_model.rowCount() == 3
-
+        
         expected_errors = {
             "Needs an ethical evaluation (EthischeBeurteilung)",
             "Beschreibung and/or Referenzcode must be defined.",

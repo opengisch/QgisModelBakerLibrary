@@ -1,0 +1,74 @@
+INTERLIS 2.3;
+
+/* Bauplanung as national model importing the infrastrukture used for using geometry types and connectiong to strasse.
+Having STRUCTURE and a many-to-many ASSOCIATION */
+MODEL Bauplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07-13" =
+  IMPORTS Infrastruktur_V1;
+
+  DOMAIN
+    !! a top level structure used everywhere an not extended
+    STRUCTURE Bauart =
+      Bezeichnung : MANDATORY TEXT;
+    END Bauart;
+
+  TOPIC Konstruktionen =
+    OID AS INTERLIS.UUIDOID;
+    DEPENDS ON Infrastruktur_V1.Strassen;
+
+    DOMAIN
+      STRUCTURE Material =
+        Bezeichnung : MANDATORY TEXT;
+      END Material;
+
+    CLASS Gebaeude =
+      Name : TEXT*99;
+      Materialien: BAG {1..*} OF Material;
+      Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
+      Test : Bauplanung_V1_1.Bauart;
+    END Gebaeude;
+
+    /*new many-to-many association*/
+    ASSOCIATION Strassen_Gebaeude =
+      Strasse (EXTERNAL) -- {0..*} Infrastruktur_V1.Strassen.Strasse;
+      Gebaeude -- {0..*} Gebaeude;
+    END Strassen_Gebaeude;
+
+  END Konstruktionen;
+
+  TOPIC Natur =
+    CLASS Park =
+      Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
+    END Park;
+
+    CLASS Tierart =
+      Spezies: TEXT;
+    END Tierart;
+
+    /*multiple Tierarten can live in a park */
+    ASSOCIATION Park_Tierart =
+      Park -- {1..1} Park;
+      Tierart -- {1..*} Tierart;
+    END Park_Tierart;
+
+    CLASS Brutstelle =
+      Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
+    END Brutstelle;
+
+    /*a Tierart can have multiple brutstellen */
+    ASSOCIATION Brutstelle_Tierart =
+      Fauna -- {1..1} Tierart;
+      Brutstelle -- {1..*} Brutstelle;
+    END Brutstelle_Tierart;
+
+    CLASS Buntbrache =
+      Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
+    END Buntbrache;
+
+    CLASS Feld =
+      Name : TEXT;
+      Geometrie : MANDATORY Infrastruktur_V1.CHSurface;
+    END Feld;
+
+  END Natur;
+
+END Bauplanung_V1_1.
