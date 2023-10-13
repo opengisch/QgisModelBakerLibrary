@@ -230,7 +230,8 @@ class MssqlConnector(DBConnector):
                 ''' This part is not yet working
                 stmt += (
                     ln
-                    + """  ,(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics
+                    + """   ,substring( c.iliname, 1, CHARINDEX('.', substring( c.iliname, CHARINDEX('.', c.iliname)+1, len(c.iliname)))+CHARINDEX('.', c.iliname)-1) as base_topic
+                            ,(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics
                             ,(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics""".format(
                         topic_pedigree="""(WITH children(is_a_base, childTopic, baseTopic) AS (
                                     SELECT

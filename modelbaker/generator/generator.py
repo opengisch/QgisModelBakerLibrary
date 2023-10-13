@@ -144,14 +144,23 @@ class Generator(QObject):
                 record.get("relevance", True)
             )  # it can be not relevant and still be displayed (in case of NONE)
 
+            base_topic = record["base_topic"] if "base_topic" in record else None
+
             all_topics = (
                 record.get("all_topics").split(",") if record.get("all_topics") else []
             )
+            # include the topic where the class is designed in
+            if base_topic:
+                all_topics.append(base_topic)
+
             relevant_topics = (
                 record.get("relevant_topics").split(",")
                 if record.get("relevant_topics")
                 else []
             )
+            # if no relevant_topic found the relevant is the one where the class is designed in
+            if not relevant_topics and base_topic:
+                relevant_topics.append(base_topic)
 
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
@@ -439,7 +448,8 @@ class Generator(QObject):
                         relation.strength = (
                             QgsRelation.Composition
                             if "strength" in record
-                            and record["strength"] == "COMPOSITE" or referencing_layer.is_structure
+                            and record["strength"] == "COMPOSITE"
+                            or referencing_layer.is_structure
                             else QgsRelation.Association
                         )
                         relation.cardinality_max = record.get("cardinality_max", None)
