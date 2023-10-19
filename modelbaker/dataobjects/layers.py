@@ -22,6 +22,7 @@ from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsDataSourceUri,
+    QgsExpressionContextUtils,
     QgsLayerDefinition,
     QgsRasterLayer,
     QgsRectangle,

@@ -53,8 +53,8 @@ class Relation:
 
         relation.setId(self._id)
         relation.setName(self.name)
-        relation.setReferencingLayer(self.referencing_layer.create().id())
-        relation.setReferencedLayer(self.referenced_layer.create().id())
+        relation.setReferencingLayer(self.referencing_layer.real_id)
+        relation.setReferencedLayer(self.referenced_layer.real_id)
         relation.addFieldPair(self.referencing_field, self.referenced_field)
         relation.setStrength(self.strength)
         self.qgis_relation = relation

@@ -225,7 +225,7 @@ class Project(QObject):
 
                 minimal_selection = cardinality.startswith("1")
 
-                current_layer = layer_obj.create()
+                current_layer = layer_obj.create(self.optimize_strategy)
 
                 field_widget = "ValueRelation"
                 field_widget_config = {
@@ -234,7 +234,7 @@ class Project(QObject):
                     "Value": value_field,
                     "OrderByValue": False,
                     "AllowNull": True,
-                    "Layer": domain_table.create().id(),
+                    "Layer": domain_table.real_id,
                     "FilterExpression": "",
                     "Key": key_field,
                     "NofColumns": 1,
