@@ -119,7 +119,7 @@ class Project(QObject):
         qgis_project.setEvaluateDefaultValues(self.evaluate_default_values)
         qgis_layers = list()
         for layer in self.layers:
-            qgis_layer = layer.create(self.optimize_strategy)
+            qgis_layer = layer.create()
             self.layer_added.emit(qgis_layer.id())
             if not self.crs and qgis_layer.isSpatial():
                 self.crs = qgis_layer.crs()
@@ -234,7 +234,7 @@ class Project(QObject):
                     "Value": value_field,
                     "OrderByValue": False,
                     "AllowNull": True,
-                    "Layer": domain_table.real_id,
+                    "Layer": domain_table.create().id(),
                     "FilterExpression": "",
                     "Key": key_field,
                     "NofColumns": 1,

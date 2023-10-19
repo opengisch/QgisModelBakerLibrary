@@ -151,7 +151,7 @@ class Layer:
         self.styles = definition["styles"]
         self.__form.load(definition["form"])
 
-    def create(self, optimize_strategy=OptimizeStrategy.NONE):
+    def create(self):
         if self.definitionfile:
             if self.__layer is None:
                 layers = QgsLayerDefinition.loadLayerDefinitionLayers(
@@ -191,16 +191,6 @@ class Layer:
                 )
                 self.__layer.geometryOptions().setRemoveDuplicateNodes(True)
 
-        # set the layer variable according to the strategy
-        interlis_topics = ",".join(
-            self.all_topics
-            if optimize_strategy == OptimizeStrategy.NONE
-            else self.relevant_topics
-        )
-        QgsExpressionContextUtils.setLayerVariable(
-            self.__layer, "interlis_topic", interlis_topics
-        )
-
         for field in self.fields:
             field.create(self)
 
@@ -236,6 +226,8 @@ class Layer:
         Will be called when the whole project has been generated and
         therefore all relations are available and the form
         can also be generated.
+
+        As well we set the variable.
         """
         has_tabs = False
         for relation in project.relations:
@@ -320,6 +312,16 @@ class Layer:
                 if not field.hidden:
                     widget = FormFieldWidget(field.alias, field.name)
                     self.__form.add_element(widget)
+
+        # set the layer variable according to the strategy
+        interlis_topics = ",".join(
+            self.all_topics
+            if project.optimize_strategy == OptimizeStrategy.NONE
+            else self.relevant_topics
+        )
+        QgsExpressionContextUtils.setLayerVariable(
+            self.__layer, "interlis_topic", interlis_topics
+        )
 
     def source(self):
         return QgsDataSourceUri(self.uri)
