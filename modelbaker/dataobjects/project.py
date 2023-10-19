@@ -119,7 +119,7 @@ class Project(QObject):
         qgis_project.setEvaluateDefaultValues(self.evaluate_default_values)
         qgis_layers = list()
         for layer in self.layers:
-            qgis_layer = layer.create()
+            qgis_layer = layer.create(self.optimize_strategy)
             self.layer_added.emit(qgis_layer.id())
             if not self.crs and qgis_layer.isSpatial():
                 self.crs = qgis_layer.crs()

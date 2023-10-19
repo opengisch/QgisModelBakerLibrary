@@ -22,7 +22,6 @@ from qgis.core import (
     Qgis,
     QgsCoordinateReferenceSystem,
     QgsDataSourceUri,
-    QgsExpressionContextUtils,
     QgsLayerDefinition,
     QgsRasterLayer,
     QgsRectangle,
@@ -96,13 +95,6 @@ class Layer:
 
         self.ili_name = ili_name
 
-        self.model_topic_name = ""
-        if self.ili_name:
-            if self.ili_name.count(".") > 1:
-                self.model_topic_name = (
-                    f"{self.ili_name.split('.')[0]}.{self.ili_name.split('.')[1]}"
-                )
-
         self.is_relevant = is_relevant
         self.all_topics = all_topics
         self.relevant_topics = relevant_topics
@@ -129,7 +121,6 @@ class Layer:
         definition["isdatasettable"] = self.is_dataset_table
         definition["displayexpression"] = self.display_expression
         definition["coordinateprecision"] = self.coordinate_precision
-        definition["modeltopicname"] = self.model_topic_name
         definition["ili_name"] = self.ili_name
         definition["is_relevant"] = self.is_relevant
         definition["all_topics"] = self.all_topics
@@ -150,7 +141,6 @@ class Layer:
         self.is_dataset_table = definition["isdatasettable"]
         self.display_expression = definition["displayexpression"]
         self.coordinate_precision = definition["coordinateprecision"]
-        self.model_topic_name = definition["modeltopicname"]
         self.ili_name = definition["ili_name"]
         self.is_relevant = definition["is_relevant"]
         self.all_topics = definition["all_topics"]
@@ -160,7 +150,7 @@ class Layer:
         self.styles = definition["styles"]
         self.__form.load(definition["form"])
 
-    def create(self):
+    def create(self, optimize_strategy=OptimizeStrategy.NONE):
         if self.definitionfile:
             if self.__layer is None:
                 layers = QgsLayerDefinition.loadLayerDefinitionLayers(
@@ -200,10 +190,15 @@ class Layer:
                 )
                 self.__layer.geometryOptions().setRemoveDuplicateNodes(True)
 
-            if self.model_topic_name:
-                QgsExpressionContextUtils.setLayerVariable(
-                    self.__layer, "interlis_topic", self.model_topic_name
-                )
+        # set the layer variable according to the strategy
+        interlis_topics = ",".join(
+            self.all_topics
+            if optimize_strategy == OptimizeStrategy.NONE
+            else self.relevant_topics
+        )
+        QgsExpressionContextUtils.setLayerVariable(
+            self.__layer, "interlis_topic", interlis_topics
+        )
 
         for field in self.fields:
             field.create(self)

@@ -375,8 +375,16 @@ class Generator(QObject):
                     ]
 
                 if self.basket_handling and column_name in BASKET_FIELDNAMES:
+                    # on NONE strategy those should be all topics the class could be in. On optimized strategies GROUP/HIDE only the relevant topics should be listed.
+                    interlis_topics = ",".join(
+                        layer.all_topics
+                        if self.optimize_strategy == OptimizeStrategy.NONE
+                        else layer.relevant_topics
+                    )
+
+                    # and set the default value (to be used from the projet variables)
                     default_basket_topic = slugify(
-                        f"default_basket{'_' if layer.model_topic_name else ''}{layer.model_topic_name}"
+                        f"default_basket{'_' if interlis_topics else ''}{interlis_topics}"
                     )
                     field.default_value_expression = f"@{default_basket_topic}"
 
