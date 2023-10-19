@@ -146,20 +146,31 @@ class Generator(QObject):
 
             base_topic = record["base_topic"] if "base_topic" in record else None
 
+            # get all the topics
             all_topics = (
                 record.get("all_topics").split(",") if record.get("all_topics") else []
             )
-            # include the topic where the class is designed in
-            if base_topic:
+            # don't concern no-topics (e.g. when a domain is designed directly in the model)
+            all_topics = [topic for topic in all_topics if topic.count(".") > 0]
+
+            # and include the topic where the class is designed in
+            if base_topic and base_topic.count(".") > 0:
                 all_topics.append(base_topic)
 
+            # get all the relevant topics
             relevant_topics = (
                 record.get("relevant_topics").split(",")
                 if record.get("relevant_topics")
                 else []
             )
+
+            # don't concern no-topics (e.g. when a domain is designed directly in the model)
+            relevant_topics = [
+                topic for topic in relevant_topics if topic.count(".") > 0
+            ]
+
             # if no relevant_topic found the relevant is the one where the class is designed in
-            if not relevant_topics and base_topic:
+            if not relevant_topics and base_topic and base_topic.count(".") > 0:
                 relevant_topics.append(base_topic)
 
             alias = record["table_alias"] if "table_alias" in record else None
