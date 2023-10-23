@@ -328,7 +328,10 @@ class TestProjectExtOptimization(unittest.TestCase):
                     }
             assert count == 4
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -389,6 +392,80 @@ class TestProjectExtOptimization(unittest.TestCase):
                         assert len(tab.children()) == 1
         # should find 4
         assert count == 4
+
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # besitzerin can be in multiple baskets (instances of topics Ortsplanung_V1_1.Konstruktionen, Kantonale_Ortsplanung_V1_1.Konstruktionen, Staedtische_Ortsplanung_V1_1.Freizeit, Staedtische_Ortsplanung_V1_1.Gewerbe)
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+            if layer.layer.name() == "BesitzerIn":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert (
+                    layer_model_topic_names
+                    == "kantonale_ortsplanung_v1_1_konstruktionen_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe_ortsplanung_v1_1_konstruktionen"
+                )
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe','Ortsplanung_V1_1.Konstruktionen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_kantonale_ortsplanung_v1_1_konstruktionen_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe_ortsplanung_v1_1_konstruktionen"
+                )
+
+        # should find 2
+        assert count == 2
 
         QgsProject.instance().clear()
 
@@ -466,7 +543,10 @@ class TestProjectExtOptimization(unittest.TestCase):
                     }
             assert count == 4
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -534,6 +614,77 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         assert count == 2
 
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # besitzerin can be in multiple baskets (instances of relevant topics Staedtische_Ortsplanung_V1_1.Freizeit, Staedtische_Ortsplanung_V1_1.Gewerbe)
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+            if layer.layer.name() == "BesitzerIn":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert (
+                    layer_model_topic_names
+                    == "staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                )
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                )
+
         QgsProject.instance().clear()
 
     def _extopt_staedtische_hide(self, generator, strategy, skip_topic_check=False):
@@ -599,7 +750,10 @@ class TestProjectExtOptimization(unittest.TestCase):
                     assert layer.relevant_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
             assert count == 3
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -648,6 +802,80 @@ class TestProjectExtOptimization(unittest.TestCase):
                     if tab.name() == "gebaeude":  # should not happen
                         count += 1
         # should find only 2
+        assert count == 2
+
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # besitzerin can be in multiple baskets (instances of relevant topics Staedtische_Ortsplanung_V1_1.Freizeit, Staedtische_Ortsplanung_V1_1.Gewerbe)
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+            if layer.layer.name() == "BesitzerIn":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert (
+                    layer_model_topic_names
+                    == "staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                )
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                )
+
+        # should find 2
         assert count == 2
 
         QgsProject.instance().clear()
@@ -938,7 +1166,10 @@ class TestProjectExtOptimization(unittest.TestCase):
 
             assert count == 5
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -1013,6 +1244,80 @@ class TestProjectExtOptimization(unittest.TestCase):
                         assert len(tab.children()) == 1
         # should find 8
         assert count == 8
+
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # besitzerin can be in multiple baskets (instances of topics 'Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe','Ortsplanung_V1_1.Konstruktionen')
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+            if layer.layer.name() == "BesitzerIn":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert (
+                    layer_model_topic_names
+                    == "polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe_ortsplanung_v1_1_konstruktionen"
+                )
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe','Ortsplanung_V1_1.Konstruktionen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe_ortsplanung_v1_1_konstruktionen"
+                )
+
+        # should find 2
+        assert count == 2
 
         QgsProject.instance().clear()
 
@@ -1115,7 +1420,10 @@ class TestProjectExtOptimization(unittest.TestCase):
 
             assert count == 5
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -1198,6 +1506,80 @@ class TestProjectExtOptimization(unittest.TestCase):
                         assert len(tab.children()) == 1
         # should find 7
         assert count == 7
+
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # besitzerin can be in multiple baskets (instances of topics 'Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe')
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+            if layer.layer.name() == "BesitzerIn":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert (
+                    layer_model_topic_names
+                    == "polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                )
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                )
+
+        # should find 2
+        assert count == 2
 
         QgsProject.instance().clear()
 
@@ -1292,7 +1674,10 @@ class TestProjectExtOptimization(unittest.TestCase):
 
             assert count == 5
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -1363,6 +1748,80 @@ class TestProjectExtOptimization(unittest.TestCase):
                         assert len(tab.children()) == 1
         # should find 7
         assert count == 7
+
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # besitzerin can be in multiple baskets (instances of topics 'Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe')
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+            if layer.layer.name() == "BesitzerIn":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert (
+                    layer_model_topic_names
+                    == "polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                )
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                )
+
+        # should find 2
+        assert count == 2
 
         QgsProject.instance().clear()
 
@@ -1640,7 +2099,10 @@ class TestProjectExtOptimization(unittest.TestCase):
 
             assert count == 5
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -1704,6 +2166,45 @@ class TestProjectExtOptimization(unittest.TestCase):
                         assert len(tab.children()) == 1
         # should find 3 (one times gebaeude and two times kantnl_ng_v1_1konstruktionen_gebaeude because it's extended)
         assert count == 3
+
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # no special cases with multi basket layers...
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+        # should find 1
+        assert count == 1
 
         QgsProject.instance().clear()
 
@@ -1797,7 +2298,10 @@ class TestProjectExtOptimization(unittest.TestCase):
 
             assert count == 5
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -1882,6 +2386,45 @@ class TestProjectExtOptimization(unittest.TestCase):
                         count += 1
                         assert len(tab.children()) == 1
         # should find 1 (one times kantnl_ng_v1_1konstruktionen_gebaeude)
+        assert count == 1
+
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # no special cases with multi basket layers...
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+        # should find 1
         assert count == 1
 
         QgsProject.instance().clear()
@@ -1971,7 +2514,10 @@ class TestProjectExtOptimization(unittest.TestCase):
 
             assert count == 5
 
-        project = Project(optimize_strategy=strategy)
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
         project.layers = available_layers
         project.relations = relations
         project.legend = legend
@@ -2024,6 +2570,45 @@ class TestProjectExtOptimization(unittest.TestCase):
                         count += 1
                         assert len(tab.children()) == 1
         # should find 1 (one times kantnl_ng_v1_1konstruktionen_gebaeude)
+        assert count == 1
+
+        # strasse can only be in it's dedicated basket (only instance of topic Infrastruktur_V1.Strassen)
+        # no special cases with multi basket layers...
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                count += 1
+
+                # check layer variable
+                layer_model_topic_names = (
+                    QgsExpressionContextUtils.layerScope(layer.layer).variable(
+                        "interlis_topic"
+                    )
+                    or ""
+                )
+
+                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+
+                # check filter in widget
+                efc = layer.layer.editFormConfig()
+                map = efc.widgetConfig("T_basket")
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
+                fields = layer.layer.fields()
+                field_idx = fields.lookupField("t_basket")
+                t_basket_field = fields.field(field_idx)
+                default_value_definition = t_basket_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "@default_basket_infrastruktur_v1_strassen"
+                )
+
+        # should find 1
         assert count == 1
 
         QgsProject.instance().clear()
