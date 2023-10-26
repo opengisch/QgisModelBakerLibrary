@@ -224,7 +224,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_staedtische_none(generator, strategy, True)
+        self._extopt_staedtische_none(generator, strategy)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -238,7 +238,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_staedtische_group(generator, strategy, True)
+        self._extopt_staedtische_group(generator, strategy)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -252,7 +252,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_staedtische_hide(generator, strategy, True)
+        self._extopt_staedtische_hide(generator, strategy)
 
     def _extopt_staedtische_none(self, generator, strategy, skip_topic_check=False):
 
@@ -408,7 +408,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
@@ -442,7 +442,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert (
                     layer_model_topic_names
-                    == "kantonale_ortsplanung_v1_1_konstruktionen_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe_ortsplanung_v1_1_konstruktionen"
+                    == "Kantonale_Ortsplanung_V1_1.Konstruktionen,Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe,Ortsplanung_V1_1.Konstruktionen"
                 )
 
                 # check filter in widget
@@ -629,7 +629,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
@@ -663,7 +663,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert (
                     layer_model_topic_names
-                    == "staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                    == "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
                 )
 
                 # check filter in widget
@@ -819,7 +819,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
@@ -853,7 +853,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert (
                     layer_model_topic_names
-                    == "staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                    == "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
                 )
 
                 # check filter in widget
@@ -1038,7 +1038,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_polymorphic_none(generator, strategy, True)
+        self._extopt_polymorphic_none(generator, strategy)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -1052,7 +1052,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_polymorphic_group(generator, strategy, True)
+        self._extopt_polymorphic_group(generator, strategy)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -1066,7 +1066,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_polymorphic_hide(generator, strategy, True)
+        self._extopt_polymorphic_hide(generator, strategy)
 
     def _extopt_polymorphic_none(self, generator, strategy, skip_topic_check=False):
         available_layers = generator.layers()
@@ -1260,7 +1260,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
@@ -1294,7 +1294,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert (
                     layer_model_topic_names
-                    == "polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe_ortsplanung_v1_1_konstruktionen"
+                    == "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe,Ortsplanung_V1_1.Konstruktionen"
                 )
 
                 # check filter in widget
@@ -1522,7 +1522,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
@@ -1556,7 +1556,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert (
                     layer_model_topic_names
-                    == "polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                    == "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
                 )
 
                 # check filter in widget
@@ -1764,7 +1764,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
@@ -1798,7 +1798,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert (
                     layer_model_topic_names
-                    == "polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                    == "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
                 )
 
                 # check filter in widget
@@ -1981,7 +1981,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_baustruct_none(generator, strategy, True)
+        self._extopt_baustruct_none(generator, strategy)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -1995,7 +1995,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_baustruct_group(generator, strategy, True)
+        self._extopt_baustruct_group(generator, strategy)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -2009,7 +2009,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         )
 
         # we skip the topic check since it's not supported in mssql
-        self._extopt_baustruct_hide(generator, strategy, True)
+        self._extopt_baustruct_hide(generator, strategy)
 
     def _extopt_baustruct_none(self, generator, strategy, skip_topic_check=False):
         available_layers = generator.layers()
@@ -2182,7 +2182,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
@@ -2403,7 +2403,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
@@ -2587,7 +2587,7 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert layer_model_topic_names == "infrastruktur_v1_strassen"
+                assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
