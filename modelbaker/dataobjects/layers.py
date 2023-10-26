@@ -215,6 +215,19 @@ class Layer:
             # set the default style
             self.__layer.styleManager().setCurrentStyle("default")
 
+    def store_variables(self, project):
+        """
+        Set the layer variables according to the strategy
+        """
+        interlis_topics = ",".join(
+            self.all_topics
+            if project.optimize_strategy == OptimizeStrategy.NONE
+            else self.relevant_topics
+        )
+        QgsExpressionContextUtils.setLayerVariable(
+            self.__layer, "interlis_topic", interlis_topics
+        )
+
     def _create_layer(self, uri, layer_name, provider):
         if provider and provider.lower() == "wms":
             return QgsRasterLayer(uri, layer_name, provider)
@@ -226,8 +239,6 @@ class Layer:
         Will be called when the whole project has been generated and
         therefore all relations are available and the form
         can also be generated.
-
-        As well we set the variable.
         """
         has_tabs = False
         for relation in project.relations:
@@ -312,16 +323,6 @@ class Layer:
                 if not field.hidden:
                     widget = FormFieldWidget(field.alias, field.name)
                     self.__form.add_element(widget)
-
-        # set the layer variable according to the strategy
-        interlis_topics = ",".join(
-            self.all_topics
-            if project.optimize_strategy == OptimizeStrategy.NONE
-            else self.relevant_topics
-        )
-        QgsExpressionContextUtils.setLayerVariable(
-            self.__layer, "interlis_topic", interlis_topics
-        )
 
     def source(self):
         return QgsDataSourceUri(self.uri)

@@ -255,6 +255,7 @@ class Project(QObject):
                 # even when a style will be loaded we create the form because not sure if the style contains form settngs
                 layer.create_form(self)
                 layer.load_styles()
+                layer.store_variables(self)
 
         if self.legend:
             self.legend.create(qgis_project, group)
