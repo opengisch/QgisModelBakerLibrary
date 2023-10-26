@@ -224,45 +224,11 @@ class MssqlConnector(DBConnector):
                                     THEN 0 ELSE 1 END AS relevance
                 """
                 )
-                # topics - where this class or an instance of it is located - are emitted by going recursively through the inheritance table.
-                # if something of this topic where the current class is located has been extended, it gets the next child topic.
-                # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
-                ''' This part is not yet working
                 stmt += (
                     ln
                     + """   ,substring( c.iliname, 1, CHARINDEX('.', substring( c.iliname, CHARINDEX('.', c.iliname)+1, len(c.iliname)))+CHARINDEX('.', c.iliname)-1) as base_topic
-                            ,(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics
-                            ,(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics""".format(
-                        topic_pedigree="""(WITH children(is_a_base, childTopic, baseTopic) AS (
-                                    SELECT
-                                    (CASE
-                                        WHEN substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) IN (SELECT substring( i.baseClass, 1, CHARINDEX('.', substring( i.baseClass, CHARINDEX('.', i.baseClass)+1, len(i.baseClass)))+CHARINDEX('.', i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass, 1,  CHARINDEX('.', i.thisClass) ) != substring( i.baseClass, 1,  CHARINDEX('.', i.baseClass)))
-                                        THEN 1
-                                        ELSE 0
-                                    END) AS is_a_base,
-                                    substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) as childTopic,
-                                    substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1, len(baseClass)))+CHARINDEX('.', baseClass)-1) as baseTopic
-                                    FROM {schema}.T_ILI2DB_INHERITANCE
-                                    WHERE substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1, len(thisClass)))+CHARINDEX('.', baseClass)-1) = substring( c.iliname, 1, CHARINDEX('.', substring( c.iliname, CHARINDEX('.', c.iliname)+1, len(c.iliname)))+CHARINDEX('.', c.iliname)-1)
-                                    UNION
-                                    SELECT
-                                    (CASE
-                                        WHEN substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) IN (SELECT substring( i.baseClass, 1, CHARINDEX('.', substring( i.baseClass, CHARINDEX('.', i.baseClass)+1, len(i.baseClass)))+CHARINDEX('.', i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass, 1,  CHARINDEX('.', i.thisClass)) != substring( i.baseClass, 1, CHARINDEX('.', i.baseClass)))
-                                        THEN 1
-                                        ELSE 0
-                                    END) AS is_a_base,
-                                    substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1))+CHARINDEX('.', inheritance.thisClass)-1,len(inheritance.thisClass)) as childTopic ,
-                                    substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', baseClass)+1))+CHARINDEX('.', inheritance.baseClass)-1,len(inheritance.baseClass)) as baseTopic
-                                    FROM children
-                                    JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance
-                                    ON substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', inheritance.baseClass)+1))+CHARINDEX('.', inheritance.baseClass)-1, len(inheritance.thisClass)) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
-                                    WHERE substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1))+CHARINDEX('.', inheritance.thisClass)-1, len(inheritance.thisClass)) != children.childTopic -- break the recursion when the coming childTopic will be the same
-                                )
-                                SELECT childTopic, baseTopic, is_a_base FROM children) AS kiddies
-                            """
-                    )
+                """
                 )
-                '''
             stmt += ln + "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS Tab"
             stmt += ln + "INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS Col"
             stmt += ln + "    ON Col.Constraint_Name = Tab.Constraint_Name"
@@ -318,6 +284,76 @@ class MssqlConnector(DBConnector):
                     my_rec["type"] = my_rec["simple_type"]
                     res.append(my_rec)
 
+            # topics - where this class or an instance of it is located - are emitted by going recursively through the inheritance table.
+            # if something of this topic where the current class is located has been extended, it gets the next child topic.
+            # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
+            # get the topics
+            for res_entry in res:
+                stmt = """
+                WITH children(is_a_base, childTopic, baseTopic) AS (
+                    SELECT
+                    (CASE
+                        WHEN substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) IN (SELECT substring( i.baseClass, 1, CHARINDEX('.', substring( i.baseClass, CHARINDEX('.', i.baseClass)+1, len(i.baseClass)))+CHARINDEX('.', i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass, 1,  CHARINDEX('.', i.thisClass) ) != substring( i.baseClass, 1,  CHARINDEX('.', i.baseClass)))
+                        THEN 1
+                        ELSE 0
+                    END) AS is_a_base,
+                    substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) as childTopic,
+                    substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1, len(baseClass)))+CHARINDEX('.', baseClass)-1) as baseTopic
+                    FROM {schema}.T_ILI2DB_INHERITANCE
+                    WHERE substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1, len(thisClass)))+CHARINDEX('.', baseClass)-1) = '{base_topic}'
+                    UNION ALL
+                    SELECT
+                    (CASE
+                        WHEN substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) IN (SELECT substring( i.baseClass, 1, CHARINDEX('.', substring( i.baseClass, CHARINDEX('.', i.baseClass)+1, len(i.baseClass)))+CHARINDEX('.', i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass, 1,  CHARINDEX('.', i.thisClass)) != substring( i.baseClass, 1, CHARINDEX('.', i.baseClass)))
+                        THEN 1
+                        ELSE 0
+                    END) AS is_a_base,
+                    substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1, len(inheritance.thisClass)))+CHARINDEX('.', inheritance.thisClass)-1) as childTopic ,
+                    substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', baseClass)+1, len(baseClass)))+CHARINDEX('.', inheritance.baseClass)-1) as baseTopic
+                    FROM children
+                    JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance
+                    ON substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', inheritance.baseClass)+1, len(inheritance.baseClass)))+CHARINDEX('.', inheritance.baseClass)-1) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
+                    WHERE substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1, len(inheritance.thisClass)))+CHARINDEX('.', inheritance.thisClass)-1) != children.childTopic -- break the recursion when the coming childTopic will be the same
+                ) SELECT STRING_AGG(childTopic,',') as all_topics FROM children
+                """.format(
+                    schema=self.schema, base_topic=res_entry["base_topic"]
+                )
+                cur.execute(stmt)
+                res_entry["all_topics"] = cur.fetchone()[0]
+
+            # get the relevant topics
+            for res_entry in res:
+                stmt = """
+                WITH children(is_a_base, childTopic, baseTopic) AS (
+                    SELECT
+                    (CASE
+                        WHEN substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) IN (SELECT substring( i.baseClass, 1, CHARINDEX('.', substring( i.baseClass, CHARINDEX('.', i.baseClass)+1, len(i.baseClass)))+CHARINDEX('.', i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass, 1,  CHARINDEX('.', i.thisClass) ) != substring( i.baseClass, 1,  CHARINDEX('.', i.baseClass)))
+                        THEN 1
+                        ELSE 0
+                    END) AS is_a_base,
+                    substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) as childTopic,
+                    substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1, len(baseClass)))+CHARINDEX('.', baseClass)-1) as baseTopic
+                    FROM {schema}.T_ILI2DB_INHERITANCE
+                    WHERE substring( baseClass, 1, CHARINDEX('.', substring( baseClass, CHARINDEX('.', baseClass)+1, len(thisClass)))+CHARINDEX('.', baseClass)-1) = '{base_topic}'
+                    UNION ALL
+                    SELECT
+                    (CASE
+                        WHEN substring( thisClass, 1, CHARINDEX('.', substring( thisClass, CHARINDEX('.', thisClass)+1, len(thisClass)))+CHARINDEX('.', thisClass)-1) IN (SELECT substring( i.baseClass, 1, CHARINDEX('.', substring( i.baseClass, CHARINDEX('.', i.baseClass)+1, len(i.baseClass)))+CHARINDEX('.', i.baseClass)-1) FROM {schema}.T_ILI2DB_INHERITANCE i WHERE substring( i.thisClass, 1,  CHARINDEX('.', i.thisClass)) != substring( i.baseClass, 1, CHARINDEX('.', i.baseClass)))
+                        THEN 1
+                        ELSE 0
+                    END) AS is_a_base,
+                    substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1, len(inheritance.thisClass)))+CHARINDEX('.', inheritance.thisClass)-1) as childTopic ,
+                    substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', baseClass)+1, len(baseClass)))+CHARINDEX('.', inheritance.baseClass)-1) as baseTopic
+                    FROM children
+                    JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance
+                    ON substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', inheritance.baseClass)+1, len(inheritance.baseClass)))+CHARINDEX('.', inheritance.baseClass)-1) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
+                    WHERE substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1, len(inheritance.thisClass)))+CHARINDEX('.', inheritance.thisClass)-1) != children.childTopic -- break the recursion when the coming childTopic will be the same
+                ) SELECT STRING_AGG(childTopic,',') as relevant_topics FROM children WHERE is_a_base = 0
+                """.format(
+                    schema=self.schema, base_topic=res_entry["base_topic"]
+                )
+                cur.execute(stmt)
+                res_entry["relevant_topics"] = cur.fetchone()[0]
         return res
 
     def _def_cursor(self, query):
@@ -792,7 +828,6 @@ WHERE TABLE_SCHEMA='{schema}'
         )
 
         res = cur.fetchone()[0]
-        print(res)
         if res > 0:
             self.new_message.emit(
                 Qgis.Warning,
