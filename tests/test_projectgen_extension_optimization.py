@@ -23,7 +23,7 @@ import os
 import pathlib
 import tempfile
 
-from qgis.core import QgsLayerTreeLayer, QgsProject
+from qgis.core import QgsExpressionContextUtils, QgsLayerTreeLayer, QgsProject
 from qgis.testing import start_app, unittest
 
 from modelbaker.dataobjects.project import Project
