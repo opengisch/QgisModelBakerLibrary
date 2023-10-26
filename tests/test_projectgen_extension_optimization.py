@@ -93,6 +93,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=get_pg_connection_string(),
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -106,6 +107,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=get_pg_connection_string(),
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -119,6 +121,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=get_pg_connection_string(),
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -156,9 +159,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_staedtische_none(generator, strategy)
+        self._extopt_staedtische_none(generator, strategy, True)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -168,9 +172,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_staedtische_group(generator, strategy)
+        self._extopt_staedtische_group(generator, strategy, True)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -180,9 +185,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_staedtische_hide(generator, strategy)
+        self._extopt_staedtische_hide(generator, strategy, True)
 
     def test_extopt_staedtische_mssql(self):
 
@@ -220,6 +226,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -234,6 +241,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -248,19 +256,20 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
         # we skip the topic check since it's not supported in mssql
         self._extopt_staedtische_hide(generator, strategy)
 
-    def _extopt_staedtische_none(self, generator, strategy, skip_topic_check=False):
+    def _extopt_staedtische_none(self, generator, strategy, is_gpkg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -289,44 +298,41 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Infrastruktur_V1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # BesitzerIn from Ortsplanung_V1_1
-                if layer.alias == "BesitzerIn":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Kantonale_Ortsplanung_V1_1.Konstruktionen",
-                        "Staedtische_Ortsplanung_V1_1.Freizeit",
-                        "Staedtische_Ortsplanung_V1_1.Gewerbe",
-                        "Ortsplanung_V1_1.Konstruktionen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Staedtische_Ortsplanung_V1_1.Freizeit",
-                        "Staedtische_Ortsplanung_V1_1.Gewerbe",
-                    }
-                # Firma from Staedtisches_Gewerbe_V1
-                if layer.alias == "Staedtisches_Gewerbe_V1.Firmen.Firma":
-                    count += 1
-                    assert layer.all_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
-                    assert layer.relevant_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
-                # Firma from Gewerbe_V1
-                if layer.alias == "Gewerbe_V1.Firmen.Firma":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Gewerbe_V1.Firmen",
-                        "Staedtisches_Gewerbe_V1.Firmen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Staedtisches_Gewerbe_V1.Firmen"
-                    }
-            assert count == 4
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Infrastruktur_V1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # BesitzerIn from Ortsplanung_V1_1
+            if layer.alias == "BesitzerIn":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Kantonale_Ortsplanung_V1_1.Konstruktionen",
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                    "Ortsplanung_V1_1.Konstruktionen",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+            # Firma from Staedtisches_Gewerbe_V1
+            if layer.alias == "Staedtisches_Gewerbe_V1.Firmen.Firma":
+                count += 1
+                assert layer.all_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
+                assert layer.relevant_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
+            # Firma from Gewerbe_V1
+            if layer.alias == "Gewerbe_V1.Firmen.Firma":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Gewerbe_V1.Firmen",
+                    "Staedtisches_Gewerbe_V1.Firmen",
+                }
+                assert set(layer.relevant_topics) == {"Staedtisches_Gewerbe_V1.Firmen"}
+        assert count == 4
 
         project = Project(
             optimize_strategy=strategy,
@@ -345,7 +351,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 9
+        assert len(all_layers) == 11
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -368,7 +374,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 10
+        assert len(relations) == 20
 
         # strasse should have relation editors to all layers (4/4)
         count = 0
@@ -412,15 +418,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -440,22 +459,36 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert (
-                    layer_model_topic_names
-                    == "Kantonale_Ortsplanung_V1_1.Konstruktionen,Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe,Ortsplanung_V1_1.Konstruktionen"
+                assert set(layer_model_topic_names.split(",")) == set(
+                    "Kantonale_Ortsplanung_V1_1.Konstruktionen,Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe,Ortsplanung_V1_1.Konstruktionen".split(
+                        ","
+                    )
                 )
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe','Ortsplanung_V1_1.Konstruktionen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe','Ortsplanung_V1_1.Konstruktionen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -469,12 +502,12 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_staedtische_group(self, generator, strategy, skip_topic_check=False):
+    def _extopt_staedtische_group(self, generator, strategy, is_gpkg=False):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -504,44 +537,41 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Infrastruktur_V1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # BesitzerIn from Ortsplanung_V1_1
-                if layer.alias == "BesitzerIn":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Kantonale_Ortsplanung_V1_1.Konstruktionen",
-                        "Staedtische_Ortsplanung_V1_1.Freizeit",
-                        "Staedtische_Ortsplanung_V1_1.Gewerbe",
-                        "Ortsplanung_V1_1.Konstruktionen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Staedtische_Ortsplanung_V1_1.Freizeit",
-                        "Staedtische_Ortsplanung_V1_1.Gewerbe",
-                    }
-                # Firma from Staedtisches_Gewerbe_V1
-                if layer.alias == "Staedtisches_Gewerbe_V1.Firmen.Firma":
-                    count += 1
-                    assert layer.all_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
-                    assert layer.relevant_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
-                # Firma from Gewerbe_V1
-                if layer.alias == "Gewerbe_V1.Firmen.Firma":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Gewerbe_V1.Firmen",
-                        "Staedtisches_Gewerbe_V1.Firmen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Staedtisches_Gewerbe_V1.Firmen"
-                    }
-            assert count == 4
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Infrastruktur_V1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # BesitzerIn from Ortsplanung_V1_1
+            if layer.alias == "BesitzerIn":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Kantonale_Ortsplanung_V1_1.Konstruktionen",
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                    "Ortsplanung_V1_1.Konstruktionen",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+            # Firma from Staedtisches_Gewerbe_V1
+            if layer.alias == "Staedtisches_Gewerbe_V1.Firmen.Firma":
+                count += 1
+                assert layer.all_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
+                assert layer.relevant_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
+            # Firma from Gewerbe_V1
+            if layer.alias == "Gewerbe_V1.Firmen.Firma":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Gewerbe_V1.Firmen",
+                    "Staedtisches_Gewerbe_V1.Firmen",
+                }
+                assert set(layer.relevant_topics) == {"Staedtisches_Gewerbe_V1.Firmen"}
+        assert count == 4
 
         project = Project(
             optimize_strategy=strategy,
@@ -560,7 +590,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 9
+        assert len(all_layers) == 11
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -588,7 +618,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 10
+        assert len(relations) == 20
 
         # strasse should only have relation editors to relevant layers (2/4)
         count = 0
@@ -633,15 +663,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -661,22 +704,36 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert (
-                    layer_model_topic_names
-                    == "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
+                assert set(layer_model_topic_names.split(",")) == set(
+                    "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe".split(
+                        ","
+                    )
                 )
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -687,13 +744,13 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_staedtische_hide(self, generator, strategy, skip_topic_check=False):
+    def _extopt_staedtische_hide(self, generator, strategy, is_gpkg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -721,34 +778,33 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Infrastruktur_V1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # BesitzerIn from Ortsplanung_V1_1
-                if layer.alias == "BesitzerIn":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Kantonale_Ortsplanung_V1_1.Konstruktionen",
-                        "Staedtische_Ortsplanung_V1_1.Freizeit",
-                        "Staedtische_Ortsplanung_V1_1.Gewerbe",
-                        "Ortsplanung_V1_1.Konstruktionen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Staedtische_Ortsplanung_V1_1.Freizeit",
-                        "Staedtische_Ortsplanung_V1_1.Gewerbe",
-                    }
-                # Firma from Staedtisches_Gewerbe_V1
-                if layer.alias == "Firma" and layer.is_relevant:
-                    count += 1
-                    assert layer.all_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
-                    assert layer.relevant_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
-            assert count == 3
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Infrastruktur_V1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # BesitzerIn from Ortsplanung_V1_1
+            if layer.alias == "BesitzerIn":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Kantonale_Ortsplanung_V1_1.Konstruktionen",
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                    "Ortsplanung_V1_1.Konstruktionen",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Staedtische_Ortsplanung_V1_1.Freizeit",
+                    "Staedtische_Ortsplanung_V1_1.Gewerbe",
+                }
+            # Firma from Staedtisches_Gewerbe_V1
+            if layer.alias == "Firma" and layer.is_relevant:
+                count += 1
+                assert layer.all_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
+                assert layer.relevant_topics == ["Staedtisches_Gewerbe_V1.Firmen"]
+        assert count == 3
 
         project = Project(
             optimize_strategy=strategy,
@@ -767,7 +823,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 6
+        assert len(all_layers) == 8
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -779,7 +835,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - only 13 are here
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 6
+        assert len(relations) == 13
 
         # strasse should only have relation editors to relevant layers (2/4)
         count = 0
@@ -823,15 +879,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -851,22 +920,36 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert (
-                    layer_model_topic_names
-                    == "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
+                assert set(layer_model_topic_names.split(",")) == set(
+                    "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe".split(
+                        ","
+                    )
                 )
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -906,6 +989,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
@@ -919,6 +1003,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
@@ -932,6 +1017,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             tool=DbIliMode.ili2pg,
             uri=get_pg_connection_string(),
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
         )
@@ -970,9 +1056,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_polymorphic_none(generator, strategy)
+        self._extopt_polymorphic_none(generator, strategy, True)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -982,9 +1069,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_polymorphic_group(generator, strategy)
+        self._extopt_polymorphic_group(generator, strategy, True)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -994,9 +1082,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_polymorphic_hide(generator, strategy)
+        self._extopt_polymorphic_hide(generator, strategy, True)
 
     def test_extopt_polymorphic_mssql(self):
 
@@ -1034,6 +1123,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -1048,6 +1138,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -1062,18 +1153,19 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
         # we skip the topic check since it's not supported in mssql
         self._extopt_polymorphic_hide(generator, strategy)
 
-    def _extopt_polymorphic_none(self, generator, strategy, skip_topic_check=False):
+    def _extopt_polymorphic_none(self, generator, strategy, is_gpkg=False):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -1103,68 +1195,67 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Infrastruktur_V1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # BesitzerIn from Ortsplanung_V1_1
-                if layer.alias == "BesitzerIn":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                        "Ortsplanung_V1_1.Konstruktionen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                    }
-                # Gebaeude from Ortsplanung_V1_1
-                if layer.alias == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                        "Ortsplanung_V1_1.Konstruktionen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                    }
-                # Gebaeude from Polymorphic_Ortsplanung_V1_1.Gewerbe
-                if layer.alias == "Gewerbe.Gebaeude":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    }
-                # Gebaeude from Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe
-                if layer.alias == "IndustrieGewerbe.Gebaeude":
-                    count += 1
-                    assert layer.all_topics == [
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    ]
-                    assert layer.relevant_topics == [
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    ]
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Infrastruktur_V1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # BesitzerIn from Ortsplanung_V1_1
+            if layer.alias == "BesitzerIn":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                    "Ortsplanung_V1_1.Konstruktionen",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                }
+            # Gebaeude from Ortsplanung_V1_1
+            if layer.alias == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                    "Ortsplanung_V1_1.Konstruktionen",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                }
+            # Gebaeude from Polymorphic_Ortsplanung_V1_1.Gewerbe
+            if layer.alias == "Gewerbe.Gebaeude":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                }
+            # Gebaeude from Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe
+            if layer.alias == "IndustrieGewerbe.Gebaeude":
+                count += 1
+                assert layer.all_topics == [
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                ]
+                assert layer.relevant_topics == [
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                ]
 
-            assert count == 5
+        assert count == 5
 
         project = Project(
             optimize_strategy=strategy,
@@ -1183,7 +1274,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 11
+        assert len(all_layers) == 13
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -1208,7 +1299,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 16
+        assert len(relations) == 28
 
         # strasse should have relation editors to all layers (8/8)
         count = 0
@@ -1264,15 +1355,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -1292,22 +1396,36 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert (
-                    layer_model_topic_names
-                    == "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe,Ortsplanung_V1_1.Konstruktionen"
+                assert set(layer_model_topic_names.split(",")) == set(
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe,Ortsplanung_V1_1.Konstruktionen".split(
+                        ","
+                    )
                 )
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe','Ortsplanung_V1_1.Konstruktionen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe','Ortsplanung_V1_1.Konstruktionen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -1321,13 +1439,13 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_polymorphic_group(self, generator, strategy, skip_topic_check=False):
+    def _extopt_polymorphic_group(self, generator, strategy, is_gpkg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -1357,68 +1475,67 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Ortsplanung_V1_1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # BesitzerIn from Ortsplanung_V1_1
-                if layer.alias == "BesitzerIn":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                        "Ortsplanung_V1_1.Konstruktionen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                    }
-                # Gebaeude from Ortsplanung_V1_1
-                if layer.alias == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                        "Ortsplanung_V1_1.Konstruktionen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                    }
-                # Gebaeude from Polymorphic_Ortsplanung_V1_1.Gewerbe
-                if layer.alias == "Gewerbe.Gebaeude":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    }
-                # Gebaeude from Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe
-                if layer.alias == "IndustrieGewerbe.Gebaeude":
-                    count += 1
-                    assert layer.all_topics == [
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    ]
-                    assert layer.relevant_topics == [
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    ]
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Ortsplanung_V1_1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # BesitzerIn from Ortsplanung_V1_1
+            if layer.alias == "BesitzerIn":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                    "Ortsplanung_V1_1.Konstruktionen",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                }
+            # Gebaeude from Ortsplanung_V1_1
+            if layer.alias == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                    "Ortsplanung_V1_1.Konstruktionen",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                }
+            # Gebaeude from Polymorphic_Ortsplanung_V1_1.Gewerbe
+            if layer.alias == "Gewerbe.Gebaeude":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                }
+            # Gebaeude from Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe
+            if layer.alias == "IndustrieGewerbe.Gebaeude":
+                count += 1
+                assert layer.all_topics == [
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                ]
+                assert layer.relevant_topics == [
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                ]
 
-            assert count == 5
+        assert count == 5
 
         project = Project(
             optimize_strategy=strategy,
@@ -1437,7 +1554,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 11
+        assert len(all_layers) == 13
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -1470,7 +1587,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 16
+        assert len(relations) == 28
 
         # strasse should have relation editors to all layers (8/8)
         count = 0
@@ -1526,15 +1643,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -1554,22 +1684,36 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert (
-                    layer_model_topic_names
-                    == "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                assert set(layer_model_topic_names.split(",")) == set(
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe".split(
+                        ","
+                    )
                 )
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -1583,13 +1727,13 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_polymorphic_hide(self, generator, strategy, skip_topic_check=False):
+    def _extopt_polymorphic_hide(self, generator, strategy, is_gpkg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -1618,61 +1762,60 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Infrastruktur_V1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # BesitzerIn from Ortsplanung_V1_1
-                if layer.alias == "BesitzerIn":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                        "Ortsplanung_V1_1.Konstruktionen",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.Freizeit",
-                        "Polymorphic_Ortsplanung_V1_1.Hallen",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                    }
-                # Gebaeude from Polymorphic_Ortsplanung_V1_1
-                if layer.alias == "Konstruktionen.Gebaeude" and layer.is_relevant:
-                    count += 1
-                    assert layer.all_topics == [
-                        "Polymorphic_Ortsplanung_V1_1.Konstruktionen"
-                    ]
-                    assert layer.relevant_topics == [
-                        "Polymorphic_Ortsplanung_V1_1.Konstruktionen"
-                    ]
-                # Gebaeude from Polymorphic_Ortsplanung_V1_1.Gewerbe
-                if layer.alias == "Gewerbe.Gebaeude":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.Gewerbe",
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    }
-                # Gebaeude from Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe
-                if layer.alias == "IndustrieGewerbe.Gebaeude":
-                    count += 1
-                    assert layer.all_topics == [
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    ]
-                    assert layer.relevant_topics == [
-                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                    ]
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Infrastruktur_V1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # BesitzerIn from Ortsplanung_V1_1
+            if layer.alias == "BesitzerIn":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                    "Ortsplanung_V1_1.Konstruktionen",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit",
+                    "Polymorphic_Ortsplanung_V1_1.Hallen",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                }
+            # Gebaeude from Polymorphic_Ortsplanung_V1_1
+            if layer.alias == "Konstruktionen.Gebaeude" and layer.is_relevant:
+                count += 1
+                assert layer.all_topics == [
+                    "Polymorphic_Ortsplanung_V1_1.Konstruktionen"
+                ]
+                assert layer.relevant_topics == [
+                    "Polymorphic_Ortsplanung_V1_1.Konstruktionen"
+                ]
+            # Gebaeude from Polymorphic_Ortsplanung_V1_1.Gewerbe
+            if layer.alias == "Gewerbe.Gebaeude":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe",
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe",
+                }
+                assert set(layer.relevant_topics) == {
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                }
+            # Gebaeude from Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe
+            if layer.alias == "IndustrieGewerbe.Gebaeude":
+                count += 1
+                assert layer.all_topics == [
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                ]
+                assert layer.relevant_topics == [
+                    "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                ]
 
-            assert count == 5
+        assert count == 5
 
         project = Project(
             optimize_strategy=strategy,
@@ -1691,7 +1834,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 10
+        assert len(all_layers) == 12
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -1712,7 +1855,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 14
+        assert len(relations) == 25
 
         # strasse should have relation editors to all layers (8/8)
         count = 0
@@ -1768,15 +1911,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -1796,22 +1952,36 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert (
-                    layer_model_topic_names
-                    == "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                assert set(layer_model_topic_names.split(",")) == set(
+                    "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe".split(
+                        ","
+                    )
                 )
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -1851,6 +2021,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=get_pg_connection_string(),
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -1864,6 +2035,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=get_pg_connection_string(),
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -1877,6 +2049,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=get_pg_connection_string(),
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -1914,9 +2087,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_baustruct_none(generator, strategy)
+        self._extopt_baustruct_none(generator, strategy, True)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -1926,9 +2100,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_baustruct_group(generator, strategy)
+        self._extopt_baustruct_group(generator, strategy, True)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -1938,9 +2113,10 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             optimize_strategy=strategy,
+            consider_basket_handling=True,
         )
 
-        self._extopt_baustruct_hide(generator, strategy)
+        self._extopt_baustruct_hide(generator, strategy, True)
 
     def test_extopt_baustruct_mssql(self):
 
@@ -1977,6 +2153,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -1991,6 +2168,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
@@ -2005,17 +2183,18 @@ class TestProjectExtOptimization(unittest.TestCase):
             uri=uri,
             inheritance=importer.configuration.inheritance,
             schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
             optimize_strategy=strategy,
         )
 
         # we skip the topic check since it's not supported in mssql
         self._extopt_baustruct_hide(generator, strategy)
 
-    def _extopt_baustruct_none(self, generator, strategy, skip_topic_check=False):
+    def _extopt_baustruct_none(self, generator, strategy, is_gpkg=False):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -2057,47 +2236,42 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Infrastruktur_V1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # Park from Bauplanung_V1_1
-                if layer.alias == "Bauplanung_V1_1.Natur.Park":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Bauplanung_V1_1.Natur",
-                        "Kantonale_Bauplanung_V1_1.Natur",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Kantonale_Bauplanung_V1_1.Natur"
-                    }
-                # Park from Kantonale_Bauplanung_V1_1
-                if layer.alias == "Kantonale_Bauplanung_V1_1.Natur.Park":
-                    count += 1
-                    assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                    assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                # Feld from Bauplanung_V1_1
-                if layer.alias == "Feld":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Bauplanung_V1_1.Natur",
-                        "Kantonale_Bauplanung_V1_1.Natur",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Kantonale_Bauplanung_V1_1.Natur"
-                    }
-                # Kartoffelfeld from Kantonale_Bauplanung_V1_1.Natur
-                if layer.alias == "Kartoffelfeld":
-                    count += 1
-                    assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                    assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Infrastruktur_V1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # Park from Bauplanung_V1_1
+            if layer.alias == "Bauplanung_V1_1.Natur.Park":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Bauplanung_V1_1.Natur",
+                    "Kantonale_Bauplanung_V1_1.Natur",
+                }
+                assert set(layer.relevant_topics) == {"Kantonale_Bauplanung_V1_1.Natur"}
+            # Park from Kantonale_Bauplanung_V1_1
+            if layer.alias == "Kantonale_Bauplanung_V1_1.Natur.Park":
+                count += 1
+                assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+                assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+            # Feld from Bauplanung_V1_1
+            if layer.alias == "Feld":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Bauplanung_V1_1.Natur",
+                    "Kantonale_Bauplanung_V1_1.Natur",
+                }
+                assert set(layer.relevant_topics) == {"Kantonale_Bauplanung_V1_1.Natur"}
+            # Kartoffelfeld from Kantonale_Bauplanung_V1_1.Natur
+            if layer.alias == "Kartoffelfeld":
+                count += 1
+                assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+                assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
 
-            assert count == 5
+        assert count == 5
 
         project = Project(
             optimize_strategy=strategy,
@@ -2116,7 +2290,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 18
+        assert len(all_layers) == 20
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -2148,7 +2322,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 18
+        assert len(relations) == 37
 
         # strasse should have relation editors to all layers (2/2)
         count = 0
@@ -2186,15 +2360,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -2208,13 +2395,13 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_baustruct_group(self, generator, strategy, skip_topic_check=False):
+    def _extopt_baustruct_group(self, generator, strategy, is_gpkg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -2256,47 +2443,42 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Infrastruktur_V1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # Park from Bauplanung_V1_1
-                if layer.alias == "Bauplanung_V1_1.Natur.Park":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Bauplanung_V1_1.Natur",
-                        "Kantonale_Bauplanung_V1_1.Natur",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Kantonale_Bauplanung_V1_1.Natur"
-                    }
-                # Park from Kantonale_Bauplanung_V1_1
-                if layer.alias == "Kantonale_Bauplanung_V1_1.Natur.Park":
-                    count += 1
-                    assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                    assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                # Feld from Bauplanung_V1_1
-                if layer.alias == "Feld":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Bauplanung_V1_1.Natur",
-                        "Kantonale_Bauplanung_V1_1.Natur",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Kantonale_Bauplanung_V1_1.Natur"
-                    }
-                # Kartoffelfeld from Kantonale_Bauplanung_V1_1.Natur
-                if layer.alias == "Kartoffelfeld":
-                    count += 1
-                    assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                    assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Infrastruktur_V1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # Park from Bauplanung_V1_1
+            if layer.alias == "Bauplanung_V1_1.Natur.Park":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Bauplanung_V1_1.Natur",
+                    "Kantonale_Bauplanung_V1_1.Natur",
+                }
+                assert set(layer.relevant_topics) == {"Kantonale_Bauplanung_V1_1.Natur"}
+            # Park from Kantonale_Bauplanung_V1_1
+            if layer.alias == "Kantonale_Bauplanung_V1_1.Natur.Park":
+                count += 1
+                assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+                assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+            # Feld from Bauplanung_V1_1
+            if layer.alias == "Feld":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Bauplanung_V1_1.Natur",
+                    "Kantonale_Bauplanung_V1_1.Natur",
+                }
+                assert set(layer.relevant_topics) == {"Kantonale_Bauplanung_V1_1.Natur"}
+            # Kartoffelfeld from Kantonale_Bauplanung_V1_1.Natur
+            if layer.alias == "Kartoffelfeld":
+                count += 1
+                assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+                assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
 
-            assert count == 5
+        assert count == 5
 
         project = Project(
             optimize_strategy=strategy,
@@ -2315,7 +2497,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 18
+        assert len(all_layers) == 20
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -2369,7 +2551,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 18
+        assert len(relations) == 37
 
         # strasse should have relation editors to all layers (3/2) - since extended relation it's two times
         count = 0
@@ -2407,15 +2589,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -2429,13 +2624,13 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_baustruct_hide(self, generator, strategy, skip_topic_check=False):
+    def _extopt_baustruct_hide(self, generator, strategy, is_gpkg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
 
-        aliases = [l.alias for l in available_layers]
+        aliases = [l.alias for l in available_layers if l.alias is not None]
         irrelevant_layer_ilinames = [
             l.ili_name for l in available_layers if not l.is_relevant
         ]
@@ -2472,47 +2667,42 @@ class TestProjectExtOptimization(unittest.TestCase):
         ]
         assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
 
-        if not skip_topic_check:
-            # check relevant topics
-            count = 0
-            for layer in available_layers:
-                # Strasse from Infrastruktur_V1
-                if layer.alias == "Strasse":
-                    count += 1
-                    assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
-                    assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
-                # Park from Bauplanung_V1_1
-                if layer.alias == "Park" and not layer.is_relevant:
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Bauplanung_V1_1.Natur",
-                        "Kantonale_Bauplanung_V1_1.Natur",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Kantonale_Bauplanung_V1_1.Natur"
-                    }
-                # Park from Kantonale_Bauplanung_V1_1
-                if layer.alias == "Park" and layer.is_relevant:
-                    count += 1
-                    assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                    assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                # Feld from Bauplanung_V1_1
-                if layer.alias == "Feld":
-                    count += 1
-                    assert set(layer.all_topics) == {
-                        "Bauplanung_V1_1.Natur",
-                        "Kantonale_Bauplanung_V1_1.Natur",
-                    }
-                    assert set(layer.relevant_topics) == {
-                        "Kantonale_Bauplanung_V1_1.Natur"
-                    }
-                # Kartoffelfeld from Kantonale_Bauplanung_V1_1.Natur
-                if layer.alias == "Kartoffelfeld":
-                    count += 1
-                    assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
-                    assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+        # check relevant topics
+        count = 0
+        for layer in available_layers:
+            # Strasse from Infrastruktur_V1
+            if layer.alias == "Strasse":
+                count += 1
+                assert layer.all_topics == ["Infrastruktur_V1.Strassen"]
+                assert layer.relevant_topics == ["Infrastruktur_V1.Strassen"]
+            # Park from Bauplanung_V1_1
+            if layer.alias == "Park" and not layer.is_relevant:
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Bauplanung_V1_1.Natur",
+                    "Kantonale_Bauplanung_V1_1.Natur",
+                }
+                assert set(layer.relevant_topics) == {"Kantonale_Bauplanung_V1_1.Natur"}
+            # Park from Kantonale_Bauplanung_V1_1
+            if layer.alias == "Park" and layer.is_relevant:
+                count += 1
+                assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+                assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+            # Feld from Bauplanung_V1_1
+            if layer.alias == "Feld":
+                count += 1
+                assert set(layer.all_topics) == {
+                    "Bauplanung_V1_1.Natur",
+                    "Kantonale_Bauplanung_V1_1.Natur",
+                }
+                assert set(layer.relevant_topics) == {"Kantonale_Bauplanung_V1_1.Natur"}
+            # Kartoffelfeld from Kantonale_Bauplanung_V1_1.Natur
+            if layer.alias == "Kartoffelfeld":
+                count += 1
+                assert layer.all_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
+                assert layer.relevant_topics == ["Kantonale_Bauplanung_V1_1.Natur"]
 
-            assert count == 5
+        assert count == 5
 
         project = Project(
             optimize_strategy=strategy,
@@ -2531,7 +2721,7 @@ class TestProjectExtOptimization(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 12
+        assert len(all_layers) == 14
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -2553,7 +2743,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         # check relations - all are there
         relations = list(qgis_project.relationManager().relations().values())
-        assert len(relations) == 7
+        assert len(relations) == 20
 
         # strasse should have relation editors to only relevant layers
         count = 0
@@ -2591,15 +2781,28 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 # check filter in widget
                 efc = layer.layer.editFormConfig()
-                map = efc.widgetConfig("T_basket")
+                map = (
+                    efc.widgetConfig("T_basket")
+                    if is_gpkg
+                    else efc.widgetConfig("t_basket")
+                )
+                dataset_table, tid, datasetname = (
+                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
+                    if is_gpkg
+                    else ("t_ili2db_dataset", "t_id", "datasetname")
+                )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
                 fields = layer.layer.fields()
-                field_idx = fields.lookupField("t_basket")
+                field_idx = (
+                    fields.lookupField("T_basket")
+                    if is_gpkg
+                    else fields.lookupField("t_basket")
+                )
                 t_basket_field = fields.field(field_idx)
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None

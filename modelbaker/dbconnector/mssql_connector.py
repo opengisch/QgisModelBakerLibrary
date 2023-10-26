@@ -26,8 +26,8 @@ from .db_connector import DBConnector, DBConnectorError
 METADATA_TABLE = "t_ili2db_table_prop"
 METAATTRS_TABLE = "t_ili2db_meta_attrs"
 SETTINGS_TABLE = "t_ili2db_settings"
-DATASET_TABLE = "t_ili2db_dataset"
-BASKET_TABLE = "t_ili2db_basket"
+DATASET_TABLE = "T_ILI2DB_DATASET"
+BASKET_TABLE = "T_ILI2DB_BASKET"
 
 
 class MssqlConnector(DBConnector):
