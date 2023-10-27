@@ -220,9 +220,9 @@ class Layer:
         Set the layer variables according to the strategy
         """
         interlis_topics = ",".join(
-            self.all_topics
+            sorted(self.all_topics)
             if project.optimize_strategy == OptimizeStrategy.NONE
-            else self.relevant_topics
+            else sorted(self.relevant_topics)
         )
         QgsExpressionContextUtils.setLayerVariable(
             self.__layer, "interlis_topic", interlis_topics

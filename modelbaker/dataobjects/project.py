@@ -182,10 +182,11 @@ class Project(QObject):
                         "AllowAddFeatures": False,
                         "FilterExpression": "\"topic\" IN ({}) and attribute(get_feature('{}', 't_id', \"dataset\"), 'datasetname') != '{}'".format(
                             ",".join(
-                                [f"'{topic}'" for topic in filter_topics]
+                                [f"'{topic}'" for topic in sorted(filter_topics)]
                             ),  # create comma separated string
                             "T_ILI2DB_DATASET"
                             if referenced_layer.provider == "ogr"
+                            or referenced_layer.provider == "mssql"
                             else "t_ili2db_dataset",
                             self.context.get("catalogue_datasetname", ""),
                         )

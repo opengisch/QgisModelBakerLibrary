@@ -230,8 +230,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_staedtische_none(generator, strategy)
+        self._extopt_staedtische_none(generator, strategy, True)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -245,8 +244,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_staedtische_group(generator, strategy)
+        self._extopt_staedtische_group(generator, strategy, True)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -260,10 +258,9 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_staedtische_hide(generator, strategy)
+        self._extopt_staedtische_hide(generator, strategy, True)
 
-    def _extopt_staedtische_none(self, generator, strategy, is_gpkg=False):
+    def _extopt_staedtische_none(self, generator, strategy, not_pg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -416,31 +413,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -459,42 +450,35 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert set(layer_model_topic_names.split(",")) == set(
-                    "Kantonale_Ortsplanung_V1_1.Konstruktionen,Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe,Ortsplanung_V1_1.Konstruktionen".split(
-                        ","
-                    )
-                )
-
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
                 assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe','Ortsplanung_V1_1.Konstruktionen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
+                    layer_model_topic_names
+                    == "Kantonale_Ortsplanung_V1_1.Konstruktionen,Ortsplanung_V1_1.Konstruktionen,Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
                 )
 
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression()
-                    == "@default_basket_kantonale_ortsplanung_v1_1_konstruktionen_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe_ortsplanung_v1_1_konstruktionen"
+                    == "@default_basket_kantonale_ortsplanung_v1_1_konstruktionen_ortsplanung_v1_1_konstruktionen_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
                 )
 
         # should find 2
@@ -502,7 +486,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_staedtische_group(self, generator, strategy, is_gpkg=False):
+    def _extopt_staedtische_group(self, generator, strategy, not_pg=False):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -661,31 +645,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -704,37 +682,30 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert set(layer_model_topic_names.split(",")) == set(
-                    "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe".split(
-                        ","
-                    )
-                )
-
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
                 assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
+                    layer_model_topic_names
+                    == "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
                 )
 
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -744,7 +715,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_staedtische_hide(self, generator, strategy, is_gpkg=False):
+    def _extopt_staedtische_hide(self, generator, strategy, not_pg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -877,31 +848,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -920,37 +885,30 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert set(layer_model_topic_names.split(",")) == set(
-                    "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe".split(
-                        ","
-                    )
-                )
-
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
                 assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
+                    layer_model_topic_names
+                    == "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
                 )
 
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -1127,8 +1085,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_polymorphic_none(generator, strategy)
+        self._extopt_polymorphic_none(generator, strategy, True)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -1142,8 +1099,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_polymorphic_group(generator, strategy)
+        self._extopt_polymorphic_group(generator, strategy, True)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -1157,10 +1113,9 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_polymorphic_hide(generator, strategy)
+        self._extopt_polymorphic_hide(generator, strategy, True)
 
-    def _extopt_polymorphic_none(self, generator, strategy, is_gpkg=False):
+    def _extopt_polymorphic_none(self, generator, strategy, not_pg=False):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -1353,31 +1308,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -1396,42 +1345,35 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert set(layer_model_topic_names.split(",")) == set(
-                    "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe,Ortsplanung_V1_1.Konstruktionen".split(
-                        ","
-                    )
-                )
-
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
                 assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe','Ortsplanung_V1_1.Konstruktionen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
+                    layer_model_topic_names
+                    == "Ortsplanung_V1_1.Konstruktionen,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
                 )
 
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Ortsplanung_V1_1.Konstruktionen','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression()
-                    == "@default_basket_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe_ortsplanung_v1_1_konstruktionen"
+                    == "@default_basket_ortsplanung_v1_1_konstruktionen_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
                 )
 
         # should find 2
@@ -1439,7 +1381,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_polymorphic_group(self, generator, strategy, is_gpkg=False):
+    def _extopt_polymorphic_group(self, generator, strategy, not_pg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -1641,31 +1583,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -1684,42 +1620,35 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert set(layer_model_topic_names.split(",")) == set(
-                    "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe".split(
-                        ","
-                    )
-                )
-
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
                 assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
+                    layer_model_topic_names
+                    == "Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
                 )
 
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression()
-                    == "@default_basket_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                    == "@default_basket_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
                 )
 
         # should find 2
@@ -1727,7 +1656,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_polymorphic_hide(self, generator, strategy, is_gpkg=False):
+    def _extopt_polymorphic_hide(self, generator, strategy, not_pg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -1909,31 +1838,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -1952,42 +1875,35 @@ class TestProjectExtOptimization(unittest.TestCase):
                     or ""
                 )
 
-                assert set(layer_model_topic_names.split(",")) == set(
-                    "Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe".split(
-                        ","
-                    )
-                )
-
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
                 assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
+                    layer_model_topic_names
+                    == "Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
                 )
 
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression()
-                    == "@default_basket_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                    == "@default_basket_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
                 )
 
         # should find 2
@@ -2157,8 +2073,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_baustruct_none(generator, strategy)
+        self._extopt_baustruct_none(generator, strategy, True)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -2172,8 +2087,7 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_baustruct_group(generator, strategy)
+        self._extopt_baustruct_group(generator, strategy, True)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -2187,10 +2101,9 @@ class TestProjectExtOptimization(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        # we skip the topic check since it's not supported in mssql
-        self._extopt_baustruct_hide(generator, strategy)
+        self._extopt_baustruct_hide(generator, strategy, True)
 
-    def _extopt_baustruct_none(self, generator, strategy, is_gpkg=False):
+    def _extopt_baustruct_none(self, generator, strategy, not_pg=False):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -2358,31 +2271,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -2395,7 +2302,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_baustruct_group(self, generator, strategy, is_gpkg=False):
+    def _extopt_baustruct_group(self, generator, strategy, not_pg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -2587,31 +2494,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
@@ -2624,7 +2525,7 @@ class TestProjectExtOptimization(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _extopt_baustruct_hide(self, generator, strategy, is_gpkg=False):
+    def _extopt_baustruct_hide(self, generator, strategy, not_pg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -2779,31 +2680,25 @@ class TestProjectExtOptimization(unittest.TestCase):
 
                 assert layer_model_topic_names == "Infrastruktur_V1.Strassen"
 
-                # check filter in widget
-                efc = layer.layer.editFormConfig()
-                map = (
-                    efc.widgetConfig("T_basket")
-                    if is_gpkg
-                    else efc.widgetConfig("t_basket")
-                )
-                dataset_table, tid, datasetname = (
-                    ("T_ILI2DB_DATASET", "T_Id", "datasetName")
-                    if is_gpkg
-                    else ("t_ili2db_dataset", "t_id", "datasetname")
-                )
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', '{tid}', \"dataset\"), '{datasetname}') != '{CATALOGUE_DATASETNAME}'"
-                )
-
-                # check default value expression
+                # have look at the basket field
                 fields = layer.layer.fields()
                 field_idx = (
                     fields.lookupField("T_basket")
-                    if is_gpkg
+                    if not_pg
                     else fields.lookupField("t_basket")
                 )
                 t_basket_field = fields.field(field_idx)
+
+                # check filter in widget
+                ews = t_basket_field.editorWidgetSetup()
+                map = ews.config()
+                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+                assert (
+                    map["FilterExpression"]
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                )
+
+                # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
