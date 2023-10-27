@@ -96,13 +96,6 @@ class Layer:
 
         self.ili_name = ili_name
 
-        self.model_topic_name = ""
-        if self.ili_name:
-            if self.ili_name.count(".") > 1:
-                self.model_topic_name = (
-                    f"{self.ili_name.split('.')[0]}.{self.ili_name.split('.')[1]}"
-                )
-
         self.is_relevant = is_relevant
         self.all_topics = all_topics
         self.relevant_topics = relevant_topics
@@ -129,7 +122,6 @@ class Layer:
         definition["isdatasettable"] = self.is_dataset_table
         definition["displayexpression"] = self.display_expression
         definition["coordinateprecision"] = self.coordinate_precision
-        definition["modeltopicname"] = self.model_topic_name
         definition["ili_name"] = self.ili_name
         definition["is_relevant"] = self.is_relevant
         definition["all_topics"] = self.all_topics
@@ -150,7 +142,6 @@ class Layer:
         self.is_dataset_table = definition["isdatasettable"]
         self.display_expression = definition["displayexpression"]
         self.coordinate_precision = definition["coordinateprecision"]
-        self.model_topic_name = definition["modeltopicname"]
         self.ili_name = definition["ili_name"]
         self.is_relevant = definition["is_relevant"]
         self.all_topics = definition["all_topics"]
@@ -200,11 +191,6 @@ class Layer:
                 )
                 self.__layer.geometryOptions().setRemoveDuplicateNodes(True)
 
-            if self.model_topic_name:
-                QgsExpressionContextUtils.setLayerVariable(
-                    self.__layer, "interlis_topic", self.model_topic_name
-                )
-
         for field in self.fields:
             field.create(self)
 
@@ -228,6 +214,19 @@ class Layer:
                     self.__layer.loadNamedStyle(style_qmlstylefile)
             # set the default style
             self.__layer.styleManager().setCurrentStyle("default")
+
+    def store_variables(self, project):
+        """
+        Set the layer variables according to the strategy
+        """
+        interlis_topics = ",".join(
+            sorted(self.all_topics)
+            if project.optimize_strategy == OptimizeStrategy.NONE
+            else sorted(self.relevant_topics)
+        )
+        QgsExpressionContextUtils.setLayerVariable(
+            self.__layer, "interlis_topic", interlis_topics
+        )
 
     def _create_layer(self, uri, layer_name, provider):
         if provider and provider.lower() == "wms":

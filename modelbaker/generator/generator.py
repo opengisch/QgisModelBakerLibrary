@@ -144,14 +144,34 @@ class Generator(QObject):
                 record.get("relevance", True)
             )  # it can be not relevant and still be displayed (in case of NONE)
 
+            base_topic = record["base_topic"] if "base_topic" in record else None
+
+            # get all the topics
             all_topics = (
                 record.get("all_topics").split(",") if record.get("all_topics") else []
             )
+            # don't concern no-topics (e.g. when a domain is designed directly in the model)
+            all_topics = [topic for topic in all_topics if topic.count(".") > 0]
+
+            # and include the topic where the class is designed in
+            if base_topic and base_topic.count(".") > 0:
+                all_topics.append(base_topic)
+
+            # get all the relevant topics
             relevant_topics = (
                 record.get("relevant_topics").split(",")
                 if record.get("relevant_topics")
                 else []
             )
+
+            # don't concern no-topics (e.g. when a domain is designed directly in the model)
+            relevant_topics = [
+                topic for topic in relevant_topics if topic.count(".") > 0
+            ]
+
+            # if no relevant_topic found the relevant is the one where the class is designed in
+            if not relevant_topics and base_topic and base_topic.count(".") > 0:
+                relevant_topics.append(base_topic)
 
             alias = record["table_alias"] if "table_alias" in record else None
             if not alias:
@@ -355,8 +375,16 @@ class Generator(QObject):
                     ]
 
                 if self.basket_handling and column_name in BASKET_FIELDNAMES:
+                    # on NONE strategy those should be all topics the class could be in. On optimized strategies GROUP/HIDE only the relevant topics should be listed.
+                    interlis_topics = ",".join(
+                        sorted(layer.all_topics)
+                        if self.optimize_strategy == OptimizeStrategy.NONE
+                        else sorted(layer.relevant_topics)
+                    )
+
+                    # and set the default value (to be used from the projet variables)
                     default_basket_topic = slugify(
-                        f"default_basket{'_' if layer.model_topic_name else ''}{layer.model_topic_name}"
+                        f"default_basket{'_' if interlis_topics else ''}{interlis_topics}"
                     )
                     field.default_value_expression = f"@{default_basket_topic}"
 
@@ -439,7 +467,8 @@ class Generator(QObject):
                         relation.strength = (
                             QgsRelation.Composition
                             if "strength" in record
-                            and record["strength"] == "COMPOSITE" or referencing_layer.is_structure
+                            and record["strength"] == "COMPOSITE"
+                            or referencing_layer.is_structure
                             else QgsRelation.Association
                         )
                         relation.cardinality_max = record.get("cardinality_max", None)

@@ -165,6 +165,12 @@ class Project(QObject):
                     },
                 )
             elif referenced_layer and referenced_layer.is_basket_table:
+                # list the topics we filter the basket with. On NONE strategy those should be all topics the class could be in. On optimized strategies GROUP/HIDE only the relevant topics should be listed.
+                filter_topics = (
+                    referencing_layer.all_topics
+                    if self.optimize_strategy == OptimizeStrategy.NONE
+                    else referencing_layer.relevant_topics
+                )
                 editor_widget_setup = QgsEditorWidgetSetup(
                     "RelationReference",
                     {
@@ -174,15 +180,18 @@ class Project(QObject):
                         "ShowOpenFormButton": False,
                         "AllowNULL": True,
                         "AllowAddFeatures": False,
-                        "FilterExpression": "\"topic\" = '{}' and attribute(get_feature('{}', 't_id', \"dataset\"), 'datasetname') != '{}'".format(
-                            referencing_layer.model_topic_name,
+                        "FilterExpression": "\"topic\" IN ({}) and attribute(get_feature('{}', 't_id', \"dataset\"), 'datasetname') != '{}'".format(
+                            ",".join(
+                                [f"'{topic}'" for topic in sorted(filter_topics)]
+                            ),  # create comma separated string
                             "T_ILI2DB_DATASET"
                             if referenced_layer.provider == "ogr"
+                            or referenced_layer.provider == "mssql"
                             else "t_ili2db_dataset",
                             self.context.get("catalogue_datasetname", ""),
                         )
-                        if referencing_layer.model_topic_name
-                        else "",
+                        if filter_topics
+                        else "",  # no filter if no topics (means could be everywhere)
                         "FilterFields": list(),
                     },
                 )
@@ -247,6 +256,7 @@ class Project(QObject):
                 # even when a style will be loaded we create the form because not sure if the style contains form settngs
                 layer.create_form(self)
                 layer.load_styles()
+                layer.store_variables(self)
 
         if self.legend:
             self.legend.create(qgis_project, group)

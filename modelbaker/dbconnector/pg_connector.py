@@ -233,7 +233,8 @@ class PGConnector(DBConnector):
                 # topics - where this class or an instance of it is located - are emitted by going recursively through the inheritance table.
                 # if something of this topic where the current class is located has been extended, it gets the next child topic.
                 # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
-                topics = """(SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics,
+                topics = """substring( c.iliname from 1 for position('.' in substring( c.iliname from position('.' in c.iliname)+1))+position('.' in c.iliname)-1) as base_topic,
+                        (SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics,
                         (SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics,""".format(
                     topic_pedigree="""(WITH RECURSIVE children(is_a_base, childTopic, baseTopic) AS (
                         SELECT
