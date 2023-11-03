@@ -1,0 +1,172 @@
+INTERLIS 2.3;
+
+/* Test model for:
+    ANYOID = OID ANY;
+    I32OID = OID 0 .. 2147483647; !! positive in 4 Bytes speicherbare Integerwerte
+    STANDARDOID = OID TEXT*16; !! gemäss Anhang D (nur Ziffern und Buchstaben erlaubt)
+    UUIDOID = OID TEXT*36; !! gemäss ISO 11578
+
+    TypeId = OID TEXT*60; !! user defined
+    TypeIDShort = OID TEXT*10; !! user defined
+
+    NO OID;
+
+    ili2db (with smart2) provides:
+
+    brache                          ch.ehi.ili2db.oidDomain	INTERLIS.STANDARDOID
+    fluss                           ch.ehi.ili2db.oidDomain	OIDMadness_V1.TypeIDShort
+    oidmadness_v1quartier_gebaeude  ch.ehi.ili2db.oidDomain	INTERLIS.UUIDOID
+    wald                            ch.ehi.ili2db.oidDomain	INTERLIS.UUIDOID
+    parkplatz                       ch.ehi.ili2db.oidDomain	INTERLIS.STANDARDOID
+    see	                            ch.ehi.ili2db.oidDomain	OIDMadness_V1.TypeID
+    spielplatz                      ch.ehi.ili2db.oidDomain	INTERLIS.STANDARDOID
+    wiese                           ch.ehi.ili2db.oidDomain	INTERLIS.I32OID
+    besitzerin                      ch.ehi.ili2db.oidDomain	INTERLIS.ANYOID
+    oidmadness_v1spass_gebaeude     ch.ehi.ili2db.oidDomain	INTERLIS.I32OID
+    oidmadness_v1wohnraum_gebaeude  ch.ehi.ili2db.oidDomain	INTERLIS.UUIDOID
+    oidmadness_v1business_gebaeude  ch.ehi.ili2db.oidDomain	INTERLIS.STANDARDOID
+
+    (ohne gartenhaus da NO ID)
+
+*/
+MODEL OIDMadness_V1 (en) AT "https://modelbaker.ch" VERSION "2023-11-03" =
+
+    DOMAIN
+        !!quite free but need to be OIDs:
+        !!OID-Werte von textlichen OID-Wertebereichen müssen die Regeln des XML-ID-Typs erfüllen:
+        !!erstes Zeichen muss Buchstabe oder Unterstrich sein, dann folgen Buchstaben, Ziffern, Punkte, Minuszeichen, Unterstriche; keine Doppelpunkte (!),
+        !!siehe www.w3.org/TR/REC-xml. ([1] Chap. 2.8.9)
+        TypeID = OID TEXT*60;
+        TypeIDShort = OID TEXT*10;
+
+    !! structures don't have any OIDs
+    STRUCTURE Parzellenidentifikation =
+        NBIdent : TEXT;
+        Parzellennummer : TEXT;
+    END Parzellenidentifikation;
+
+    TOPIC Natur =
+    !! no OIDs defined in topic
+
+        CLASS Park =
+            !! no OIDs defined
+            Name : TEXT*99;
+        END Park;
+
+        CLASS Brache =
+            OID AS INTERLIS.STANDARDOID;
+            Name : TEXT*99;
+        END Brache;
+
+        CLASS Wiese =
+            OID AS INTERLIS.I32OID;
+            Name : TEXT*99;
+        END Wiese;
+
+        CLASS Wald =
+            OID AS INTERLIS.UUIDOID;
+            Name : TEXT*99;
+        END Wald;
+
+        CLASS See =
+            OID AS TypeID;
+            Name : TEXT*99;
+        END See;
+
+        CLASS Fluss =
+            OID AS TypeIDShort;
+            Name : TEXT*99;
+        END Fluss;
+
+    END Natur;
+
+    TOPIC Konstruktionen (ABSTRACT)=
+        BASKET OID AS INTERLIS.ANYOID;
+        OID AS INTERLIS.ANYOID;
+
+        CLASS Gebaeude (ABSTRACT)=
+            OID AS INTERLIS.ANYOID;
+            Name : TEXT*99;
+            Parzellen: BAG {0..*} OF OIDMadness_V1.Parzellenidentifikation;
+        END Gebaeude;
+
+        CLASS BesitzerIn =
+            !!ANYOID: given by TOPIC
+            Vorname : TEXT*99;
+            Nachname : TEXT*99;
+        END BesitzerIn;
+
+        ASSOCIATION Gebaeude_BesitzerIn =
+            BesitzerIn -- {0..1} BesitzerIn;
+            Gebaeude -- {0..*} Gebaeude;
+        END Gebaeude_BesitzerIn;
+
+    END Konstruktionen;
+
+    TOPIC Wohnraum EXTENDS OIDMadness_V1.Konstruktionen =
+        BASKET OID AS INTERLIS.UUIDOID;
+        OID AS INTERLIS.UUIDOID;
+
+        CLASS Gebaeude (EXTENDED) =
+            !!UUIDOID: given by TOPIC
+            AnzWohnungen : 1 .. 99;
+        END Gebaeude;
+
+        CLASS Gartenhaus =
+            NO OID;
+            Name : TEXT;
+        END Gartenhaus;
+
+    END Wohnraum;
+
+    TOPIC Quartier EXTENDS OIDMadness_V1.Wohnraum =
+
+        CLASS Gebaeude (EXTENDED) =
+            !!UUIDOID: given by parent (since no TOPIC definition)
+            Art : TEXT;
+        END Gebaeude;
+
+        /* Works, but removed from testcase since it's not allowed:
+           Es ist nicht möglich, eine bereits gemachte OID Definition zu erweitern, ausser dass ein geerbtes ANY durch eine konkrete Definition ersetzt wird.
+        CLASS Schulgebaeude EXTENDS Gebaeude =
+            OID AS INTERLIS.STANDARDOID;
+            !!STANDARDOID: erweitert ursprüngliche Definition
+            AnzKlassenzimmer: 1 .. 99;
+        END Schulgebaeude;
+        */
+    END Quartier;
+
+    TOPIC Business EXTENDS OIDMadness_V1.Konstruktionen =
+        BASKET OID AS INTERLIS.STANDARDOID;
+        OID AS INTERLIS.STANDARDOID;
+
+        CLASS Gebaeude (EXTENDED)  =
+            !!STANDARDOID: given by TOPIC
+            Firma : TEXT*99;
+        END Gebaeude;
+
+        CLASS Parkplatz =
+            !!STANDARDOID: given by TOPIC
+            Anzahl : 0 .. 200;
+        END Parkplatz;
+
+    END Business;
+
+    TOPIC Spass EXTENDS OIDMadness_V1.Konstruktionen =
+        BASKET OID AS INTERLIS.I32OID;
+        OID AS INTERLIS.I32OID;
+
+        CLASS Gebaeude (EXTENDED)  =
+            !!I32OID: given by TOPIC
+            Unterhaltungsart : TEXT*99;
+        END Gebaeude;
+
+        CLASS Spielplatz =
+            !! not sure if allowed
+            OID AS INTERLIS.STANDARDOID;
+            Beschreibung : TEXT;
+        END Spielplatz;
+
+    END Spass;
+
+END OIDMadness_V1.
