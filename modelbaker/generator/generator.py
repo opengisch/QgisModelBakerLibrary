@@ -392,7 +392,8 @@ class Generator(QObject):
                     # when there is a t_ili_tid it should be filled up when there is no OID defined in the model
                     if "oid_domain" not in fielddef or fielddef["oid_domain"] is None:
                         field.default_value_expression = "substr(uuid(), 2, 36)"
-
+                    else:
+                        field.oid_domain = fielddef["oid_domain"]
                 if "enum_domain" in fielddef and fielddef["enum_domain"]:
                     field.enum_domain = fielddef["enum_domain"]
 

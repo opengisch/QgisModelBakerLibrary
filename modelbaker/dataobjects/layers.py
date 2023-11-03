@@ -341,6 +341,14 @@ class Layer:
         else:
             return None
 
+    @property
+    def oid_domain(self):
+        oid_domain = None
+        for field in self.fields:
+            if field.name.lower() == "t_ili_tid":
+                oid_domain = field.oid_domain
+        return oid_domain
+
     def isPureLinkTable(self, project):
         """
         Returns True if the layer is a pure link table in a n:m relation.
