@@ -63,8 +63,8 @@ class TestProjectOIDs(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/OIDMadness.ili")
-        importer.configuration.ilimodels = "OIDMadness"
+        importer.configuration.ilifile = testdata_path("ilimodels/OIDMadness_V1.ili")
+        importer.configuration.ilimodels = "OIDMadness_V1"
         importer.configuration.dbschema = "oid_madness{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
