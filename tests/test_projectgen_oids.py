@@ -346,7 +346,7 @@ class TestProjectOIDs(unittest.TestCase):
         for layer in layers_of_interest:
             if layer.name == "brache":
                 layer.t_ili_tid_field.default_value_expression = (
-                    "'ch_baker'||ilicounter(000000000,999999999)"
+                    "'chMBaker'||ilicounter(000000000,999999999)"
                 )
             if layer.name == "wiese":
                 layer.t_ili_tid_field.default_value_expression = (
@@ -360,7 +360,7 @@ class TestProjectOIDs(unittest.TestCase):
                 count += 1
                 assert (
                     layer.t_ili_tid_field.default_value_expression
-                    == "'ch_baker'||ilicounter(000000000,999999999)"
+                    == "'chMBaker'||ilicounter(000000000,999999999)"
                 )
             if layer.name == "wiese":
                 count += 1
@@ -469,7 +469,7 @@ class TestProjectOIDs(unittest.TestCase):
         for layer in layers_of_interest:
             if layer.name == "brache":
                 layer.t_ili_tid_field.default_value_expression = (
-                    "'ch_baker'||ilicounter(000000000,999999999)"
+                    "'chMBaker'||ilicounter(000000000,999999999)"
                 )
             if layer.name == "wiese":
                 layer.t_ili_tid_field.default_value_expression = (
@@ -483,7 +483,7 @@ class TestProjectOIDs(unittest.TestCase):
                 count += 1
                 assert (
                     layer.t_ili_tid_field.default_value_expression
-                    == "'ch_baker'||ilicounter(000000000,999999999)"
+                    == "'chMBaker'||ilicounter(000000000,999999999)"
                 )
             if layer.name == "wiese":
                 count += 1
@@ -590,7 +590,7 @@ class TestProjectOIDs(unittest.TestCase):
         for layer in layers_of_interest:
             if layer.name == "brache":
                 layer.t_ili_tid_field.default_value_expression = (
-                    "'ch_baker'||ilicounter(000000000,999999999)"
+                    "'chMBaker'||ilicounter(000000000,999999999)"
                 )
             if layer.name == "wiese":
                 layer.t_ili_tid_field.default_value_expression = (
@@ -604,7 +604,7 @@ class TestProjectOIDs(unittest.TestCase):
                 count += 1
                 assert (
                     layer.t_ili_tid_field.default_value_expression
-                    == "'ch_baker'||ilicounter(000000000,999999999)"
+                    == "'chMBaker'||ilicounter(000000000,999999999)"
                 )
             if layer.name == "wiese":
                 count += 1
