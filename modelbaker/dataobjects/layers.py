@@ -343,11 +343,17 @@ class Layer:
 
     @property
     def oid_domain(self):
-        oid_domain = None
+        t_ili_tid_field = self.t_ili_tid_field
+        if t_ili_tid_field:
+            return t_ili_tid_field.oid_domain
+        return None
+
+    @property
+    def t_ili_tid_field(self):
         for field in self.fields:
             if field.name.lower() == "t_ili_tid":
-                oid_domain = field.oid_domain
-        return oid_domain
+                return field
+        return None
 
     def isPureLinkTable(self, project):
         """
