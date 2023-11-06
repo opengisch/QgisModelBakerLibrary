@@ -23,13 +23,64 @@ INTERLIS 2.3;
     wiese                           ch.ehi.ili2db.oidDomain	INTERLIS.I32OID
     besitzerin                      ch.ehi.ili2db.oidDomain	INTERLIS.ANYOID
     oidmadness_v1spass_gebaeude     ch.ehi.ili2db.oidDomain	INTERLIS.I32OID
-    oidmadness_v1wohnraum_gebaeude  ch.ehi.ili2db.oidDomain	INTERLIS.UUIDOID
     oidmadness_v1business_gebaeude  ch.ehi.ili2db.oidDomain	INTERLIS.STANDARDOID
+
+    oidbasmdnss_v1wohnraum_gebaeude ch.ehi.ili2db.oidDomain	INTERLIS.UUIDOID
 
     (ohne gartenhaus da NO ID)
 
 */
+MODEL OIDBaseMadness_V1 (en) AT "https://modelbaker.ch" VERSION "2023-11-03" =
+
+    !! structures don't have any OIDs
+    STRUCTURE Parzellenidentifikation =
+        NBIdent : TEXT;
+        Parzellennummer : TEXT;
+    END Parzellenidentifikation;
+
+    TOPIC Konstruktionen (ABSTRACT)=
+        BASKET OID AS INTERLIS.ANYOID;
+        OID AS INTERLIS.ANYOID;
+
+        CLASS Gebaeude (ABSTRACT)=
+            OID AS INTERLIS.ANYOID;
+            Name : TEXT*99;
+            Parzellen: BAG {0..*} OF OIDBaseMadness_V1.Parzellenidentifikation;
+        END Gebaeude;
+
+        CLASS BesitzerIn =
+            !!ANYOID: given by TOPIC
+            Vorname : TEXT*99;
+            Nachname : TEXT*99;
+        END BesitzerIn;
+
+        ASSOCIATION Gebaeude_BesitzerIn =
+            BesitzerIn -- {0..1} BesitzerIn;
+            Gebaeude -- {0..*} Gebaeude;
+        END Gebaeude_BesitzerIn;
+
+    END Konstruktionen;
+
+    TOPIC Wohnraum EXTENDS OIDBaseMadness_V1.Konstruktionen =
+        BASKET OID AS INTERLIS.UUIDOID;
+        OID AS INTERLIS.UUIDOID;
+
+        CLASS Gebaeude (EXTENDED) =
+            !!UUIDOID: given by TOPIC
+            AnzWohnungen : 1 .. 99;
+        END Gebaeude;
+
+        CLASS Gartenhaus =
+            NO OID;
+            Name : TEXT;
+        END Gartenhaus;
+
+    END Wohnraum;
+
+END OIDBaseMadness_V1.
+
 MODEL OIDMadness_V1 (en) AT "https://modelbaker.ch" VERSION "2023-11-03" =
+    IMPORTS OIDBaseMadness_V1;
 
     DOMAIN
         !!quite free but need to be OIDs:
@@ -38,12 +89,6 @@ MODEL OIDMadness_V1 (en) AT "https://modelbaker.ch" VERSION "2023-11-03" =
         !!siehe www.w3.org/TR/REC-xml. ([1] Chap. 2.8.9)
         TypeID = OID TEXT*60;
         TypeIDShort = OID TEXT*10;
-
-    !! structures don't have any OIDs
-    STRUCTURE Parzellenidentifikation =
-        NBIdent : TEXT;
-        Parzellennummer : TEXT;
-    END Parzellenidentifikation;
 
     TOPIC Natur =
     !! no OIDs defined in topic
@@ -80,46 +125,7 @@ MODEL OIDMadness_V1 (en) AT "https://modelbaker.ch" VERSION "2023-11-03" =
 
     END Natur;
 
-    TOPIC Konstruktionen (ABSTRACT)=
-        BASKET OID AS INTERLIS.ANYOID;
-        OID AS INTERLIS.ANYOID;
-
-        CLASS Gebaeude (ABSTRACT)=
-            OID AS INTERLIS.ANYOID;
-            Name : TEXT*99;
-            Parzellen: BAG {0..*} OF OIDMadness_V1.Parzellenidentifikation;
-        END Gebaeude;
-
-        CLASS BesitzerIn =
-            !!ANYOID: given by TOPIC
-            Vorname : TEXT*99;
-            Nachname : TEXT*99;
-        END BesitzerIn;
-
-        ASSOCIATION Gebaeude_BesitzerIn =
-            BesitzerIn -- {0..1} BesitzerIn;
-            Gebaeude -- {0..*} Gebaeude;
-        END Gebaeude_BesitzerIn;
-
-    END Konstruktionen;
-
-    TOPIC Wohnraum EXTENDS OIDMadness_V1.Konstruktionen =
-        BASKET OID AS INTERLIS.UUIDOID;
-        OID AS INTERLIS.UUIDOID;
-
-        CLASS Gebaeude (EXTENDED) =
-            !!UUIDOID: given by TOPIC
-            AnzWohnungen : 1 .. 99;
-        END Gebaeude;
-
-        CLASS Gartenhaus =
-            NO OID;
-            Name : TEXT;
-        END Gartenhaus;
-
-    END Wohnraum;
-
-    TOPIC Quartier EXTENDS OIDMadness_V1.Wohnraum =
+    TOPIC Quartier EXTENDS OIDBaseMadness_V1.Wohnraum =
 
         CLASS Gebaeude (EXTENDED) =
             !!UUIDOID: given by parent (since no TOPIC definition)
@@ -136,7 +142,7 @@ MODEL OIDMadness_V1 (en) AT "https://modelbaker.ch" VERSION "2023-11-03" =
         */
     END Quartier;
 
-    TOPIC Business EXTENDS OIDMadness_V1.Konstruktionen =
+    TOPIC Business EXTENDS OIDBaseMadness_V1.Konstruktionen =
         BASKET OID AS INTERLIS.STANDARDOID;
         OID AS INTERLIS.STANDARDOID;
 
@@ -152,7 +158,7 @@ MODEL OIDMadness_V1 (en) AT "https://modelbaker.ch" VERSION "2023-11-03" =
 
     END Business;
 
-    TOPIC Spass EXTENDS OIDMadness_V1.Konstruktionen =
+    TOPIC Spass EXTENDS OIDBaseMadness_V1.Konstruktionen =
         BASKET OID AS INTERLIS.I32OID;
         OID AS INTERLIS.I32OID;
 
