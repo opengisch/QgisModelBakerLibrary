@@ -338,6 +338,18 @@ class DBConnector(QObject):
         """
         return {}
 
+    def get_ili2db_sequence_value(self):
+        """
+        Returns the current value of the sequence used for the t_id
+        """
+        return None
+
+    def set_ili2db_sequence_value(self, value):
+        """
+        Resets the current value of the sequence used for the t_id
+        """
+        return False, None
+
 
 class DBConnectorError(Exception):
     """This error is raised when DbConnector could not connect to database.

@@ -880,7 +880,7 @@ class GPKGConnector(DBConnector):
                 cursor.execute(
                     """
                     INSERT INTO {basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES ({next_id}, {dataset_tid}, '{topic}', '{uuid}', 'Qgis Model Baker')
+                    VALUES ({next_id}, {dataset_tid}, '{topic}', '{uuid}', 'modelbaker')
                 """.format(
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
@@ -964,7 +964,7 @@ class GPKGConnector(DBConnector):
                 cursor.execute(
                     """
                     INSERT OR REPLACE INTO T_KEY_OBJECT (T_Key, T_LastUniqueId, T_LastChange, T_CreateDate, T_User )
-                    VALUES (:key, :next_id, date('now'), :create_date, 'Qgis Model Baker')
+                    VALUES (:key, :next_id, date('now'), :create_date, 'modelbaker')
                 """,
                     {"key": field_name, "next_id": next_id, "create_date": create_date},
                 )
@@ -994,3 +994,63 @@ class GPKGConnector(DBConnector):
                 "Could not fetch T_LastUniqueId because T_KEY_OBJECT does not exist."
             ),
         )
+
+    def get_ili2db_sequence_value(self):
+        if self._table_exists("T_KEY_OBJECT"):
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                    SELECT T_LastUniqueId FROM T_KEY_OBJECT
+                    WHERE T_Key = '{}'
+                """.format(
+                    self.tid
+                )
+            )
+
+            content = cursor.fetchone()
+            cursor.close()
+
+            if content:
+                return content[0]
+        return None
+
+    def set_ili2db_sequence_value(self, value):
+        if self._table_exists("T_KEY_OBJECT"):
+            try:
+                cursor = self.conn.cursor()
+                if not self.get_ili2db_sequence_value():
+                    # need to create the entry
+                    cursor.execute(
+                        """
+                        INSERT INTO T_KEY_OBJECT (T_Key, T_LastUniqueId, T_LastChange, T_CreateDate, T_User )
+                        VALUES ('{tid}', {value}, date('now'), date('now'), 'modelbaker')
+                        """.format(
+                            tid=self.tid, value=value
+                        )
+                    )
+                else:
+                    # just update it
+                    cursor.execute(
+                        """
+                            UPDATE T_KEY_OBJECT SET
+                            T_LastUniqueID = {value},
+                            T_LastChange = date('now'),
+                            T_User = 'modelbaker'
+                            WHERE T_Key = '{tid}';
+                        """.format(
+                            tid=self.tid, value=value
+                        )
+                    )
+                self.conn.commit()
+                cursor.close()
+                return True, self.tr("Successfully reset T_LastUniqueId to {}.").format(
+                    value
+                )
+            except sqlite3.Error as e:
+                cursor.close()
+                error_message = " ".join(e.args)
+                return False, self.tr("Could not reset T_LastUniqueId: {}").format(
+                    error_message
+                )
+
+        return False, self.tr("Could not reset T_LastUniqueId")
