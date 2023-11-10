@@ -11,7 +11,7 @@
  *                                                                         *
  *   This program is free software; you can redistribute it and/or modify  *
  *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
+ *   the Free Software Foundation either version 2 of the License, or     *
  *   (at your option) any later version.                                   *
  *                                                                         *
  ***************************************************************************/
@@ -23,9 +23,10 @@ import os
 import pathlib
 import tempfile
 
-from qgis.core import QgsProject
+from qgis.core import QgsExpressionContextUtils, QgsProject
 from qgis.testing import start_app, unittest
 
+from modelbaker.dataobjects.project import Project
 from modelbaker.db_factory.gpkg_command_config_manager import GpkgCommandConfigManager
 from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
@@ -249,370 +250,591 @@ class TestProjectOIDs(unittest.TestCase):
 
     def _oids_tids_none(self, generator, strategy, not_pg=False):
 
-        # all layers are visible
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
+
         available_layers = generator.layers()
-        layers_of_interest = [
-            l for l in available_layers if l.name not in self.BASKET_TABLES
-        ]
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
 
-        oid_map = dict()
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
 
-        for layer in layers_of_interest:
-            oid_entry = dict()
-            oid_entry["alias"] = layer.alias
-            oid_entry["iliname"] = layer.ili_name
-            oid_entry["oid_domain"] = layer.oid_domain
-            oid_map[layer.name] = oid_entry
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
 
-        assert oid_map == {
-            "parzellenidentifikation": {
-                "alias": "Parzellenidentifikation",
-                "iliname": "OIDBaseMadness_V1.Parzellenidentifikation",
-                "oid_domain": None,
-            },
-            "besitzerin": {
-                "alias": "BesitzerIn",
-                "iliname": "OIDBaseMadness_V1.Konstruktionen.BesitzerIn",
-                "oid_domain": "INTERLIS.ANYOID",
-            },
-            "oidbasmdnss_v1wohnraum_gebaeude": {
-                "alias": "Wohnraum.Gebaeude",
-                "iliname": "OIDBaseMadness_V1.Wohnraum.Gebaeude",
-                "oid_domain": "INTERLIS.UUIDOID",
-            },
-            "gartenhaus": {
-                "alias": "Gartenhaus",
-                "iliname": "OIDBaseMadness_V1.Wohnraum.Gartenhaus",
-                "oid_domain": None,
-            },
-            "park": {
-                "alias": "Park",
-                "iliname": "OIDMadness_V1.Natur.Park",
-                "oid_domain": None,
-            },
-            "brache": {
-                "alias": "Brache",
-                "iliname": "OIDMadness_V1.Natur.Brache",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "wiese": {
-                "alias": "Wiese",
-                "iliname": "OIDMadness_V1.Natur.Wiese",
-                "oid_domain": "INTERLIS.I32OID",
-            },
-            "wald": {
-                "alias": "Wald",
-                "iliname": "OIDMadness_V1.Natur.Wald",
-                "oid_domain": "INTERLIS.UUIDOID",
-            },
-            "see": {
-                "alias": "See",
-                "iliname": "OIDMadness_V1.Natur.See",
-                "oid_domain": "OIDMadness_V1.TypeID",
-            },
-            "fluss": {
-                "alias": "Fluss",
-                "iliname": "OIDMadness_V1.Natur.Fluss",
-                "oid_domain": "OIDMadness_V1.TypeIDShort",
-            },
-            "oidmadness_v1quartier_gebaeude": {
-                "alias": "Quartier.Gebaeude",
-                "iliname": "OIDMadness_V1.Quartier.Gebaeude",
-                "oid_domain": "INTERLIS.UUIDOID",
-            },
-            "oidmadness_v1business_gebaeude": {
-                "alias": "Business.Gebaeude",
-                "iliname": "OIDMadness_V1.Business.Gebaeude",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "parkplatz": {
-                "alias": "Parkplatz",
-                "iliname": "OIDMadness_V1.Business.Parkplatz",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "oidmadness_v1spass_gebaeude": {
-                "alias": "Spass.Gebaeude",
-                "iliname": "OIDMadness_V1.Spass.Gebaeude",
-                "oid_domain": "INTERLIS.I32OID",
-            },
-            "spielplatz": {
-                "alias": "Spielplatz",
-                "iliname": "OIDMadness_V1.Spass.Spielplatz",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-        }
+        tree_layers = root.findLayers()
+        assert len(tree_layers) == 17
 
-        # set two layers default expression
-        for layer in layers_of_interest:
-            if layer.name == "brache":
-                layer.t_ili_tid_field.default_value_expression = (
-                    "'chMBaker'||ilicounter(000000000,999999999)"
-                )
-            if layer.name == "wiese":
-                layer.t_ili_tid_field.default_value_expression = (
-                    "ilicounter(0,999999999)"
-                )
+        t_id_name = "T_Id" if not_pg else "t_id"
+        t_ili_tid_name = "T_Ili_Tid" if not_pg else "t_ili_tid"
+        expected_uuid_expression = "uuid('WithoutBraces')"
+        expected_i32_expression = t_id_name
+        expected_standard_expression = f"'ch100000' || lpad( {t_id_name}, 8, 0 )"
+        expected_other_expression = "'_' || uuid('WithoutBraces')"
 
-        # check if it's properly set
         count = 0
-        for layer in available_layers:
-            if layer.name == "brache":
-                count += 1
-                assert (
-                    layer.t_ili_tid_field.default_value_expression
-                    == "'chMBaker'||ilicounter(000000000,999999999)"
+        for tree_layer in tree_layers:
+            # with none
+            if tree_layer.layer().name() in [
+                "Parzellenidentifikation",
+                "Gartenhaus",
+                "Park",
+            ]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
                 )
-            if layer.name == "wiese":
-                count += 1
+                assert oid_domain == ""
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
                 assert (
-                    layer.t_ili_tid_field.default_value_expression
-                    == "ilicounter(0,999999999)"
+                    default_value_definition.expression() == expected_other_expression
                 )
-        assert count == 2
+                count += 1
+            # ANYOID
+            if tree_layer.layer().name() in ["BesitzerIn"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.ANYOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression() == expected_other_expression
+                )
+                count += 1
+            # UUIDOID
+            if tree_layer.layer().name() in [
+                "Wohnraum.Gebaeude",
+                "Quartier.Gebaeude",
+                "Wald",
+            ]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.UUIDOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == expected_uuid_expression
+                count += 1
+            # STANARDOID
+            if tree_layer.layer().name() in [
+                "Brache",
+                "Business.Gebaeude",
+                "Parkplatz",
+                "Spielplatz",
+            ]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.STANDARDOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == expected_standard_expression
+                )
+                count += 1
+            # I32OID
+            if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.I32OID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == expected_i32_expression
+                count += 1
+            # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
+            if tree_layer.layer().name() in ["See", "Fluss"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain in [
+                    "OIDMadness_V1.TypeID",
+                    "OIDMadness_V1.TypeIDShort",
+                ]
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression() == expected_other_expression
+                )
+                count += 1
+
+        # should find 15
+        assert count == 15
+
+        QgsProject.instance().clear()
 
     def _oids_tids_group(self, generator, strategy, not_pg=False):
 
-        # all layers are visible
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
+
         available_layers = generator.layers()
-        layers_of_interest = [
-            l for l in available_layers if l.name not in self.BASKET_TABLES
-        ]
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
 
-        oid_map = dict()
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
 
-        for layer in layers_of_interest:
-            oid_entry = dict()
-            oid_entry["alias"] = layer.alias
-            oid_entry["iliname"] = layer.ili_name
-            oid_entry["oid_domain"] = layer.oid_domain
-            oid_map[layer.name] = oid_entry
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
 
-        assert oid_map == {
-            "parzellenidentifikation": {
-                "alias": "Parzellenidentifikation",
-                "iliname": "OIDBaseMadness_V1.Parzellenidentifikation",
-                "oid_domain": None,
-            },
-            "besitzerin": {
-                "alias": "BesitzerIn",
-                "iliname": "OIDBaseMadness_V1.Konstruktionen.BesitzerIn",
-                "oid_domain": "INTERLIS.ANYOID",
-            },
-            "oidbasmdnss_v1wohnraum_gebaeude": {
-                "alias": "Wohnraum.Gebaeude",
-                "iliname": "OIDBaseMadness_V1.Wohnraum.Gebaeude",
-                "oid_domain": "INTERLIS.UUIDOID",
-            },
-            "gartenhaus": {
-                "alias": "Gartenhaus",
-                "iliname": "OIDBaseMadness_V1.Wohnraum.Gartenhaus",
-                "oid_domain": None,
-            },
-            "park": {
-                "alias": "Park",
-                "iliname": "OIDMadness_V1.Natur.Park",
-                "oid_domain": None,
-            },
-            "brache": {
-                "alias": "Brache",
-                "iliname": "OIDMadness_V1.Natur.Brache",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "wiese": {
-                "alias": "Wiese",
-                "iliname": "OIDMadness_V1.Natur.Wiese",
-                "oid_domain": "INTERLIS.I32OID",
-            },
-            "wald": {
-                "alias": "Wald",
-                "iliname": "OIDMadness_V1.Natur.Wald",
-                "oid_domain": "INTERLIS.UUIDOID",
-            },
-            "see": {
-                "alias": "See",
-                "iliname": "OIDMadness_V1.Natur.See",
-                "oid_domain": "OIDMadness_V1.TypeID",
-            },
-            "fluss": {
-                "alias": "Fluss",
-                "iliname": "OIDMadness_V1.Natur.Fluss",
-                "oid_domain": "OIDMadness_V1.TypeIDShort",
-            },
-            "oidmadness_v1quartier_gebaeude": {
-                "alias": "Quartier.Gebaeude",
-                "iliname": "OIDMadness_V1.Quartier.Gebaeude",
-                "oid_domain": "INTERLIS.UUIDOID",
-            },
-            "oidmadness_v1business_gebaeude": {
-                "alias": "Business.Gebaeude",
-                "iliname": "OIDMadness_V1.Business.Gebaeude",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "parkplatz": {
-                "alias": "Parkplatz",
-                "iliname": "OIDMadness_V1.Business.Parkplatz",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "oidmadness_v1spass_gebaeude": {
-                "alias": "Spass.Gebaeude",
-                "iliname": "OIDMadness_V1.Spass.Gebaeude",
-                "oid_domain": "INTERLIS.I32OID",
-            },
-            "spielplatz": {
-                "alias": "Spielplatz",
-                "iliname": "OIDMadness_V1.Spass.Spielplatz",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-        }
+        tree_layers = root.findLayers()
+        assert len(tree_layers) == 17
 
-        # set two layers default expression
-        for layer in layers_of_interest:
-            if layer.name == "brache":
-                layer.t_ili_tid_field.default_value_expression = (
-                    "'chMBaker'||ilicounter(000000000,999999999)"
-                )
-            if layer.name == "wiese":
-                layer.t_ili_tid_field.default_value_expression = (
-                    "ilicounter(0,999999999)"
-                )
+        t_id_name = "T_Id" if not_pg else "t_id"
+        t_ili_tid_name = "T_Ili_Tid" if not_pg else "t_ili_tid"
+        expected_uuid_expression = "uuid('WithoutBraces')"
+        expected_i32_expression = t_id_name
+        expected_standard_expression = f"'ch100000' || lpad( {t_id_name}, 8, 0 )"
+        expected_other_expression = "'_' || uuid('WithoutBraces')"
 
-        # check if it's properly set
         count = 0
-        for layer in available_layers:
-            if layer.name == "brache":
-                count += 1
-                assert (
-                    layer.t_ili_tid_field.default_value_expression
-                    == "'chMBaker'||ilicounter(000000000,999999999)"
+        for tree_layer in tree_layers:
+            # with none
+            if tree_layer.layer().name() in [
+                "Parzellenidentifikation",
+                "Gartenhaus",
+                "Park",
+            ]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
                 )
-            if layer.name == "wiese":
-                count += 1
+                assert oid_domain == ""
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
                 assert (
-                    layer.t_ili_tid_field.default_value_expression
-                    == "ilicounter(0,999999999)"
+                    default_value_definition.expression() == expected_other_expression
                 )
-        assert count == 2
+                count += 1
+            # ANYOID
+            if tree_layer.layer().name() in ["BesitzerIn"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.ANYOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression() == expected_other_expression
+                )
+                count += 1
+            # UUIDOID
+            if tree_layer.layer().name() in [
+                "Wohnraum.Gebaeude",
+                "Quartier.Gebaeude",
+                "Wald",
+            ]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.UUIDOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == expected_uuid_expression
+                count += 1
+            # STANARDOID
+            if tree_layer.layer().name() in [
+                "Brache",
+                "Business.Gebaeude",
+                "Parkplatz",
+                "Spielplatz",
+            ]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.STANDARDOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == expected_standard_expression
+                )
+                count += 1
+            # I32OID
+            if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.I32OID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == expected_i32_expression
+                count += 1
+            # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
+            if tree_layer.layer().name() in ["See", "Fluss"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain in [
+                    "OIDMadness_V1.TypeID",
+                    "OIDMadness_V1.TypeIDShort",
+                ]
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression() == expected_other_expression
+                )
+                count += 1
+
+        # should find 15
+        assert count == 15
+
+        QgsProject.instance().clear()
 
     def _oids_tids_hide(self, generator, strategy, not_pg=False):
 
-        # only relevant layers are visible
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
+
         available_layers = generator.layers()
-        layers_of_interest = [
-            l
-            for l in available_layers
-            if l.is_relevant and l.name not in self.BASKET_TABLES
-        ]
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
 
-        oid_map = dict()
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
 
-        for layer in layers_of_interest:
-            oid_entry = dict()
-            oid_entry["alias"] = layer.alias
-            oid_entry["iliname"] = layer.ili_name
-            oid_entry["oid_domain"] = layer.oid_domain
-            oid_map[layer.name] = oid_entry
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
 
-        # this one is hidden: 'oidbasmdnss_v1wohnraum_gebaeude': {'alias': 'Wohnraum.Gebaeude', 'iliname': 'OIDBaseMadness_V1.Wohnraum.Gebaeude', 'oid_domain': 'INTERLIS.UUIDOID'},
-        assert oid_map == {
-            "parzellenidentifikation": {
-                "alias": "Parzellenidentifikation",
-                "iliname": "OIDBaseMadness_V1.Parzellenidentifikation",
-                "oid_domain": None,
-            },
-            "besitzerin": {
-                "alias": "BesitzerIn",
-                "iliname": "OIDBaseMadness_V1.Konstruktionen.BesitzerIn",
-                "oid_domain": "INTERLIS.ANYOID",
-            },
-            "gartenhaus": {
-                "alias": "Gartenhaus",
-                "iliname": "OIDBaseMadness_V1.Wohnraum.Gartenhaus",
-                "oid_domain": None,
-            },
-            "park": {
-                "alias": "Park",
-                "iliname": "OIDMadness_V1.Natur.Park",
-                "oid_domain": None,
-            },
-            "brache": {
-                "alias": "Brache",
-                "iliname": "OIDMadness_V1.Natur.Brache",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "wiese": {
-                "alias": "Wiese",
-                "iliname": "OIDMadness_V1.Natur.Wiese",
-                "oid_domain": "INTERLIS.I32OID",
-            },
-            "wald": {
-                "alias": "Wald",
-                "iliname": "OIDMadness_V1.Natur.Wald",
-                "oid_domain": "INTERLIS.UUIDOID",
-            },
-            "see": {
-                "alias": "See",
-                "iliname": "OIDMadness_V1.Natur.See",
-                "oid_domain": "OIDMadness_V1.TypeID",
-            },
-            "fluss": {
-                "alias": "Fluss",
-                "iliname": "OIDMadness_V1.Natur.Fluss",
-                "oid_domain": "OIDMadness_V1.TypeIDShort",
-            },
-            "oidmadness_v1quartier_gebaeude": {
-                "alias": "Quartier.Gebaeude",
-                "iliname": "OIDMadness_V1.Quartier.Gebaeude",
-                "oid_domain": "INTERLIS.UUIDOID",
-            },
-            "oidmadness_v1business_gebaeude": {
-                "alias": "Business.Gebaeude",
-                "iliname": "OIDMadness_V1.Business.Gebaeude",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "parkplatz": {
-                "alias": "Parkplatz",
-                "iliname": "OIDMadness_V1.Business.Parkplatz",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-            "oidmadness_v1spass_gebaeude": {
-                "alias": "Spass.Gebaeude",
-                "iliname": "OIDMadness_V1.Spass.Gebaeude",
-                "oid_domain": "INTERLIS.I32OID",
-            },
-            "spielplatz": {
-                "alias": "Spielplatz",
-                "iliname": "OIDMadness_V1.Spass.Spielplatz",
-                "oid_domain": "INTERLIS.STANDARDOID",
-            },
-        }
+        tree_layers = root.findLayers()
+        assert len(tree_layers) == 16
 
-        # set two layers default expression
-        for layer in layers_of_interest:
-            if layer.name == "brache":
-                layer.t_ili_tid_field.default_value_expression = (
-                    "'chMBaker'||ilicounter(000000000,999999999)"
-                )
-            if layer.name == "wiese":
-                layer.t_ili_tid_field.default_value_expression = (
-                    "ilicounter(0,999999999)"
-                )
+        t_id_name = "T_Id" if not_pg else "t_id"
+        t_ili_tid_name = "T_Ili_Tid" if not_pg else "t_ili_tid"
+        expected_uuid_expression = "uuid('WithoutBraces')"
+        expected_i32_expression = t_id_name
+        expected_standard_expression = f"'ch100000' || lpad( {t_id_name}, 8, 0 )"
+        expected_other_expression = "'_' || uuid('WithoutBraces')"
 
-        # check if it's properly set
+        # "Wohnraum.Gebaeude" is hidden because of the strategy
         count = 0
-        for layer in available_layers:
-            if layer.name == "brache":
-                count += 1
-                assert (
-                    layer.t_ili_tid_field.default_value_expression
-                    == "'chMBaker'||ilicounter(000000000,999999999)"
+        for tree_layer in tree_layers:
+            # with none
+            if tree_layer.layer().name() in [
+                "Parzellenidentifikation",
+                "Gartenhaus",
+                "Park",
+            ]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
                 )
-            if layer.name == "wiese":
-                count += 1
+                assert oid_domain == ""
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
                 assert (
-                    layer.t_ili_tid_field.default_value_expression
-                    == "ilicounter(0,999999999)"
+                    default_value_definition.expression() == expected_other_expression
                 )
-        assert count == 2
+                count += 1
+            # ANYOID
+            if tree_layer.layer().name() in ["BesitzerIn"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.ANYOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression() == expected_other_expression
+                )
+                count += 1
+            # UUIDOID
+            if tree_layer.layer().name() in ["Quartier.Gebaeude", "Wald"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.UUIDOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == expected_uuid_expression
+                count += 1
+            # STANARDOID
+            if tree_layer.layer().name() in [
+                "Brache",
+                "Business.Gebaeude",
+                "Parkplatz",
+                "Spielplatz",
+            ]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.STANDARDOID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == expected_standard_expression
+                )
+                count += 1
+            # I32OID
+            if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain == "INTERLIS.I32OID"
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert default_value_definition.expression() == expected_i32_expression
+                count += 1
+            # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
+            if tree_layer.layer().name() in ["See", "Fluss"]:
+                # check layer variable
+                oid_domain = (
+                    QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                        "oid_domain"
+                    )
+                    or ""
+                )
+                assert oid_domain in [
+                    "OIDMadness_V1.TypeID",
+                    "OIDMadness_V1.TypeIDShort",
+                ]
+
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                ews = t_ili_tid_field.editorWidgetSetup()
+                ews.config()
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression() == expected_other_expression
+                )
+                count += 1
+
+        # should find 14
+        assert count == 14
+
+        QgsProject.instance().clear()
 
     def print_info(self, text):
         logging.info(text)

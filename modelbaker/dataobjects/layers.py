@@ -228,6 +228,10 @@ class Layer:
             self.__layer, "interlis_topic", interlis_topics
         )
 
+        QgsExpressionContextUtils.setLayerVariable(
+            self.__layer, "oid_domain", self.oid_domain
+        )
+
     def _create_layer(self, uri, layer_name, provider):
         if provider and provider.lower() == "wms":
             return QgsRasterLayer(uri, layer_name, provider)

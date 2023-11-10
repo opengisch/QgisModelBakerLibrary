@@ -369,11 +369,37 @@ class Generator(QObject):
 
                 db_factory.customize_widget_editor(field, data_type)
 
+                if "enum_domain" in fielddef and fielddef["enum_domain"]:
+                    field.enum_domain = fielddef["enum_domain"]
+
+                # default value expressions
+
+                ## we have this to provide e.g. the T_Id expression for GPKG defined in the db_connector
                 if "default_value_expression" in fielddef:
                     field.default_value_expression = fielddef[
                         "default_value_expression"
                     ]
 
+                ## oid (t_ili_tid)
+                # trying to set reasonable default default-expressions:
+                if column_name == self._db_connector.tilitid:
+                    field.oid_domain = fielddef.get("oid_domain", None)
+                    if field.oid_domain == "INTERLIS.UUIDOID":
+                        # clear case
+                        field.default_value_expression = "uuid('WithoutBraces')"
+                    elif field.oid_domain == "INTERLIS.I32OID":
+                        # taking the tid as stable serial
+                        field.default_value_expression = self._db_connector.tid
+                    elif field.oid_domain == "INTERLIS.STANDARDOID":
+                        # taking the example prefix + the tid as stable serial in 8 chars
+                        field.default_value_expression = (
+                            f"'ch100000' || lpad( {self._db_connector.tid}, 8, 0 )"
+                        )
+                    else:
+                        # ANY, user- or not-defined (mostly OID TEXT, means no leading digits allowed)
+                        field.default_value_expression = "'_' || uuid('WithoutBraces')"
+
+                ## basket (t_basket)
                 if self.basket_handling and column_name in BASKET_FIELDNAMES:
                     # on NONE strategy those should be all topics the class could be in. On optimized strategies GROUP/HIDE only the relevant topics should be listed.
                     interlis_topics = ",".join(
@@ -387,15 +413,6 @@ class Generator(QObject):
                         f"default_basket{'_' if interlis_topics else ''}{interlis_topics}"
                     )
                     field.default_value_expression = f"@{default_basket_topic}"
-
-                if column_name == self._db_connector.tilitid:
-                    # when there is a t_ili_tid it should be filled up when there is no OID defined in the model
-                    if "oid_domain" not in fielddef or fielddef["oid_domain"] is None:
-                        field.default_value_expression = "substr(uuid(), 2, 36)"
-                    else:
-                        field.oid_domain = fielddef["oid_domain"]
-                if "enum_domain" in fielddef and fielddef["enum_domain"]:
-                    field.enum_domain = fielddef["enum_domain"]
 
                 layer.fields.append(field)
 
