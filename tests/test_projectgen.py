@@ -2780,14 +2780,14 @@ class TestProjectGen(unittest.TestCase):
                     == "'_' || uuid('WithoutBraces')"
                 )
             if layer.name == "station":
-                # no default expression since it's defined in model
+                # default expression according model definition (althoug there is a default value server side)
                 count += 1
                 fields = layer.layer.fields()
                 field_idx = fields.lookupField("t_ili_tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
-                assert default_value_definition.expression() == ""
+                assert default_value_definition.expression() == "uuid('WithoutBraces')"
 
         # check if the layers have been considered
         assert count == 2
@@ -2851,17 +2851,14 @@ class TestProjectGen(unittest.TestCase):
                     == "'_' || uuid('WithoutBraces')"
                 )
             if layer.name == "station":
-                # default expression even when it's defined in model (since geopackage cannot create uuids)
+                # default expression according model definition
                 count += 1
                 fields = layer.layer.fields()
                 field_idx = fields.lookupField("T_Ili_Tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
-                assert (
-                    default_value_definition.expression()
-                    == "'_' || uuid('WithoutBraces')"
-                )
+                assert default_value_definition.expression() == "uuid('WithoutBraces')"
 
         # check if the layers have been considered
         assert count == 2
@@ -2932,14 +2929,14 @@ class TestProjectGen(unittest.TestCase):
                     == "'_' || uuid('WithoutBraces')"
                 )
             if layer.name == "station":
-                # no default expression since it's defined in model
+                # default expression according model definition
                 count += 1
                 fields = layer.layer.fields()
                 field_idx = fields.lookupField("t_ili_tid")
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
-                assert default_value_definition.expression() == ""
+                assert default_value_definition.expression() == "uuid('WithoutBraces')"
 
         # check if the layers have been considered
         assert count == 2
