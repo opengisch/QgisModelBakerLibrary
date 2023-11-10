@@ -2775,7 +2775,10 @@ class TestProjectGen(unittest.TestCase):
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
-                assert default_value_definition.expression() == "uuid('WithoutBraces')"
+                assert (
+                    default_value_definition.expression()
+                    == "'_' || uuid('WithoutBraces')"
+                )
             if layer.name == "station":
                 # no default expression since it's defined in model
                 count += 1
@@ -2843,7 +2846,10 @@ class TestProjectGen(unittest.TestCase):
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
-                assert default_value_definition.expression() == "uuid('WithoutBraces')"
+                assert (
+                    default_value_definition.expression()
+                    == "'_' || uuid('WithoutBraces')"
+                )
             if layer.name == "station":
                 # default expression even when it's defined in model (since geopackage cannot create uuids)
                 count += 1
@@ -2852,7 +2858,10 @@ class TestProjectGen(unittest.TestCase):
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
-                assert default_value_definition.expression() == "uuid('WithoutBraces')"
+                assert (
+                    default_value_definition.expression()
+                    == "'_' || uuid('WithoutBraces')"
+                )
 
         # check if the layers have been considered
         assert count == 2
@@ -2918,7 +2927,10 @@ class TestProjectGen(unittest.TestCase):
                 t_ili_tid_field = fields.field(field_idx)
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
-                assert default_value_definition.expression() == "uuid('WithoutBraces')"
+                assert (
+                    default_value_definition.expression()
+                    == "'_' || uuid('WithoutBraces')"
+                )
             if layer.name == "station":
                 # no default expression since it's defined in model
                 count += 1
