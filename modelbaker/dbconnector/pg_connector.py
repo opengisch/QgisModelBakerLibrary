@@ -16,6 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import logging
 import re
 
 import psycopg2
@@ -1073,3 +1074,20 @@ class PGConnector(DBConnector):
             )
             result = cur.fetchall()
         return result
+
+    def get_schemas(self):
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(
+                """SELECT schema_name
+                           FROM information_schema.schemata"""
+            )
+        except psycopg2.errors.Error as e:
+            error_message = " ".join(e.args)
+            logging.error(f"Could not get the list of schemas: {error_message}")
+            return []
+
+        schemas = cursor.fetchall()
+
+        # Transform list of tuples into list
+        return list(sum(schemas, ()))
