@@ -49,6 +49,7 @@ class Generator(QObject):
         mgmt_uri=None,
         consider_basket_handling=False,
         optimize_strategy=OptimizeStrategy.NONE,
+        expose_t_ili_tid=False,
     ):
         """
         Creates a new Generator objects.
@@ -71,6 +72,7 @@ class Generator(QObject):
         self._db_connector.new_message.connect(self.append_print_message)
         self.basket_handling = consider_basket_handling and self.get_basket_handling()
         self.optimize_strategy = optimize_strategy
+        self.expose_t_ili_tid = expose_t_ili_tid
 
         self._additional_ignored_layers = (
             []
@@ -308,7 +310,8 @@ class Generator(QObject):
                                     break
 
                 if column_name in IGNORED_FIELDNAMES:
-                    hide_attribute = True
+                    if not self.expose_t_ili_tid and column_name.lower() == "t_ili_tid":
+                        hide_attribute = True
 
                 if not self.basket_handling and column_name in BASKET_FIELDNAMES:
                     hide_attribute = True
@@ -316,7 +319,8 @@ class Generator(QObject):
                 field.hidden = hide_attribute
 
                 if column_name in READONLY_FIELDNAMES:
-                    field.read_only = True
+                    if not self.expose_t_ili_tid and column_name.lower() == "t_ili_tid":
+                        field.read_only = True
 
                 if column_name in min_max_info:
                     field.widget = "Range"
