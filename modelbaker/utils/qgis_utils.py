@@ -21,6 +21,7 @@ from qgis.core import (
     QgsLayerTreeLayer,
     QgsLayerTreeNode,
     QgsMapLayer,
+    QgsProject,
     QgsWkbTypes,
 )
 
@@ -127,3 +128,78 @@ def get_group_non_recursive(group, group_name):
             return group
 
     return None
+
+
+class QgisProject:
+    def __init__(self, project: QgsProject = None):
+        self.project = project
+
+    def get_oid_settings(self):
+        """Returns a dictionary like:
+        {
+            "Strasse":
+            {
+                "oid_domain": "STANDARDOID",
+                "interlis_topic" : "OIDMadness_V1",
+                "default_value_expression": "uuid()",
+                "in_form": True
+            }
+        }
+        """
+
+        oid_settings = {}
+
+        root = project.layerTreeRoot()
+
+        tree_layers = root.findLayers()
+        for tree_layer in tree_layers:
+            # get t_ili_tid field OID field
+            fields = tree_layer.layer().fields()
+            field_idx = fields.lookupField("t_ili_tid")
+            if field_idx < 0:
+                continue
+
+            t_ili_tid_field = fields.field(field_idx)
+
+            oid_setting = {}
+
+            # get oid type and all possible topics (for information) (comma sparated)
+            oid_setting["oid_domain"] = (
+                QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                    "oid_domain"
+                )
+                or ""
+            )
+            oid_setting["interlis_topic"] = (
+                QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                    "interlis_topic"
+                )
+                or ""
+            )
+
+            # get the default value expression
+            oid_setting["default_value_expression"] = (
+                t_ili_tid_field.defaultValueDefinition() or ""
+            )
+
+            # todo: we have to check if the field is already in the form (by drag'n'drop)
+            oid_setting["default_value_expression"] = False
+            oid_settings[tree_layer.layer().name()] = oid_setting
+
+        return oid_settings
+
+    def set_oid_settings(self, oid_settings):
+        for layer_name in oid_settings.keys():
+            layers = self.project.mapLayersByName(layer_name)
+            if layers:
+                layers[0]
+                oid_setting = oid_settings[layer_name]
+
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField("t_ili_tid")
+                fields.field(field_idx)
+
+                # set the default value expression
+                field.default_value_expression = oid_setting["default_value_expression"]
+
+                # we have to check if the field is already in the form (by drag'n'drop) and add or remove it...
