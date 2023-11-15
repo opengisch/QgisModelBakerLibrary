@@ -267,19 +267,20 @@ class TestProjectOIDs(unittest.TestCase):
         qgis_project = QgsProject.instance()
         project.create(None, qgis_project)
 
-        # check layertree
-        root = qgis_project.layerTreeRoot()
-        assert root is not None
-
-        tree_layers = root.findLayers()
-        assert len(tree_layers) == 17
-
+        # values
         t_id_name = "T_Id" if not_pg else "t_id"
         t_ili_tid_name = "T_Ili_Tid" if not_pg else "t_ili_tid"
         expected_uuid_expression = "uuid('WithoutBraces')"
         expected_i32_expression = t_id_name
         expected_standard_expression = f"'ch100000' || lpad( {t_id_name}, 8, 0 )"
         expected_other_expression = "'_' || uuid('WithoutBraces')"
+
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        tree_layers = root.findLayers()
+        assert len(tree_layers) == 17
 
         count = 0
         for tree_layer in tree_layers:
@@ -302,8 +303,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -326,8 +326,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -354,8 +353,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -381,8 +379,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -406,8 +403,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -431,8 +427,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -512,7 +507,6 @@ class TestProjectOIDs(unittest.TestCase):
                 assert expected_widgets_in_general_tab == {
                     child.name().lower for child in root_container.children()[0]
                 }
-
                 count += 1
         assert count == 3
 
@@ -571,8 +565,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -595,8 +588,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -623,8 +615,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -650,8 +641,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -675,8 +665,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -700,8 +689,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -840,8 +828,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -864,8 +851,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -888,8 +874,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -915,8 +900,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -940,8 +924,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
@@ -965,8 +948,7 @@ class TestProjectOIDs(unittest.TestCase):
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField(t_ili_tid_name)
                 t_ili_tid_field = fields.field(field_idx)
-                ews = t_ili_tid_field.editorWidgetSetup()
-                ews.config()
+
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
