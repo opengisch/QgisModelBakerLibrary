@@ -42,12 +42,10 @@ class TestSequenceReset(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path(
-            "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
-        )
-        importer.configuration.ilimodels = "Staedtische_Ortsplanung_V1_1"
-        importer.configuration.dbschema = (
-            "optimal_staedtische_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
+        importer.configuration.ilimodels = "RoadsSimple"
+        importer.configuration.dbschema = "road_simple{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
         )
 
         importer.configuration.srs_code = 2056
