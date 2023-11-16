@@ -18,6 +18,10 @@
 
 from qgis.core import (
     Qgis,
+    QgsAttributeEditorContainer,
+    QgsAttributeEditorField,
+    QgsDefaultValue,
+    QgsExpressionContextUtils,
     QgsLayerTreeLayer,
     QgsLayerTreeNode,
     QgsMapLayer,
@@ -149,7 +153,7 @@ class QgisProjectUtils:
 
         oid_settings = {}
 
-        root = project.layerTreeRoot()
+        root = self.project.layerTreeRoot()
 
         tree_layers = root.findLayers()
         for tree_layer in tree_layers:
@@ -179,7 +183,7 @@ class QgisProjectUtils:
 
             # get the default value expression
             oid_setting["default_value_expression"] = (
-                t_ili_tid_field.defaultValueDefinition() or ""
+                t_ili_tid_field.defaultValueDefinition().expression() or ""
             )
 
             # check if t_ili_tid is exposed in form
@@ -196,18 +200,19 @@ class QgisProjectUtils:
         for layer_name in oid_settings.keys():
             layers = self.project.mapLayersByName(layer_name)
             if layers:
-                layers[0]
+                layer = layers[0]
                 oid_setting = oid_settings[layer_name]
 
-                fields = tree_layer.layer().fields()
+                fields = layer.fields()
                 field_idx = fields.lookupField("t_ili_tid")
                 t_ili_tid_field = fields.field(field_idx)
 
                 # set the default value expression
-                field.default_value_expression = oid_setting["default_value_expression"]
+                default_value = QgsDefaultValue(oid_setting["default_value_expression"])
+                layer.setDefaultValueDefinition(field_idx, default_value)
 
                 # we have to check if the field is already exposed in the form
-                efc = tree_layer.layer().editFormConfig()
+                efc = layer.editFormConfig()
                 root_container = efc.invisibleRootContainer()
                 found_container = self._found_tilitid(root_container)
                 tilitid_in_form = bool(found_container is not None)

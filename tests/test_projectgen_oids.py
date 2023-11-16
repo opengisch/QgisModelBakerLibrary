@@ -434,22 +434,23 @@ class TestProjectOIDs(unittest.TestCase):
         assert count == 15
 
         # check oid settings getter
-        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
+        oid_settings = QgisProjectUtils(qgis_project).get_oid_settings()
 
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
-            "default_value_definition"
+            "default_value_expression"
         ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
         # change expression of See
         oid_settings["See"][
-            "default_value_definition"
+            "default_value_expression"
         ] = "'MB' || uuid('WithoutBraces')"
         # exponate t_ili_tid to form of BesitzerIn
         oid_settings["BesitzerIn"]["in_form"] = True
 
-        QgsProject(QgsProject.instance()).set_oid_settings(oid_setting)
+        QgisProjectUtils(QgsProject.instance()).set_oid_settings(oid_settings)
 
         # check layertree again
+        qgis_project = QgsProject.instance()
         root = qgis_project.layerTreeRoot()
         assert root is not None
 
@@ -499,7 +500,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert root_container.children()
 
                 assert expected_widgets_in_general_tab == {
-                    child.name().lower for child in root_container.children()[0]
+                    child.name().lower()
+                    for child in root_container.children()[0].children()
                 }
                 count += 1
         assert count == 3
@@ -690,22 +692,23 @@ class TestProjectOIDs(unittest.TestCase):
         assert count == 15
 
         # check oid settings getter
-        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
+        oid_settings = QgisProjectUtils(qgis_project).get_oid_settings()
 
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
-            "default_value_definition"
+            "default_value_expression"
         ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
         # change expression of See
         oid_settings["See"][
-            "default_value_definition"
+            "default_value_expression"
         ] = "'MB' || uuid('WithoutBraces')"
         # exponate t_ili_tid to form of BesitzerIn
         oid_settings["BesitzerIn"]["in_form"] = True
 
-        QgsProject(QgsProject.instance()).set_oid_settings(oid_setting)
+        QgisProjectUtils(QgsProject.instance()).set_oid_settings(oid_settings)
 
         # check layertree again
+        qgis_project = QgsProject.instance()
         root = qgis_project.layerTreeRoot()
         assert root is not None
 
@@ -755,7 +758,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert root_container.children()
 
                 assert expected_widgets_in_general_tab == {
-                    child.name().lower for child in root_container.children()[0]
+                    child.name().lower()
+                    for child in root_container.children()[0].children()
                 }
 
                 count += 1
@@ -943,27 +947,28 @@ class TestProjectOIDs(unittest.TestCase):
         assert count == 14
 
         # check oid settings getter
-        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
+        oid_settings = QgisProjectUtils(qgis_project).get_oid_settings()
 
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
-            "default_value_definition"
+            "default_value_expression"
         ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
         # change expression of See
         oid_settings["See"][
-            "default_value_definition"
+            "default_value_expression"
         ] = "'MB' || uuid('WithoutBraces')"
         # exponate t_ili_tid to form of BesitzerIn
         oid_settings["BesitzerIn"]["in_form"] = True
 
-        QgsProject(QgsProject.instance()).set_oid_settings(oid_setting)
+        QgisProjectUtils(QgsProject.instance()).set_oid_settings(oid_settings)
 
         # check layertree again
+        qgis_project = QgsProject.instance()
         root = qgis_project.layerTreeRoot()
         assert root is not None
 
         tree_layers = root.findLayers()
-        assert len(tree_layers) == 17
+        assert len(tree_layers) == 16
 
         count = 0
         for tree_layer in tree_layers:
@@ -1008,7 +1013,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert root_container.children()
 
                 assert expected_widgets_in_general_tab == {
-                    child.name().lower for child in root_container.children()[0]
+                    child.name().lower()
+                    for child in root_container.children()[0].children()
                 }
                 count += 1
         assert count == 3
