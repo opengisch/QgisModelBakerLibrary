@@ -32,7 +32,7 @@ from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from modelbaker.utils.globals import OptimizeStrategy
-from modelbaker.utils.qgis_utils import QgisProject
+from modelbaker.utils.qgis_utils import QgisProjectUtils
 from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
 
 CATALOGUE_DATASETNAME = "Catset"
@@ -434,7 +434,7 @@ class TestProjectOIDs(unittest.TestCase):
         assert count == 15
 
         # check oid settings getter
-        oid_settings = QgisProject(QgsProject.instance()).get_oid_settings()
+        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
 
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
@@ -485,11 +485,23 @@ class TestProjectOIDs(unittest.TestCase):
                 )
                 count += 1
             if tree_layer.layer().name() == "BesitzerIn":
-                # have look at the t_ili_tid field
-                fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
-                t_ili_tid_field = fields.field(field_idx)
-                # to do - check if exponated
+                # have look at the widgets in first tab "General"
+                # t_ili_tid should be here now
+                expected_widgets_in_general_tab = {
+                    "t_basket",
+                    "vorname",
+                    "nachname",
+                    "t_ili_tid",
+                }
+
+                efc = tree_layer.layer().editFormConfig()
+                root_container = efc.invisibleRootContainer()
+                assert root_container.children()
+
+                assert expected_widgets_in_general_tab == {
+                    child.name().lower for child in root_container.children()[0]
+                }
+
                 count += 1
         assert count == 3
 
@@ -679,7 +691,7 @@ class TestProjectOIDs(unittest.TestCase):
         assert count == 15
 
         # check oid settings getter
-        oid_settings = QgisProject(QgsProject.instance()).get_oid_settings()
+        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
 
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
@@ -730,11 +742,23 @@ class TestProjectOIDs(unittest.TestCase):
                 )
                 count += 1
             if tree_layer.layer().name() == "BesitzerIn":
-                # have look at the t_ili_tid field
-                fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
-                t_ili_tid_field = fields.field(field_idx)
-                # to do - check if exponated
+                # have look at the widgets in first tab "General"
+                # t_ili_tid should be here now
+                expected_widgets_in_general_tab = {
+                    "t_basket",
+                    "vorname",
+                    "nachname",
+                    "t_ili_tid",
+                }
+
+                efc = tree_layer.layer().editFormConfig()
+                root_container = efc.invisibleRootContainer()
+                assert root_container.children()
+
+                assert expected_widgets_in_general_tab == {
+                    child.name().lower for child in root_container.children()[0]
+                }
+
                 count += 1
         assert count == 3
 
@@ -921,7 +945,7 @@ class TestProjectOIDs(unittest.TestCase):
         assert count == 14
 
         # check oid settings getter
-        oid_settings = QgisProject(QgsProject.instance()).get_oid_settings()
+        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
 
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
@@ -972,11 +996,23 @@ class TestProjectOIDs(unittest.TestCase):
                 )
                 count += 1
             if tree_layer.layer().name() == "BesitzerIn":
-                # have look at the t_ili_tid field
-                fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
-                t_ili_tid_field = fields.field(field_idx)
-                # to do - check if exponated
+                # have look at the widgets in first tab "General"
+                # t_ili_tid should be here now
+                expected_widgets_in_general_tab = {
+                    "t_basket",
+                    "vorname",
+                    "nachname",
+                    "t_ili_tid",
+                }
+
+                efc = tree_layer.layer().editFormConfig()
+                root_container = efc.invisibleRootContainer()
+                assert root_container.children()
+
+                assert expected_widgets_in_general_tab == {
+                    child.name().lower for child in root_container.children()[0]
+                }
+
                 count += 1
         assert count == 3
 
