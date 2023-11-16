@@ -57,7 +57,7 @@ class TestSequenceReset(unittest.TestCase):
 
         db_connector = db_utils.get_db_connector(importer.configuration)
 
-        assert db_connector.get_ili2db_sequence_value() == 1
+        assert db_connector.get_ili2db_sequence_value() == 8
 
         success, _ = db_connector.set_ili2db_sequence_value(2000)
         assert success
@@ -74,7 +74,7 @@ class TestSequenceReset(unittest.TestCase):
         dataImporter.stderr.connect(self.print_error)
         assert dataImporter.run() == iliimporter.Importer.SUCCESS
 
-        assert db_connector.get_ili2db_sequence_value() == 2042
+        assert db_connector.get_ili2db_sequence_value() == 2032  # entries + basket
 
         success, _ = db_connector.set_ili2db_sequence_value(1000)
         assert success
