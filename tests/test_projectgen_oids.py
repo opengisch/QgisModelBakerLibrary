@@ -32,6 +32,7 @@ from modelbaker.generator.generator import Generator
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from modelbaker.utils.globals import OptimizeStrategy
+from modelbaker.utils.qgis_utils import QgisProjectUtils
 from tests.utils import get_pg_connection_string, iliimporter_config, testdata_path
 
 CATALOGUE_DATASETNAME = "Catset"
@@ -443,6 +444,78 @@ class TestProjectOIDs(unittest.TestCase):
         # should find 15
         assert count == 15
 
+        # check oid settings getter
+        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
+
+        # change expression of Parkplatz
+        oid_settings["Parkplatz"][
+            "default_value_definition"
+        ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+        # change expression of See
+        oid_settings["See"][
+            "default_value_definition"
+        ] = "'MB' || uuid('WithoutBraces')"
+        # exponate t_ili_tid to form of BesitzerIn
+        oid_settings["BesitzerIn"]["in_form"] = True
+
+        QgsProject(QgsProject.instance()).set_oid_settings(oid_setting)
+
+        # check layertree again
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        tree_layers = root.findLayers()
+        assert len(tree_layers) == 17
+
+        count = 0
+        for tree_layer in tree_layers:
+            if tree_layer.layer().name() == "Parkplatz":
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+                )
+                count += 1
+            if tree_layer.layer().name() == "See":
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "'MB' || uuid('WithoutBraces')"
+                )
+                count += 1
+            if tree_layer.layer().name() == "BesitzerIn":
+                # have look at the widgets in first tab "General"
+                # t_ili_tid should be here now
+                expected_widgets_in_general_tab = {
+                    "t_basket",
+                    "vorname",
+                    "nachname",
+                    "t_ili_tid",
+                }
+
+                efc = tree_layer.layer().editFormConfig()
+                root_container = efc.invisibleRootContainer()
+                assert root_container.children()
+
+                assert expected_widgets_in_general_tab == {
+                    child.name().lower for child in root_container.children()[0]
+                }
+
+                count += 1
+        assert count == 3
+
         QgsProject.instance().clear()
 
     def _oids_tids_group(self, generator, strategy, not_pg=False):
@@ -640,6 +713,77 @@ class TestProjectOIDs(unittest.TestCase):
         # should find 15
         assert count == 15
 
+        # check oid settings getter
+        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
+
+        # change expression of Parkplatz
+        oid_settings["Parkplatz"][
+            "default_value_definition"
+        ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+        # change expression of See
+        oid_settings["See"][
+            "default_value_definition"
+        ] = "'MB' || uuid('WithoutBraces')"
+        # exponate t_ili_tid to form of BesitzerIn
+        oid_settings["BesitzerIn"]["in_form"] = True
+
+        QgsProject(QgsProject.instance()).set_oid_settings(oid_setting)
+
+        # check layertree again
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        tree_layers = root.findLayers()
+        assert len(tree_layers) == 17
+
+        count = 0
+        for tree_layer in tree_layers:
+            if tree_layer.layer().name() == "Parkplatz":
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+                )
+                count += 1
+            if tree_layer.layer().name() == "See":
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "'MB' || uuid('WithoutBraces')"
+                )
+                count += 1
+            if tree_layer.layer().name() == "BesitzerIn":
+                # have look at the widgets in first tab "General"
+                # t_ili_tid should be here now
+                expected_widgets_in_general_tab = {
+                    "t_basket",
+                    "vorname",
+                    "nachname",
+                    "t_ili_tid",
+                }
+
+                efc = tree_layer.layer().editFormConfig()
+                root_container = efc.invisibleRootContainer()
+                assert root_container.children()
+
+                assert expected_widgets_in_general_tab == {
+                    child.name().lower for child in root_container.children()[0]
+                }
+
+                count += 1
+        assert count == 3
         QgsProject.instance().clear()
 
     def _oids_tids_hide(self, generator, strategy, not_pg=False):
@@ -833,6 +977,78 @@ class TestProjectOIDs(unittest.TestCase):
 
         # should find 14
         assert count == 14
+
+        # check oid settings getter
+        oid_settings = QgisProjectUtils(QgsProject.instance()).get_oid_settings()
+
+        # change expression of Parkplatz
+        oid_settings["Parkplatz"][
+            "default_value_definition"
+        ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+        # change expression of See
+        oid_settings["See"][
+            "default_value_definition"
+        ] = "'MB' || uuid('WithoutBraces')"
+        # exponate t_ili_tid to form of BesitzerIn
+        oid_settings["BesitzerIn"]["in_form"] = True
+
+        QgsProject(QgsProject.instance()).set_oid_settings(oid_setting)
+
+        # check layertree again
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        tree_layers = root.findLayers()
+        assert len(tree_layers) == 17
+
+        count = 0
+        for tree_layer in tree_layers:
+            if tree_layer.layer().name() == "Parkplatz":
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+                )
+                count += 1
+            if tree_layer.layer().name() == "See":
+                # have look at the t_ili_tid field
+                fields = tree_layer.layer().fields()
+                field_idx = fields.lookupField(t_ili_tid_name)
+                t_ili_tid_field = fields.field(field_idx)
+                # check default value expression
+                default_value_definition = t_ili_tid_field.defaultValueDefinition()
+                assert default_value_definition is not None
+                assert (
+                    default_value_definition.expression()
+                    == "'MB' || uuid('WithoutBraces')"
+                )
+                count += 1
+            if tree_layer.layer().name() == "BesitzerIn":
+                # have look at the widgets in first tab "General"
+                # t_ili_tid should be here now
+                expected_widgets_in_general_tab = {
+                    "t_basket",
+                    "vorname",
+                    "nachname",
+                    "t_ili_tid",
+                }
+
+                efc = tree_layer.layer().editFormConfig()
+                root_container = efc.invisibleRootContainer()
+                assert root_container.children()
+
+                assert expected_widgets_in_general_tab == {
+                    child.name().lower for child in root_container.children()[0]
+                }
+
+                count += 1
+        assert count == 3
 
         QgsProject.instance().clear()
 
