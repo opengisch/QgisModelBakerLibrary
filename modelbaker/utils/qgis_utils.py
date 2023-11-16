@@ -130,7 +130,7 @@ def get_group_non_recursive(group, group_name):
     return None
 
 
-class QgisProject:
+class QgisProjectUtils:
     def __init__(self, project: QgsProject = None):
         self.project = project
 
@@ -182,8 +182,12 @@ class QgisProject:
                 t_ili_tid_field.defaultValueDefinition() or ""
             )
 
-            # todo: we have to check if the field is already in the form (by drag'n'drop)
-            oid_setting["default_value_expression"] = False
+            # check if t_ili_tid is exposed in form
+            efc = tree_layer.layer().editFormConfig()
+            root_container = efc.invisibleRootContainer()
+            oid_setting["in_form"] = bool(
+                self._found_tilitid(root_container) is not None
+            )
             oid_settings[tree_layer.layer().name()] = oid_setting
 
         return oid_settings
@@ -197,9 +201,54 @@ class QgisProject:
 
                 fields = tree_layer.layer().fields()
                 field_idx = fields.lookupField("t_ili_tid")
-                fields.field(field_idx)
+                t_ili_tid_field = fields.field(field_idx)
 
                 # set the default value expression
                 field.default_value_expression = oid_setting["default_value_expression"]
 
-                # we have to check if the field is already in the form (by drag'n'drop) and add or remove it...
+                # we have to check if the field is already exposed in the form
+                efc = tree_layer.layer().editFormConfig()
+                root_container = efc.invisibleRootContainer()
+                found_container = self._found_tilitid(root_container)
+                tilitid_in_form = bool(found_container is not None)
+
+                if (not tilitid_in_form) and oid_setting["in_form"]:
+                    # needs to be added
+                    if root_container.children() and isinstance(
+                        root_container.children()[0], QgsAttributeEditorContainer
+                    ):
+                        # add it to the first tab
+                        container = root_container.children()[0]
+                    else:
+                        # add it to top level (rootContainer)
+                        container = root_container
+                    widget = QgsAttributeEditorField(
+                        t_ili_tid_field.name(), field_idx, container
+                    )
+                    container.addChildElement(widget)
+
+                if tilitid_in_form and not oid_setting["in_form"]:
+                    # needs to be removed
+                    preserved_container = found_container.clone(
+                        found_container.parent()
+                    )
+                    found_container.clear()
+
+                    for child in preserved_container.children():
+                        if child.name().lower() == "t_ili_tid":
+                            continue
+                        found_container.addChildElement(child.clone(found_container))
+
+    def _found_tilitid(self, container):
+        """Recursive function to dig into the form containers for the t_ili_tid returning true on success."""
+        for element in container.children():
+            if isinstance(element, QgsAttributeEditorContainer):
+                found_here = self._found_tilitid(element)
+                if found_here is not None:
+                    return found_here
+            elif (
+                isinstance(element, QgsAttributeEditorField)
+                and element.name().lower() == "t_ili_tid"
+            ):
+                return container
+        return None
