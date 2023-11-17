@@ -16,6 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 """
+import logging
 import re
 
 import psycopg2
@@ -1019,7 +1020,7 @@ class PGConnector(DBConnector):
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (nextval('{schema}.{sequence}'), {dataset_tid}, '{topic}', uuid_generate_v4(), 'Qgis Model Baker')
+                    VALUES (nextval('{schema}.{sequence}'), {dataset_tid}, '{topic}', uuid_generate_v4(), 'modelbaker')
                 """.format(
                         schema=self.schema,
                         sequence="t_ili2db_seq",
@@ -1073,3 +1074,58 @@ class PGConnector(DBConnector):
             )
             result = cur.fetchall()
         return result
+
+    def get_ili2db_sequence_value(self):
+        if self.schema:
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                    SELECT last_value FROM {schema}.{sequence};
+                """.format(
+                    schema=self.schema, sequence="t_ili2db_seq"
+                )
+            )
+            content = cur.fetchone()
+            if content:
+                return content[0]
+        return None
+
+    def set_ili2db_sequence_value(self, value):
+        if self.schema:
+            cur = self.conn.cursor()
+            try:
+                cur.execute(
+                    """
+                    ALTER SEQUENCE {schema}.{sequence} RESTART WITH {value};
+                    """.format(
+                        schema=self.schema, sequence="t_ili2db_seq", value=value
+                    )
+                )
+                self.conn.commit()
+                return True, self.tr(
+                    'Successfully reset sequence value to "{}".'
+                ).format(value)
+            except psycopg2.errors.Error as e:
+                error_message = " ".join(e.args)
+                return False, self.tr("Could not reset sequence: {}").format(
+                    error_message
+                )
+
+        return False, self.tr("Could not reset sequence")
+
+    def get_schemas(self):
+        cursor = self.conn.cursor()
+        try:
+            cursor.execute(
+                """SELECT schema_name
+                           FROM information_schema.schemata"""
+            )
+        except psycopg2.errors.Error as e:
+            error_message = " ".join(e.args)
+            logging.error(f"Could not get the list of schemas: {error_message}")
+            return []
+
+        schemas = cursor.fetchall()
+
+        # Transform list of tuples into list
+        return list(sum(schemas, ()))

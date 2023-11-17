@@ -176,7 +176,7 @@ class IliCache(QObject):
                         file=file, exception=str(e)
                     )
                 ),
-                self.tr("QGIS Model Baker"),
+                self.tr("modelbaker"),
             )
             return
 
@@ -206,7 +206,7 @@ class IliCache(QObject):
                         file=file, exception=str(e)
                     )
                 ),
-                self.tr("QGIS Model Baker"),
+                self.tr("modelbaker"),
             )
             return
 
@@ -300,7 +300,7 @@ class IliCache(QObject):
                             ilifile=ilifile, exception=str(e)
                         )
                     ),
-                    self.tr("QGIS Model Baker"),
+                    self.tr("modelbaker"),
                 )
                 fileModels = list()
 
@@ -472,7 +472,7 @@ class IliDataCache(IliCache):
                         file=file, exception=str(e)
                     )
                 ),
-                self.tr("QGIS Model Baker"),
+                self.tr("modelbaker"),
             )
             return
 
@@ -903,7 +903,7 @@ class IliToppingFileCache(IliDataCache):
                         file=file, exception=str(e)
                     )
                 ),
-                self.tr("QGIS Model Baker"),
+                self.tr("modelbaker"),
             )
             return
 
