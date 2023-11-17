@@ -131,7 +131,7 @@ def get_db_connector(configuration):
             "There was an error connecting to the database. Check connection parameters. Error details: {}".format(
                 db_connector_error
             ),
-            "QGIS Model Baker",
+            "modelbaker",
         )
         return None
     except FileNotFoundError as file_not_found_error:
@@ -139,7 +139,7 @@ def get_db_connector(configuration):
             "There was an error connecting to the database. Check connection parameters. Error details: {}".format(
                 file_not_found_error
             ),
-            "QGIS Model Baker",
+            "modelbaker",
         )
         return None
 
