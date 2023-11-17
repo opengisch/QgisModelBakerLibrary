@@ -974,10 +974,13 @@ class PGConnector(DBConnector):
                 """
                     SELECT DISTINCT (string_to_array(cn.iliname, '.'))[1] as model,
                     (string_to_array(cn.iliname, '.'))[2] as topic,
+                    ma.attr_value as bid_domain,
                     {relevance}
                     FROM {schema}.t_ili2db_classname as cn
                     JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
+                    LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
+                    ON CONCAT((string_to_array(cn.iliname, '.'))[1],'.',(string_to_array(cn.iliname, '.'))[2]) = ma.ilielement and ma.attr_name = 'ili2db.ili.bidDomain'
 					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and tp.setting != 'ENUM'
                 """.format(
                     schema=self.schema,
@@ -998,7 +1001,7 @@ class PGConnector(DBConnector):
             return cur.fetchall()
         return {}
 
-    def create_basket(self, dataset_tid, topic):
+    def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self.schema and self._table_exists(PG_BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1017,10 +1020,15 @@ class PGConnector(DBConnector):
                     topic
                 )
             try:
+                if not tilitid_value:
+                    # default value
+                    tilitid_value = "uuid_generate_v4()"
+                elif not tilitid_value.isnumeric():
+                    tilitid_value = f"'{tilitid_value}'"
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (nextval('{schema}.{sequence}'), {dataset_tid}, '{topic}', uuid_generate_v4(), 'modelbaker')
+                    VALUES (nextval('{schema}.{sequence}'), {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
                 """.format(
                         schema=self.schema,
                         sequence="t_ili2db_seq",
@@ -1029,6 +1037,7 @@ class PGConnector(DBConnector):
                         basket_table=PG_BASKET_TABLE,
                         dataset_tid=dataset_tid,
                         topic=topic,
+                        tilitid=tilitid_value,
                     )
                 )
                 self.conn.commit()

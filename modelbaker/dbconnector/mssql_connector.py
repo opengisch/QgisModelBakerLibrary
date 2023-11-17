@@ -946,11 +946,14 @@ WHERE TABLE_SCHEMA='{schema}'
             cur = self.conn.cursor()
             cur.execute(
                 """
-                    SELECT DISTINCT PARSENAME(cn.iliname,1) as model,
-                    PARSENAME(cn.iliname,2) as topic
+                    SELECT DISTINCT PARSENAME(cn.iliname,3) as model,
+                    PARSENAME(cn.iliname,2) as topic,
+                    ma.attr_value as bid_domain
                     FROM {schema}.t_ili2db_classname as cn
                     JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
+                    LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
+                    ON CONCAT(PARSENAME(cn.iliname,3),'.',PARSENAME(cn.iliname,2)) = ma.ilielement AND ma.attr_name = 'ili2db.ili.bidDomain'
 					WHERE PARSENAME(cn.iliname,3) != '' and tp.setting != 'ENUM'
                 """.format(
                     schema=self.schema
@@ -959,7 +962,7 @@ WHERE TABLE_SCHEMA='{schema}'
             result = self._get_dict_result(cur)
         return result
 
-    def create_basket(self, dataset_tid, topic):
+    def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -978,10 +981,15 @@ WHERE TABLE_SCHEMA='{schema}'
                     topic
                 )
             try:
+                if not tilitid_value:
+                    # default value
+                    tilitid_value = "NEWID()"
+                elif not tilitid_value.isnumeric():
+                    tilitid_value = f"'{tilitid_value}'"
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', NEWID(), 'modelbaker')
+                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
                 """.format(
                         schema=self.schema,
                         sequence="t_ili2db_seq",
@@ -990,6 +998,7 @@ WHERE TABLE_SCHEMA='{schema}'
                         basket_table=BASKET_TABLE,
                         dataset_tid=dataset_tid,
                         topic=topic,
+                        tilitid=tilitid_value,
                     )
                 )
                 self.conn.commit()

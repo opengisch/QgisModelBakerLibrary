@@ -826,10 +826,13 @@ class GPKGConnector(DBConnector):
                 """
                     SELECT DISTINCT substr(CN.IliName, 0, instr(CN.IliName, '.')) as model,
                     substr(substr(CN.IliName, instr(CN.IliName, '.')+1),0, instr(substr(CN.IliName, instr(CN.IliName, '.')+1),'.')) as topic,
+                    MA.attr_value as bid_domain,
                     {relevance}
                     FROM T_ILI2DB_CLASSNAME as CN
                     JOIN T_ILI2DB_TABLE_PROP as TP
                     ON CN.sqlname = TP.tablename
+                    LEFT JOIN T_ILI2DB_META_ATTRS as MA
+                    ON substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) = MA.ilielement and MA.attr_name = 'ili2db.ili.bidDomain'
 					WHERE topic != '' and TP.setting != 'ENUM'
                 """.format(
                     # it's relevant, when it's not extended
@@ -851,7 +854,7 @@ class GPKGConnector(DBConnector):
             return contents
         return {}
 
-    def create_basket(self, dataset_tid, topic):
+    def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -877,10 +880,15 @@ class GPKGConnector(DBConnector):
                     return False, self.tr(
                         'Could not create basket for topic "{}": {}'
                     ).format(topic, fetch_and_increment_feedback)
+                if not tilitid_value:
+                    # default value
+                    tilitid_value = f"'{uuid.uuid4()}'"
+                elif not tilitid_value.isnumeric():
+                    tilitid_value = f"'{tilitid_value}'"
                 cursor.execute(
                     """
                     INSERT INTO {basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES ({next_id}, {dataset_tid}, '{topic}', '{uuid}', 'modelbaker')
+                    VALUES ({next_id}, {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
                 """.format(
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
@@ -888,7 +896,7 @@ class GPKGConnector(DBConnector):
                         next_id=next_id,
                         dataset_tid=dataset_tid,
                         topic=topic,
-                        uuid=uuid.uuid4(),
+                        tilitid=tilitid_value,
                     )
                 )
                 self.conn.commit()

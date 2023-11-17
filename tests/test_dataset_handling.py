@@ -266,6 +266,17 @@ class TestDatasetHandling(unittest.TestCase):
         topics = db_connector.get_topics_info()
         assert len(topics) == 2
 
+        # check the bid_domain
+        count = 0
+        for topic in topics:
+            if topic["topic"] == "Infrastructure":
+                assert topic["bid_domain"] == "INTERLIS.UUIDOID"
+                count += 1
+            if topic["topic"] == "Lines":
+                assert topic["bid_domain"] == "INTERLIS.UUIDOID"
+                count += 1
+        assert count == 2
+
         # Generate the basket for 'Glarus Nord' and the first topic
         result = db_connector.create_basket(
             glarus_nord_tid, f"{topics[0]['model']}.{topics[0]['topic']}"
