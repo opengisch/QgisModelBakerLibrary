@@ -347,7 +347,7 @@ class JavaNotFoundError(FileNotFoundError):
         if self.java_version:
             return QCoreApplication.translate(
                 "ili2dbutils",
-                'Wrong java version found. Qgis Model Baker requires at least java version 8. Please <a href="{0}">install Java</a> and or <a href="{1}">configure a custom java path</a>.<br/><br/>Java Version:<br/>{2}',
+                'Wrong java version found. Model Baker requires at least java version 8. Please <a href="{0}">install Java</a> and or <a href="{1}">configure a custom java path</a>.<br/><br/>Java Version:<br/>{2}',
             ).format(
                 JavaNotFoundError.JAVA_DOWNLOAD_URL,
                 JavaNotFoundError.PLUGIN_CONFIGURATION_URL,
