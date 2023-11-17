@@ -319,7 +319,7 @@ class DBConnector(QObject):
         """
         return {}
 
-    def create_basket(self, dataset_tid, topic):
+    def create_basket(self, dataset_tid, topic, tilitid_value=None):
         """
         Returns the state and the errormessage
         """

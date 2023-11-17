@@ -959,7 +959,7 @@ WHERE TABLE_SCHEMA='{schema}'
             result = self._get_dict_result(cur)
         return result
 
-    def create_basket(self, dataset_tid, topic):
+    def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -978,10 +978,13 @@ WHERE TABLE_SCHEMA='{schema}'
                     topic
                 )
             try:
+                if not tilitid_value:
+                    # default value
+                    tilitid_value = "NEWID()"
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', NEWID(), 'Qgis Model Baker')
+                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, 'Qgis Model Baker')
                 """.format(
                         schema=self.schema,
                         sequence="t_ili2db_seq",
@@ -990,6 +993,7 @@ WHERE TABLE_SCHEMA='{schema}'
                         basket_table=BASKET_TABLE,
                         dataset_tid=dataset_tid,
                         topic=topic,
+                        tilitid=tilitid_value,
                     )
                 )
                 self.conn.commit()

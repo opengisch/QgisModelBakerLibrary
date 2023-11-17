@@ -19,7 +19,6 @@ import errno
 import os
 import re
 import sqlite3
-import uuid
 
 import qgis.utils
 from qgis.core import Qgis
@@ -851,7 +850,7 @@ class GPKGConnector(DBConnector):
             return contents
         return {}
 
-    def create_basket(self, dataset_tid, topic):
+    def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -877,10 +876,13 @@ class GPKGConnector(DBConnector):
                     return False, self.tr(
                         'Could not create basket for topic "{}": {}'
                     ).format(topic, fetch_and_increment_feedback)
+                if not tilitid_value:
+                    # default value
+                    tilitid_value = f"'uuid.uuid4()'"
                 cursor.execute(
                     """
                     INSERT INTO {basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES ({next_id}, {dataset_tid}, '{topic}', '{uuid}', 'Qgis Model Baker')
+                    VALUES ({next_id}, {dataset_tid}, '{topic}', {tilitid}, 'Qgis Model Baker')
                 """.format(
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
@@ -888,7 +890,7 @@ class GPKGConnector(DBConnector):
                         next_id=next_id,
                         dataset_tid=dataset_tid,
                         topic=topic,
-                        uuid=uuid.uuid4(),
+                        tilitid=tilitid_value,
                     )
                 )
                 self.conn.commit()
