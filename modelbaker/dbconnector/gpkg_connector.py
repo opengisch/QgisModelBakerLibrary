@@ -825,10 +825,13 @@ class GPKGConnector(DBConnector):
                 """
                     SELECT DISTINCT substr(CN.IliName, 0, instr(CN.IliName, '.')) as model,
                     substr(substr(CN.IliName, instr(CN.IliName, '.')+1),0, instr(substr(CN.IliName, instr(CN.IliName, '.')+1),'.')) as topic,
+                    MA.attr_value as bid_domain,
                     {relevance}
                     FROM T_ILI2DB_CLASSNAME as CN
                     JOIN T_ILI2DB_TABLE_PROP as TP
                     ON CN.sqlname = TP.tablename
+                    LEFT JOIN T_ILI2DB_META_ATTRS as MA
+                    ON substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) = MA.ilielement and MA.attr_name = 'ili2db.ili.bidDomain'
 					WHERE topic != '' and TP.setting != 'ENUM'
                 """.format(
                     # it's relevant, when it's not extended

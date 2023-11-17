@@ -973,10 +973,13 @@ class PGConnector(DBConnector):
                 """
                     SELECT DISTINCT (string_to_array(cn.iliname, '.'))[1] as model,
                     (string_to_array(cn.iliname, '.'))[2] as topic,
+                    ma.attr_value as bid_domain,
                     {relevance}
                     FROM {schema}.t_ili2db_classname as cn
                     JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
+                    LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
+                    ON CONCAT((string_to_array(cn.iliname, '.'))[1],'.',(string_to_array(cn.iliname, '.'))[2]) = ma.ilielement and ma.attr_name = 'ili2db.ili.bidDomain'
 					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and tp.setting != 'ENUM'
                 """.format(
                     schema=self.schema,

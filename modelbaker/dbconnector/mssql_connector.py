@@ -947,10 +947,13 @@ WHERE TABLE_SCHEMA='{schema}'
             cur.execute(
                 """
                     SELECT DISTINCT PARSENAME(cn.iliname,1) as model,
-                    PARSENAME(cn.iliname,2) as topic
+                    PARSENAME(cn.iliname,2) as topic,
+                    ma.attr_value as bid_domain,
                     FROM {schema}.t_ili2db_classname as cn
                     JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
+                    LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
+                    ON CONCAT(PARSENAME(cn.iliname,1),'.',PARSENAME(cn.iliname,2)) = ma.ilielement and ma.attr_name = 'ili2db.ili.bidDomain'
 					WHERE PARSENAME(cn.iliname,3) != '' and tp.setting != 'ENUM'
                 """.format(
                     schema=self.schema
