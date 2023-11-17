@@ -1020,13 +1020,15 @@ class PGConnector(DBConnector):
                     topic
                 )
             try:
-                if tilitid_value == None:
+                if not tilitid_value:
                     # default value
                     tilitid_value = "uuid_generate_v4()"
+                elif not tilitid_value.isnumeric():
+                    tilitid_value = f"'{tilitid_value}'"
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (nextval('{schema}.{sequence}'), {dataset_tid}, '{topic}', uuid_generate_v4(), 'modelbaker')
+                    VALUES (nextval('{schema}.{sequence}'), {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
                 """.format(
                         schema=self.schema,
                         sequence="t_ili2db_seq",

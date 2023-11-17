@@ -19,6 +19,7 @@ import errno
 import os
 import re
 import sqlite3
+import uuid
 
 import qgis.utils
 from qgis.core import Qgis
@@ -881,11 +882,13 @@ class GPKGConnector(DBConnector):
                     ).format(topic, fetch_and_increment_feedback)
                 if not tilitid_value:
                     # default value
-                    tilitid_value = f"'uuid.uuid4()'"
+                    tilitid_value = f"'{uuid.uuid4()}'"
+                elif not tilitid_value.isnumeric():
+                    tilitid_value = f"'{tilitid_value}'"
                 cursor.execute(
                     """
                     INSERT INTO {basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES ({next_id}, {dataset_tid}, '{topic}', '{uuid}', 'modelbaker')
+                    VALUES ({next_id}, {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
                 """.format(
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
