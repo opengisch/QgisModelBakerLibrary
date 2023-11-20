@@ -147,6 +147,7 @@ class QgisProjectUtils:
                 "interlis_topic" : "OIDMadness_V1",
                 "default_value_expression": "uuid()",
                 "in_form": True
+                "layer": QgsVectorLayer
             }
         }
         """
@@ -180,6 +181,9 @@ class QgisProjectUtils:
                 )
                 or ""
             )
+
+            # QgsVectorLayer (for information)
+            oid_setting["layer"] = tree_layer.layer()
 
             # get the default value expression
             oid_setting["default_value_expression"] = (
