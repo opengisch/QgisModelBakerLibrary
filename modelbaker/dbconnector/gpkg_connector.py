@@ -16,6 +16,7 @@
  ***************************************************************************/
 """
 import errno
+import numbers
 import os
 import re
 import sqlite3
@@ -883,7 +884,7 @@ class GPKGConnector(DBConnector):
                 if not tilitid_value:
                     # default value
                     tilitid_value = f"'{uuid.uuid4()}'"
-                elif not tilitid_value.isnumeric():
+                elif not isinstance(tilitid_value, numbers.Number):
                     tilitid_value = f"'{tilitid_value}'"
                 cursor.execute(
                     """

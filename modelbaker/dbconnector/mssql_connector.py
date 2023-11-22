@@ -16,6 +16,7 @@
  ***************************************************************************/
 """
 
+import numbers
 import re
 
 import pyodbc
@@ -984,8 +985,23 @@ WHERE TABLE_SCHEMA='{schema}'
                 if not tilitid_value:
                     # default value
                     tilitid_value = "NEWID()"
-                elif not tilitid_value.isnumeric():
+                elif not isinstance(tilitid_value, numbers.Number):
                     tilitid_value = f"'{tilitid_value}'"
+                print(
+                    """
+                    INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
+                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
+                """.format(
+                        schema=self.schema,
+                        sequence="t_ili2db_seq",
+                        tid_name=self.tid,
+                        tilitid_name=self.tilitid,
+                        basket_table=BASKET_TABLE,
+                        dataset_tid=dataset_tid,
+                        topic=topic,
+                        tilitid=tilitid_value,
+                    )
+                )
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )

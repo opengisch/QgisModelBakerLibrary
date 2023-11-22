@@ -17,6 +17,7 @@
  ***************************************************************************/
 """
 import logging
+import numbers
 import re
 
 import psycopg2
@@ -1020,11 +1021,28 @@ class PGConnector(DBConnector):
                     topic
                 )
             try:
+                print(tilitid_value)
                 if not tilitid_value:
                     # default value
                     tilitid_value = "uuid_generate_v4()"
-                elif not tilitid_value.isnumeric():
+                elif not isinstance(tilitid_value, numbers.Number):
                     tilitid_value = f"'{tilitid_value}'"
+                print(tilitid_value)
+                print(
+                    """
+                    INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
+                    VALUES (nextval('{schema}.{sequence}'), {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
+                """.format(
+                        schema=self.schema,
+                        sequence="t_ili2db_seq",
+                        tid_name=self.tid,
+                        tilitid_name=self.tilitid,
+                        basket_table=PG_BASKET_TABLE,
+                        dataset_tid=dataset_tid,
+                        topic=topic,
+                        tilitid=tilitid_value,
+                    )
+                )
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
