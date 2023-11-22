@@ -1044,6 +1044,10 @@ WHERE TABLE_SCHEMA='{schema}'
         return result
 
     def get_ili2db_sequence_value(self):
+        # not implemented, return the next one
+        return self.get_ili2db_sequence_value()
+
+    def get_next_ili2db_sequence_value(self):
         if self.schema:
             cur = self.conn.cursor()
             cur.execute(
