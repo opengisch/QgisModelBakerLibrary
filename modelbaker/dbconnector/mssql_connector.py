@@ -16,6 +16,7 @@
  ***************************************************************************/
 """
 
+import numbers
 import re
 
 import pyodbc
@@ -984,7 +985,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 if not tilitid_value:
                     # default value
                     tilitid_value = "NEWID()"
-                elif not tilitid_value.isnumeric():
+                elif not isinstance(tilitid_value, numbers.Number):
                     tilitid_value = f"'{tilitid_value}'"
                 cur.execute(
                     """

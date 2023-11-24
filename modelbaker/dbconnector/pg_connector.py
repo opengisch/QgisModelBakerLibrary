@@ -17,6 +17,7 @@
  ***************************************************************************/
 """
 import logging
+import numbers
 import re
 
 import psycopg2
@@ -1023,7 +1024,7 @@ class PGConnector(DBConnector):
                 if not tilitid_value:
                     # default value
                     tilitid_value = "uuid_generate_v4()"
-                elif not tilitid_value.isnumeric():
+                elif not isinstance(tilitid_value, numbers.Number):
                     tilitid_value = f"'{tilitid_value}'"
                 cur.execute(
                     """
