@@ -1022,6 +1022,14 @@ class GPKGConnector(DBConnector):
                 return content[0]
         return None
 
+    def get_next_ili2db_sequence_value(self):
+        (
+            status,
+            next_id,
+            fetch_and_increment_feedback,
+        ) = self._fetch_and_increment_key_object(self.tid)
+        return next_id
+
     def set_ili2db_sequence_value(self, value):
         if self._table_exists("T_KEY_OBJECT"):
             try:

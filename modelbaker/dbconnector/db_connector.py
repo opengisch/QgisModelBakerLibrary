@@ -344,6 +344,12 @@ class DBConnector(QObject):
         """
         return None
 
+    def get_next_ili2db_sequence_value(self):
+        """
+        Increases and returns the value of the sequence used for the t_id
+        """
+        return None
+
     def set_ili2db_sequence_value(self, value):
         """
         Resets the current value of the sequence used for the t_id

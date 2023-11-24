@@ -1099,6 +1099,22 @@ class PGConnector(DBConnector):
                 return content[0]
         return None
 
+    def get_next_ili2db_sequence_value(self):
+
+        if self.schema:
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                """
+                SELECT nextval('{schema}.{sequence}')
+                """.format(
+                    schema=self.schema, sequence="t_ili2db_seq"
+                )
+            )
+            content = cur.fetchone()
+            if content:
+                return content[0]
+        return None
+
     def set_ili2db_sequence_value(self, value):
         if self.schema:
             cur = self.conn.cursor()
