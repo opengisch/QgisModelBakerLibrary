@@ -10,6 +10,7 @@ class TestILI2DBUtils(unittest.TestCase):
         """Run before all tests."""
         cls.parent_dir = testdata_path("")
         cls.ilimodels = testdata_path("ilimodels")
+        cls.invalid_ilimodels = testdata_path("invalid_ilimodels")
         cls.ciaf_ladm = testdata_path("ilimodels/CIAF_LADM")
         cls.empty = testdata_path("ilimodels/subparent_dir/empty")
         cls.hidden = testdata_path("ilimodels/subparent_dir/.hidden")
@@ -27,6 +28,7 @@ class TestILI2DBUtils(unittest.TestCase):
         expected_dirs = [
             self.parent_dir,
             self.ilimodels,
+            self.invalid_ilimodels,
             self.ciaf_ladm,
             self.hidden,
             self.not_hidden,

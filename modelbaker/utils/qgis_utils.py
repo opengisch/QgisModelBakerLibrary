@@ -18,9 +18,14 @@
 
 from qgis.core import (
     Qgis,
+    QgsAttributeEditorContainer,
+    QgsAttributeEditorField,
+    QgsDefaultValue,
+    QgsExpressionContextUtils,
     QgsLayerTreeLayer,
     QgsLayerTreeNode,
     QgsMapLayer,
+    QgsProject,
     QgsWkbTypes,
 )
 
@@ -127,3 +132,132 @@ def get_group_non_recursive(group, group_name):
             return group
 
     return None
+
+
+class QgisProjectUtils:
+    def __init__(self, project: QgsProject = None):
+        self.project = project
+
+    def get_oid_settings(self):
+        """Returns a dictionary like:
+        {
+            "Strasse":
+            {
+                "oid_domain": "STANDARDOID",
+                "interlis_topic" : "OIDMadness_V1",
+                "default_value_expression": "uuid()",
+                "in_form": True
+                "layer": QgsVectorLayer
+            }
+        }
+        """
+
+        oid_settings = {}
+
+        root = self.project.layerTreeRoot()
+
+        tree_layers = root.findLayers()
+        for tree_layer in tree_layers:
+            # get t_ili_tid field OID field
+            fields = tree_layer.layer().fields()
+            field_idx = fields.lookupField("t_ili_tid")
+            if field_idx < 0:
+                continue
+
+            t_ili_tid_field = fields.field(field_idx)
+
+            oid_setting = {}
+
+            # get oid type and all possible topics (for information) (comma sparated)
+            oid_setting["oid_domain"] = (
+                QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                    "oid_domain"
+                )
+                or ""
+            )
+            oid_setting["interlis_topic"] = (
+                QgsExpressionContextUtils.layerScope(tree_layer.layer()).variable(
+                    "interlis_topic"
+                )
+                or ""
+            )
+
+            # QgsVectorLayer (for information)
+            oid_setting["layer"] = tree_layer.layer()
+
+            # get the default value expression
+            oid_setting["default_value_expression"] = (
+                t_ili_tid_field.defaultValueDefinition().expression() or ""
+            )
+
+            # check if t_ili_tid is exposed in form
+            efc = tree_layer.layer().editFormConfig()
+            root_container = efc.invisibleRootContainer()
+            oid_setting["in_form"] = bool(
+                self._found_tilitid(root_container) is not None
+            )
+            oid_settings[tree_layer.layer().name()] = oid_setting
+
+        return oid_settings
+
+    def set_oid_settings(self, oid_settings):
+        for layer_name in oid_settings.keys():
+            layers = self.project.mapLayersByName(layer_name)
+            if layers:
+                layer = layers[0]
+                oid_setting = oid_settings[layer_name]
+
+                fields = layer.fields()
+                field_idx = fields.lookupField("t_ili_tid")
+                t_ili_tid_field = fields.field(field_idx)
+
+                # set the default value expression
+                default_value = QgsDefaultValue(oid_setting["default_value_expression"])
+                layer.setDefaultValueDefinition(field_idx, default_value)
+
+                # we have to check if the field is already exposed in the form
+                efc = layer.editFormConfig()
+                root_container = efc.invisibleRootContainer()
+                found_container = self._found_tilitid(root_container)
+                tilitid_in_form = bool(found_container is not None)
+
+                if (not tilitid_in_form) and oid_setting["in_form"]:
+                    # needs to be added
+                    if root_container.children() and isinstance(
+                        root_container.children()[0], QgsAttributeEditorContainer
+                    ):
+                        # add it to the first tab
+                        container = root_container.children()[0]
+                    else:
+                        # add it to top level (rootContainer)
+                        container = root_container
+                    widget = QgsAttributeEditorField(
+                        t_ili_tid_field.name(), field_idx, container
+                    )
+                    container.addChildElement(widget)
+
+                if tilitid_in_form and not oid_setting["in_form"]:
+                    # needs to be removed
+                    preserved_container = found_container.clone(
+                        found_container.parent()
+                    )
+                    found_container.clear()
+
+                    for child in preserved_container.children():
+                        if child.name().lower() == "t_ili_tid":
+                            continue
+                        found_container.addChildElement(child.clone(found_container))
+
+    def _found_tilitid(self, container):
+        """Recursive function to dig into the form containers for the t_ili_tid returning true on success."""
+        for element in container.children():
+            if isinstance(element, QgsAttributeEditorContainer):
+                found_here = self._found_tilitid(element)
+                if found_here is not None:
+                    return found_here
+            elif (
+                isinstance(element, QgsAttributeEditorField)
+                and element.name().lower() == "t_ili_tid"
+            ):
+                return container
+        return None

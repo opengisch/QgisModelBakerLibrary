@@ -410,13 +410,6 @@ class GPKGConnector(DBConnector):
                         record["enum_domain"] = column_prop["setting"]
                     elif column_prop["tag"] == "ch.ehi.ili2db.oidDomain":
                         record["oid_domain"] = column_prop["setting"]
-                        # Calculated on client side, since sqlite doesn't provide the means to pre-evaluate UUID
-                        # This could be moved to the field function in the generator in future, since we get the oid_domain.
-                        if (
-                            record["column_name"] == "T_Ili_Tid"
-                            and column_prop["setting"] == "INTERLIS.UUIDOID"
-                        ):
-                            record["default_value_expression"] = "substr(uuid(), 2, 36)"
 
             record["attr_order"] = "999"
             if (

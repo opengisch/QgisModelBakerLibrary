@@ -59,7 +59,9 @@ class IliCacheTest(unittest.TestCase):
         ilicache = IliCache([])
         with self.assertRaises(RuntimeError):
             ilicache.parse_ili_file(
-                os.path.join(test_path, "testdata", "ilimodels", "RoadsInvalid.ili"),
+                os.path.join(
+                    test_path, "testdata", "invalid_ilimodels", "RoadsInvalid.ili"
+                ),
                 "utf-8",
             )
 
