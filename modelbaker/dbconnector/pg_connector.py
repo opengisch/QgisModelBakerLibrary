@@ -1021,7 +1021,6 @@ class PGConnector(DBConnector):
                     topic
                 )
             try:
-                print(tilitid_value)
                 if not tilitid_value:
                     # default value
                     tilitid_value = "uuid_generate_v4()"
