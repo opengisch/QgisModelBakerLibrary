@@ -1623,6 +1623,7 @@ class TestProjectGen(unittest.TestCase):
                 assert layer.layer.displayExpression() == (
                     '"t_ili_tid"' if Qgis.QGIS_VERSION_INT >= 31800 else '"t_id"'
                 )
+                assert layer.layer.displayExpression() == "type"
             if layer.name == "obstacle":
                 count += 1
                 assert layer.layer.displayExpression() == "type"
@@ -1679,6 +1680,7 @@ class TestProjectGen(unittest.TestCase):
                 assert layer.layer.displayExpression() == (
                     '"T_Ili_Tid"' if Qgis.QGIS_VERSION_INT >= 31800 else '"T_Id"'
                 )
+                assert layer.layer.displayExpression() == "type"
             if layer.name == "obstacle":
                 count += 1
                 assert layer.layer.displayExpression() == "type"
@@ -1837,6 +1839,7 @@ class TestProjectGen(unittest.TestCase):
                 assert layer.layer.displayExpression() == (
                     '"T_Ili_Tid"' if Qgis.QGIS_VERSION_INT >= 31800 else '"T_Id"'
                 )
+                assert layer.layer.displayExpression() == "type"
             if layer.name == "obstacle":
                 count += 1
                 assert layer.layer.displayExpression() == "type"
