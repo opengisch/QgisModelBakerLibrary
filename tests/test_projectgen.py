@@ -1437,7 +1437,7 @@ class TestProjectGen(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool, "ilimodels")
-        importer.configuration.ilimodels = "ExceptionalLoadsRoute_LV95_V1"
+        importer.configuration.ilimodels = "ExceptionalLoadsRoute_LV03_V1"
         importer.configuration.dbschema = "ciaf_ladm_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
@@ -1482,7 +1482,7 @@ class TestProjectGen(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool, "ilimodels")
-        importer.configuration.ilimodels = "ExceptionalLoadsRoute_LV95_V1"
+        importer.configuration.ilimodels = "ExceptionalLoadsRoute_LV03_V1"
 
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
@@ -1531,7 +1531,7 @@ class TestProjectGen(unittest.TestCase):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
         importer.configuration = iliimporter_config(importer.tool, "ilimodels")
-        importer.configuration.ilimodels = "ExceptionalLoadsRoute_LV95_V1"
+        importer.configuration.ilimodels = "ExceptionalLoadsRoute_LV03_V1"
         importer.configuration.dbschema = "ciaf_ladm_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
@@ -1620,9 +1620,7 @@ class TestProjectGen(unittest.TestCase):
                 assert layer.layer.displayExpression() == "type"
             if layer.name == "route":
                 count += 1
-                assert layer.layer.displayExpression() == (
-                    '"t_ili_tid"' if Qgis.QGIS_VERSION_INT >= 31800 else '"t_id"'
-                )
+                assert layer.layer.displayExpression() == "type"
             if layer.name == "obstacle":
                 count += 1
                 assert layer.layer.displayExpression() == "type"
@@ -1676,9 +1674,7 @@ class TestProjectGen(unittest.TestCase):
                 assert layer.layer.displayExpression() == "type"
             if layer.name == "route":
                 count += 1
-                assert layer.layer.displayExpression() == (
-                    '"T_Ili_Tid"' if Qgis.QGIS_VERSION_INT >= 31800 else '"T_Id"'
-                )
+                assert layer.layer.displayExpression() == "type"
             if layer.name == "obstacle":
                 count += 1
                 assert layer.layer.displayExpression() == "type"
@@ -1834,9 +1830,7 @@ class TestProjectGen(unittest.TestCase):
                 assert layer.layer.displayExpression() == "type"
             if layer.name == "route":
                 count += 1
-                assert layer.layer.displayExpression() == (
-                    '"T_Ili_Tid"' if Qgis.QGIS_VERSION_INT >= 31800 else '"T_Id"'
-                )
+                assert layer.layer.displayExpression() == "type"
             if layer.name == "obstacle":
                 count += 1
                 assert layer.layer.displayExpression() == "type"

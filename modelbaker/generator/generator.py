@@ -233,7 +233,10 @@ class Generator(QObject):
             elif "ili_name" in record and record["ili_name"]:
                 meta_attrs = self.get_meta_attrs(record["ili_name"])
                 for attr_record in meta_attrs:
-                    if attr_record["attr_name"] == "dispExpression":
+                    if attr_record["attr_name"] in [
+                        "dispExpression",
+                        "qgis.modelbaker.dispExpression",
+                    ]:
                         display_expression = attr_record["attr_value"]
 
             coord_decimals = (

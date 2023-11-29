@@ -159,6 +159,8 @@ class QgisProjectUtils:
         tree_layers = root.findLayers()
         for tree_layer in tree_layers:
             # get t_ili_tid field OID field
+            if tree_layer.layer().type() != QgsMapLayer.VectorLayer:
+                continue
             fields = tree_layer.layer().fields()
             field_idx = fields.lookupField("t_ili_tid")
             if field_idx < 0:
