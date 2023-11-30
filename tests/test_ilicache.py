@@ -285,6 +285,58 @@ class IliCacheTest(unittest.TestCase):
 
     def test_ilidata_xml_parser_metaconfig_kbs(self):
         # find kbs metaconfig file according to the model(s) with direct ilidata.xml scan
+        # pass gpkg as datasource find the ones with gpkg-datasource-category and the ones without datasource-category
+        ilimetaconfigcache = IliDataCache(
+            configuration=None, models="KbS_LV95_V1_4", datasources=["gpkg"]
+        )
+        ilimetaconfigcache._process_informationfile(
+            os.path.join(
+                test_path, "testdata", "ilirepo", "usabilityhub", "ilidata.xml"
+            ),
+            "test_repo",
+            os.path.join(test_path, "testdata", "ilirepo", "usabilityhub"),
+        )
+        assert "test_repo" in ilimetaconfigcache.repositories.keys()
+        metaconfigs = {
+            e["id"]
+            for e in next(elem for elem in ilimetaconfigcache.repositories.values())
+        }
+        expected_metaconfigs = {
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg_localfiletest",  # gpkg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-wrong",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg",  # no preferred datasource
+        }
+        assert metaconfigs == expected_metaconfigs
+
+        # pass pg as datasource find the ones with pg-datasource-category and the ones without datasource-category
+        ilimetaconfigcache = IliDataCache(
+            configuration=None, models="KbS_LV95_V1_4", datasources=["pg"]
+        )
+        ilimetaconfigcache._process_informationfile(
+            os.path.join(
+                test_path, "testdata", "ilirepo", "usabilityhub", "ilidata.xml"
+            ),
+            "test_repo",
+            os.path.join(test_path, "testdata", "ilirepo", "usabilityhub"),
+        )
+        assert "test_repo" in ilimetaconfigcache.repositories.keys()
+        metaconfigs = {
+            e["id"]
+            for e in next(elem for elem in ilimetaconfigcache.repositories.values())
+        }
+        expected_metaconfigs = {
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_localfiletest",  # pg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_ili2db",  # pg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-wrong",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg",  # no preferred datasource
+        }
+        assert metaconfigs == expected_metaconfigs
+
+        # don't pass any datasource, means find all
         ilimetaconfigcache = IliDataCache(configuration=None, models="KbS_LV95_V1_4")
         ilimetaconfigcache._process_informationfile(
             os.path.join(
@@ -299,13 +351,13 @@ class IliCacheTest(unittest.TestCase):
             for e in next(elem for elem in ilimetaconfigcache.repositories.values())
         }
         expected_metaconfigs = {
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_localfiletest",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg_localfiletest",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_ili2db",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-wrong",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg",
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_localfiletest",  # pg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg_localfiletest",  # gpkg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_ili2db",  # pg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-wrong",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg",  # no preferred datasource
         }
         assert metaconfigs == expected_metaconfigs
 

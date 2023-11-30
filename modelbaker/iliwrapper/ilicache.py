@@ -437,7 +437,7 @@ class IliDataCache(IliCache):
 
     CACHE_PATH = os.path.expanduser("~/.ilidatacache")
 
-    def __init__(self, configuration, type="metaconfig", models=None):
+    def __init__(self, configuration, type="metaconfig", models=None, datasources=[]):
         IliCache.__init__(self, configuration)
         self.information_file = "ilidata.xml"
 
@@ -454,6 +454,7 @@ class IliDataCache(IliCache):
             if self.base_configuration
             else []
         )
+        self.datasources = datasources
 
     def process_model_directory(self, path):
         # download remote and local repositories
@@ -512,9 +513,16 @@ class IliDataCache(IliCache):
                                 datasource = datasource_code_regex.search(
                                     category_value
                                 ).group(1)
+
+                    # filter for models and types and if datasources are passed and found in the category, they need to be considered
                     if (
                         not any(model in models for model in self.filter_models)
                         or type != self.type
+                        or (
+                            self.datasources
+                            and datasource
+                            and datasource not in self.datasources
+                        )
                     ):
                         continue
                     title = list()
