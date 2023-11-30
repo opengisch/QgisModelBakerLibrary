@@ -25,7 +25,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 from enum import Enum
 
-from PyQt5.QtCore import QDir, QObject, QSortFilterProxyModel, Qt, pyqtSignal
+from PyQt5.QtCore import QDir, QObject, QSortFilterProxyModel, Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QPalette, QRegion, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QGridLayout, QItemDelegate, QLabel, QStyle, QWidget
 from qgis.core import Qgis, QgsMessageLog
@@ -55,6 +55,17 @@ class IliCache(QObject):
         if self.base_configuration:
             self.directories = self.base_configuration.model_directories
 
+        # refresh the models on changing values but avoid massive db connects by timer
+        self.modelReposTimer = QTimer()
+        self.modelReposTimer.setSingleShot(True)
+        self.modelReposTimer.timeout.connect(
+            lambda: self.model.set_repositories(self.repositories)
+        )
+
+    def set_repositories_to_model(self):
+        # hold refresh back
+        self.modelReposTimer.start(500)
+
     def refresh(self):
         if not self.directories is None:
             for directory in self.directories:
@@ -80,7 +91,7 @@ class IliCache(QObject):
         self.repositories["no_repo"] = sorted(
             models, key=lambda m: m["version"], reverse=True
         )
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def file_url(self, url, file):
         if url is None:
@@ -252,7 +263,7 @@ class IliCache(QObject):
             reverse=True,
         )
 
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def process_local_ili_folder(self, path):
         """
@@ -268,7 +279,7 @@ class IliCache(QObject):
             models, key=lambda m: m["version"], reverse=True
         )
 
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def process_ili_file(self, ilifile):
         fileModels = list()
@@ -365,7 +376,6 @@ class IliModelItemModel(QStandardItemModel):
 
     def set_repositories(self, repositories):
         self.clear()
-        row = 0
         names = list()
 
         for repository in repositories.values():
@@ -379,11 +389,11 @@ class IliModelItemModel(QStandardItemModel):
                 item.setData(model["name"], int(Qt.DisplayRole))
                 item.setData(model["name"], int(Qt.EditRole))  # considered in completer
                 item.setData(model["repository"], int(IliModelItemModel.Roles.ILIREPO))
+                model["repository"]
                 item.setData(model["version"], int(IliModelItemModel.Roles.VERSION))
 
                 names.append(model["name"])
                 self.appendRow(item)
-                row += 1
 
 
 class ModelCompleterDelegate(QItemDelegate):
@@ -664,7 +674,7 @@ class IliDataCache(IliCache):
             reverse=True,
         )
 
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def download_file(self, netloc, url, file, dataset_id=None):
         """
@@ -727,7 +737,6 @@ class IliDataItemModel(QStandardItemModel):
     def set_repositories(self, repositories):
         self.beginResetModel()
         self.clear()
-        row = 0
         ids = list()
 
         for repository in repositories.values():
@@ -776,7 +785,6 @@ class IliDataItemModel(QStandardItemModel):
 
                 ids.append(dataitem["id"])
                 self.appendRow(item)
-                row += 1
         self.endResetModel()
 
 
@@ -891,7 +899,7 @@ class IliToppingFileCache(IliDataCache):
             repo_files.append(toppingfile)
 
         self.repositories[netloc] = repo_files
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def on_download_status(self, dataset_id):
         # here we could add some more logic
@@ -971,7 +979,7 @@ class IliToppingFileCache(IliDataCache):
             reverse=True,
         )
 
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
 
 class IliToppingFileItemModel(QStandardItemModel):
@@ -991,7 +999,6 @@ class IliToppingFileItemModel(QStandardItemModel):
 
     def set_repositories(self, repositories):
         self.clear()
-        row = 0
         ids = list()
 
         for repository in repositories.values():
@@ -1024,4 +1031,3 @@ class IliToppingFileItemModel(QStandardItemModel):
 
                 ids.append(toppingfile["id"])
                 self.appendRow(item)
-                row += 1
