@@ -1,7 +1,7 @@
 import os
 import pathlib
 
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import QEventLoop, Qt, QTimer
 from qgis.testing import unittest
 
 from modelbaker.iliwrapper.ili2dbconfig import BaseConfiguration
@@ -361,6 +361,8 @@ class IliCacheTest(unittest.TestCase):
         }
         assert metaconfigs == expected_metaconfigs
 
+        self._sleep()
+
         ilimetaconfigcache_model = ilimetaconfigcache.model
 
         matches_on_id = ilimetaconfigcache_model.match(
@@ -439,6 +441,8 @@ class IliCacheTest(unittest.TestCase):
         }
         assert metaconfigs == expected_metaconfigs
 
+        self._sleep()
+
         ilimetaconfigcache_model = ilimetaconfigcache.model
 
         matches_on_id = ilimetaconfigcache_model.match(
@@ -510,6 +514,8 @@ class IliCacheTest(unittest.TestCase):
         }
         assert referencedata == expected_referencedata
 
+        self._sleep()
+
         linked_model_list = []
         for r in range(ilireferencedatacache.model.rowCount()):
             if ilireferencedatacache.model.item(r).data(
@@ -562,6 +568,8 @@ class IliCacheTest(unittest.TestCase):
             "ch.gl.ili.catalogue.GL_Forstreviere_V1_Kataloge",
         }
         assert referencedata == expected_referencedata
+
+        self._sleep()
 
         linked_model_list = []
         for r in range(ilireferencedatacache.model.rowCount()):
@@ -616,6 +624,8 @@ class IliCacheTest(unittest.TestCase):
         }
 
         assert files == expected_files
+
+        self._sleep()
 
         ilitoppingfilecache_model = ilitoppingfilecache.model
 
@@ -765,3 +775,11 @@ class IliCacheTest(unittest.TestCase):
         # not finding invalid metaconfig but the one with none as id
         expected_metaconfigs = {None, "ch.opengis.ili.config.valid"}
         assert metaconfigs == expected_metaconfigs
+
+    def _sleep(self, mili=2000):
+        loop = QEventLoop()
+        timer = QTimer()
+        timer.setSingleShot(True)
+        timer.timeout.connect(lambda: loop.quit())
+        timer.start(mili)
+        loop.exec()
