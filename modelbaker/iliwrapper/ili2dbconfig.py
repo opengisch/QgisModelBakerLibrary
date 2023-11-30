@@ -101,7 +101,7 @@ class BaseConfiguration:
         return dirs
 
     @property
-    def metaconfig_directories(self):
+    def ilidata_directories(self):
         dirs = list()
         if self.custom_model_directories_enabled and self.custom_model_directories:
             dirs = self.custom_model_directories.split(";")
@@ -451,7 +451,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.db_ili_version == 3:
             self.append_args(args, ["--export3"])
-            
+
         if self.xtflog:
             self.append_args(args, ["--xtflog", self.xtflog])
 
@@ -461,7 +461,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.valid_config:
             self.append_args(args, ["--validConfig", self.valid_config])
-        
+
         if self.db_ili_version == 3:
             self.append_args(args, [self.xtffile])
 
