@@ -41,11 +41,13 @@ class DatasetMetadata:
         file_type: str = None,
         file_path: str = None,
         linking_models: list = [],
+        preferred_datasource: str = None,
     ):
         self.id = id
         self.file_type = file_type
         self.file_path = file_path
         self.linking_models = linking_models
+        self.preferred_datasource = preferred_datasource
 
         self.version = dataset_version
         self.publishing_date = publishing_date
@@ -99,7 +101,7 @@ class DatasetMetadata:
             type_datasetidx16_code, "value"
         ).text = f"http://codes.interlis.ch/type/{self.file_type}"
 
-        if self.file_type in ["metaconfig", "referencedata"]:
+        if self.file_type in ["metaconfig", "referencedata", "projecttopping"]:
             for linking_model in self.linking_models:
                 linking_model_datasetidx16_code = ET.SubElement(
                     categories, "DatasetIdx16.Code_"
@@ -107,6 +109,14 @@ class DatasetMetadata:
                 ET.SubElement(
                     linking_model_datasetidx16_code, "value"
                 ).text = f"http://codes.interlis.ch/model/{linking_model}"
+
+            if self.preferred_datasource:
+                datasource_datasetidx16_code = ET.SubElement(
+                    categories, "DatasetIdx16.Code_"
+                )
+                ET.SubElement(
+                    datasource_datasetidx16_code, "value"
+                ).text = f"http://codes.modelbaker.ch/preferredDataSource/{self.preferred_datasource}"
 
         files = ET.SubElement(element, "files")
         datsaetidx16_datafile = ET.SubElement(files, "DatasetIdx16.DataFile")
@@ -127,7 +137,12 @@ class IliData:
     def __init__(self):
         pass
 
-    def generate_file(self, target: IliTarget, linking_models: list = []):
+    def generate_file(
+        self,
+        target: IliTarget,
+        linking_models: list = [],
+        preferred_datasource: str = None,
+    ):
         """
         Generates the ilidata.xml file containing all the toppingfile listed in the targets toppingfileinfo_list and writes it to the targets folders.
         """
@@ -168,6 +183,7 @@ class IliData:
                 toppingfileinfo["type"],
                 toppingfileinfo["path"],
                 linking_models,
+                preferred_datasource,
             )
             dataset.make_xml_element(dataset_metadata_element)
 

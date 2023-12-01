@@ -50,6 +50,7 @@ class IliProjectTopping(ProjectTopping):
         self.target = target
         self.export_settings = export_settings
         self.metaconfig = metaconfig
+        self.preferred_datasource = None
 
     @property
     def models(self):
@@ -94,7 +95,9 @@ class IliProjectTopping(ProjectTopping):
 
         # generate ilidata
         ilidata = IliData()
-        ilidata_path = ilidata.generate_file(self.target, self.models)
+        ilidata_path = ilidata.generate_file(
+            self.target, self.models, self.preferred_datasource
+        )
         if ilidata_path:
             self.stdout.emit(
                 self.tr("IliData written to XML file: {}").format(ilidata_path),

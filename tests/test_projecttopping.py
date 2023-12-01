@@ -1249,6 +1249,10 @@ class TestProjectTopping(unittest.TestCase):
         if len(topping_file_cache.downloaded_files) != len(id_list):
             loop.exec()
 
+        # since the local download is quicker than the delay in the model refresh, we make one here as well
+        timer.start(3000)
+        loop.exec()
+
         return topping_file_cache.model
 
     # that's the same (more or less) like in project_creation_page.py

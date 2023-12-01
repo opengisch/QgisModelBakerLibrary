@@ -36,9 +36,6 @@
           <DatasetIdx16.Code_>
           	<value>http://codes.interlis.ch/type/metaconfig</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-          	<value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
         </categories>
         <files>
           <DatasetIdx16.DataFile>
@@ -72,9 +69,6 @@
           </DatasetIdx16.Code_>
           <DatasetIdx16.Code_>
           	<value>http://codes.interlis.ch/type/metaconfig</value>
-          </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-          	<value>http://codes.opengis.ch/modelbaker</value>
           </DatasetIdx16.Code_>
         </categories>
         <files>
@@ -111,7 +105,7 @@
           	<value>http://codes.interlis.ch/type/metaconfig</value>
           </DatasetIdx16.Code_>
           <DatasetIdx16.Code_>
-          	<value>http://codes.opengis.ch/modelbaker</value>
+          	<value>http://codes.modelbaker.ch/preferredDataSource/pg</value>
           </DatasetIdx16.Code_>
         </categories>
         <files>
@@ -148,7 +142,7 @@
           	<value>http://codes.interlis.ch/type/metaconfig</value>
           </DatasetIdx16.Code_>
           <DatasetIdx16.Code_>
-          	<value>http://codes.opengis.ch/modelbaker</value>
+          	<value>http://codes.modelbaker.ch/preferredDataSource/gpkg</value>
           </DatasetIdx16.Code_>
         </categories>
         <files>
@@ -184,9 +178,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/metaconfig</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
         <files>
           <DatasetIdx16.DataFile>
@@ -211,9 +203,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/metaconfig</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
         <files>
           <DatasetIdx16.DataFile>
@@ -249,7 +239,7 @@
             <value>http://codes.interlis.ch/type/metaconfig</value>
           </DatasetIdx16.Code_>
           <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
+          	<value>http://codes.modelbaker.ch/preferredDataSource/pg</value>
           </DatasetIdx16.Code_>
         </categories>
         <files>
@@ -414,9 +404,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/projecttopping</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
         <files>
           <DatasetIdx16.DataFile>
@@ -452,9 +440,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/projecttopping</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
         <files>
           <DatasetIdx16.DataFile>
@@ -554,9 +540,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/referenceData</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
          <files>
           <DatasetIdx16.DataFile>
@@ -591,9 +575,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/referenceData</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
          <files>
           <DatasetIdx16.DataFile>
@@ -641,9 +623,6 @@
           <DatasetIdx16.Code_>
           	<value>http://codes.interlis.ch/type/metaconfig</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-          	<value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
         </categories>
         <files>
           <DatasetIdx16.DataFile>
@@ -677,9 +656,6 @@
           </DatasetIdx16.Code_>
           <DatasetIdx16.Code_>
           	<value>http://codes.interlis.ch/type/metaconfig</value>
-          </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-          	<value>http://codes.opengis.ch/modelbaker</value>
           </DatasetIdx16.Code_>
         </categories>
         <files>
@@ -716,9 +692,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/referenceData</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
         <files>
           <DatasetIdx16.DataFile>
@@ -764,9 +738,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/referenceData</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
         <files>
           <DatasetIdx16.DataFile>
@@ -812,9 +784,7 @@
           <DatasetIdx16.Code_>
             <value>http://codes.interlis.ch/type/referenceData</value>
           </DatasetIdx16.Code_>
-          <DatasetIdx16.Code_>
-            <value>http://codes.opengis.ch/modelbaker</value>
-          </DatasetIdx16.Code_>
+
         </categories>
         <files>
           <DatasetIdx16.DataFile>

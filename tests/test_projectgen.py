@@ -3158,6 +3158,9 @@ class TestProjectGen(unittest.TestCase):
             models="KbS_LV95_V1_4",
         )
         ilimetaconfigcache.refresh()
+
+        self._sleep()
+
         matches_on_id = ilimetaconfigcache.model.match(
             ilimetaconfigcache.model.index(0, 0),
             int(IliDataItemModel.Roles.ID),
@@ -3548,6 +3551,9 @@ class TestProjectGen(unittest.TestCase):
             models="KbS_LV95_V1_4",
         )
         ilimetaconfigcache.refresh()
+
+        self._sleep()
+
         matches_on_id = ilimetaconfigcache.model.match(
             ilimetaconfigcache.model.index(0, 0),
             int(IliDataItemModel.Roles.ID),
@@ -4264,7 +4270,18 @@ class TestProjectGen(unittest.TestCase):
         if len(topping_file_cache.downloaded_files) != len(id_list):
             loop.exec()
 
+        # since the local download is quicker than the delay in the model refresh, we make one here as well
+        self._sleep(3000)
+
         return topping_file_cache.model
+
+    def _sleep(self, mili=2000):
+        loop = QEventLoop()
+        timer = QTimer()
+        timer.setSingleShot(True)
+        timer.timeout.connect(lambda: loop.quit())
+        timer.start(mili)
+        loop.exec()
 
     @classmethod
     def tearDownClass(cls):

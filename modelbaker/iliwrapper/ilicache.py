@@ -25,7 +25,7 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 from enum import Enum
 
-from PyQt5.QtCore import QDir, QObject, QSortFilterProxyModel, Qt, pyqtSignal
+from PyQt5.QtCore import QDir, QObject, QSortFilterProxyModel, Qt, QTimer, pyqtSignal
 from PyQt5.QtGui import QPalette, QRegion, QStandardItem, QStandardItemModel
 from PyQt5.QtWidgets import QGridLayout, QItemDelegate, QLabel, QStyle, QWidget
 from qgis.core import Qgis, QgsMessageLog
@@ -55,6 +55,17 @@ class IliCache(QObject):
         if self.base_configuration:
             self.directories = self.base_configuration.model_directories
 
+        # refresh the models on changing values but avoid massive db connects by timer
+        self.modelReposTimer = QTimer()
+        self.modelReposTimer.setSingleShot(True)
+        self.modelReposTimer.timeout.connect(
+            lambda: self.model.set_repositories(self.repositories)
+        )
+
+    def set_repositories_to_model(self):
+        # hold refresh back
+        self.modelReposTimer.start(500)
+
     def refresh(self):
         if not self.directories is None:
             for directory in self.directories:
@@ -80,7 +91,7 @@ class IliCache(QObject):
         self.repositories["no_repo"] = sorted(
             models, key=lambda m: m["version"], reverse=True
         )
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def file_url(self, url, file):
         if url is None:
@@ -252,7 +263,7 @@ class IliCache(QObject):
             reverse=True,
         )
 
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def process_local_ili_folder(self, path):
         """
@@ -268,7 +279,7 @@ class IliCache(QObject):
             models, key=lambda m: m["version"], reverse=True
         )
 
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def process_ili_file(self, ilifile):
         fileModels = list()
@@ -365,7 +376,6 @@ class IliModelItemModel(QStandardItemModel):
 
     def set_repositories(self, repositories):
         self.clear()
-        row = 0
         names = list()
 
         for repository in repositories.values():
@@ -379,11 +389,11 @@ class IliModelItemModel(QStandardItemModel):
                 item.setData(model["name"], int(Qt.DisplayRole))
                 item.setData(model["name"], int(Qt.EditRole))  # considered in completer
                 item.setData(model["repository"], int(IliModelItemModel.Roles.ILIREPO))
+                model["repository"]
                 item.setData(model["version"], int(IliModelItemModel.Roles.VERSION))
 
                 names.append(model["name"])
                 self.appendRow(item)
-                row += 1
 
 
 class ModelCompleterDelegate(QItemDelegate):
@@ -435,9 +445,9 @@ class IliDataCache(IliCache):
     file_download_failed = pyqtSignal(str, str)
     model_refreshed = pyqtSignal(int)
 
-    CACHE_PATH = os.path.expanduser("~/.ilimetaconfigcache")
+    CACHE_PATH = os.path.expanduser("~/.ilidatacache")
 
-    def __init__(self, configuration, type="metaconfig", models=None):
+    def __init__(self, configuration, type="metaconfig", models=None, datasources=[]):
         IliCache.__init__(self, configuration)
         self.information_file = "ilidata.xml"
 
@@ -450,10 +460,11 @@ class IliDataCache(IliCache):
         self.filter_models = models.split(";") if models else []
         self.type = type
         self.directories = (
-            self.base_configuration.metaconfig_directories
+            self.base_configuration.ilidata_directories
             if self.base_configuration
             else []
         )
+        self.datasources = datasources
 
     def process_model_directory(self, path):
         # download remote and local repositories
@@ -478,22 +489,23 @@ class IliDataCache(IliCache):
 
         model_code_regex = re.compile("http://codes.interlis.ch/model/(.*)")
         type_code_regex = re.compile("http://codes.interlis.ch/type/(.*)")
-        tool_code_regex = re.compile("http://codes.opengis.ch/(.*)")
+        datasource_code_regex = re.compile(
+            "http://codes.modelbaker.ch/preferredDataSource/(.*)"
+        )
 
         self.repositories[netloc] = list()
-        repo_metaconfigs = list()
+        repo_ilidatafiles = list()
         for repo in root.iter(
             "{http://www.interlis.ch/INTERLIS2.3}DatasetIdx16.DataIndex"
         ):
-            for metaconfig_metadata in repo.findall(
+            for ilidata_metadata in repo.findall(
                 "ili23:DatasetIdx16.DataIndex.DatasetMetadata", self.ns
             ):
-                categories_element = metaconfig_metadata.find(
-                    "ili23:categories", self.ns
-                )
+                categories_element = ilidata_metadata.find("ili23:categories", self.ns)
                 if categories_element is not None:
                     models = []
                     type = ""
+                    datasource = ""
                     for category in categories_element.findall(
                         "ili23:DatasetIdx16.Code_", self.ns
                     ):
@@ -507,15 +519,24 @@ class IliDataCache(IliCache):
                                 )
                             if type_code_regex.search(category_value):
                                 type = type_code_regex.search(category_value).group(1)
-                            if tool_code_regex.search(category_value):
-                                tool_code_regex.search(category_value).group(1)
+                            if datasource_code_regex.search(category_value):
+                                datasource = datasource_code_regex.search(
+                                    category_value
+                                ).group(1)
+
+                    # filter for models and types and if datasources are passed and found in the category, they need to be considered
                     if (
                         not any(model in models for model in self.filter_models)
                         or type != self.type
+                        or (
+                            self.datasources
+                            and datasource
+                            and datasource not in self.datasources
+                        )
                     ):
                         continue
                     title = list()
-                    for title_element in metaconfig_metadata.findall(
+                    for title_element in ilidata_metadata.findall(
                         "ili23:title", self.ns
                     ):
                         for multilingual_text_element in title_element.findall(
@@ -547,7 +568,7 @@ class IliDataCache(IliCache):
 
                     short_description = list()
 
-                    for short_description_element in metaconfig_metadata.findall(
+                    for short_description_element in ilidata_metadata.findall(
                         "ili23:shortDescription", self.ns
                     ):
                         for (
@@ -582,7 +603,7 @@ class IliDataCache(IliCache):
                                     )
 
                     model_link_names = []
-                    for basket_element in metaconfig_metadata.findall(
+                    for basket_element in ilidata_metadata.findall(
                         "ili23:baskets", self.ns
                     ):
                         for basket_metadata in basket_element.findall(
@@ -600,7 +621,7 @@ class IliDataCache(IliCache):
                                         )
                                     )
 
-                    for files_element in metaconfig_metadata.findall(
+                    for files_element in ilidata_metadata.findall(
                         "ili23:files", self.ns
                     ):
                         for data_file in files_element.findall(
@@ -616,45 +637,44 @@ class IliDataCache(IliCache):
                                         file.find("ili23:path", self.ns)
                                     )
 
-                                    metaconfig = dict()
-                                    metaconfig["id"] = self.get_element_text(
-                                        metaconfig_metadata.find("ili23:id", self.ns)
+                                    ilidatafile = dict()
+                                    ilidatafile["id"] = self.get_element_text(
+                                        ilidata_metadata.find("ili23:id", self.ns)
                                     )
 
-                                    metaconfig["version"] = self.get_element_text(
-                                        metaconfig_metadata.find(
-                                            "ili23:version", self.ns
-                                        )
+                                    ilidatafile["version"] = self.get_element_text(
+                                        ilidata_metadata.find("ili23:version", self.ns)
                                     )
-                                    metaconfig["owner"] = self.get_element_text(
-                                        metaconfig_metadata.find("ili23:owner", self.ns)
+                                    ilidatafile["owner"] = self.get_element_text(
+                                        ilidata_metadata.find("ili23:owner", self.ns)
                                     )
 
-                                    metaconfig["repository"] = netloc
-                                    metaconfig["url"] = url
-                                    metaconfig["models"] = models
-                                    metaconfig["relative_file_path"] = path
+                                    ilidatafile["repository"] = netloc
+                                    ilidatafile["url"] = url
+                                    ilidatafile["models"] = models
+                                    ilidatafile["datasource"] = datasource
+                                    ilidatafile["relative_file_path"] = path
                                     if title is not None:
-                                        metaconfig["title"] = title
+                                        ilidatafile["title"] = title
                                     else:
-                                        metaconfig["title"] = None
+                                        ilidatafile["title"] = None
                                     if short_description is not None:
-                                        metaconfig[
+                                        ilidatafile[
                                             "short_description"
                                         ] = short_description
                                     else:
-                                        metaconfig["short_description"] = None
+                                        ilidatafile["short_description"] = None
 
-                                    metaconfig["model_link_names"] = model_link_names
-                                    repo_metaconfigs.append(metaconfig)
+                                    ilidatafile["model_link_names"] = model_link_names
+                                    repo_ilidatafiles.append(ilidatafile)
 
         self.repositories[netloc] = sorted(
-            repo_metaconfigs,
+            repo_ilidatafiles,
             key=lambda m: m["version"] if m["version"] else "0",
             reverse=True,
         )
 
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def download_file(self, netloc, url, file, dataset_id=None):
         """
@@ -717,7 +737,6 @@ class IliDataItemModel(QStandardItemModel):
     def set_repositories(self, repositories):
         self.beginResetModel()
         self.clear()
-        row = 0
         ids = list()
 
         for repository in repositories.values():
@@ -766,11 +785,10 @@ class IliDataItemModel(QStandardItemModel):
 
                 ids.append(dataitem["id"])
                 self.appendRow(item)
-                row += 1
         self.endResetModel()
 
 
-class MetaConfigCompleterDelegate(QItemDelegate):
+class IliDataFileCompleterDelegate(QItemDelegate):
     """
     A item delegate for the autocompleter of metaconfig / topping dialogs.
     It shows the source repository (including model) next to the metaconfig id and the owner.
@@ -781,11 +799,11 @@ class MetaConfigCompleterDelegate(QItemDelegate):
         self.widget = QWidget()
         self.widget.setLayout(QGridLayout())
         self.widget.layout().setContentsMargins(2, 0, 0, 0)
-        self.metaconfig_label = QLabel()
-        self.metaconfig_label.setAttribute(Qt.WA_TranslucentBackground)
+        self.ilidatafile_label = QLabel()
+        self.ilidatafile_label.setAttribute(Qt.WA_TranslucentBackground)
         self.repository_label = QLabel()
         self.repository_label.setAlignment(Qt.AlignRight)
-        self.widget.layout().addWidget(self.metaconfig_label, 0, 0)
+        self.widget.layout().addWidget(self.ilidatafile_label, 0, 0)
         self.widget.layout().addWidget(self.repository_label, 0, 1)
 
     def paint(self, painter, option, index):
@@ -801,7 +819,7 @@ class MetaConfigCompleterDelegate(QItemDelegate):
                 repository=repository
             )
         )
-        self.metaconfig_label.setText(
+        self.ilidatafile_label.setText(
             "{display_text}".format(display_text=display_text)
         )
         self.widget.setMinimumSize(rect.size())
@@ -881,7 +899,7 @@ class IliToppingFileCache(IliDataCache):
             repo_files.append(toppingfile)
 
         self.repositories[netloc] = repo_files
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
     def on_download_status(self, dataset_id):
         # here we could add some more logic
@@ -961,7 +979,7 @@ class IliToppingFileCache(IliDataCache):
             reverse=True,
         )
 
-        self.model.set_repositories(self.repositories)
+        self.set_repositories_to_model()
 
 
 class IliToppingFileItemModel(QStandardItemModel):
@@ -981,7 +999,6 @@ class IliToppingFileItemModel(QStandardItemModel):
 
     def set_repositories(self, repositories):
         self.clear()
-        row = 0
         ids = list()
 
         for repository in repositories.values():
@@ -1014,4 +1031,3 @@ class IliToppingFileItemModel(QStandardItemModel):
 
                 ids.append(toppingfile["id"])
                 self.appendRow(item)
-                row += 1

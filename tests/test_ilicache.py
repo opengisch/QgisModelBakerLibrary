@@ -1,7 +1,7 @@
 import os
 import pathlib
 
-from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtCore import QEventLoop, Qt, QTimer
 from qgis.testing import unittest
 
 from modelbaker.iliwrapper.ili2dbconfig import BaseConfiguration
@@ -285,6 +285,58 @@ class IliCacheTest(unittest.TestCase):
 
     def test_ilidata_xml_parser_metaconfig_kbs(self):
         # find kbs metaconfig file according to the model(s) with direct ilidata.xml scan
+        # pass gpkg as datasource find the ones with gpkg-datasource-category and the ones without datasource-category
+        ilimetaconfigcache = IliDataCache(
+            configuration=None, models="KbS_LV95_V1_4", datasources=["gpkg"]
+        )
+        ilimetaconfigcache._process_informationfile(
+            os.path.join(
+                test_path, "testdata", "ilirepo", "usabilityhub", "ilidata.xml"
+            ),
+            "test_repo",
+            os.path.join(test_path, "testdata", "ilirepo", "usabilityhub"),
+        )
+        assert "test_repo" in ilimetaconfigcache.repositories.keys()
+        metaconfigs = {
+            e["id"]
+            for e in next(elem for elem in ilimetaconfigcache.repositories.values())
+        }
+        expected_metaconfigs = {
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg_localfiletest",  # gpkg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-wrong",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg",  # no preferred datasource
+        }
+        assert metaconfigs == expected_metaconfigs
+
+        # pass pg as datasource find the ones with pg-datasource-category and the ones without datasource-category
+        ilimetaconfigcache = IliDataCache(
+            configuration=None, models="KbS_LV95_V1_4", datasources=["pg"]
+        )
+        ilimetaconfigcache._process_informationfile(
+            os.path.join(
+                test_path, "testdata", "ilirepo", "usabilityhub", "ilidata.xml"
+            ),
+            "test_repo",
+            os.path.join(test_path, "testdata", "ilirepo", "usabilityhub"),
+        )
+        assert "test_repo" in ilimetaconfigcache.repositories.keys()
+        metaconfigs = {
+            e["id"]
+            for e in next(elem for elem in ilimetaconfigcache.repositories.values())
+        }
+        expected_metaconfigs = {
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_localfiletest",  # pg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_ili2db",  # pg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-wrong",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg",  # no preferred datasource
+        }
+        assert metaconfigs == expected_metaconfigs
+
+        # don't pass any datasource, means find all
         ilimetaconfigcache = IliDataCache(configuration=None, models="KbS_LV95_V1_4")
         ilimetaconfigcache._process_informationfile(
             os.path.join(
@@ -299,15 +351,17 @@ class IliCacheTest(unittest.TestCase):
             for e in next(elem for elem in ilimetaconfigcache.repositories.values())
         }
         expected_metaconfigs = {
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_localfiletest",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg_localfiletest",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_ili2db",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-wrong",
-            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg",
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-technical",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_localfiletest",  # pg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg_localfiletest",  # gpkg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_ili2db",  # pg as preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0-wrong",  # no preferred datasource
+            "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg",  # no preferred datasource
         }
         assert metaconfigs == expected_metaconfigs
+
+        self._sleep()
 
         ilimetaconfigcache_model = ilimetaconfigcache.model
 
@@ -387,6 +441,8 @@ class IliCacheTest(unittest.TestCase):
         }
         assert metaconfigs == expected_metaconfigs
 
+        self._sleep()
+
         ilimetaconfigcache_model = ilimetaconfigcache.model
 
         matches_on_id = ilimetaconfigcache_model.match(
@@ -458,6 +514,8 @@ class IliCacheTest(unittest.TestCase):
         }
         assert referencedata == expected_referencedata
 
+        self._sleep()
+
         linked_model_list = []
         for r in range(ilireferencedatacache.model.rowCount()):
             if ilireferencedatacache.model.item(r).data(
@@ -510,6 +568,8 @@ class IliCacheTest(unittest.TestCase):
             "ch.gl.ili.catalogue.GL_Forstreviere_V1_Kataloge",
         }
         assert referencedata == expected_referencedata
+
+        self._sleep()
 
         linked_model_list = []
         for r in range(ilireferencedatacache.model.rowCount()):
@@ -564,6 +624,8 @@ class IliCacheTest(unittest.TestCase):
         }
 
         assert files == expected_files
+
+        self._sleep()
 
         ilitoppingfilecache_model = ilitoppingfilecache.model
 
@@ -713,3 +775,11 @@ class IliCacheTest(unittest.TestCase):
         # not finding invalid metaconfig but the one with none as id
         expected_metaconfigs = {None, "ch.opengis.ili.config.valid"}
         assert metaconfigs == expected_metaconfigs
+
+    def _sleep(self, mili=2000):
+        loop = QEventLoop()
+        timer = QTimer()
+        timer.setSingleShot(True)
+        timer.timeout.connect(lambda: loop.quit())
+        timer.start(mili)
+        loop.exec()
