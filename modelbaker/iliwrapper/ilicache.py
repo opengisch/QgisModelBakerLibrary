@@ -389,7 +389,6 @@ class IliModelItemModel(QStandardItemModel):
                 item.setData(model["name"], int(Qt.DisplayRole))
                 item.setData(model["name"], int(Qt.EditRole))  # considered in completer
                 item.setData(model["repository"], int(IliModelItemModel.Roles.ILIREPO))
-                model["repository"]
                 item.setData(model["version"], int(IliModelItemModel.Roles.VERSION))
 
                 names.append(model["name"])
