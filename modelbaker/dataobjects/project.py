@@ -122,11 +122,11 @@ class Project(QObject):
             # set auto_transaction mode
             mode = Qgis.TransactionMode.Disabled
             if (
-                self.auto_transaction == "AutomaticGroups"
-                or self.auto_transaction == True
-            ):  # backwards compatibility
+                self.auto_transaction == Qgis.TransactionMode.AutomaticGroups.name
+                or self.auto_transaction is True
+            ):
                 mode = Qgis.TransactionMode.AutomaticGroups
-            elif self.auto_transaction == "BufferedGroups":
+            elif self.auto_transaction == Qgis.TransactionMode.BufferedGroups.name:
                 mode = Qgis.TransactionMode.BufferedGroups
             qgis_project.setTransactionMode(mode)
 
