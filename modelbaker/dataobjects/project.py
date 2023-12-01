@@ -373,10 +373,10 @@ class Project(QObject):
 
                 qgis_project.mapThemeCollection().insert(name, map_theme_record)
 
-        def store_project_variables(self, qgis_project):
-            QgsExpressionContextUtils.setProjectVariable(
-                qgis_project, "optimize_strategy", self.optimize_strategy.name
-            )
+    def store_project_variables(self, qgis_project):
+        QgsExpressionContextUtils.setProjectVariable(
+            qgis_project, "optimize_strategy", self.optimize_strategy.name
+        )
 
     def post_generate(self):
         for layer in self.layers:
