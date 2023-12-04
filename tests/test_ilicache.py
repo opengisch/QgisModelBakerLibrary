@@ -361,9 +361,9 @@ class IliCacheTest(unittest.TestCase):
         }
         assert metaconfigs == expected_metaconfigs
 
-        self._sleep()
-
         ilimetaconfigcache_model = ilimetaconfigcache.model
+
+        self._sleep(ilimetaconfigcache_model)
 
         matches_on_id = ilimetaconfigcache_model.match(
             ilimetaconfigcache_model.index(0, 0),
@@ -441,9 +441,9 @@ class IliCacheTest(unittest.TestCase):
         }
         assert metaconfigs == expected_metaconfigs
 
-        self._sleep()
-
         ilimetaconfigcache_model = ilimetaconfigcache.model
+
+        self._sleep(ilimetaconfigcache_model)
 
         matches_on_id = ilimetaconfigcache_model.match(
             ilimetaconfigcache_model.index(0, 0),
@@ -514,7 +514,7 @@ class IliCacheTest(unittest.TestCase):
         }
         assert referencedata == expected_referencedata
 
-        self._sleep()
+        self._sleep(ilireferencedatacache.model)
 
         linked_model_list = []
         for r in range(ilireferencedatacache.model.rowCount()):
@@ -569,7 +569,7 @@ class IliCacheTest(unittest.TestCase):
         }
         assert referencedata == expected_referencedata
 
-        self._sleep()
+        self._sleep(ilireferencedatacache.model)
 
         linked_model_list = []
         for r in range(ilireferencedatacache.model.rowCount()):
@@ -625,9 +625,9 @@ class IliCacheTest(unittest.TestCase):
 
         assert files == expected_files
 
-        self._sleep()
-
         ilitoppingfilecache_model = ilitoppingfilecache.model
+
+        self._sleep(ilitoppingfilecache_model)
 
         matches_on_id = ilitoppingfilecache_model.match(
             ilitoppingfilecache_model.index(0, 0),
@@ -776,10 +776,12 @@ class IliCacheTest(unittest.TestCase):
         expected_metaconfigs = {None, "ch.opengis.ili.config.valid"}
         assert metaconfigs == expected_metaconfigs
 
-    def _sleep(self, mili=2000):
+    def _sleep(self, model=None, mili=10000):
         loop = QEventLoop()
         timer = QTimer()
         timer.setSingleShot(True)
         timer.timeout.connect(lambda: loop.quit())
         timer.start(mili)
+        if model:
+            model.modelReset.connect(lambda: loop.quit())
         loop.exec()
