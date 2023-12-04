@@ -3159,7 +3159,7 @@ class TestProjectGen(unittest.TestCase):
         )
         ilimetaconfigcache.refresh()
 
-        self._sleep()
+        self._sleep(ilimetaconfigcache.model)
 
         matches_on_id = ilimetaconfigcache.model.match(
             ilimetaconfigcache.model.index(0, 0),
@@ -3552,7 +3552,7 @@ class TestProjectGen(unittest.TestCase):
         )
         ilimetaconfigcache.refresh()
 
-        self._sleep()
+        self._sleep(ilimetaconfigcache.model)
 
         matches_on_id = ilimetaconfigcache.model.match(
             ilimetaconfigcache.model.index(0, 0),
@@ -4271,15 +4271,17 @@ class TestProjectGen(unittest.TestCase):
             loop.exec()
 
         # since the local download is quicker than the delay in the model refresh, we make one here as well
-        self._sleep(3000)
+        self._sleep(mili=3000)
 
         return topping_file_cache.model
 
-    def _sleep(self, mili=2000):
+    def _sleep(self, model=None, mili=10000):
         loop = QEventLoop()
         timer = QTimer()
         timer.setSingleShot(True)
         timer.timeout.connect(lambda: loop.quit())
+        if model:
+            model.modelReset.connect(lambda: loop.quit())
         timer.start(mili)
         loop.exec()
 
