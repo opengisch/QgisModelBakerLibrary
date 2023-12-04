@@ -18,7 +18,7 @@
 """
 
 
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis, QgsExpressionContextUtils, QgsProject
 
 from ..libs.toppingmaker import ExportSettings, ProjectTopping
 from .ilidata import IliData
