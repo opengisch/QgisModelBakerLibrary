@@ -283,6 +283,8 @@ class Project(QObject):
 
         self.load_layouts(qgis_project)
 
+        self.store_project_variables(qgis_project)
+
         if path:
             qgis_project.write(path)
 
@@ -384,6 +386,11 @@ class Project(QObject):
                             map_theme_record.addLayerRecord(map_theme_layer_record)
 
                 qgis_project.mapThemeCollection().insert(name, map_theme_record)
+
+    def store_project_variables(self, qgis_project):
+        QgsExpressionContextUtils.setProjectVariable(
+            qgis_project, "optimize_strategy", self.optimize_strategy.name
+        )
 
     def post_generate(self):
         for layer in self.layers:

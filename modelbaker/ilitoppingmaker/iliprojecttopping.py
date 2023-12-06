@@ -18,7 +18,7 @@
 """
 
 
-from qgis.core import Qgis, QgsProject
+from qgis.core import Qgis, QgsExpressionContextUtils, QgsProject
 
 from ..libs.toppingmaker import ExportSettings, ProjectTopping
 from .ilidata import IliData
@@ -83,6 +83,9 @@ class IliProjectTopping(ProjectTopping):
             return False
         # Creates and sets the project_topping considering the passed QgsProject and the existing ExportSettings.
         self.parse_project(project, self.export_settings)
+
+        self.append_iliproperties(project)
+
         # Generate topping files (layertree and depending files like style etc) considering existing ProjectTopping and Target.
         projecttopping_id = self.generate_files(self.target)
 
@@ -105,3 +108,12 @@ class IliProjectTopping(ProjectTopping):
             )
 
         return ilidata_path
+
+    def append_iliproperties(self, project):
+        # append ilispecific properties like the optimize_strategy to the properties object
+        optimize_strategy = QgsExpressionContextUtils.projectScope(project).variable(
+            "optimize_strategy"
+        )
+
+        if optimize_strategy:
+            self.properties["ili_optimize_strategy"] = optimize_strategy
