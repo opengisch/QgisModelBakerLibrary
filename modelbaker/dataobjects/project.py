@@ -115,7 +115,21 @@ class Project(QObject):
     def create(
         self, path: str, qgis_project: QgsProject, group: QgsLayerTreeGroup = None
     ):
-        qgis_project.setAutoTransaction(self.auto_transaction)
+        if Qgis.QGIS_VERSION_INT < 32600:
+            # set auto_transaction as boolean
+            qgis_project.setAutoTransaction(self.auto_transaction)
+        else:
+            # set auto_transaction mode
+            mode = Qgis.TransactionMode.Disabled
+            if (
+                self.auto_transaction == Qgis.TransactionMode.AutomaticGroups.name
+                or self.auto_transaction is True
+            ):
+                mode = Qgis.TransactionMode.AutomaticGroups
+            elif self.auto_transaction == Qgis.TransactionMode.BufferedGroups.name:
+                mode = Qgis.TransactionMode.BufferedGroups
+            qgis_project.setTransactionMode(mode)
+
         qgis_project.setEvaluateDefaultValues(self.evaluate_default_values)
         qgis_layers = list()
         for layer in self.layers:
