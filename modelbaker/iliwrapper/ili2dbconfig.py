@@ -380,6 +380,7 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
         super().__init__()
         self.xtffile = ""
         self.dataset = ""
+        self.delete_data = False
         self.with_importtid = False
         self.with_importbid = False
 
@@ -387,7 +388,10 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
         args = list()
 
         if with_action:
-            self.append_args(args, ["--update"])
+            if self.delete_data:
+                self.append_args(args, ["--replace"])
+            else:
+                self.append_args(args, ["--update"])
 
         self.append_args(args, extra_args)
 
