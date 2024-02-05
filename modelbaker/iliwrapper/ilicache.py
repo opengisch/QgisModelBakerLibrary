@@ -115,7 +115,7 @@ class IliCache(QObject):
         Downloads the informationfile (default: ilimodels.xml) and ilisite.xml files from the provided url
         and updates the local cache.
         """
-        netloc = urllib.parse.urlsplit(url)[1] if not os.path.isdir(url) else url
+        netloc = "/".join([urllib.parse.urlsplit(url)[1], urllib.parse.urlsplit(url)[2]]) if not os.path.isdir(url) else url
 
         information_file_url = self.file_url(url, self.information_file)
         ilisite_url = self.file_url(url, "ilisite.xml")
