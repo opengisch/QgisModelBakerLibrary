@@ -4259,7 +4259,9 @@ class TestProjectGen(unittest.TestCase):
 
         # we wait for the download or we timeout after 30 seconds and we apply what we have
         loop = QEventLoop()
-        topping_file_cache.download_finished.connect(lambda: loop.quit())
+        topping_file_cache.download_finished_and_model_fresh.connect(
+            lambda: loop.quit()
+        )
         timer = QTimer()
         timer.setSingleShot(True)
         timer.timeout.connect(lambda: loop.quit())
