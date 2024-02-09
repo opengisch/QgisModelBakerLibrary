@@ -249,7 +249,7 @@ def get_java_path(base_configuration):
                 output, err = p.communicate()
                 version_output = err.decode("utf-8")
                 java_version = java_version_re.match(version_output)
-                if is_version_valid(
+                if java_version and is_version_valid(
                     java_version.group(1),
                     "1.8.0",
                     exact_required_version=False,
