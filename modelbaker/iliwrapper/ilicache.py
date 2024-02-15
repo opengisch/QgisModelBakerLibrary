@@ -836,7 +836,7 @@ class IliDataFileCompleterDelegate(QItemDelegate):
 
 class IliToppingFileCache(IliDataCache):
 
-    download_finished = pyqtSignal()
+    download_finished_and_model_fresh = pyqtSignal()
     """
     meta_netloc is the repository (netloc) of the metaconfiguration file used for file paths in the file_ids
     file_ids can contain ilidata: or file: information
@@ -905,8 +905,9 @@ class IliToppingFileCache(IliDataCache):
         # here we could add some more logic
         if dataset_id is not None:
             self.downloaded_files.append(dataset_id)
+        # ensure all the files are downloaded and contained in the model
         if len(self.downloaded_files) == len(self.file_ids) == self.model.rowCount():
-            self.download_finished.emit()
+            self.download_finished_and_model_fresh.emit()
 
     def _process_informationfile(self, file, netloc, url):
         """
