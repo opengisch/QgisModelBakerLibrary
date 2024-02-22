@@ -824,10 +824,10 @@ class GPKGConnector(DBConnector):
                     {relevance}
                     FROM T_ILI2DB_CLASSNAME as CN
                     LEFT JOIN T_ILI2DB_TABLE_PROP as TP
-                    ON CN.sqlname = TP.tablename and TP.setting != 'ENUM'
+                    ON CN.sqlname = TP.tablename
                     LEFT JOIN T_ILI2DB_META_ATTRS as MA
                     ON substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) = MA.ilielement and MA.attr_name = 'ili2db.ili.bidDomain'
-					WHERE topic != ''
+					WHERE topic != '' and ( TP.setting != 'ENUM' or TP.setting IS NULL )
                 """.format(
                     # it's relevant, when it's not extended
                     # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not.

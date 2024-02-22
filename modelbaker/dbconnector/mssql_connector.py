@@ -952,10 +952,10 @@ WHERE TABLE_SCHEMA='{schema}'
                     ma.attr_value as bid_domain
                     FROM {schema}.t_ili2db_classname as cn
                     LEFT JOIN {schema}.t_ili2db_table_prop as tp
-                    ON cn.sqlname = tp.tablename and tp.setting != 'ENUM'
+                    ON cn.sqlname = tp.tablename
                     LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
                     ON CONCAT(PARSENAME(cn.iliname,3),'.',PARSENAME(cn.iliname,2)) = ma.ilielement AND ma.attr_name = 'ili2db.ili.bidDomain'
-					WHERE PARSENAME(cn.iliname,3) != ''
+					WHERE PARSENAME(cn.iliname,3) != '' and ( tp.setting != 'ENUM' OR tp.setting IS NULL )
                 """.format(
                     schema=self.schema
                 )

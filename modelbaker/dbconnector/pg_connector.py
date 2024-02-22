@@ -979,38 +979,10 @@ class PGConnector(DBConnector):
                     {relevance}
                     FROM {schema}.t_ili2db_classname as cn
                     LEFT JOIN {schema}.t_ili2db_table_prop as tp
-                    ON cn.sqlname = tp.tablename and tp.setting != 'ENUM'
-                    LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
-                    ON CONCAT((string_to_array(cn.iliname, '.'))[1],'.',(string_to_array(cn.iliname, '.'))[2]) = ma.ilielement and ma.attr_name = 'ili2db.ili.bidDomain'
-					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2
-                """.format(
-                    schema=self.schema,
-                    relevance="""
-                        CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
-                        SELECT substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) as childTopic , substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) as baseTopic
-                        FROM {schema}.T_ILI2DB_INHERITANCE
-                        WHERE substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) = substring( CN.IliName from 1 for position('.' in substring( CN.IliName from position('.' in CN.IliName)+1))+position('.' in CN.IliName)-1) -- model.topic
-                        UNION
-                        SELECT substring( inheritance.thisClass from 1 for position('.' in substring( inheritance.thisClass from position('.' in inheritance.thisClass)+1))+position('.' in inheritance.thisClass)-1) as childTopic , substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) as baseTopic FROM children
-                        JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance ON substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) = children.childTopic
-                        )SELECT count(childTopic) FROM children)>0 THEN FALSE ELSE TRUE END AS relevance
-                    """.format(
-                        schema=self.schema
-                    ),
-                )
-            )
-            print(
-                """
-                    SELECT DISTINCT (string_to_array(cn.iliname, '.'))[1] as model,
-                    (string_to_array(cn.iliname, '.'))[2] as topic,
-                    ma.attr_value as bid_domain,
-                    {relevance}
-                    FROM {schema}.t_ili2db_classname as cn
-                    JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
                     LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
                     ON CONCAT((string_to_array(cn.iliname, '.'))[1],'.',(string_to_array(cn.iliname, '.'))[2]) = ma.ilielement and ma.attr_name = 'ili2db.ili.bidDomain'
-					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and tp.setting != 'ENUM'
+					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and ( tp.setting != 'ENUM' or  tp.setting IS NULL )
                 """.format(
                     schema=self.schema,
                     relevance="""
