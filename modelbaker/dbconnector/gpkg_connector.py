@@ -823,11 +823,11 @@ class GPKGConnector(DBConnector):
                     MA.attr_value as bid_domain,
                     {relevance}
                     FROM T_ILI2DB_CLASSNAME as CN
-                    JOIN T_ILI2DB_TABLE_PROP as TP
+                    LEFT JOIN T_ILI2DB_TABLE_PROP as TP
                     ON CN.sqlname = TP.tablename
                     LEFT JOIN T_ILI2DB_META_ATTRS as MA
                     ON substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) = MA.ilielement and MA.attr_name = 'ili2db.ili.bidDomain'
-					WHERE topic != '' and TP.setting != 'ENUM'
+					WHERE topic != '' and ( TP.setting != 'ENUM' or TP.setting IS NULL )
                 """.format(
                     # it's relevant, when it's not extended
                     # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not.
