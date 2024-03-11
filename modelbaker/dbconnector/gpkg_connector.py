@@ -829,13 +829,13 @@ class GPKGConnector(DBConnector):
                     ON substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) = MA.ilielement and MA.attr_name = 'ili2db.ili.bidDomain'
 					WHERE topic != '' and ( TP.setting != 'ENUM' or TP.setting IS NULL )
                 """.format(
-                    # it's relevant, when it's not extended
-                    # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not.
+                    # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not (except if it's extended by itself)
                     relevance="""
                         CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
                         SELECT substr( thisClass, 0, instr(substr( thisClass, instr(thisClass, '.')+1), '.')+instr(thisClass, '.')) as childTopic , substr( baseClass, 0, instr(substr( baseClass, instr(baseClass, '.')+1), '.')+instr(baseClass, '.')) as baseTopic
                         FROM T_ILI2DB_INHERITANCE
                         WHERE baseTopic = substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) -- model.topic
+                        AND baseTopic != childTopic
                         UNION
                         SELECT substr( inheritance.thisClass, 0, instr(substr( inheritance.thisClass, instr(inheritance.thisClass, '.')+1), '.')+instr(inheritance.thisClass, '.')) as childTopic , substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) as baseTopic FROM children
                         JOIN T_ILI2DB_INHERITANCE as inheritance ON substr( inheritance.baseClass, 0, instr(substr( inheritance.baseClass, instr(baseClass, '.')+1), '.')+instr(inheritance.baseClass, '.')) = children.childTopic

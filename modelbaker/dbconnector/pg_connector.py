@@ -985,11 +985,13 @@ class PGConnector(DBConnector):
 					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and ( tp.setting != 'ENUM' or  tp.setting IS NULL )
                 """.format(
                     schema=self.schema,
+                    # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not (except if it's extended by itself)
                     relevance="""
                         CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
                         SELECT substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) as childTopic , substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) as baseTopic
                         FROM {schema}.T_ILI2DB_INHERITANCE
                         WHERE substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) = substring( CN.IliName from 1 for position('.' in substring( CN.IliName from position('.' in CN.IliName)+1))+position('.' in CN.IliName)-1) -- model.topic
+                        AND substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) != substring( CN.IliName from 1 for position('.' in substring( CN.IliName from position('.' in CN.IliName)+1))+position('.' in CN.IliName)-1) -- model.topic
                         UNION
                         SELECT substring( inheritance.thisClass from 1 for position('.' in substring( inheritance.thisClass from position('.' in inheritance.thisClass)+1))+position('.' in inheritance.thisClass)-1) as childTopic , substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) as baseTopic FROM children
                         JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance ON substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) = children.childTopic
@@ -1000,6 +1002,7 @@ class PGConnector(DBConnector):
                 )
             )
             return cur.fetchall()
+
         return {}
 
     def create_basket(self, dataset_tid, topic, tilitid_value=None):
