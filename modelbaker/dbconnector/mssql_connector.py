@@ -537,7 +537,10 @@ class MssqlConnector(DBConnector):
                 if metaattrs_exists:
                     stmt += ln + "LEFT JOIN {schema}.t_ili2db_meta_attrs form_order"
                     stmt += ln + "    ON full_name.iliname=form_order.ilielement AND"
-                    stmt += ln + "    form_order.attr_name='form_order'"
+                    stmt += ln + "    form_order.attr_name IN ("
+                    stmt += ln + "        'form_order',"  # obsolete
+                    stmt += ln + "        'qgis.modelbaker.form_order',"  # obsolete
+                    stmt += ln + "        'qgis.modelbaker.formOrder')"
                     stmt += ln + "LEFT JOIN {schema}.t_ili2db_meta_attrs attr_mapping"
                     stmt += ln + "    ON full_name.iliname=attr_mapping.ilielement AND"
                     stmt += ln + "    attr_mapping.attr_name='ili2db.mapping'"
