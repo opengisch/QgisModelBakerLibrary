@@ -490,7 +490,10 @@ class PGConnector(DBConnector):
                     attr_order_field = "COALESCE(to_number(form_order.attr_value, '999'), 999) as attr_order,"
                     attr_order_join = """LEFT JOIN {schema}.{t_ili2db_meta_attrs} form_order
                                                             ON full_name.iliname=form_order.ilielement AND
-                                                            form_order.attr_name='form_order'
+                                                            form_order.attr_name IN (
+                                                                'form_order', --obsolete
+                                                                'qgis.modelbaker.form_order', --obsolete
+                                                                'qgis.modelbaker.formOrder')
                                                             """.format(
                         schema=self.schema, t_ili2db_meta_attrs=PG_METAATTRS_TABLE
                     )

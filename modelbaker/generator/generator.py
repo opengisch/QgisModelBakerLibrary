@@ -234,7 +234,7 @@ class Generator(QObject):
                 meta_attrs = self.get_meta_attrs(record["ili_name"])
                 for attr_record in meta_attrs:
                     if attr_record["attr_name"] in [
-                        "dispExpression",
+                        "dispExpression",  # obsolete
                         "qgis.modelbaker.dispExpression",
                     ]:
                         display_expression = attr_record["attr_value"]

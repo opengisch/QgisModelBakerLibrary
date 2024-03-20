@@ -421,7 +421,11 @@ class GPKGConnector(DBConnector):
                     if record["fully_qualified_name"] != meta_attr["ilielement"]:
                         continue
 
-                    if meta_attr["attr_name"] == "form_order":
+                    if meta_attr["attr_name"] in [
+                        "form_order",  # obsolete
+                        "qgis.modelbaker.form_order",  # obsolete
+                        "qgis.modelbaker.formOrder",
+                    ]:
                         record["attr_order"] = meta_attr["attr_value"]
                         attr_order_found = True
 
