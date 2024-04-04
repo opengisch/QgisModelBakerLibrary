@@ -252,7 +252,6 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.append_args(args, extra_args, force_append=True)
 
         self.append_args(args, ["--coalesceCatalogueRef"], True)
-        self.append_args(args, ["--createEnumTabs"], True)
 
         if self.disable_validation:
             self.append_args(args, ["--sqlEnableNull"], force_append=True)
@@ -276,10 +275,11 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
             self.append_args(args, ["--createTypeConstraint"], True)
             self.append_args(args, ["--createEnumTabsWithId"], True)
             self.append_args(args, ["--createTidCol"], True)
-
-        # version 3 backwards compatibility (not needed in newer versions)
-        if self.create_import_tid:
-            self.append_args(args, ["--importTid"])
+        else:
+            # version 3 backwards compatibility (not needed in newer versions)
+            self.append_args(args, ["--createEnumTabs"], True)
+            if self.create_import_tid:
+                self.append_args(args, ["--importTid"])
 
         if self.inheritance == "smart1":
             self.append_args(args, ["--smart1Inheritance"])
