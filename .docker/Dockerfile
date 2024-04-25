@@ -8,6 +8,7 @@ RUN apt-get update && \
 
 # MSSQL: client side
 RUN apt-get update
+RUN apt-get install -y curl locales
 RUN apt-get install -y unixodbc unixodbc-dev odbcinst odbcinst1debian2 libodbc1 libqt5sql5-odbc
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -

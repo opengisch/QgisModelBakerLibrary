@@ -1,12 +1,12 @@
 version: '3'
 services:
-  postgres11:
-    image: kartoza/postgis:11.0-2.5
+  postgres13:
+    image: kartoza/postgis:13-3.1
     environment:
       - ALLOW_IP_RANGE="172.0.0.0/8"
 
-  postgres12:
-    image: kartoza/postgis:12.1
+  postgres15:
+    image: kartoza/postgis:15-3.4
     environment:
       - ALLOW_IP_RANGE="172.0.0.0/8"
 
@@ -28,6 +28,6 @@ services:
     volumes:
       - ${GITHUB_WORKSPACE}:/usr/src
     links:
-      - postgres11
-      - postgres12
+      - postgres13
+      - postgres15
       - mssql

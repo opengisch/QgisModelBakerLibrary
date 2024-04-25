@@ -20,8 +20,8 @@ set -e
 
 /usr/src/tests/testdata/mssql/setup-mssql.sh
 
-# Default to postgres12 unless another host has been defined (i.e. postgres11 from travis test matrix / docker-compose)
-export PGHOST=${PGHOST-postgres12}
+# Default to postgres15 unless another host has been defined (i.e. postgres13 from docker-compose)
+export PGHOST=${PGHOST-postgres13}
 
 # rationale: Wait for postgres container to become available
 echo "Wait a moment while loading the database."
