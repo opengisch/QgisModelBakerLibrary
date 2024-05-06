@@ -1,14 +1,20 @@
 version: '3'
 services:
   postgres13:
-    image: kartoza/postgis:13-3.1
+    image: postgis/postgis:13-3.4-alpine
     environment:
       - ALLOW_IP_RANGE="172.0.0.0/8"
+      - "POSTGRES_PASSWORD=docker"
+      - "POSTGRES_USER=docker"
+      - "POSTGRES_DB=gis"
 
   postgres15:
-    image: kartoza/postgis:15-3.4
+    image: postgis/postgis:15-3.4-alpine
     environment:
       - ALLOW_IP_RANGE="172.0.0.0/8"
+      - "POSTGRES_PASSWORD=docker"
+      - "POSTGRES_USER=docker"
+      - "POSTGRES_DB=gis"
 
   mssql:
     image: mcr.microsoft.com/mssql/server:2019-CU11-ubuntu-20.04
