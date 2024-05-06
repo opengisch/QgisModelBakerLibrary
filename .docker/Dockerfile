@@ -9,7 +9,7 @@ RUN apt-get update && \
 # MSSQL: client side
 RUN apt-get update
 RUN apt-get install -y curl locales postgresql-client
-RUN apt-get install -y unixodbc unixodbc-dev odbcinst odbcinst1debian2 libodbc1 libqt5sql5-odbc
+RUN apt-get install -y unixodbc unixodbc-dev odbcinst unixodbc-common libodbcinst2 libodbccr2 libodbc2 libqt5sql5-odbc
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
 RUN curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc/apt/sources.list.d/msprod.list
