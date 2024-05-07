@@ -2,7 +2,7 @@ ARG QGIS_TEST_VERSION=latest
 FROM  qgis/qgis:${QGIS_TEST_VERSION}
 
 # Useful only in 3.22 and 3.28: drop when not need anymore
-RUN apt-get update && apt-get -y install python3-pip python-venv
+RUN apt-get update && apt-get -y install python3-pip python3-venv
 
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
