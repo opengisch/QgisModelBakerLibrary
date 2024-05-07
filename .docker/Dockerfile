@@ -3,11 +3,13 @@ FROM  qgis/qgis:${QGIS_TEST_VERSION}
 
 RUN apt-get update && \
     apt-get -y install openjdk-8-jre \
-    python3-pip \
     && rm -rf /var/lib/apt/lists/*
 
+ENV VIRTUAL_ENV=/opt/venv
+RUN python3 -m venv $VIRTUAL_ENV
+ENV PATH="$VIRTUAL_ENV/bin:$PATH"
+
 # MSSQL: client side
-RUN apt-get update
 RUN apt-get install -y curl locales postgresql-client
 RUN apt-get install -y unixodbc unixodbc-dev odbcinst unixodbc-common libodbcinst2 libodbccr2 libodbc2 libqt5sql5-odbc
 
