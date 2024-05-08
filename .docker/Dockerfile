@@ -3,7 +3,6 @@ FROM  qgis/qgis:${QGIS_TEST_VERSION}
 
 # Useful only in 3.22 and 3.28: drop when not need anymore
 RUN apt-get update && apt-get -y install python3-pip python3-venv python3-pytest
-
 ENV VIRTUAL_ENV=/opt/venv
 RUN python3 -m venv $VIRTUAL_ENV
 ENV PATH="$VIRTUAL_ENV/bin:$PATH"
@@ -14,7 +13,7 @@ RUN apt-get update && \
 
 # MSSQL: client side
 RUN apt-get update
-RUN apt-get install -y curl locales postgresql-client
+RUN apt-get install -y curl locales postgresql-client libpq-dev
 RUN apt-get install -y unixodbc unixodbc-dev odbcinst unixodbc-common libodbcinst2 libodbccr2 libodbc2 libqt5sql5-odbc
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add -
@@ -22,6 +21,7 @@ RUN curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list | tee /etc
 RUN apt-get update
 RUN ACCEPT_EULA=Y apt-get install -y msodbcsql17 mssql-tools
 
+RUN pip3 install wheel
 COPY ./requirements.txt /tmp/
 RUN pip3 install -r /tmp/requirements.txt
 
