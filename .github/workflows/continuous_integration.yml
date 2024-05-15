@@ -29,10 +29,10 @@ jobs:
       - name: Package PyPI Packages
         run: |
           sudo ./scripts/package_pip_packages.sh
-      - name: Test on QGIS
-        run: docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
-      - name: Test on QGIS with PG
+      - name: Test on QGIS with PG 13
         run: docker-compose -f .docker/docker-compose.gh.yml run -e "PGHOST=postgres13" qgis /usr/src/.docker/run-docker-tests.sh
+      - name: Test on QGIS with PG 15
+        run: docker-compose -f .docker/docker-compose.gh.yml run -e "PGHOST=postgres15" qgis /usr/src/.docker/run-docker-tests.sh
 
   release:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI
