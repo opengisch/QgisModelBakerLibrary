@@ -336,10 +336,13 @@ class Generator(QObject):
                         )
 
                 if column_name in value_map_info:
+                    irrelevant_tables = self.get_irrelevant_tables()
                     field.widget = "ValueMap"
-                    field.widget_config["map"] = [
-                        {val: val} for val in value_map_info[column_name]
-                    ]
+                    field.widget_config["map"] = []
+                    for val in value_map_info[column_name]:
+                        if val not in irrelevant_tables.values():
+                            field.widget_config["map"].append({val: val})
+                            field.default_value_expression = f"'{val}'"
 
                 if "attr_mapping" in fielddef and fielddef["attr_mapping"] == "ARRAY":
                     field.widget = "List"
@@ -890,3 +893,6 @@ class Generator(QObject):
 
     def get_basket_handling(self):
         return self._db_connector.get_basket_handling()
+
+    def get_irrelevant_tables(self):
+        return self._db_connector.get_irrelevant_tables()

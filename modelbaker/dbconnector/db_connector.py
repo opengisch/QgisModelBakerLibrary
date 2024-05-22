@@ -319,6 +319,12 @@ class DBConnector(QObject):
         """
         return {}
 
+    def get_irrelevant_tables(self):
+        """
+        Returns all irrelevant tables
+        """
+        return {}
+
     def create_basket(self, dataset_tid, topic, tilitid_value=None):
         """
         Returns the state and the errormessage
