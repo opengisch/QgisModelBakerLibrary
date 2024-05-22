@@ -16,8 +16,9 @@ jobs:
   test:
     runs-on: ubuntu-22.04
     strategy:
+      fail-fast: false  # keep for now, since 3.22 and 3.28 have different bases than 3.34+
       matrix:
-        qgis_version: [release-3_22, release-3_28, latest]
+        qgis_version: [release-3_22, release-3_28, 3.34, latest]
     env:
       QGIS_TEST_VERSION: ${{ matrix.qgis_version }}
     steps:
@@ -28,10 +29,10 @@ jobs:
       - name: Package PyPI Packages
         run: |
           sudo ./scripts/package_pip_packages.sh
-      - name: Test on QGIS
-        run: docker-compose -f .docker/docker-compose.gh.yml run qgis /usr/src/.docker/run-docker-tests.sh
-      - name: Test on QGIS with PG
-        run: docker-compose -f .docker/docker-compose.gh.yml run -e "PGHOST=postgres11" qgis /usr/src/.docker/run-docker-tests.sh
+      - name: Test on QGIS with PG 13
+        run: docker-compose -f .docker/docker-compose.gh.yml run -e "PGHOST=postgres13" qgis /usr/src/.docker/run-docker-tests.sh
+      - name: Test on QGIS with PG 15
+        run: docker-compose -f .docker/docker-compose.gh.yml run -e "PGHOST=postgres15" qgis /usr/src/.docker/run-docker-tests.sh
 
   release:
     name: Build and publish Python 🐍 distributions 📦 to PyPI and TestPyPI

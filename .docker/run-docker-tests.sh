@@ -20,8 +20,8 @@ set -e
 
 /usr/src/tests/testdata/mssql/setup-mssql.sh
 
-# Default to postgres12 unless another host has been defined (i.e. postgres11 from travis test matrix / docker-compose)
-export PGHOST=${PGHOST-postgres12}
+# Default to postgres15 unless another host has been defined (i.e. postgres13 from github ci)
+export PGHOST=${PGHOST-postgres15}
 
 # rationale: Wait for postgres container to become available
 echo "Wait a moment while loading the database."
@@ -34,5 +34,5 @@ echo ""
 
 pushd /usr/src
 DEFAULT_PARAMS='-v'
-xvfb-run pytest ${@:-`echo $DEFAULT_PARAMS`} $1 $2
+xvfb-run python -m pytest ${@:-`echo $DEFAULT_PARAMS`} $1 $2
 popd
