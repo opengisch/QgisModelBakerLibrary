@@ -470,6 +470,28 @@ class GPKGConnector(DBConnector):
         cursor.close()
         return constraint_mapping
 
+    def get_value_map_info(self, table_name):
+        if self.metadata_exists():
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                SELECT *
+                FROM t_ili2db_column_prop
+                WHERE tablename = '{}'
+                AND tag = 'ch.ehi.ili2db.types'
+                """.format(
+                    table_name
+                )
+            )
+            types_entries = cursor.fetchall()
+
+            types_mapping = dict()
+            for types_entry in types_entries:
+                values = eval(types_entry["setting"])
+                types_mapping[types_entry["columnname"]] = values
+            return types_mapping
+        return {}
+
     def get_relations_info(self, filter_layer_list=[]):
         # We need to get the PK for each table, so first get tables_info
         # and then build something more searchable
