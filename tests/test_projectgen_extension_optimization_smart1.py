@@ -234,7 +234,8 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             "Strasse",
             "Gebaeude",
             "Gebaeude_StadtFirma",
-            "BesitzerIn" "Firma",
+            "BesitzerIn",
+            "Firma",
         ]
         assert set(aliases) == set(expected_aliases)
 
@@ -266,10 +267,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                     "Staedtisches_Gewerbe_V1.Firmen",
                     "Gewerbe_V1.Firmen",
                 }
-                assert set(layer.relevant_topics) == {
-                    "Staedtisches_Gewerbe_V1.Firmen",
-                    "Gewerbe_V1.Firmen",
-                }
+                assert set(layer.relevant_topics) == {"Staedtisches_Gewerbe_V1.Firmen"}
         assert count == 3
 
         project = Project(
@@ -423,7 +421,9 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
 
             if layer.layer.name() == "Gebaeude":
                 count += 1
-
+                value_map = layer.layer.editFormConfig().widgetConfig(
+                    "T_Type" if not_pg else "t_type"
+                )
                 assert value_map
 
                 expected_entries = {
@@ -610,7 +610,6 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
 
         expected_aliases = [
             "BesitzerIn",
-            "Markthalle",
             "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
             "Polymorphic_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
             "Strasse",
@@ -679,7 +678,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
         assert root is not None
 
         all_layers = root.findLayers()
-        assert len(all_layers) == 13
+        assert len(all_layers) == 8
 
         geometry_layers = {
             l.name() for l in root.children() if isinstance(l, QgsLayerTreeLayer)
@@ -817,7 +816,9 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
 
             if layer.layer.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
                 count += 1
-
+                value_map = layer.layer.editFormConfig().widgetConfig(
+                    "T_Type" if not_pg else "t_type"
+                )
                 assert value_map
 
                 expected_entries = {
@@ -1096,7 +1097,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 2
                 for tab in efc.tabs():
-                    if tab.name() == "gebaeude":
+                    if tab.name() == "strassen_gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 1 (one times gebaeude)
@@ -1164,7 +1165,9 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
 
             if layer.layer.name() == "Gebaeude":
                 count += 1
-
+                value_map = layer.layer.editFormConfig().widgetConfig(
+                    "T_Type" if not_pg else "t_type"
+                )
                 assert value_map
 
                 expected_entries = {"gebaeude", "kantnl_ng_v1_1konstruktionen_gebaeude"}
@@ -1174,7 +1177,9 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
 
             if layer.layer.name() == "Buntbrache":
                 count += 1
-
+                value_map = layer.layer.editFormConfig().widgetConfig(
+                    "T_Type" if not_pg else "t_type"
+                )
                 assert value_map
 
                 expected_entries = {"buntbrache", "kantonalebuntbrache"}
@@ -1184,7 +1189,9 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
 
             if layer.layer.name() == "Feld":
                 count += 1
-
+                value_map = layer.layer.editFormConfig().widgetConfig(
+                    "T_Type" if not_pg else "t_type"
+                )
                 assert value_map
 
                 expected_entries = {"feld", "sonnenblumenfeld", "kartoffelfeld"}

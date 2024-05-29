@@ -610,7 +610,7 @@ class MssqlConnector(DBConnector):
                     self.schema, table_name
                 )
             )
-            types_entries = cur.fetchall()
+            types_entries = self._get_dict_result(cur)
 
             types_mapping = dict()
             for types_entry in types_entries:
