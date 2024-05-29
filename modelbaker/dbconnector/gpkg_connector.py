@@ -470,7 +470,7 @@ class GPKGConnector(DBConnector):
         cursor.close()
         return constraint_mapping
 
-    def get_value_map_info(self, table_name):
+    def get_t_type_map_info(self, table_name):
         if self.metadata_exists():
             cursor = self.conn.cursor()
             cursor.execute(

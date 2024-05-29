@@ -271,9 +271,12 @@ class Generator(QObject):
             # Configure fields for current table
             fields_info = self.get_fields_info(record["tablename"])
             min_max_info = self.get_min_max_info(record["tablename"])
+            # We get the value map values from the check-constraints (only pg support) and additionally we check the t_type values in the ili2db-meta-tables
             value_map_info = self.get_value_map_info(record["tablename"])
-            re_iliname = re.compile(r".*\.(.*)$")
+            t_type_map_info = self.get_t_type_map_info(record["tablename"])
+            value_map_info.update(t_type_map_info)
 
+            re_iliname = re.compile(r".*\.(.*)$")
             for fielddef in fields_info:
                 column_name = fielddef["column_name"]
                 fully_qualified_name = (
@@ -878,6 +881,9 @@ class Generator(QObject):
 
     def get_value_map_info(self, table_name):
         return self._db_connector.get_value_map_info(table_name)
+
+    def get_t_type_map_info(self, table_name):
+        return self._db_connector.get_t_type_map_info(table_name)
 
     def get_relations_info(self, filter_layer_list=[]):
         return self._db_connector.get_relations_info(filter_layer_list)

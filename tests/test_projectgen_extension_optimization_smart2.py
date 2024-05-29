@@ -41,7 +41,7 @@ start_app()
 test_path = pathlib.Path(__file__).parent.absolute()
 
 
-class TestProjectExtOptimization(unittest.TestCase):
+class TestProjectExtOptimizationSmart2(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Run before all tests."""

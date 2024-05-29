@@ -597,6 +597,28 @@ class MssqlConnector(DBConnector):
 
         return result
 
+    def get_t_type_map_info(self, table_name):
+        if self.schema and self.metadata_exists():
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                SELECT *
+                FROM {}.t_ili2db_column_prop
+                WHERE tablename = '{}'
+                AND tag = 'ch.ehi.ili2db.types'
+                """.format(
+                    self.schema, table_name
+                )
+            )
+            types_entries = cur.fetchall()
+
+            types_mapping = dict()
+            for types_entry in types_entries:
+                values = eval(types_entry["setting"])
+                types_mapping[types_entry["columnname"]] = values
+            return types_mapping
+        return {}
+
     def get_relations_info(self, filter_layer_list=[]):
         result = []
 

@@ -147,6 +147,16 @@ class DBConnector(QObject):
         """
         return {}
 
+    def get_t_type_map_info(self, table_name):
+        """
+        Info about available types of a given smart1-inherited table.
+
+        Return:
+            Dictionary with keys corresponding to column names and values
+            with lists of allowed values
+        """
+        return {}
+
     def get_relations_info(self, filter_layer_list=[]):
         """
         Info about relations found in a database (or database schema).
