@@ -346,7 +346,10 @@ class Generator(QObject):
                         tables_relevance_info = self.get_tables_relevance()
                         field.widget_config["map"] = []
                         for val in value_map_info[column_name]:
-                            if not tables_relevance_info[val]["relevance"]:
+                            if (
+                                not tables_relevance_info[val]["relevance"]
+                                and self.optimize_strategy == OptimizeStrategy.HIDE
+                            ):
                                 continue
                             field.widget_config["map"].append(
                                 {tables_relevance_info[val]["iliname"]: val}
@@ -448,11 +451,13 @@ class Generator(QObject):
 
     def _rename_ambiguous_layers(self, layers, second_pass=False):
         # rename ambiguous layers with topic (on not second_pass) or model (on second_pass) prefix
-        # on irrelevant layers only if we don't ride OptimizeStrategy.HIDE
+        # on irrelevant layers only if we don't ride OptimizeStrategy.HIDE or we do but on smart1
         aliases = [
             l.alias
             for l in layers
-            if l.is_relevant or self.optimize_strategy != OptimizeStrategy.HIDE
+            if l.is_relevant
+            or self.optimize_strategy != OptimizeStrategy.HIDE
+            or self.inheritance == "smart1"
         ]
         ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
         for layer in layers:
@@ -487,12 +492,14 @@ class Generator(QObject):
                     if (
                         not referencing_layer.is_relevant
                         and self.optimize_strategy == OptimizeStrategy.HIDE
+                        and self.inheritance == "smart2"
                     ):
                         continue
                     for referenced_layer in layer_map[record["referenced_table"]]:
                         if (
                             not referenced_layer.is_relevant
                             and self.optimize_strategy == OptimizeStrategy.HIDE
+                            and self.inheritance == "smart2"
                         ):
                             continue
                         relation = Relation()
@@ -699,7 +706,10 @@ class Generator(QObject):
         else:
             irrelevant_layers = []
             relevant_layers = []
-            if self.optimize_strategy == OptimizeStrategy.NONE:
+            if (
+                self.optimize_strategy == OptimizeStrategy.NONE
+                or self.inheritance == "smart1"
+            ):
                 relevant_layers = layers
             else:
                 for layer in layers:

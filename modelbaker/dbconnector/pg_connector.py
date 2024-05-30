@@ -1030,6 +1030,53 @@ class PGConnector(DBConnector):
 
         return {}
 
+    def get_classes_relevance(self):
+        if self.schema and self._table_exists("t_ili2db_classname"):
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                """
+                SELECT
+                    c.iliname as iliname,
+                    c.SqlName as sqlname,
+                    CASE WHEN c.iliname IN (
+                            WITH names AS (
+                                WITH topic_level_name AS (
+                                    SELECT
+                                    thisClass as fullname,
+                                    substring(thisClass from 1 for position('.' in thisClass)-1) as model,
+                                    substring(thisClass from position('.' in thisClass)+1) as topicclass
+                                    FROM {schema}.t_ili2db_inheritance
+                                )
+                                SELECT fullname, model, topicclass, substring(topicclass from position('.' in topicclass)+1) as class
+                                FROM topic_level_name
+                            )
+                            SELECT i.baseClass as base
+                            FROM {schema}.t_ili2db_inheritance i
+                            LEFT JOIN names extend_names
+                            ON thisClass = extend_names.fullname
+                            LEFT JOIN names base_names
+                            ON baseClass = base_names.fullname
+                            -- it's extended
+                            WHERE baseClass IS NOT NULL
+                            -- in a different model
+                            AND base_names.model != extend_names.model
+                            AND (
+                                -- with the same name
+                                base_names.class = extend_names.class
+                                OR
+                                -- multiple times in a same extended model
+                                (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
+                            )
+                        )
+                        THEN FALSE ELSE TRUE END AS relevance
+                FROM {schema}.t_ili2db_classname c
+                """.format(
+                    schema=self.schema
+                )
+            )
+            return cur.fetchall()
+        return []
+
     def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self.schema and self._table_exists(PG_BASKET_TABLE):
             cur = self.conn.cursor()

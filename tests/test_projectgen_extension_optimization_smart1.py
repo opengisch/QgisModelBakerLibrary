@@ -41,7 +41,7 @@ start_app()
 test_path = pathlib.Path(__file__).parent.absolute()
 
 
-class TestProjectExtOptimizationSmart2(unittest.TestCase):
+class TestProjectExtOptimizationSmart1(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         """Run before all tests."""
@@ -96,7 +96,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_staedtische_none(generator, strategy)
+        self._extopt_staedtische(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -110,7 +110,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_staedtische_hide(generator, strategy)
+        self._extopt_staedtische(generator, strategy)
 
     def test_extopt_staedtische_geopackage(self):
         importer = iliimporter.Importer()
@@ -147,7 +147,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_staedtische_none(generator, strategy, True)
+        self._extopt_staedtische(generator, strategy, True)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -160,7 +160,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_staedtische_hide(generator, strategy, True)
+        self._extopt_staedtische(generator, strategy, True)
 
     def test_extopt_staedtische_mssql(self):
 
@@ -202,7 +202,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_staedtische_none(generator, strategy, True)
+        self._extopt_staedtische(generator, strategy, True)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -216,9 +216,9 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_staedtische_hide(generator, strategy, True)
+        self._extopt_staedtische(generator, strategy, True)
 
-    def _extopt_staedtische_none(self, generator, strategy, not_pg=False):
+    def _extopt_staedtische(self, generator, strategy, not_pg=False):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -366,6 +366,12 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 count += 1
 
                 # check layer variable
+                expected_layer_model_topic_names = (
+                    "Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
+                    if strategy == OptimizeStrategy.HIDE
+                    else "Kantonale_Ortsplanung_V1_1.Konstruktionen,Ortsplanung_V1_1.Konstruktionen,Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
+                )
+
                 layer_model_topic_names = (
                     QgsExpressionContextUtils.layerScope(layer.layer).variable(
                         "interlis_topic"
@@ -373,10 +379,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                     or ""
                 )
 
-                assert (
-                    layer_model_topic_names
-                    == "Kantonale_Ortsplanung_V1_1.Konstruktionen,Ortsplanung_V1_1.Konstruktionen,Staedtische_Ortsplanung_V1_1.Freizeit,Staedtische_Ortsplanung_V1_1.Gewerbe"
-                )
+                assert layer_model_topic_names == expected_layer_model_topic_names
 
                 # have look at the basket field
                 fields = layer.layer.fields()
@@ -391,17 +394,24 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 ews = t_basket_field.editorWidgetSetup()
                 map = ews.config()
                 dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                expected_filter_expression = (
+                    f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    if strategy == OptimizeStrategy.HIDE
+                    else f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
+                assert map["FilterExpression"] == expected_filter_expression
 
                 # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
+                expected_default_value_expression = (
+                    "@default_basket_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                    if strategy == OptimizeStrategy.HIDE
+                    else "@default_basket_kantonale_ortsplanung_v1_1_konstruktionen_ortsplanung_v1_1_konstruktionen_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                )
                 assert (
                     default_value_definition.expression()
-                    == "@default_basket_kantonale_ortsplanung_v1_1_konstruktionen_ortsplanung_v1_1_konstruktionen_staedtische_ortsplanung_v1_1_freizeit_staedtische_ortsplanung_v1_1_gewerbe"
+                    == expected_default_value_expression
                 )
 
         # should find 2
@@ -426,24 +436,43 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 )
                 assert value_map
 
-                expected_entries = {
-                    "gebaeude",
-                    "stadtscng_v1_1freizeit_gebaeude",
-                    "kantnl_ng_v1_1konstruktionen_gebaeude",
-                    "stadtscng_v1_1gewerbe_gebaeude",
-                }
-                entries = {next(iter(entry)) for entry in value_map["map"]}
+                expected_values = (
+                    {
+                        "stadtscng_v1_1freizeit_gebaeude",
+                        "stadtscng_v1_1gewerbe_gebaeude",
+                    }
+                    if strategy == OptimizeStrategy.HIDE
+                    else {
+                        "gebaeude",
+                        "stadtscng_v1_1freizeit_gebaeude",
+                        "kantnl_ng_v1_1konstruktionen_gebaeude",
+                        "stadtscng_v1_1gewerbe_gebaeude",
+                    }
+                )
 
-                assert entries == expected_entries
+                values = {next(iter(entry.values())) for entry in value_map["map"]}
+                assert values == expected_values
+
+                expected_keys = (
+                    {
+                        "Staedtische_Ortsplanung_V1_1.Freizeit.Gebaeude",
+                        "Staedtische_Ortsplanung_V1_1.Gewerbe.Gebaeude",
+                    }
+                    if strategy == OptimizeStrategy.HIDE
+                    else {
+                        "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+                        "Staedtische_Ortsplanung_V1_1.Freizeit.Gebaeude",
+                        "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+                        "Staedtische_Ortsplanung_V1_1.Gewerbe.Gebaeude",
+                    }
+                )
+                keys = {next(iter(entry)) for entry in value_map["map"]}
+                assert keys == expected_keys
 
         # should find 2
         assert count == 2
 
         QgsProject.instance().clear()
-
-    def _extopt_staedtische_hide(self, generator, strategy, not_pg=False):
-        # to do in next step
-        return
 
     def test_extopt_polymorphic_postgis(self):
         importer = iliimporter.Importer()
@@ -476,7 +505,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_polymorphic_none(generator, strategy)
+        self._extopt_polymorphic(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -490,7 +519,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_polymorphic_hide(generator, strategy)
+        self._extopt_polymorphic(generator, strategy)
 
     def test_extopt_polymorphic_geopackage(self):
         importer = iliimporter.Importer()
@@ -527,7 +556,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_polymorphic_none(generator, strategy, True)
+        self._extopt_polymorphic(generator, strategy, True)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -540,7 +569,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_polymorphic_hide(generator, strategy, True)
+        self._extopt_polymorphic(generator, strategy, True)
 
     def test_extopt_polymorphic_mssql(self):
 
@@ -582,7 +611,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_polymorphic_none(generator, strategy, True)
+        self._extopt_polymorphic(generator, strategy, True)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -596,9 +625,9 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_polymorphic_hide(generator, strategy, True)
+        self._extopt_polymorphic(generator, strategy, True)
 
-    def _extopt_polymorphic_none(self, generator, strategy, not_pg=False):
+    def _extopt_polymorphic(self, generator, strategy, not_pg=False):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -761,6 +790,11 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 count += 1
 
                 # check layer variable
+                expected_layer_model_topic_names = (
+                    "Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                    if strategy == OptimizeStrategy.HIDE
+                    else "Ortsplanung_V1_1.Konstruktionen,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
+                )
                 layer_model_topic_names = (
                     QgsExpressionContextUtils.layerScope(layer.layer).variable(
                         "interlis_topic"
@@ -768,10 +802,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                     or ""
                 )
 
-                assert (
-                    layer_model_topic_names
-                    == "Ortsplanung_V1_1.Konstruktionen,Polymorphic_Ortsplanung_V1_1.Freizeit,Polymorphic_Ortsplanung_V1_1.Gewerbe,Polymorphic_Ortsplanung_V1_1.Hallen,Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe"
-                )
+                assert layer_model_topic_names == expected_layer_model_topic_names
 
                 # have look at the basket field
                 fields = layer.layer.fields()
@@ -786,17 +817,23 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 ews = t_basket_field.editorWidgetSetup()
                 map = ews.config()
                 dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
-                assert (
-                    map["FilterExpression"]
-                    == f"\"topic\" IN ('Ortsplanung_V1_1.Konstruktionen','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                expected_filter_expression = (
+                    f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    if strategy == OptimizeStrategy.HIDE
+                    else f"\"topic\" IN ('Ortsplanung_V1_1.Konstruktionen','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
+                assert map["FilterExpression"] == expected_filter_expression
 
                 # check default value expression
                 default_value_definition = t_basket_field.defaultValueDefinition()
                 assert default_value_definition is not None
+                expected_default_expression = (
+                    "@default_basket_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                    if strategy == OptimizeStrategy.HIDE
+                    else "@default_basket_ortsplanung_v1_1_konstruktionen_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                )
                 assert (
-                    default_value_definition.expression()
-                    == "@default_basket_ortsplanung_v1_1_konstruktionen_polymorphic_ortsplanung_v1_1_freizeit_polymorphic_ortsplanung_v1_1_gewerbe_polymorphic_ortsplanung_v1_1_hallen_polymorphic_ortsplanung_v1_1_industriegewerbe"
+                    default_value_definition.expression() == expected_default_expression
                 )
 
         # should find 2
@@ -821,28 +858,60 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 )
                 assert value_map
 
-                expected_entries = {
-                    "polymrpng_v1_1hallen_gebaeude",
-                    "turnhalletyp2",
-                    "polymrpng_v1_1gewerbe_gebaeude",
-                    "polymrpng_v1_1industriegewerbe_gebaeude",
-                    "turnhalletyp1",
-                    "gebaeude",
-                    "markthalle",
-                    "polymrpng_v1_1freizeit_gebaeude",
-                }
-                entries = {next(iter(entry)) for entry in value_map["map"]}
+                expected_values = (
+                    {
+                        "polymrpng_v1_1hallen_gebaeude",
+                        "turnhalletyp2",
+                        "polymrpng_v1_1gewerbe_gebaeude",
+                        "polymrpng_v1_1industriegewerbe_gebaeude",
+                        "turnhalletyp1",
+                        "markthalle",
+                        "polymrpng_v1_1freizeit_gebaeude",
+                    }
+                    if strategy == OptimizeStrategy.HIDE
+                    else {
+                        "polymrpng_v1_1hallen_gebaeude",
+                        "turnhalletyp2",
+                        "polymrpng_v1_1gewerbe_gebaeude",
+                        "polymrpng_v1_1industriegewerbe_gebaeude",
+                        "turnhalletyp1",
+                        "gebaeude",
+                        "markthalle",
+                        "polymrpng_v1_1freizeit_gebaeude",
+                    }
+                )
+                values = {next(iter(entry.values())) for entry in value_map["map"]}
+                assert values == expected_values
 
-                assert entries == expected_entries
+                expected_keys = (
+                    {
+                        "Polymorphic_Ortsplanung_V1_1.Hallen.Gebaeude",
+                        "Polymorphic_Ortsplanung_V1_1.Hallen.TurnhalleTyp2",
+                        "Polymorphic_Ortsplanung_V1_1.Gewerbe.Gebaeude",
+                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe.Gebaeude",
+                        "Polymorphic_Ortsplanung_V1_1.Hallen.TurnhalleTyp1",
+                        "Polymorphic_Ortsplanung_V1_1.Hallen.Markthalle",
+                        "Polymorphic_Ortsplanung_V1_1.Freizeit.Gebaeude",
+                    }
+                    if strategy == OptimizeStrategy.HIDE
+                    else {
+                        "Polymorphic_Ortsplanung_V1_1.Hallen.Gebaeude",
+                        "Polymorphic_Ortsplanung_V1_1.Hallen.TurnhalleTyp2",
+                        "Polymorphic_Ortsplanung_V1_1.Gewerbe.Gebaeude",
+                        "Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe.Gebaeude",
+                        "Polymorphic_Ortsplanung_V1_1.Hallen.TurnhalleTyp1",
+                        "Ortsplanung_V1_1.Konstruktionen.Gebaeude",
+                        "Polymorphic_Ortsplanung_V1_1.Hallen.Markthalle",
+                        "Polymorphic_Ortsplanung_V1_1.Freizeit.Gebaeude",
+                    }
+                )
+                keys = {next(iter(entry)) for entry in value_map["map"]}
+                assert keys == expected_keys
 
         # should find 2
         assert count == 2
 
         QgsProject.instance().clear()
-
-    def _extopt_polymorphic_hide(self, generator, strategy, not_pg=False):
-        # to do in next step
-        return
 
     def test_extopt_baustruct_postgis(self):
         importer = iliimporter.Importer()
@@ -874,7 +943,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_baustruct_none(generator, strategy)
+        self._extopt_baustruct(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -888,7 +957,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_baustruct_hide(generator, strategy)
+        self._extopt_baustruct(generator, strategy)
 
     def test_extopt_baustruct_geopackage(self):
         importer = iliimporter.Importer()
@@ -925,7 +994,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_baustruct_none(generator, strategy, True)
+        self._extopt_baustruct(generator, strategy, True)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -938,7 +1007,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_baustruct_hide(generator, strategy, True)
+        self._extopt_baustruct(generator, strategy, True)
 
     def test_extopt_baustruct_mssql(self):
 
@@ -979,7 +1048,7 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_baustruct_none(generator, strategy, True)
+        self._extopt_baustruct(generator, strategy, True)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -993,9 +1062,9 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_baustruct_hide(generator, strategy, True)
+        self._extopt_baustruct(generator, strategy, True)
 
-    def _extopt_baustruct_none(self, generator, strategy, not_pg=False):
+    def _extopt_baustruct(self, generator, strategy, not_pg=False):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -1170,10 +1239,25 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 )
                 assert value_map
 
-                expected_entries = {"gebaeude", "kantnl_ng_v1_1konstruktionen_gebaeude"}
-                entries = {next(iter(entry)) for entry in value_map["map"]}
+                expected_values = (
+                    {"kantnl_ng_v1_1konstruktionen_gebaeude"}
+                    if strategy == OptimizeStrategy.HIDE
+                    else {"gebaeude", "kantnl_ng_v1_1konstruktionen_gebaeude"}
+                )
 
-                assert entries == expected_entries
+                values = {next(iter(entry.values())) for entry in value_map["map"]}
+                assert values == expected_values
+
+                expected_keys = (
+                    {"Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude"}
+                    if strategy == OptimizeStrategy.HIDE
+                    else {
+                        "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+                        "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+                    }
+                )
+                keys = {next(iter(entry)) for entry in value_map["map"]}
+                assert keys == expected_keys
 
             if layer.layer.name() == "Buntbrache":
                 count += 1
@@ -1182,10 +1266,27 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 )
                 assert value_map
 
-                expected_entries = {"buntbrache", "kantonalebuntbrache"}
-                entries = {next(iter(entry)) for entry in value_map["map"]}
+                expected_values = (
+                    {"buntbrache", "kantonalebuntbrache"}
+                    if strategy == OptimizeStrategy.HIDE
+                    else {"buntbrache", "kantonalebuntbrache"}
+                )
+                values = {next(iter(entry.values())) for entry in value_map["map"]}
+                assert values == expected_values
 
-                assert entries == expected_entries
+                expected_keys = (
+                    {
+                        "Bauplanung_V1_1.Natur.Buntbrache",
+                        "Kantonale_Bauplanung_V1_1.Natur.KantonaleBuntbrache",
+                    }
+                    if strategy == OptimizeStrategy.HIDE
+                    else {
+                        "Bauplanung_V1_1.Natur.Buntbrache",
+                        "Kantonale_Bauplanung_V1_1.Natur.KantonaleBuntbrache",
+                    }
+                )
+                keys = {next(iter(entry)) for entry in value_map["map"]}
+                assert keys == expected_keys
 
             if layer.layer.name() == "Feld":
                 count += 1
@@ -1194,19 +1295,33 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 )
                 assert value_map
 
-                expected_entries = {"feld", "sonnenblumenfeld", "kartoffelfeld"}
-                entries = {next(iter(entry)) for entry in value_map["map"]}
+                expected_values = (
+                    {"sonnenblumenfeld", "kartoffelfeld"}
+                    if strategy == OptimizeStrategy.HIDE
+                    else {"feld", "sonnenblumenfeld", "kartoffelfeld"}
+                )
+                values = {next(iter(entry.values())) for entry in value_map["map"]}
+                assert values == expected_values
 
-                assert entries == expected_entries
+                expected_keys = (
+                    {
+                        "Kantonale_Bauplanung_V1_1.Natur.Kartoffelfeld",
+                        "Kantonale_Bauplanung_V1_1.Natur.Sonnenblumenfeld",
+                    }
+                    if strategy == OptimizeStrategy.HIDE
+                    else {
+                        "Bauplanung_V1_1.Natur.Feld",
+                        "Kantonale_Bauplanung_V1_1.Natur.Kartoffelfeld",
+                        "Kantonale_Bauplanung_V1_1.Natur.Sonnenblumenfeld",
+                    }
+                )
+                keys = {next(iter(entry)) for entry in value_map["map"]}
+                assert keys == expected_keys
 
         # should find 4
         assert count == 4
 
         QgsProject.instance().clear()
-
-    def _extopt_baustruct_hide(self, generator, strategy, not_pg=False):
-        # to do in next step
-        return
 
     def print_info(self, text):
         logging.info(text)
