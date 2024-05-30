@@ -340,9 +340,22 @@ class Generator(QObject):
 
                 if column_name in value_map_info:
                     field.widget = "ValueMap"
-                    field.widget_config["map"] = [
-                        {val: val} for val in value_map_info[column_name]
-                    ]
+
+                    # if it's the t_type column, then handle concerning relevance
+                    if column_name.lower() == "t_type":
+                        tables_relevance_info = self.get_tables_relevance()
+                        field.widget_config["map"] = []
+                        for val in value_map_info[column_name]:
+                            if not tables_relevance_info[val]["relevance"]:
+                                continue
+                            field.widget_config["map"].append(
+                                {tables_relevance_info[val]["iliname"]: val}
+                            )
+                            field.default_value_expression = f"'{val}'"
+                    else:
+                        field.widget_config["map"] = [
+                            {val: val} for val in value_map_info[column_name]
+                        ]
 
                 if "attr_mapping" in fielddef and fielddef["attr_mapping"] == "ARRAY":
                     field.widget = "List"
@@ -881,6 +894,19 @@ class Generator(QObject):
 
     def get_value_map_info(self, table_name):
         return self._db_connector.get_value_map_info(table_name)
+
+    def get_tables_relevance(self):
+        """
+        Returns a dict with relevance info per sqlname of class.
+        """
+        tables_relevance = {}
+        for record in self._db_connector.get_classes_relevance():
+            tables_relevance[record["sqlname"]] = {
+                "iliname": record["iliname"],
+                "relevance": record["relevance"],
+            }
+
+        return tables_relevance
 
     def get_t_type_map_info(self, table_name):
         return self._db_connector.get_t_type_map_info(table_name)
