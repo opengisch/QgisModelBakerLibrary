@@ -66,6 +66,8 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
     """
 
     def test_extopt_staedtische_postgis(self):
+        self._set_pg_naming()
+
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
@@ -113,6 +115,8 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
         self._extopt_staedtische(generator, strategy)
 
     def test_extopt_staedtische_geopackage(self):
+        self._set_pg_naming(False)
+
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
@@ -147,7 +151,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_staedtische(generator, strategy, True)
+        self._extopt_staedtische(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -160,9 +164,10 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_staedtische(generator, strategy, True)
+        self._extopt_staedtische(generator, strategy)
 
     def test_extopt_staedtische_mssql(self):
+        self._set_pg_naming(False)
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
@@ -202,7 +207,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_staedtische(generator, strategy, True)
+        self._extopt_staedtische(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -216,9 +221,9 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_staedtische(generator, strategy, True)
+        self._extopt_staedtische(generator, strategy)
 
-    def _extopt_staedtische(self, generator, strategy, not_pg=False):
+    def _extopt_staedtische(self, generator, strategy):
 
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
@@ -338,20 +343,16 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
                 # have look at the basket field
                 fields = layer.layer.fields()
-                field_idx = (
-                    fields.lookupField("T_basket")
-                    if not_pg
-                    else fields.lookupField("t_basket")
-                )
+                field_idx = fields.lookupField(self.basket_fieldname)
                 t_basket_field = fields.field(field_idx)
 
                 # check filter in widget
                 ews = t_basket_field.editorWidgetSetup()
                 map = ews.config()
-                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
@@ -383,21 +384,17 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
                 # have look at the basket field
                 fields = layer.layer.fields()
-                field_idx = (
-                    fields.lookupField("T_basket")
-                    if not_pg
-                    else fields.lookupField("t_basket")
-                )
+                field_idx = fields.lookupField(self.basket_fieldname)
                 t_basket_field = fields.field(field_idx)
 
                 # check filter in widget
                 ews = t_basket_field.editorWidgetSetup()
                 map = ews.config()
-                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+
                 expected_filter_expression = (
-                    f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                     if strategy == OptimizeStrategy.HIDE
-                    else f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    else f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
                 assert map["FilterExpression"] == expected_filter_expression
 
@@ -424,7 +421,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             if layer.layer.name() == "Strasse":
                 count += 1
                 value_map = layer.layer.editFormConfig().widgetConfig(
-                    "T_Type" if not_pg else "t_type"
+                    self.type_fieldname
                 )
 
                 assert not value_map
@@ -432,7 +429,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             if layer.layer.name() == "Gebaeude":
                 count += 1
                 value_map = layer.layer.editFormConfig().widgetConfig(
-                    "T_Type" if not_pg else "t_type"
+                    self.type_fieldname
                 )
                 assert value_map
 
@@ -475,6 +472,8 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
         QgsProject.instance().clear()
 
     def test_extopt_polymorphic_postgis(self):
+        self._set_pg_naming()
+
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
@@ -522,6 +521,8 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
         self._extopt_polymorphic(generator, strategy)
 
     def test_extopt_polymorphic_geopackage(self):
+        self._set_pg_naming(False)
+
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
@@ -556,7 +557,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_polymorphic(generator, strategy, True)
+        self._extopt_polymorphic(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -569,9 +570,10 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_polymorphic(generator, strategy, True)
+        self._extopt_polymorphic(generator, strategy)
 
     def test_extopt_polymorphic_mssql(self):
+        self._set_pg_naming(False)
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
@@ -611,7 +613,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_polymorphic(generator, strategy, True)
+        self._extopt_polymorphic(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -625,9 +627,9 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_polymorphic(generator, strategy, True)
+        self._extopt_polymorphic(generator, strategy)
 
-    def _extopt_polymorphic(self, generator, strategy, not_pg=False):
+    def _extopt_polymorphic(self, generator, strategy):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -762,20 +764,16 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
                 # have look at the basket field
                 fields = layer.layer.fields()
-                field_idx = (
-                    fields.lookupField("T_basket")
-                    if not_pg
-                    else fields.lookupField("t_basket")
-                )
+                field_idx = fields.lookupField(self.basket_fieldname)
                 t_basket_field = fields.field(field_idx)
 
                 # check filter in widget
                 ews = t_basket_field.editorWidgetSetup()
                 map = ews.config()
-                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
@@ -806,21 +804,17 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
                 # have look at the basket field
                 fields = layer.layer.fields()
-                field_idx = (
-                    fields.lookupField("T_basket")
-                    if not_pg
-                    else fields.lookupField("t_basket")
-                )
+                field_idx = fields.lookupField(self.basket_fieldname)
                 t_basket_field = fields.field(field_idx)
 
                 # check filter in widget
                 ews = t_basket_field.editorWidgetSetup()
                 map = ews.config()
-                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+
                 expected_filter_expression = (
-                    f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                     if strategy == OptimizeStrategy.HIDE
-                    else f"\"topic\" IN ('Ortsplanung_V1_1.Konstruktionen','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    else f"\"topic\" IN ('Ortsplanung_V1_1.Konstruktionen','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
                 assert map["FilterExpression"] == expected_filter_expression
 
@@ -846,7 +840,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             if layer.layer.name() == "Strasse":
                 count += 1
                 value_map = layer.layer.editFormConfig().widgetConfig(
-                    "T_Type" if not_pg else "t_type"
+                    self.type_fieldname
                 )
 
                 assert not value_map
@@ -854,7 +848,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             if layer.layer.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
                 count += 1
                 value_map = layer.layer.editFormConfig().widgetConfig(
-                    "T_Type" if not_pg else "t_type"
+                    self.type_fieldname
                 )
                 assert value_map
 
@@ -914,6 +908,8 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
         QgsProject.instance().clear()
 
     def test_extopt_baustruct_postgis(self):
+        self._set_pg_naming()
+
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
@@ -960,6 +956,8 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
         self._extopt_baustruct(generator, strategy)
 
     def test_extopt_baustruct_geopackage(self):
+        self._set_pg_naming(False)
+
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
@@ -994,7 +992,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_baustruct(generator, strategy, True)
+        self._extopt_baustruct(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -1007,9 +1005,10 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._extopt_baustruct(generator, strategy, True)
+        self._extopt_baustruct(generator, strategy)
 
     def test_extopt_baustruct_mssql(self):
+        self._set_pg_naming(False)
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
@@ -1048,7 +1047,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_baustruct(generator, strategy, True)
+        self._extopt_baustruct(generator, strategy)
 
         ### 2. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -1062,9 +1061,9 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._extopt_baustruct(generator, strategy, True)
+        self._extopt_baustruct(generator, strategy)
 
-    def _extopt_baustruct(self, generator, strategy, not_pg=False):
+    def _extopt_baustruct(self, generator, strategy):
         available_layers = generator.layers()
         relations, _ = generator.relations(available_layers)
         legend = generator.legend(available_layers)
@@ -1191,20 +1190,16 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
                 # have look at the basket field
                 fields = layer.layer.fields()
-                field_idx = (
-                    fields.lookupField("T_basket")
-                    if not_pg
-                    else fields.lookupField("t_basket")
-                )
+                field_idx = fields.lookupField(self.basket_fieldname)
                 t_basket_field = fields.field(field_idx)
 
                 # check filter in widget
                 ews = t_basket_field.editorWidgetSetup()
                 map = ews.config()
-                dataset_table = "T_ILI2DB_DATASET" if not_pg else "t_ili2db_dataset"
+
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{dataset_table}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
@@ -1227,7 +1222,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             if layer.layer.name() == "Strasse":
                 count += 1
                 value_map = layer.layer.editFormConfig().widgetConfig(
-                    "T_Type" if not_pg else "t_type"
+                    self.type_fieldname
                 )
 
                 assert not value_map
@@ -1235,7 +1230,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             if layer.layer.name() == "Gebaeude":
                 count += 1
                 value_map = layer.layer.editFormConfig().widgetConfig(
-                    "T_Type" if not_pg else "t_type"
+                    self.type_fieldname
                 )
                 assert value_map
 
@@ -1262,7 +1257,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             if layer.layer.name() == "Buntbrache":
                 count += 1
                 value_map = layer.layer.editFormConfig().widgetConfig(
-                    "T_Type" if not_pg else "t_type"
+                    self.type_fieldname
                 )
                 assert value_map
 
@@ -1291,7 +1286,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             if layer.layer.name() == "Feld":
                 count += 1
                 value_map = layer.layer.editFormConfig().widgetConfig(
-                    "T_Type" if not_pg else "t_type"
+                    self.type_fieldname
                 )
                 assert value_map
 
@@ -1322,6 +1317,16 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
         assert count == 4
 
         QgsProject.instance().clear()
+
+    def _set_pg_naming(self, is_pg=True):
+        if is_pg:
+            self.dataset_tablename = "t_ili2db_dataset"
+            self.basket_fieldname = "t_basket"
+            self.type_fieldname = "t_type"
+        else:
+            self.dataset_tablename = "T_ILI2DB_DATASET"
+            self.basket_fieldname = "T_basket"
+            self.type_fieldname = "T_Type"
 
     def print_info(self, text):
         logging.info(text)
