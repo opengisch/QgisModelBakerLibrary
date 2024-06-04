@@ -171,6 +171,9 @@ class PgCommandConfigManager(DbCommandConfigManager):
         settings.setValue(
             self._settings_base_path + "service", self.configuration.dbservice
         )
+        settings.setValue(
+            self._settings_base_path + "sslmode", self.configuration.sslmode
+        )
 
     def load_config_from_qsettings(self):
         settings = QSettings()
@@ -195,4 +198,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
         )
         self.configuration.db_use_super_login = settings.value(
             self._settings_base_path + "usesuperlogin", defaultValue=False, type=bool
+        )
+        self.configuration.sslmode = settings.value(
+            self._settings_base_path + "sslmode"
         )
