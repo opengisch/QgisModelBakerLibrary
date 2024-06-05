@@ -16,10 +16,12 @@
  *                                                                         *
  ***************************************************************************/
 """
+from typing import TYPE_CHECKING
 
 from qgis.core import QgsDefaultValue, QgsEditorWidgetSetup
 
-from modelbaker.dataobjects.layers import Layer
+if TYPE_CHECKING:
+    from modelbaker.dataobjects.layers import Layer
 
 
 class Field:
