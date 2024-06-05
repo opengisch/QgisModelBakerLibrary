@@ -631,6 +631,28 @@ class PGConnector(DBConnector):
 
         return {}
 
+    def get_t_type_map_info(self, table_name):
+        if self.schema and self.metadata_exists():
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                """
+                SELECT *
+                FROM {}.t_ili2db_column_prop
+                WHERE tablename = '{}'
+                AND tag = 'ch.ehi.ili2db.types'
+                """.format(
+                    self.schema, table_name
+                )
+            )
+            types_entries = cur.fetchall()
+
+            types_mapping = dict()
+            for types_entry in types_entries:
+                values = eval(types_entry["setting"])
+                types_mapping[types_entry["columnname"].lower()] = values
+            return types_mapping
+        return {}
+
     def get_relations_info(self, filter_layer_list=[]):
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1007,6 +1029,53 @@ class PGConnector(DBConnector):
             return cur.fetchall()
 
         return {}
+
+    def get_classes_relevance(self):
+        if self.schema and self._table_exists("t_ili2db_classname"):
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                """
+                SELECT
+                    c.iliname as iliname,
+                    c.SqlName as sqlname,
+                    CASE WHEN c.iliname IN (
+                            WITH names AS (
+                                WITH topic_level_name AS (
+                                    SELECT
+                                    thisClass as fullname,
+                                    substring(thisClass from 1 for position('.' in thisClass)-1) as model,
+                                    substring(thisClass from position('.' in thisClass)+1) as topicclass
+                                    FROM {schema}.t_ili2db_inheritance
+                                )
+                                SELECT fullname, model, topicclass, substring(topicclass from position('.' in topicclass)+1) as class
+                                FROM topic_level_name
+                            )
+                            SELECT i.baseClass as base
+                            FROM {schema}.t_ili2db_inheritance i
+                            LEFT JOIN names extend_names
+                            ON thisClass = extend_names.fullname
+                            LEFT JOIN names base_names
+                            ON baseClass = base_names.fullname
+                            -- it's extended
+                            WHERE baseClass IS NOT NULL
+                            -- in a different model
+                            AND base_names.model != extend_names.model
+                            AND (
+                                -- with the same name
+                                base_names.class = extend_names.class
+                                OR
+                                -- multiple times in a same extended model
+                                (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
+                            )
+                        )
+                        THEN FALSE ELSE TRUE END AS relevance
+                FROM {schema}.t_ili2db_classname c
+                """.format(
+                    schema=self.schema
+                )
+            )
+            return cur.fetchall()
+        return []
 
     def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self.schema and self._table_exists(PG_BASKET_TABLE):

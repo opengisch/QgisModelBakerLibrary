@@ -597,6 +597,28 @@ class MssqlConnector(DBConnector):
 
         return result
 
+    def get_t_type_map_info(self, table_name):
+        if self.schema and self.metadata_exists():
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                SELECT *
+                FROM {}.t_ili2db_column_prop
+                WHERE tablename = '{}'
+                AND tag = 'ch.ehi.ili2db.types'
+                """.format(
+                    self.schema, table_name
+                )
+            )
+            types_entries = self._get_dict_result(cur)
+
+            types_mapping = dict()
+            for types_entry in types_entries:
+                values = eval(types_entry["setting"])
+                types_mapping[types_entry["columnname"]] = values
+            return types_mapping
+        return {}
+
     def get_relations_info(self, filter_layer_list=[]):
         result = []
 
@@ -959,6 +981,70 @@ WHERE TABLE_SCHEMA='{schema}'
                     LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
                     ON CONCAT(PARSENAME(cn.iliname,3),'.',PARSENAME(cn.iliname,2)) = ma.ilielement AND ma.attr_name = 'ili2db.ili.bidDomain'
 					WHERE PARSENAME(cn.iliname,3) != '' and ( tp.setting != 'ENUM' OR tp.setting IS NULL )
+                """.format(
+                    schema=self.schema
+                )
+            )
+            result = self._get_dict_result(cur)
+        return result
+
+    def get_classes_relevance(self):
+        result = []
+        if self.schema and self._table_exists("t_ili2db_classname"):
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                SELECT
+                    c.iliname as iliname,
+                    c.SqlName as sqlname,
+                    CASE WHEN c.iliname IN (
+                        SELECT i.baseClass as base
+                        FROM {schema}.t_ili2db_inheritance i
+                        LEFT JOIN (
+                            SELECT fullname, model, topicclass, substring(topicclass, charindex('.',topicclass)+1, len(topicclass)) as class
+                            FROM (
+                                SELECT
+                                    thisClass as fullname,
+                                    substring(thisClass, 1, charindex('.', thisClass)-1) as model,
+                                    substring(thisClass, charindex('.', thisClass)+1, len(thisClass)) as topicclass
+                                FROM {schema}.t_ili2db_inheritance
+                            ) AS extended
+                        ) AS extend_names
+                        ON thisClass = extend_names.fullname
+                        LEFT JOIN (
+                            SELECT fullname, model, topicclass, substring(topicclass, charindex('.', topicclass)+1, len(topicclass)) as class
+                            FROM (
+                                SELECT
+                                thisClass as fullname,
+                                substring(thisClass, 1, charindex('.',thisClass)-1) as model,
+                                substring(thisClass, charindex('.', thisClass)+1, len(thisClass)) as topicclass
+                                FROM {schema}.t_ili2db_inheritance
+                            ) AS topic_level_name
+                        ) AS base_names
+                        ON baseClass = base_names.fullname
+                        -- it's extended
+                        WHERE baseClass IS NOT NULL
+                        -- in a different model
+                        AND base_names.model != extend_names.model
+                        AND (
+                            -- with the same name
+                            base_names.class = extend_names.class
+                            OR
+                            -- multiple times in the same extended model
+                            (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM {schema}.t_ili2db_inheritance JOIN (
+                            SELECT fullname, model, topicclass, substring(topicclass, charindex('.', topicclass)+1, len(topicclass)) as class
+                            FROM (
+                                SELECT
+                                thisClass as fullname,
+                                substring(thisClass, 1, charindex('.',thisClass)-1) as model,
+                                substring(thisClass, charindex('.', thisClass)+1, len(thisClass)) as topicclass
+                                FROM {schema}.t_ili2db_inheritance
+                            ) AS topic_level_name
+                        ) AS extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
+                        )
+                    )
+                    THEN 0 ELSE 1 END AS relevance
+                FROM {schema}.t_ili2db_classname c
                 """.format(
                     schema=self.schema
                 )

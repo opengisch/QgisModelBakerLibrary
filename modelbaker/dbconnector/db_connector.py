@@ -147,6 +147,16 @@ class DBConnector(QObject):
         """
         return {}
 
+    def get_t_type_map_info(self, table_name):
+        """
+        Info about available types of a given smart1-inherited table.
+
+        Return:
+            Dictionary with keys corresponding to column names and values
+            with lists of allowed values
+        """
+        return {}
+
     def get_relations_info(self, filter_layer_list=[]):
         """
         Info about relations found in a database (or database schema).
@@ -316,8 +326,21 @@ class DBConnector(QObject):
             Expected columns are:
                 model
                 topic
+                bid_domain
+                relevance
         """
         return {}
+
+    def get_classes_relevance(self):
+        """
+        Returns the ili classes and it's sqlname and relevance. Compared to tables_info it returns the classes (and the sqlnames of tables that might not be existing)
+        and not the existing tables. This is mainly used, when smart1 has been selected.
+            Expected colums are:
+                iliname
+                sqlname
+                relevance
+        """
+        return []
 
     def create_basket(self, dataset_tid, topic, tilitid_value=None):
         """

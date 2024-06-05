@@ -470,6 +470,28 @@ class GPKGConnector(DBConnector):
         cursor.close()
         return constraint_mapping
 
+    def get_t_type_map_info(self, table_name):
+        if self.metadata_exists():
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                SELECT *
+                FROM t_ili2db_column_prop
+                WHERE tablename = '{}'
+                AND tag = 'ch.ehi.ili2db.types'
+                """.format(
+                    table_name
+                )
+            )
+            types_entries = cursor.fetchall()
+
+            types_mapping = dict()
+            for types_entry in types_entries:
+                values = eval(types_entry["setting"])
+                types_mapping[types_entry["columnname"]] = values
+            return types_mapping
+        return {}
+
     def get_relations_info(self, filter_layer_list=[]):
         # We need to get the PK for each table, so first get tables_info
         # and then build something more searchable
@@ -851,6 +873,58 @@ class GPKGConnector(DBConnector):
             cursor.close()
             return contents
         return {}
+
+    def get_classes_relevance(self):
+        if self._table_exists("T_ILI2DB_CLASSNAME"):
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                SELECT
+                    c.iliname as iliname,
+                    c.SqlName as sqlname,
+                    CASE WHEN c.iliname IN (
+                            WITH names AS (
+                                WITH class_level_name AS(
+                                    WITH topic_level_name AS (
+                                        SELECT
+                                        thisClass as fullname,
+                                        substr(thisClass, 0, instr(thisClass, '.')) as model,
+                                        substr(ltrim(thisClass,substr(thisClass, 0, instr(thisClass, '.'))),2) as topicclass
+                                        FROM T_ILI2DB_INHERITANCE
+                                    )
+                                    SELECT *, ltrim(topicclass,substr(topicclass, 0, instr(topicclass, '.'))) as class_with_dot
+                                    FROM topic_level_name
+                                )
+                                SELECT fullname, model, topicclass, substr(class_with_dot, instr(class_with_dot,'.')+1) as class
+                                FROM class_level_name
+                                )
+                                SELECT i.baseClass as iliname
+                                FROM T_ILI2DB_INHERITANCE i
+                                LEFT JOIN names extend_names
+                                ON thisClass = extend_names.fullname
+                                LEFT JOIN names base_names
+                                ON baseClass = base_names.fullname
+                                -- it's extended
+                                LEFT JOIN T_ILI2DB_CLASSNAME c
+                                ON IliName = i.baseClass
+                                WHERE baseClass IS NOT NULL
+                                -- in a different model
+                                AND base_names.model != extend_names.model
+                                AND (
+                                    -- with the same name
+                                    base_names.class = extend_names.class
+                                    OR
+                                    -- multiple times in the same extended model
+                                    (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM T_ILI2DB_INHERITANCE JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
+                                )
+                    ) THEN FALSE ELSE TRUE END AS relevance
+                FROM T_ILI2DB_CLASSNAME c
+                """
+            )
+            contents = cursor.fetchall()
+            cursor.close()
+            return contents
+        return []
 
     def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self._table_exists(GPKG_BASKET_TABLE):
