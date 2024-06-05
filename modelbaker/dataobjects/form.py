@@ -18,7 +18,7 @@
 """
 from __future__ import annotations
 
-from typing import Optional, Union
+from typing import TYPE_CHECKING, Optional, Union
 
 from qgis.core import (
     Qgis,
@@ -30,9 +30,10 @@ from qgis.core import (
     QgsVectorLayer,
 )
 
-from modelbaker.dataobjects.layers import Layer
-from modelbaker.dataobjects.project import Project
-from modelbaker.dataobjects.relations import Relation
+if TYPE_CHECKING:
+    from modelbaker.dataobjects.layers import Layer
+    from modelbaker.dataobjects.project import Project
+    from modelbaker.dataobjects.relations import Relation
 
 
 class FormFieldWidget:
