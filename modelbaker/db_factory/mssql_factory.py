@@ -15,6 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 from typing import Optional
 
 from modelbaker.db_factory.db_command_config_manager import Ili2DbCommandConfiguration

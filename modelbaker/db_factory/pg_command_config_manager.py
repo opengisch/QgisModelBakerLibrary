@@ -15,6 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 from qgis.PyQt.QtCore import QSettings
 
 from modelbaker.iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
