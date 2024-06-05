@@ -16,7 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from typing import List
+from typing import Any, Optional
 
 from qgis.core import (
     Qgis,
@@ -46,20 +46,20 @@ class Project(QObject):
 
     def __init__(
         self,
-        auto_transaction=True,
-        evaluate_default_values=True,
-        context={},
-        optimize_strategy=OptimizeStrategy.NONE,
-    ):
+        auto_transaction: bool = True,
+        evaluate_default_values: bool = True,
+        context: dict[str, str] = {},
+        optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
+    ) -> None:
         QObject.__init__(self)
         self.crs = None
         self.name = "Not set"
-        self.layers = List[Layer]
+        self.layers = list[Layer]
         self.legend = LegendGroup()
         self.custom_layer_order_structure = list()
         self.auto_transaction = auto_transaction
         self.evaluate_default_values = evaluate_default_values
-        self.relations = List[Relation]
+        self.relations = list[Relation]
         self.custom_variables = {}
         self.layouts = {}
         self.mapthemes = {}
@@ -69,10 +69,10 @@ class Project(QObject):
         # {Layer_class_name: {dbattribute: {Layer_class, cardinality, Layer_domain, key_field, value_field]}
         self.bags_of_enum = dict()
 
-    def add_layer(self, layer):
+    def add_layer(self, layer: Layer) -> None:
         self.layers.append(layer)
 
-    def dump(self):
+    def dump(self) -> dict[str, Any]:
         definition = dict()
         definition["crs"] = self.crs.toWkt()
         definition["auto_transaction"] = self.auto_transaction
@@ -96,7 +96,7 @@ class Project(QObject):
 
         return definition
 
-    def load(self, definition):
+    def load(self, definition: dict[str, Any]) -> None:
         self.crs = definition["crs"]
         self.auto_transaction = definition["auto_transaction"]
         self.evaluate_default_values = definition["evaluate_default_values"]
@@ -113,8 +113,11 @@ class Project(QObject):
         self.mapthemes = definition["mapthemes"]
 
     def create(
-        self, path: str, qgis_project: QgsProject, group: QgsLayerTreeGroup = None
-    ):
+        self,
+        path: str,
+        qgis_project: QgsProject,
+        group: Optional[QgsLayerTreeGroup] = None,
+    ) -> None:
         if Qgis.QGIS_VERSION_INT < 32600:
             # set auto_transaction as boolean
             qgis_project.setAutoTransaction(self.auto_transaction)
@@ -288,7 +291,7 @@ class Project(QObject):
         if path:
             qgis_project.write(path)
 
-    def load_custom_layer_order(self, qgis_project):
+    def load_custom_layer_order(self, qgis_project: QgsProject) -> None:
         custom_layer_order = list()
         for custom_layer_name in self.custom_layer_order_structure:
             custom_layer = qgis_project.mapLayersByName(custom_layer_name)
@@ -301,13 +304,13 @@ class Project(QObject):
             root.setCustomLayerOrder(custom_layer_order)
             root.setHasCustomLayerOrder(True)
 
-    def load_custom_variables(self, qgis_project):
+    def load_custom_variables(self, qgis_project: QgsProject) -> None:
         for key in self.custom_variables.keys():
             QgsExpressionContextUtils.setProjectVariable(
                 qgis_project, key, self.custom_variables[key]
             )
 
-    def load_layouts(self, qgis_project):
+    def load_layouts(self, qgis_project: QgsProject) -> None:
         for layout_name in self.layouts.keys():
             # create the layout
             layout = QgsPrintLayout(qgis_project)
@@ -324,7 +327,7 @@ class Project(QObject):
                 layout.setName(layout_name)
                 qgis_project.layoutManager().addLayout(layout)
 
-    def load_mapthemes(self, qgis_project):
+    def load_mapthemes(self, qgis_project: QgsProject) -> None:
         if self.mapthemes:
             for name in self.mapthemes.keys():
                 map_theme_record = QgsMapThemeCollection.MapThemeRecord()
@@ -387,11 +390,11 @@ class Project(QObject):
 
                 qgis_project.mapThemeCollection().insert(name, map_theme_record)
 
-    def store_project_variables(self, qgis_project):
+    def store_project_variables(self, qgis_project: QgsProject) -> None:
         QgsExpressionContextUtils.setProjectVariable(
             qgis_project, "optimize_strategy", self.optimize_strategy.name
         )
 
-    def post_generate(self):
+    def post_generate(self) -> None:
         for layer in self.layers:
             layer.post_generate(self)

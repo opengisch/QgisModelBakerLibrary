@@ -19,9 +19,11 @@
 
 from qgis.core import QgsDefaultValue, QgsEditorWidgetSetup
 
+from modelbaker.dataobjects.layers import Layer
+
 
 class Field:
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.alias = None
         self.read_only = False
@@ -31,18 +33,18 @@ class Field:
         self.enum_domain = None
         self.oid_domain = None
 
-    def dump(self):
+    def dump(self) -> dict:
         definition = dict()
         if self.alias:
             definition["alias"] = self.alias
 
         return definition
 
-    def load(self, definition):
+    def load(self, definition: dict) -> None:
         if "alias" in definition:
             self.alias = definition["alias"]
 
-    def create(self, layer):
+    def create(self, layer: Layer) -> None:
         field_idx = layer.layer.fields().indexOf(self.name)
 
         if self.alias:
