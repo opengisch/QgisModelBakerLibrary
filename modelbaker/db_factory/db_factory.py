@@ -16,7 +16,7 @@
  ***************************************************************************/
 """
 from abc import ABC, abstractmethod
-from typing import Tuple
+from typing import Optional
 
 from ..dataobjects.fields import Field
 from ..dbconnector.db_connector import DBConnector
@@ -26,10 +26,10 @@ from .layer_uri import LayerUri
 
 
 class DbFactory(ABC):
-    """Creates an entire set of objects so that modelbaker supports some database. This is a abstract class."""
+    """Creates an entire set of objects so that modelbaker supports some database. This is an abstract class."""
 
     @abstractmethod
-    def get_db_connector(self, uri: str, schema: str) -> DBConnector:
+    def get_db_connector(self, uri: str, schema: Optional[str]) -> DBConnector:
         """Returns an instance of connector to database (:class:`DBConnector`).
 
         :param str uri: Database connection string.
@@ -63,7 +63,7 @@ class DbFactory(ABC):
     @abstractmethod
     def pre_generate_project(
         self, configuration: Ili2DbCommandConfiguration
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """This method will be called before an operation of generate project is executed.
 
         :param configuration: Configuration parameters with which will be executed the operation of generate project.
@@ -74,7 +74,7 @@ class DbFactory(ABC):
     @abstractmethod
     def post_generate_project_validations(
         self, configuration: Ili2DbCommandConfiguration
-    ) -> Tuple[bool, str]:
+    ) -> tuple[bool, str]:
         """This method will be called after an operation of generate project is executed.
 
         :param configuration: Configuration parameters with which were executed the operation of generate project.
@@ -82,8 +82,8 @@ class DbFactory(ABC):
         :return: *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise.
         """
 
-    def get_specific_messages(self):
-        """Returns specific words that will be use in warning and error messages.
+    def get_specific_messages(self) -> dict[str, str]:
+        """Returns specific words that will be used in warning and error messages.
 
         :rtype dict
         """
@@ -91,7 +91,7 @@ class DbFactory(ABC):
 
         return messages
 
-    def customize_widget_editor(self, field: Field, data_type: str):
+    def customize_widget_editor(self, field: Field, data_type: str) -> None:
         """Allows customizing the way a field is shown in the widget editor.
 
         For instance, a boolean field can be shown as a checkbox.

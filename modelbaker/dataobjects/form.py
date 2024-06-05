@@ -16,24 +16,98 @@
  *                                                                         *
  ***************************************************************************/
 """
+from typing import Optional, Union
 
 from qgis.core import (
     Qgis,
     QgsAttributeEditorContainer,
+    QgsAttributeEditorElement,
     QgsAttributeEditorField,
     QgsAttributeEditorRelation,
     QgsEditFormConfig,
+    QgsVectorLayer,
 )
+
+from modelbaker.dataobjects.layers import Layer
+from modelbaker.dataobjects.project import Project
+from modelbaker.dataobjects.relations import Relation
+
+
+class FormFieldWidget:
+    def __init__(self, name: str, field_name: str) -> None:
+        self.name = name if name else field_name
+        self.field_name = field_name
+
+    def create(
+        self, parent: QgsAttributeEditorElement, layer: QgsVectorLayer
+    ) -> QgsAttributeEditorField:
+        index = layer.fields().indexOf(self.field_name)
+        widget = QgsAttributeEditorField(self.field_name, index, parent)
+        return widget
+
+
+class FormRelationWidget:
+    def __init__(
+        self, relation: Relation, nm_relation: Optional[Relation] = None
+    ) -> None:
+        self.relation = relation
+        self.nm_relation = nm_relation
+
+    def create(
+        self, parent: QgsAttributeEditorElement, _layer
+    ) -> QgsAttributeEditorRelation:
+        try:
+            widget = QgsAttributeEditorRelation(self.relation.id, parent)
+        except TypeError:
+            # Feed deprecated API for 3.0.0 and 3.0.1
+            widget = QgsAttributeEditorRelation(
+                self.relation.id, self.relation.id, parent
+            )
+        if self.nm_relation:
+            widget.setNmRelationId(self.nm_relation.id)
+
+        if Qgis.QGIS_VERSION_INT >= 31800:
+            widget.setRelationWidgetTypeId("linking_relation_editor")
+
+            if not self.nm_relation and self.relation.cardinality_max == "1":
+                configuration = widget.relationEditorConfiguration()
+                configuration["one_to_one"] = True
+                widget.setRelationEditorConfiguration(configuration)
+
+        return widget
+
+
+class FormTab:
+    def __init__(self, name: str, columns: int = 1) -> None:
+        self.name = name
+        self.children = list()
+        self.columns = columns
+
+    def addChild(self, child: Union[FormFieldWidget, FormRelationWidget]) -> None:
+        self.children.append(child)
+
+    def create(
+        self, parent: QgsAttributeEditorElement, layer: QgsVectorLayer
+    ) -> QgsAttributeEditorContainer:
+        container = QgsAttributeEditorContainer(self.name, parent)
+        container.setIsGroupBox(False)
+        container.setColumnCount(self.columns)
+
+        for child in self.children:
+            container.addChildElement(child.create(container, layer))
+        return container
 
 
 class Form:
-    def __init__(self):
+    def __init__(self) -> None:
         self.__elements = list()
 
-    def elements(self):
+    def elements(self) -> list[Union[FormFieldWidget, FormRelationWidget]]:
         return self.__elements
 
-    def create(self, layer, qgis_layer, project):
+    def create(
+        self, layer: Layer, qgis_layer: QgsVectorLayer, project: Project
+    ) -> QgsEditFormConfig:
         edit_form_config = qgis_layer.editFormConfig()
         root_container = edit_form_config.invisibleRootContainer()
         root_container.clear()
@@ -58,39 +132,20 @@ class Form:
                         break
         return edit_form_config
 
-    def add_element(self, element):
+    def add_element(self, element: Union[FormTab, FormFieldWidget]) -> None:
         self.__elements.append(element)
 
 
-class FormTab:
-    def __init__(self, name, columns=1):
-        self.name = name
-        self.children = list()
-        self.columns = columns
-
-    def addChild(self, child):
-        self.children.append(child)
-
-    def create(self, parent, layer):
-        container = QgsAttributeEditorContainer(self.name, parent)
-        container.setIsGroupBox(False)
-        container.setColumnCount(self.columns)
-
-        for child in self.children:
-            container.addChildElement(child.create(container, layer))
-        return container
-
-
 class FormGroupBox:
-    def __init__(self, name, columns=1):
+    def __init__(self, name: str, columns: int = 1) -> None:
         self.name = name
         self.children = list()
         self.columns = columns
 
-    def addChild(self, child):
+    def addChild(self, child) -> None:
         self.children.append(child)
 
-    def create(self, parent, layer):
+    def create(self, _parent, layer) -> QgsAttributeEditorContainer:
         container = QgsAttributeEditorContainer(self.name)
         container.setIsGroupBox(True)
         container.setColumnCount(self.columns)
@@ -98,41 +153,3 @@ class FormGroupBox:
         for child in self.children:
             container.addChildElement(child, layer)
         return container
-
-
-class FormFieldWidget:
-    def __init__(self, name, field_name):
-        self.name = name if name else field_name
-        self.field_name = field_name
-
-    def create(self, parent, layer):
-        index = layer.fields().indexOf(self.field_name)
-        widget = QgsAttributeEditorField(self.field_name, index, parent)
-        return widget
-
-
-class FormRelationWidget:
-    def __init__(self, relation, nm_relation=None):
-        self.relation = relation
-        self.nm_relation = nm_relation
-
-    def create(self, parent, layer):
-        try:
-            widget = QgsAttributeEditorRelation(self.relation.id, parent)
-        except TypeError:
-            # Feed deprecated API for 3.0.0 and 3.0.1
-            widget = QgsAttributeEditorRelation(
-                self.relation.id, self.relation.id, parent
-            )
-        if self.nm_relation:
-            widget.setNmRelationId(self.nm_relation.id)
-
-        if Qgis.QGIS_VERSION_INT >= 31800:
-            widget.setRelationWidgetTypeId("linking_relation_editor")
-
-            if not self.nm_relation and self.relation.cardinality_max == "1":
-                configuration = widget.relationEditorConfiguration()
-                configuration["one_to_one"] = True
-                widget.setRelationEditorConfiguration(configuration)
-
-        return widget

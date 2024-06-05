@@ -27,7 +27,7 @@ class LayerUri(ABC):
     :ivar str provider: Database provider.
     """
 
-    def __init__(self, uri):
+    def __init__(self, uri: str) -> None:
         """
         :param str uri: Database uri. This is the same database uri of the db connectors.
         """
@@ -35,7 +35,7 @@ class LayerUri(ABC):
         self.provider = None
 
     @abstractmethod
-    def get_data_source_uri(self, record: dict):
+    def get_data_source_uri(self, record: dict) -> str:
         """Provides layer uri based on database uri and specific information of the data source.
 
         :param str record: Dictionary containing specific information of the data source.

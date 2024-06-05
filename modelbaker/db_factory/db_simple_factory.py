@@ -16,6 +16,7 @@
  ***************************************************************************/
 """
 import logging
+from typing import Optional
 
 from ..iliwrapper.globals import DbIliMode
 from .db_factory import DbFactory
@@ -44,7 +45,7 @@ except ModuleNotFoundError:
 class DbSimpleFactory:
     """Provides a single point (simple factory) to create a database factory (:class:`DbFactory`)."""
 
-    def create_factory(self, ili_mode: DbIliMode) -> DbFactory:
+    def create_factory(self, ili_mode: DbIliMode) -> Optional[DbFactory]:
         """Creates an instance of :class:`DbFactory` based on ili_mode parameter.
 
         :param ili_mode: Value specifying which factory will be instantiated.
@@ -67,7 +68,7 @@ class DbSimpleFactory:
 
         return result
 
-    def get_db_list(self, is_schema_import=False):
+    def get_db_list(self, is_schema_import: bool = False) -> list[DbIliMode]:
         """Gets a list containing the databases available in modelbaker.
 
         This list can be used to show the available databases in GUI, for example, **QComboBox source**
@@ -89,7 +90,7 @@ class DbSimpleFactory:
         return result
 
     @property
-    def default_database(self):
+    def default_database(self) -> DbIliMode:
         """Gets a default database for modelbaker.
 
         :return: Default database for modelbaker.

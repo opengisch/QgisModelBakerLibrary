@@ -1,8 +1,8 @@
-from qgis.core import QgsRelation
+from qgis.core import QgsProject, QgsRelation
 
 
 class Relation:
-    def __init__(self):
+    def __init__(self) -> None:
         self.referencing_layer = None
         self.referenced_layer = None
         self.referencing_field = None
@@ -14,7 +14,7 @@ class Relation:
         self.qgis_relation = None
         self._id = None
 
-    def dump(self):
+    def dump(self) -> dict:
         definition = dict()
         definition["referencingLayer"] = self.referencing_layer
         definition["referencingField"] = self.referencing_field
@@ -26,7 +26,7 @@ class Relation:
 
         return definition
 
-    def load(self, definition):
+    def load(self, definition: str) -> None:
         self.referencing_layer = definition["referencingLayer"]
         self.referencing_field = definition["referencingField"]
         self.referenced_layer = definition["referencedLayer"]
@@ -35,7 +35,9 @@ class Relation:
         self.cardinality_max = definition["cardinality_max"]
         self.child_domain_name = definition["child_domain_name"]
 
-    def create(self, qgis_project, relations):
+    def create(
+        self, qgis_project: QgsProject, relations: list[QgsRelation]
+    ) -> QgsRelation:
         relation = QgsRelation()
         project_ids = qgis_project.relationManager().relations().keys()
         base_id = self.name
@@ -61,5 +63,5 @@ class Relation:
         return relation
 
     @property
-    def id(self):
+    def id(self) -> str:
         return self._id
