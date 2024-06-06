@@ -20,6 +20,7 @@
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtNetwork import QNetworkProxy
 
+from .globals import DbIliMode
 from .ili2dbutils import get_all_modeldir_in_path
 
 
@@ -297,6 +298,10 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
             self.append_args(args, ["--createBasketCol"])
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--createBasketCol=False"])
+
+        print(f"{self.tool} is")
+        if self.tool == DbIliMode.gpkg:
+            self.append_args(args, ["--gpkgMultiGeomPerTable"], True)
 
         self.append_args(args, ["--defaultSrsAuth", self.srs_auth])
 

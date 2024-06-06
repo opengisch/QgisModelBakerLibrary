@@ -31,7 +31,12 @@ class GpkgLayerUri(LayerUri):
         self.provider = "ogr"
 
     def get_data_source_uri(self, record):
+
         data_source_uri = "{uri}|layername={table}".format(
             uri=self.uri, table=record["tablename"]
         )
+        if record["geometry_column"]:
+            data_source_uri = "{} ({})".format(
+                data_source_uri, record["geometry_column"]
+            )
         return data_source_uri
