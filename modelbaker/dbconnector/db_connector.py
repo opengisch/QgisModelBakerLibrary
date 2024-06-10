@@ -287,6 +287,7 @@ class DBConnector(QObject):
                 basket_t_id
                 basket_t_ili_tid
                 topic
+                attachmentkey
                 dataset_t_id
                 datasetname
         """
