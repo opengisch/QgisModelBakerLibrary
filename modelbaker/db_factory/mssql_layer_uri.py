@@ -19,11 +19,11 @@ from .layer_uri import LayerUri
 
 
 class MssqlLayerUri(LayerUri):
-    def __init__(self, uri):
+    def __init__(self, uri: str) -> None:
         LayerUri.__init__(self, uri)
         self.provider = "mssql"
 
-    def get_data_source_uri(self, record):
+    def get_data_source_uri(self, record: dict) -> str:
         if record["geometry_column"]:
             data_source_uri = '{uri} key={primary_key} estimatedmetadata=true srid={srid} type={type} table="{schema}"."{table}" ({geometry_column}) sql='.format(
                 uri=self._get_layer_uri_common(),
@@ -44,7 +44,7 @@ class MssqlLayerUri(LayerUri):
 
         return data_source_uri
 
-    def _get_layer_uri_common(self):
+    def _get_layer_uri_common(self) -> str:
         param_db = dict()
         lst_item = self.uri.split(";")
         for item in lst_item:

@@ -16,10 +16,15 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 import re
+from typing import Optional
 
 from qgis.core import QgsApplication, QgsRelation, QgsWkbTypes
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QObject, pyqtSignal
+
+from modelbaker.iliwrapper.globals import DbIliMode
 
 from ..dataobjects.fields import Field
 from ..dataobjects.layers import Layer
@@ -40,16 +45,16 @@ class Generator(QObject):
 
     def __init__(
         self,
-        tool,
-        uri,
-        inheritance,
-        schema=None,
-        pg_estimated_metadata=False,
-        parent=None,
-        mgmt_uri=None,
-        consider_basket_handling=False,
-        optimize_strategy=OptimizeStrategy.NONE,
-    ):
+        tool: DbIliMode,
+        uri: str,
+        inheritance: str,
+        schema: Optional[str] = None,
+        pg_estimated_metadata: bool = False,
+        parent: QObject = None,
+        mgmt_uri: Optional[str] = None,
+        consider_basket_handling: bool = False,
+        optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
+    ) -> None:
         """
         Creates a new Generator objects.
         :param uri: The uri that should be used in the resulting project. If authcfg is used, make sure the mgmt_uri is set as well.
@@ -78,21 +83,21 @@ class Generator(QObject):
 
         self.collected_print_messages = []
 
-    def print_info(self, text):
+    def print_info(self, text: str) -> None:
         self.stdout.emit(text)
 
-    def print_messages(self):
+    def print_messages(self) -> None:
         for message in self.collected_print_messages:
             self.new_message.emit(message["level"], message["text"])
         self.collected_print_messages.clear()
 
-    def append_print_message(self, level, text):
+    def append_print_message(self, level, text) -> None:
         message = {"level": level, "text": text}
 
         if message not in self.collected_print_messages:
             self.collected_print_messages.append(message)
 
-    def layers(self, filter_layer_list=[]):
+    def layers(self, filter_layer_list: list = []) -> list[Layer]:
         ignore_basket_tables = not self.basket_handling
         tables_info = self.get_tables_info_without_ignored_tables(ignore_basket_tables)
         layers = list()

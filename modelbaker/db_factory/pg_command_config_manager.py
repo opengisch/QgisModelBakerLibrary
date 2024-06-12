@@ -15,7 +15,11 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 from qgis.PyQt.QtCore import QSettings
+
+from modelbaker.iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 
 from ..libs import pgserviceparser
 from .db_command_config_manager import DbCommandConfigManager
@@ -32,10 +36,10 @@ class PgCommandConfigManager(DbCommandConfigManager):
 
     _settings_base_path = "ili2pg/"
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su=False, qgis=False):
+    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
         uri = []
 
         if su:
@@ -109,7 +113,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
 
         return " ".join(uri)
 
-    def get_db_args(self, hide_password=False, su=False):
+    def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
         db_args = list()
         db_args += ["--dbhost", self.configuration.dbhost]
         if self.configuration.dbport:
@@ -141,12 +145,12 @@ class PgCommandConfigManager(DbCommandConfigManager):
         ]
         return db_args
 
-    def get_schema_import_args(self):
+    def get_schema_import_args(self) -> list[str]:
         args = list()
         args += ["--setupPgExt"]
         return args
 
-    def save_config_in_qsettings(self):
+    def save_config_in_qsettings(self) -> None:
         settings = QSettings()
         # PostgreSQL specific options
         settings.setValue(self._settings_base_path + "host", self.configuration.dbhost)
@@ -175,7 +179,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
             self._settings_base_path + "sslmode", self.configuration.sslmode
         )
 
-    def load_config_from_qsettings(self):
+    def load_config_from_qsettings(self) -> None:
         settings = QSettings()
 
         self.configuration.dbhost = settings.value(

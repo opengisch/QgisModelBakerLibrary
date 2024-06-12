@@ -16,16 +16,30 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
 
-from qgis.core import QgsLayerDefinition, QgsLayerTreeLayer, QgsProject
+from typing import Any, Optional, Union
+
+from qgis.core import (
+    QgsLayerDefinition,
+    QgsLayerTreeGroup,
+    QgsLayerTreeLayer,
+    QgsProject,
+)
+
+from modelbaker.dataobjects.layers import Layer
 
 from ..utils.qgis_utils import get_group_non_recursive, get_suggested_index_for_layer
 
 
 class LegendGroup:
     def __init__(
-        self, name=None, expanded=True, ignore_node_names=None, static_sorting=False
-    ):
+        self,
+        name: str = None,
+        expanded: bool = True,
+        ignore_node_names: bool = None,
+        static_sorting: bool = False,
+    ) -> None:
         self.name = name
         self.items = list()
         self.expanded = expanded
@@ -40,16 +54,16 @@ class LegendGroup:
         # groups that should be always on top)
         self.ignore_node_names = ignore_node_names
 
-    def dump(self):
+    def dump(self) -> list[dict[str, Any]]:
         definition = list()
         for item in self.items:
             definition.append(item.dump())
         return definition
 
-    def append(self, item):
+    def append(self, item: Union[LegendGroup, Layer]) -> None:
         self.items.append(item)
 
-    def __getitem__(self, item):
+    def __getitem__(self, item: str) -> Union[LegendGroup, Layer]:
         for i in self.items:
             try:
                 if i.name == item:
@@ -60,10 +74,12 @@ class LegendGroup:
 
         raise KeyError(item)
 
-    def load(self, definition):
+    def load(self, definition: list[Union[LegendGroup, Layer]]) -> None:
         self.items = definition
 
-    def create(self, qgis_project: QgsProject, group=None):
+    def create(
+        self, qgis_project: QgsProject, group: Optional[QgsLayerTreeGroup] = None
+    ) -> None:
         if not group:
             group = qgis_project.layerTreeRoot()
 
@@ -112,5 +128,5 @@ class LegendGroup:
                     group.insertChildNode(index, layernode)
             static_index += 1
 
-    def is_empty(self):
+    def is_empty(self) -> bool:
         return not bool(self.items)

@@ -15,6 +15,12 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
+from typing import Optional
+
+from modelbaker.db_factory.db_command_config_manager import Ili2DbCommandConfiguration
+
 from ..dataobjects.fields import Field
 from ..dbconnector.mssql_connector import MssqlConnector
 from .db_factory import DbFactory
@@ -23,22 +29,28 @@ from .mssql_layer_uri import MssqlLayerUri
 
 
 class MssqlFactory(DbFactory):
-    def get_db_connector(self, uri, schema):
+    def get_db_connector(self, uri: str, schema: Optional[str]) -> MssqlConnector:
         return MssqlConnector(uri, schema)
 
-    def get_db_command_config_manager(self, configuration):
+    def get_db_command_config_manager(
+        self, configuration: Ili2DbCommandConfiguration
+    ) -> MssqlCommandConfigManager:
         return MssqlCommandConfigManager(configuration)
 
-    def get_layer_uri(self, uri):
+    def get_layer_uri(self, uri: str) -> MssqlLayerUri:
         return MssqlLayerUri(uri)
 
-    def pre_generate_project(self, configuration):
+    def pre_generate_project(
+        self, configuration: Ili2DbCommandConfiguration
+    ) -> tuple[bool, str]:
         return True, ""
 
-    def post_generate_project_validations(self, configuration):
+    def post_generate_project_validations(
+        self, configuration: Ili2DbCommandConfiguration
+    ) -> tuple[bool, str]:
         return True, ""
 
-    def customize_widget_editor(self, field: Field, data_type: str):
+    def customize_widget_editor(self, field: Field, data_type: str) -> None:
         if "bit" in data_type:
             field.widget = "CheckBox"
             field.widget_config["CheckedState"] = "1"

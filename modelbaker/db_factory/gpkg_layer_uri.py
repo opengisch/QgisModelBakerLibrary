@@ -26,11 +26,11 @@ class GpkgLayerUri(LayerUri):
     :ivar str uri: Database uri.
     """
 
-    def __init__(self, uri):
+    def __init__(self, uri: str) -> None:
         LayerUri.__init__(self, uri)
         self.provider = "ogr"
 
-    def get_data_source_uri(self, record):
+    def get_data_source_uri(self, record: dict) -> str:
         data_source_uri = "{uri}|layername={table}".format(
             uri=self.uri, table=record["tablename"]
         )
