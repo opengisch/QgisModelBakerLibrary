@@ -19,8 +19,7 @@ from __future__ import annotations
 
 from qgis.PyQt.QtCore import QSettings
 
-from modelbaker.iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
-
+from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 from .db_command_config_manager import DbCommandConfigManager
 
 

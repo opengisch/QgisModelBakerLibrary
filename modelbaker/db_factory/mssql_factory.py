@@ -19,10 +19,9 @@ from __future__ import annotations
 
 from typing import Optional
 
-from modelbaker.db_factory.db_command_config_manager import Ili2DbCommandConfiguration
-
 from ..dataobjects.fields import Field
 from ..dbconnector.mssql_connector import MssqlConnector
+from .db_command_config_manager import Ili2DbCommandConfiguration
 from .db_factory import DbFactory
 from .mssql_command_config_manager import MssqlCommandConfigManager
 from .mssql_layer_uri import MssqlLayerUri

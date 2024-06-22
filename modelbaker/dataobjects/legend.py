@@ -27,9 +27,8 @@ from qgis.core import (
     QgsProject,
 )
 
-from modelbaker.dataobjects.layers import Layer
-
 from ..utils.qgis_utils import get_group_non_recursive, get_suggested_index_for_layer
+from .layers import Layer
 
 
 class LegendGroup:

@@ -24,13 +24,12 @@ from typing import Optional
 from qgis.core import QgsApplication, QgsRelation, QgsWkbTypes
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QObject, pyqtSignal
 
-from modelbaker.iliwrapper.globals import DbIliMode
-
 from ..dataobjects.fields import Field
 from ..dataobjects.layers import Layer
 from ..dataobjects.legend import LegendGroup
 from ..dataobjects.relations import Relation
 from ..db_factory.db_simple_factory import DbSimpleFactory
+from ..iliwrapper.globals import DbIliMode
 from ..utils.globals import OptimizeStrategy
 from ..utils.qt_utils import slugify
 from .config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES, READONLY_FIELDNAMES

@@ -21,10 +21,9 @@ from typing import Optional
 
 from qgis.PyQt.QtCore import QCoreApplication
 
-from modelbaker.db_factory.db_command_config_manager import Ili2DbCommandConfiguration
-
 from ..dbconnector.db_connector import DBConnectorError
 from ..dbconnector.pg_connector import PGConnector
+from .db_command_config_manager import Ili2DbCommandConfiguration
 from .db_factory import DbFactory
 from .pg_command_config_manager import PgCommandConfigManager
 from .pg_layer_uri import PgLayerUri
