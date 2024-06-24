@@ -23,7 +23,7 @@ import os
 import pathlib
 import tempfile
 
-from qgis.core import QgsExpressionContextUtils, QgsProject
+from qgis.core import QgsExpressionContextUtils, QgsFieldConstraints, QgsProject
 from qgis.testing import start_app, unittest
 
 from modelbaker.dataobjects.project import Project
@@ -315,6 +315,15 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set (shouldn't be)
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
                 count += 1
             # ANYOID
             if tree_layer.layer().name() in ["BesitzerIn"]:
@@ -336,6 +345,27 @@ class TestProjectOIDs(unittest.TestCase):
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression() == expected_other_expression
+                )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
                 )
                 count += 1
             # UUIDOID
@@ -361,6 +391,27 @@ class TestProjectOIDs(unittest.TestCase):
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_uuid_expression
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # STANARDOID
             if tree_layer.layer().name() in [
@@ -389,6 +440,27 @@ class TestProjectOIDs(unittest.TestCase):
                     default_value_definition.expression()
                     == expected_standard_expression
                 )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # I32OID
             if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
@@ -409,6 +481,27 @@ class TestProjectOIDs(unittest.TestCase):
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_i32_expression
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
             if tree_layer.layer().name() in ["See", "Fluss"]:
@@ -433,6 +526,27 @@ class TestProjectOIDs(unittest.TestCase):
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression() == expected_other_expression
+                )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
                 )
                 count += 1
 
@@ -573,6 +687,15 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set (shouldn't)
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
                 count += 1
             # ANYOID
             if tree_layer.layer().name() in ["BesitzerIn"]:
@@ -594,6 +717,27 @@ class TestProjectOIDs(unittest.TestCase):
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression() == expected_other_expression
+                )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
                 )
                 count += 1
             # UUIDOID
@@ -619,6 +763,27 @@ class TestProjectOIDs(unittest.TestCase):
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_uuid_expression
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # STANARDOID
             if tree_layer.layer().name() in [
@@ -647,6 +812,27 @@ class TestProjectOIDs(unittest.TestCase):
                     default_value_definition.expression()
                     == expected_standard_expression
                 )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # I32OID
             if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
@@ -667,6 +853,27 @@ class TestProjectOIDs(unittest.TestCase):
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_i32_expression
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
             if tree_layer.layer().name() in ["See", "Fluss"]:
@@ -691,6 +898,27 @@ class TestProjectOIDs(unittest.TestCase):
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression() == expected_other_expression
+                )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
                 )
                 count += 1
 
@@ -832,6 +1060,15 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set (shouldn't)
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
                 count += 1
             # ANYOID
             if tree_layer.layer().name() in ["BesitzerIn"]:
@@ -854,6 +1091,27 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # UUIDOID
             if tree_layer.layer().name() in ["Quartier.Gebaeude", "Wald"]:
@@ -874,6 +1132,27 @@ class TestProjectOIDs(unittest.TestCase):
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_uuid_expression
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # STANARDOID
             if tree_layer.layer().name() in [
@@ -902,6 +1181,27 @@ class TestProjectOIDs(unittest.TestCase):
                     default_value_definition.expression()
                     == expected_standard_expression
                 )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # I32OID
             if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
@@ -922,6 +1222,27 @@ class TestProjectOIDs(unittest.TestCase):
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_i32_expression
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
                 count += 1
             # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
             if tree_layer.layer().name() in ["See", "Fluss"]:
@@ -946,6 +1267,27 @@ class TestProjectOIDs(unittest.TestCase):
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression() == expected_other_expression
+                )
+                # check if not null and unique constraints are set
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintUnique
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
+                )
+                assert (
+                    t_ili_tid_field.constraints().constraintStrength(
+                        QgsFieldConstraints.ConstraintNotNull
+                    )
+                    == QgsFieldConstraints.ConstraintStrengthHard
                 )
                 count += 1
 
