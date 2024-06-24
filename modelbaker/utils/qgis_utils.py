@@ -22,6 +22,7 @@ from qgis.core import (
     QgsAttributeEditorField,
     QgsDefaultValue,
     QgsExpressionContextUtils,
+    QgsFieldConstraints,
     QgsLayerTreeLayer,
     QgsLayerTreeNode,
     QgsMapLayer,
@@ -147,6 +148,8 @@ class QgisProjectUtils:
                 "interlis_topic" : "OIDMadness_V1",
                 "default_value_expression": "uuid()",
                 "in_form": True
+                "not_null": True,
+                "unique": True,
                 "layer": QgsVectorLayer
             }
         }
@@ -198,6 +201,17 @@ class QgisProjectUtils:
             oid_setting["in_form"] = bool(
                 self._found_tilitid(root_container) is not None
             )
+
+            # get the constraints
+            oid_setting["not_null"] = bool(
+                t_ili_tid_field.constraints().constraints()
+                & QgsFieldConstraints.ConstraintNotNull
+            )
+            oid_setting["unique"] = bool(
+                t_ili_tid_field.constraints().constraints()
+                & QgsFieldConstraints.ConstraintUnique
+            )
+
             oid_settings[tree_layer.layer().name()] = oid_setting
 
         return oid_settings
@@ -249,6 +263,54 @@ class QgisProjectUtils:
                         if child.name().lower() == "t_ili_tid":
                             continue
                         found_container.addChildElement(child.clone(found_container))
+
+                # set the constraints if not yet set and set it strong
+                if (
+                    not bool(
+                        t_ili_tid_field.constraints().constraints()
+                        & QgsFieldConstraints.ConstraintNotNull
+                    )
+                    and oid_setting["not_null"]
+                ):
+                    layer.setFieldConstraint(
+                        field_idx,
+                        QgsFieldConstraints.ConstraintNotNull,
+                        QgsFieldConstraints.ConstraintStrengthHard,
+                    )
+                if (
+                    bool(
+                        t_ili_tid_field.constraints().constraints()
+                        & QgsFieldConstraints.ConstraintNotNull
+                    )
+                    and not oid_setting["not_null"]
+                ):
+                    layer.removeFieldConstraint(
+                        field_idx,
+                        QgsFieldConstraints.ConstraintNotNull,
+                    )
+                if (
+                    not bool(
+                        t_ili_tid_field.constraints().constraints()
+                        & QgsFieldConstraints.ConstraintUnique
+                    )
+                    and oid_setting["unique"]
+                ):
+                    layer.setFieldConstraint(
+                        field_idx,
+                        QgsFieldConstraints.ConstraintUnique,
+                        QgsFieldConstraints.ConstraintStrengthHard,
+                    )
+                if (
+                    bool(
+                        t_ili_tid_field.constraints().constraints()
+                        & QgsFieldConstraints.ConstraintUnique
+                    )
+                    and not oid_setting["unique"]
+                ):
+                    layer.removeFieldConstraint(
+                        field_idx,
+                        QgsFieldConstraints.ConstraintUnique,
+                    )
 
     def _found_tilitid(self, container):
         """Recursive function to dig into the form containers for the t_ili_tid returning true on success."""
