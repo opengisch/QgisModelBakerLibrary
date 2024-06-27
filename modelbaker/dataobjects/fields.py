@@ -20,7 +20,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from qgis.core import QgsDefaultValue, QgsEditorWidgetSetup
+from qgis.core import QgsDefaultValue, QgsEditorWidgetSetup, QgsFieldConstraints
 
 if TYPE_CHECKING:
     from .layers import Layer
@@ -61,3 +61,16 @@ class Field:
         if self.default_value_expression:
             default_value = QgsDefaultValue(self.default_value_expression)
             layer.layer.setDefaultValueDefinition(field_idx, default_value)
+
+        if self.oid_domain:
+            # if defined, then set not null and unique constraints
+            layer.layer.setFieldConstraint(
+                field_idx,
+                QgsFieldConstraints.ConstraintNotNull,
+                QgsFieldConstraints.ConstraintStrengthHard,
+            )
+            layer.layer.setFieldConstraint(
+                field_idx,
+                QgsFieldConstraints.ConstraintUnique,
+                QgsFieldConstraints.ConstraintStrengthHard,
+            )
