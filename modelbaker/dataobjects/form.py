@@ -31,9 +31,9 @@ from qgis.core import (
 )
 
 if TYPE_CHECKING:
-    from modelbaker.dataobjects.layers import Layer
-    from modelbaker.dataobjects.project import Project
-    from modelbaker.dataobjects.relations import Relation
+    from .layers import Layer
+    from .project import Project
+    from .relations import Relation
 
 
 class FormFieldWidget:

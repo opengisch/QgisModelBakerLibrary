@@ -35,8 +35,8 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QCoreApplication, QSettings
 
 if TYPE_CHECKING:
-    from modelbaker.dataobjects.fields import Field
-    from modelbaker.dataobjects.project import Project
+    from .fields import Field
+    from .project import Project
 
 from ..generator.config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES
 from ..utils.globals import OptimizeStrategy
