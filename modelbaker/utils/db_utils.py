@@ -167,7 +167,7 @@ def get_service_names():
         )
 
 
-def get_service_config(service_name: str):
+def get_service_config(servicename: str):
     """
     Provides the service configuration of a given service from the PostgreSQL connection service file.
     """
