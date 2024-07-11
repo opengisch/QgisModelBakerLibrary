@@ -20,7 +20,7 @@ from __future__ import annotations
 from qgis.PyQt.QtCore import QSettings
 
 from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
-from ..libs import pgserviceparser
+from ..utils import db_utils
 from .db_command_config_manager import DbCommandConfigManager
 
 
@@ -63,50 +63,38 @@ class PgCommandConfigManager(DbCommandConfigManager):
             uri += ["service='{}'".format(self.configuration.dbservice)]
 
         # only set the params when they are not available in the service
-        if not pgserviceparser.service_config(self.configuration.dbservice).get(
-            "sslmode", None
-        ):
+        service_config, _ = db_utils.get_service_config(self.configuration.dbservice)
+        if not service_config or not service_config.get("sslmode", None):
             if self.configuration.sslmode:
                 uri += ["sslmode='{}'".format(self.configuration.sslmode)]
 
-        if not pgserviceparser.service_config(self.configuration.dbservice).get(
-            "host", None
-        ):
+        if not service_config or not service_config.get("host", None):
             uri += ["host={}".format(self.configuration.dbhost)]
 
-        if not pgserviceparser.service_config(self.configuration.dbservice).get(
-            "port", None
-        ):
+        if not service_config or not service_config.get("port", None):
             if self.configuration.dbport:
                 uri += ["port={}".format(self.configuration.dbport)]
 
-        if not pgserviceparser.service_config(self.configuration.dbservice).get(
-            "dbname", None
-        ):
+        if not service_config or not service_config.get("dbname", None):
             uri += ["dbname='{}'".format(self.configuration.database)]
 
         # only provide authcfg to the uri when it's needed for QGIS specific things
         if (
             qgis
             and self.configuration.dbauthid
-            and not (
-                pgserviceparser.service_config(self.configuration.dbservice).get(
-                    "user", None
-                )
-                and pgserviceparser.service_config(self.configuration.dbservice).get(
-                    "password", None
+            and (
+                not service_config
+                or not (
+                    service_config.get("user", None)
+                    and service_config.get("password", None)
                 )
             )
         ):
             uri += ["authcfg={}".format(self.configuration.dbauthid)]
         else:
-            if not pgserviceparser.service_config(self.configuration.dbservice).get(
-                "user", None
-            ):
+            if not service_config or not service_config.get("user", None):
                 uri += ["user={}".format(self.configuration.dbusr)]
-            if not pgserviceparser.service_config(self.configuration.dbservice).get(
-                "password", None
-            ):
+            if not service_config or not service_config.get("password", None):
                 if self.configuration.dbpwd:
                     uri += ["password={}".format(self.configuration.dbpwd)]
 

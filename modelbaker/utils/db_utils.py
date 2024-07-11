@@ -74,7 +74,8 @@ def get_configuration_from_sourceprovider(provider, configuration):
         layer_source = QgsDataSourceUri(provider.dataSourceUri())
         mode = DbIliMode.pg
         configuration.dbservice = layer_source.service()
-        service_map = pgserviceparser.service_config(configuration.dbservice)
+        print("here")
+        service_map, _ = get_service_config(configuration.dbservice)
         if layer_source.authConfigId():
             configuration.dbauthid = layer_source.authConfigId()
             authconfig_map = get_authconfig_map(configuration.dbauthid)
@@ -152,3 +153,41 @@ def db_ili_version(configuration):
     db_connector = get_db_connector(configuration)
     if db_connector:
         return db_connector.ili_version()
+
+
+def get_service_names():
+    """
+    Provides the available service_names if
+    """
+    try:
+        return pgserviceparser.service_names(), None
+    except pgserviceparser.ServiceFileNotFound as sfe:
+        return (
+            [],
+            f"The last used service {servicename} cannot be found, since no service file {str(sfe)} available anymore.",
+        )
+    except pgserviceparser.ServiceNotFound:
+        return (
+            [],
+            f"The last used service {servicename} cannot be found in the service file.",
+        )
+
+
+def get_service_config(servicename):
+    """
+    Provides the available service_names if
+    """
+    if not servicename:
+        return {}, f"No servicename given."
+    try:
+        return pgserviceparser.service_config(servicename), None
+    except pgserviceparser.ServiceFileNotFound as sfe:
+        return (
+            {},
+            f"The last used service {servicename} cannot be found, since no service file {str(sfe)} available anymore.",
+        )
+    except pgserviceparser.ServiceNotFound:
+        return (
+            {},
+            f"The last used service {servicename} cannot be found in the service file.",
+        )
