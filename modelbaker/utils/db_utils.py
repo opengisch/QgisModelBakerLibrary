@@ -74,7 +74,7 @@ def get_configuration_from_sourceprovider(provider, configuration):
         layer_source = QgsDataSourceUri(provider.dataSourceUri())
         mode = DbIliMode.pg
         configuration.dbservice = layer_source.service()
-        service_map = pgserviceparser.service_config(configuration.dbservice)
+        service_map, _ = get_service_config(configuration.dbservice)
         if layer_source.authConfigId():
             configuration.dbauthid = layer_source.authConfigId()
             authconfig_map = get_authconfig_map(configuration.dbauthid)
@@ -152,3 +152,36 @@ def db_ili_version(configuration):
     db_connector = get_db_connector(configuration)
     if db_connector:
         return db_connector.ili_version()
+
+
+def get_service_names():
+    """
+    Provides the names of the available services in the PostgreSQL connection service file.
+    """
+    try:
+        return pgserviceparser.service_names(), None
+    except pgserviceparser.ServiceFileNotFound as sfe:
+        return (
+            [],
+            f"Services cannot be retrieved, since no service file {str(sfe)} available.",
+        )
+
+
+def get_service_config(servicename: str):
+    """
+    Provides the service configuration of a given service from the PostgreSQL connection service file.
+    """
+    if not servicename:
+        return {}, f"No servicename given."
+    try:
+        return pgserviceparser.service_config(servicename), None
+    except pgserviceparser.ServiceFileNotFound as sfe:
+        return (
+            {},
+            f"The service {servicename} cannot be found, since no service file {str(sfe)} available.",
+        )
+    except pgserviceparser.ServiceNotFound:
+        return (
+            {},
+            f"The service {servicename} cannot be found in the service file.",
+        )
