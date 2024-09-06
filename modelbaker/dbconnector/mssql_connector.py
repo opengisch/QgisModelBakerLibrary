@@ -737,6 +737,9 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_models(self):
+        if not self._table_exists("t_ili2db_trafo"):
+            return {}
+
         # Get MODELS
         if self.schema:
             cur = self.conn.cursor()

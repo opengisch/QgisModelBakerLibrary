@@ -844,6 +844,9 @@ class PGConnector(DBConnector):
         return {}
 
     def get_models(self):
+        if not self._table_exists("t_ili2db_trafo"):
+            return {}
+
         # Get MODELS
         if self.schema:
             cursor = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
