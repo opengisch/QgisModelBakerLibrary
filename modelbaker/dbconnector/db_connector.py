@@ -349,6 +349,12 @@ class DBConnector(QObject):
         """
         return False, None
 
+    def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        """
+        Returns the state and the errormessage
+        """
+        return False, None
+
     def get_tid_handling(self):
         """
         Returns `True` if a tid handling is enabled according to the settings table (when the database has been created with `--createTidCol`).

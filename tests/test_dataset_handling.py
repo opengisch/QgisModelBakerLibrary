@@ -296,6 +296,46 @@ class TestDatasetHandling(unittest.TestCase):
             record["datasetname"] for record in db_connector.get_datasets_info()
         } == {"Winti", "Seuzach", "Glarus West"}
 
+        # Edit basket for topic PipeBasketTest.Infrastructure and dataset Glarus West
+        baskets_info = db_connector.get_baskets_info()
+        for record in baskets_info:
+            if (
+                record["topic"] == "PipeBasketTest.Infrastructure"
+                and record["datasetname"] == "Glarus West"
+            ):
+                basket_info = record
+                break
+        basket_t_id = basket_info["basket_t_id"]
+        dataset_t_id = basket_info["dataset_t_id"]
+
+        # Info to be set to existing basket
+        basket_config = {
+            "topic": "PipeBasketTest.Infrastructure",
+            "basket_t_id": basket_t_id,
+            "bid_value": "3aa70ca6-13c6-482f-a415-a59694cfd658",
+            "attachmentkey": "my own attachment key",
+            "dataset_t_id": dataset_t_id,
+            "datasetname": "Glarus West",
+        }
+        res, msg = db_connector.edit_basket(basket_config)
+        assert res, msg
+
+        baskets_info = db_connector.get_baskets_info()
+        assert len(baskets_info) == 6
+        for record in baskets_info:
+            if record["basket_t_id"] == basket_t_id:
+                edited_basket_info = record
+                break
+        assert edited_basket_info["basket_t_id"] == basket_t_id
+        assert edited_basket_info["dataset_t_id"] == dataset_t_id
+        assert (
+            edited_basket_info["basket_t_ili_tid"]
+            == "3aa70ca6-13c6-482f-a415-a59694cfd658"
+        )
+        assert edited_basket_info["attachmentkey"] == "my own attachment key"
+        assert edited_basket_info["datasetname"] == "Glarus West"
+        assert edited_basket_info["topic"] == "PipeBasketTest.Infrastructure"
+
     def print_info(self, text):
         logging.info(text)
 

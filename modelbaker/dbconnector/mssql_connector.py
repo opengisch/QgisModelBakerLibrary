@@ -51,6 +51,7 @@ class MssqlConnector(DBConnector):
         self.iliCodeName = "iliCode"
         self.tid = "T_Id"
         self.tilitid = "T_Ili_Tid"
+        self.attachmentKey = "attachmentkey"
         self.dispName = "dispName"
         self.basket_table_name = BASKET_TABLE
         self.dataset_table_name = DATASET_TABLE
@@ -1102,6 +1103,46 @@ WHERE TABLE_SCHEMA='{schema}'
                     'Could not create basket for topic "{}": {}'
                 ).format(topic, error_message)
         return False, self.tr('Could not create basket for topic "{}".').format(topic)
+
+    def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        if self.schema and self._table_exists(BASKET_TABLE):
+            cur = self.conn.cursor()
+            try:
+                cur.execute(
+                    """
+                    UPDATE {schema}.{basket_table}
+                    SET dataset = ?,
+                        {t_ili_tid} = ?,
+                        {attachment_key} = ?
+                    WHERE {tid_name} = ?
+                    """.format(
+                        schema=self.schema,
+                        basket_table=BASKET_TABLE,
+                        t_ili_tid=self.tilitid,
+                        attachment_key=self.attachmentKey,
+                        tid_name=self.tid,
+                    ),
+                    (
+                        basket_config["dataset_t_id"],
+                        basket_config["bid_value"],
+                        basket_config["attachmentkey"],
+                        basket_config["basket_t_id"],
+                    ),
+                )
+                self.conn.commit()
+                return True, self.tr(
+                    'Successfully edited basket for topic "{}" and dataset "{}".'
+                ).format(basket_config["topic"], basket_config["datasetname"])
+            except pyodbc.errors.Error as e:
+                error_message = " ".join(e.args)
+                return False, self.tr(
+                    'Could not edit basket for topic "{}" and dataset "{}": {}'
+                ).format(
+                    basket_config["topic"], basket_config["datasetname"], error_message
+                )
+        return False, self.tr(
+            'Could not edit basket for topic "{}" and dataset "{}"'
+        ).format(basket_config["topic"], basket_config["datasetname"])
 
     def get_tid_handling(self):
         if self.schema and self._table_exists(SETTINGS_TABLE):
