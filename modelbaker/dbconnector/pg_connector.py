@@ -1101,7 +1101,9 @@ class PGConnector(DBConnector):
             return cur.fetchall()
         return []
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         if self.schema and self._table_exists(PG_BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1129,7 +1131,7 @@ class PGConnector(DBConnector):
                     sql.SQL(
                         """
                         INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey)
-                        VALUES (nextval(%s), %s, %s, %s, 'modelbaker')
+                        VALUES (nextval(%s), %s, %s, %s, %s)
                         """
                     ).format(
                         schema=sql.Identifier(self.schema),
@@ -1142,6 +1144,7 @@ class PGConnector(DBConnector):
                         dataset_tid,
                         topic,
                         tilitid_value,
+                        attachment_key,
                     ),
                 )
                 self.conn.commit()

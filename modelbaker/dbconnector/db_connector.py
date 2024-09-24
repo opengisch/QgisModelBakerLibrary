@@ -343,7 +343,9 @@ class DBConnector(QObject):
         """
         return []
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         """
         Returns the state and the errormessage
         """

@@ -917,7 +917,9 @@ class GPKGConnector(DBConnector):
             return contents
         return []
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -951,7 +953,7 @@ class GPKGConnector(DBConnector):
                 cursor.execute(
                     """
                     INSERT INTO "{basket_table}" ("{tid_name}", dataset, topic, "{tilitid_name}", attachmentkey )
-                    VALUES (?, ?, ?, ?, 'modelbaker')
+                    VALUES (?, ?, ?, ?, ?)
                     """.format(
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
@@ -962,6 +964,7 @@ class GPKGConnector(DBConnector):
                         dataset_tid,
                         topic,
                         tilitid_value,
+                        attachment_key,
                     ),
                 )
                 self.conn.commit()

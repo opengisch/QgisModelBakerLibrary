@@ -1054,7 +1054,9 @@ WHERE TABLE_SCHEMA='{schema}'
             result = self._get_dict_result(cur)
         return result
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1081,7 +1083,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
+                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, {attachment_key})
                 """.format(
                         schema=self.schema,
                         sequence="t_ili2db_seq",
@@ -1091,6 +1093,7 @@ WHERE TABLE_SCHEMA='{schema}'
                         dataset_tid=dataset_tid,
                         topic=topic,
                         tilitid=tilitid_value,
+                        attachment_key=attachment_key,
                     )
                 )
                 self.conn.commit()
