@@ -472,3 +472,23 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
 
         return args
+
+
+class DeleteConfiguration(Ili2DbCommandConfiguration):
+    def __init__(self):
+        super().__init__()
+        self.dataset = ""
+
+    def to_ili2db_args(self, extra_args=[], with_action=True):
+        args = list()
+
+        if with_action:
+            self.append_args(args, ["--delete"])
+
+        self.append_args(args, extra_args)
+
+        self.append_args(args, ["--dataset", self.dataset])
+
+        self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
+
+        return args

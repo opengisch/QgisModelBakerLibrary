@@ -26,6 +26,7 @@ from modelbaker.iliwrapper import ili2dbconfig
 from modelbaker.iliwrapper.globals import DbIliMode
 from modelbaker.iliwrapper.ili2dbconfig import (
     BaseConfiguration,
+    DeleteConfiguration,
     ExportConfiguration,
     ImportDataConfiguration,
     SchemaImportConfiguration,
@@ -161,6 +162,31 @@ def ilivalidator_config(
         configuration.database = "gis"
     elif tool == DbIliMode.ili2gpkg:
         configuration.dbfile = testdata_path(gpkg_path)
+    configuration.base_configuration = base_config
+
+    return configuration
+
+
+def ilideleter_config(tool=DbIliMode.ili2pg, modeldir=None):
+    base_config = BaseConfiguration()
+    if modeldir is None:
+        base_config.custom_model_directories_enabled = False
+    else:
+        base_config.custom_model_directories = testdata_path(modeldir)
+        base_config.custom_model_directories_enabled = True
+
+    configuration = DeleteConfiguration()
+    if tool == DbIliMode.ili2pg:
+        configuration.dbhost = os.environ["PGHOST"]
+        configuration.dbusr = "docker"
+        configuration.dbpwd = "docker"
+        configuration.database = "gis"
+    elif tool == DbIliMode.ili2mssql:
+        configuration.dbhost = "mssql"
+        configuration.dbusr = "sa"
+        configuration.dbpwd = "<YourStrong!Passw0rd>"
+        configuration.database = "gis"
+
     configuration.base_configuration = base_config
 
     return configuration
