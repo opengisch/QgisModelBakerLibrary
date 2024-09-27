@@ -16,7 +16,6 @@
  ***************************************************************************/
 """
 import errno
-import numbers
 import os
 import re
 import sqlite3
@@ -944,9 +943,7 @@ class GPKGConnector(DBConnector):
                     ).format(topic, fetch_and_increment_feedback)
                 if not tilitid_value:
                     # default value
-                    tilitid_value = f"'{uuid.uuid4()}'"
-                elif not isinstance(tilitid_value, numbers.Number):
-                    tilitid_value = f"'{tilitid_value}'"
+                    tilitid_value = f"{uuid.uuid4()}"
                 cursor.execute(
                     """
                     INSERT INTO "{basket_table}" ("{tid_name}", dataset, topic, "{tilitid_name}", attachmentkey )
