@@ -17,7 +17,6 @@
  ***************************************************************************/
 """
 import logging
-import numbers
 import re
 
 import psycopg2
@@ -71,11 +70,11 @@ class PGConnector(DBConnector):
         cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         cur.execute(
             """
-                    SELECT
-                        count(extversion)
-                    FROM pg_catalog.pg_extension
-                    WHERE extname='postgis'
-                    """
+            SELECT
+                count(extversion)
+            FROM pg_catalog.pg_extension
+            WHERE extname='postgis'
+            """
         )
 
         return bool(cur.fetchone()[0])
@@ -85,10 +84,9 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 """
-                        SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = '{}');
-            """.format(
-                    self.schema
-                )
+                SELECT EXISTS(SELECT 1 FROM pg_namespace WHERE nspname = %s);
+                """,
+                (self.schema,),
             )
 
             return bool(cur.fetchone()[0])
@@ -98,16 +96,16 @@ class PGConnector(DBConnector):
     def create_db_or_schema(self, usr):
         cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         if usr:
-            authorization_string = " AUTHORIZATION {}".format(usr)
+            authorization_string = sql.SQL("AUTHORIZATION") + sql.Identifier(usr)
         else:
-            authorization_string = ""
-        cur.execute(
-            """
-                    CREATE SCHEMA {schema}{authorization};
-        """.format(
-                schema=self.schema, authorization=authorization_string
-            )
+            authorization_string = sql.SQL(";")
+
+        parts = (
+            sql.SQL("CREATE SCHEMA")
+            + sql.Identifier(self.schema)
+            + authorization_string
         )
+        cur.execute(parts.join(" "))
         self.conn.commit()
 
     def metadata_exists(self):
@@ -118,13 +116,12 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 """
-                        SELECT
-                          count(tablename)
-                        FROM pg_catalog.pg_tables
-                        WHERE schemaname = '{}' and tablename = '{}'
-            """.format(
-                    self.schema, PG_METADATA_TABLE
-                )
+                SELECT
+                    count(tablename)
+                FROM pg_catalog.pg_tables
+                WHERE schemaname = %s and tablename = %s
+                """,
+                (self.schema, PG_METADATA_TABLE),
             )
 
             return bool(cur.fetchone()[0])
@@ -136,13 +133,12 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 """
-                        SELECT
-                          count(tablename)
-                        FROM pg_catalog.pg_tables
-                        WHERE schemaname = '{}' and tablename = '{}'
-            """.format(
-                    self.schema, tablename
-                )
+                SELECT
+                    count(tablename)
+                FROM pg_catalog.pg_tables
+                WHERE schemaname = %s and tablename = %s
+                """,
+                (self.schema, tablename),
             )
 
             return bool(cur.fetchone()[0])
@@ -294,40 +290,40 @@ class PGConnector(DBConnector):
 
             cur.execute(
                 """
-                        SELECT
-                          tbls.schemaname AS schemaname,
-                          tbls.tablename AS tablename,
-                          a.attname AS primary_key,
-                          g.f_geometry_column AS geometry_column,
-                          g.srid AS srid,
-                          {kind_settings_field}
-                          {table_alias}
-                          {model_name}
-                          {ili_name}
-                          {extent}
-                          {attribute_name}
-                          {coord_decimals}
-                          {relevance}
-                          {topics}
-                          g.type AS simple_type,
-                          format_type(ga.atttypid, ga.atttypmod) as formatted_type
-                        FROM pg_catalog.pg_tables tbls
-                        LEFT JOIN pg_index i
-                          ON i.indrelid = CONCAT(tbls.schemaname, '."', tbls.tablename, '"')::regclass
-                        LEFT JOIN pg_attribute a
-                          ON a.attrelid = i.indrelid
-                          AND a.attnum = ANY(i.indkey)
-                        {domain_left_join}
-                        {alias_left_join}
-                        {model_where}
-                        {attribute_left_join}
-                        LEFT JOIN public.geometry_columns g
-                          ON g.f_table_schema = tbls.schemaname
-                          AND g.f_table_name = tbls.tablename
-                        LEFT JOIN pg_attribute ga
-                          ON ga.attrelid = i.indrelid
-                          AND ga.attname = g.f_geometry_column
-                        WHERE i.indisprimary {schema_where}
+                SELECT
+                  tbls.schemaname AS schemaname,
+                  tbls.tablename AS tablename,
+                  a.attname AS primary_key,
+                  g.f_geometry_column AS geometry_column,
+                  g.srid AS srid,
+                  {kind_settings_field}
+                  {table_alias}
+                  {model_name}
+                  {ili_name}
+                  {extent}
+                  {attribute_name}
+                  {coord_decimals}
+                  {relevance}
+                  {topics}
+                  g.type AS simple_type,
+                  format_type(ga.atttypid, ga.atttypmod) as formatted_type
+                FROM pg_catalog.pg_tables tbls
+                LEFT JOIN pg_index i
+                  ON i.indrelid = CONCAT(tbls.schemaname, '."', tbls.tablename, '"')::regclass
+                LEFT JOIN pg_attribute a
+                  ON a.attrelid = i.indrelid
+                  AND a.attnum = ANY(i.indkey)
+                {domain_left_join}
+                {alias_left_join}
+                {model_where}
+                {attribute_left_join}
+                LEFT JOIN public.geometry_columns g
+                  ON g.f_table_schema = tbls.schemaname
+                  AND g.f_table_name = tbls.tablename
+                LEFT JOIN pg_attribute ga
+                  ON ga.attrelid = i.indrelid
+                  AND ga.attname = g.f_geometry_column
+                WHERE i.indisprimary {schema_where}
             """.format(
                     kind_settings_field=kind_settings_field,
                     table_alias=table_alias,
@@ -357,11 +353,13 @@ class PGConnector(DBConnector):
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
-                """
-                        SELECT *
-                        FROM {schema}.{metaattrs_table};
-            """.format(
-                    schema=self.schema, metaattrs_table=PG_METAATTRS_TABLE
+                sql.SQL(
+                    """
+                    SELECT *
+                    FROM {}.{};
+                    """
+                ).format(
+                    sql.Identifier(self.schema), sql.Identifier(PG_METAATTRS_TABLE)
                 )
             )
 
@@ -376,17 +374,18 @@ class PGConnector(DBConnector):
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
-                """
-                        SELECT
-                          attr_name,
-                          attr_value
-                        FROM {schema}.{metaattrs_table}
-                        WHERE ilielement='{ili_name}';
-            """.format(
-                    schema=self.schema,
-                    metaattrs_table=PG_METAATTRS_TABLE,
-                    ili_name=ili_name,
-                )
+                sql.SQL(
+                    """
+                    SELECT
+                        attr_name,
+                        attr_value
+                    FROM {}.{}
+                    WHERE ilielement = %s;
+                    """
+                ).format(
+                    sql.Identifier(self.schema), sql.Identifier(PG_METAATTRS_TABLE)
+                ),
+                (ili_name,),
             )
 
             return cur
@@ -576,11 +575,10 @@ class PGConnector(DBConnector):
                   pg_get_constraintdef(oid),
                   regexp_matches(pg_get_constraintdef(oid), 'CHECK \(\(\((.*) >= [\'']?([-]?[\d\.]+)[\''::integer|numeric]*\) AND \((.*) <= [\'']?([-]?[\d\.]+)[\''::integer|numeric]*\)\)\)') AS check_details
                 FROM pg_constraint
-                WHERE conrelid = '{schema}."{table}"'::regclass
+                WHERE conrelid = %s::regclass
                 AND contype = 'c'
-                """.format(
-                    schema=self.schema, table=table_name
-                )
+                """,
+                ('{}."{}"'.format(self.schema, table_name),),
             )
 
             # Create a mapping in the form of
@@ -609,11 +607,10 @@ class PGConnector(DBConnector):
                 SELECT
                   regexp_matches(pg_get_constraintdef(oid), 'CHECK \(\(\((.*)\)::text = ANY \(\(ARRAY\[(.*)\]\)::text\[\]\)\)\)') AS check_details
                 FROM pg_constraint
-                WHERE conrelid = '{schema}."{table}"'::regclass
+                WHERE conrelid = %s::regclass
                 AND contype = 'c'
-                """.format(
-                    schema=self.schema, table=table_name
-                )
+                """,
+                ('{}."{}"'.format(self.schema, table_name),),
             )
             # Returns value in the form of
             #    {t_type,"'gl_ntznng_v1_4geobasisdaten_grundnutzung_zonenflaeche'::character varying, 'grundnutzung_zonenflaeche'::character varying"}
@@ -629,6 +626,29 @@ class PGConnector(DBConnector):
 
             return constraint_mapping
 
+        return {}
+
+    def get_t_type_map_info(self, table_name):
+        if self.schema and self.metadata_exists():
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                sql.SQL(
+                    """
+                    SELECT *
+                    FROM {}.t_ili2db_column_prop
+                    WHERE tablename = %s
+                    AND tag = 'ch.ehi.ili2db.types'
+                    """
+                ).format(sql.Identifier(self.schema)),
+                (table_name,),
+            )
+            types_entries = cur.fetchall()
+
+            types_mapping = dict()
+            for types_entry in types_entries:
+                values = eval(types_entry["setting"])
+                types_mapping[types_entry["columnname"].lower()] = values
+            return types_mapping
         return {}
 
     def get_relations_info(self, filter_layer_list=[]):
@@ -707,20 +727,23 @@ class PGConnector(DBConnector):
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
-                """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
-                            meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max
-                            FROM {schema}.t_ili2db_column_prop as cprop
-                            LEFT JOIN {schema}.t_ili2db_classname as cname
-                            ON cname.sqlname = cprop.tablename
-                            LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_array
-                            ON meta_attrs_array.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_array.attr_name = 'ili2db.mapping'
-                            LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_min
-                            ON meta_attrs_cardinality_min.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
-                            LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_max
-                            ON meta_attrs_cardinality_max.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
-                            WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey' AND meta_attrs_array.attr_value = 'ARRAY'
-                            """.format(
-                    schema=self.schema, t_ili2db_meta_attrs=PG_METAATTRS_TABLE
+                sql.SQL(
+                    """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
+                        meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max
+                    FROM {schema}.t_ili2db_column_prop as cprop
+                    LEFT JOIN {schema}.t_ili2db_classname as cname
+                    ON cname.sqlname = cprop.tablename
+                    LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_array
+                    ON meta_attrs_array.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                    LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_min
+                    ON meta_attrs_cardinality_min.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                    LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_max
+                    ON meta_attrs_cardinality_max.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                    WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey' AND meta_attrs_array.attr_value = 'ARRAY'
+                    """
+                ).format(
+                    schema=sql.Identifier(self.schema),
+                    t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
                 )
             )
             return cur
@@ -732,19 +755,21 @@ class PGConnector(DBConnector):
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-            where = ""
+            where = sql.SQL(";")
             if sqlnames:
-                names = "'" + "','".join(sqlnames) + "'"
-                where = "WHERE sqlname IN ({})".format(names)
-
-            cur.execute(
-                """SELECT iliname, sqlname
-                               FROM {schema}.t_ili2db_classname
-                               {where}
-                           """.format(
-                    schema=self.schema, where=where
+                where = sql.SQL("WHERE sqlname IN ({})").format(
+                    sql.SQL(", ").join(sql.Placeholder() * len(sqlnames))
                 )
+
+            parts = (
+                sql.SQL("SELECT iliname, sqlname FROM ")
+                + sql.Identifier(self.schema)
+                + sql.SQL(".t_ili2db_classname ")
+                + where
             )
+
+            cur.execute(parts.join(""), tuple(sqlnames))
+
             return cur
 
         return {}
@@ -753,18 +778,22 @@ class PGConnector(DBConnector):
         """Used for ili2db version 3 relation creation"""
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            class_names = (
-                "'"
-                + "','".join(list(models_info.keys()) + list(extended_classes.keys()))
-                + "'"
-            )
-            cur.execute(
-                """SELECT *
-                           FROM {schema}.t_ili2db_classname
-                           WHERE iliname IN ({class_names})
-                        """.format(
-                    schema=self.schema, class_names=class_names
+
+            where = sql.SQL(" WHERE iliname IN ({})").format(
+                sql.SQL(", ").join(
+                    sql.Placeholder() * (len(models_info) + len(extended_classes))
                 )
+            )
+            parts = (
+                sql.SQL("SELECT * FROM ")
+                + sql.Identifier(self.schema)
+                + sql.SQL(".t_ili2db_classname")
+                + where
+            )
+
+            cur.execute(
+                parts.join(""),
+                tuple(models_info.keys()) + tuple(extended_classes.keys()),
             )
             return cur
 
@@ -774,15 +803,20 @@ class PGConnector(DBConnector):
         """Used for ili2db version 3 relation creation"""
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            attr_names = "'" + "','".join(attrs_list) + "'"
-            cur.execute(
-                """SELECT iliname, sqlname, owner
-                           FROM {schema}.t_ili2db_attrname
-                           WHERE iliname IN ({attr_names})
-                        """.format(
-                    schema=self.schema, attr_names=attr_names
-                )
+
+            where = sql.SQL("WHERE iliname IN ({})").format(
+                sql.SQL(", ").join(sql.Placeholder() * len(attrs_list))
+                if attrs_list
+                else sql.SQL("''")
             )
+            parts = (
+                sql.SQL("SELECT iliname, sqlname, owner FROM ")
+                + sql.Identifier(self.schema)
+                + sql.SQL(".t_ili2db_attrname ")
+                + where
+            )
+
+            cur.execute(parts.join(""), tuple(attrs_list))
             return cur
 
         return {}
@@ -791,15 +825,20 @@ class PGConnector(DBConnector):
         """Used for ili2db version 3 relation creation"""
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            owner_names = "'" + "','".join(owners) + "'"
-            cur.execute(
-                """SELECT iliname, sqlname, owner
-                           FROM {schema}.t_ili2db_attrname
-                           WHERE owner IN ({owner_names})
-                        """.format(
-                    schema=self.schema, owner_names=owner_names
-                )
+
+            where = sql.SQL("WHERE owner IN ({});").format(
+                sql.SQL(", ").join(sql.Placeholder() * len(owners))
+                if owners
+                else sql.SQL("''")
             )
+            parts = (
+                sql.SQL("SELECT iliname, sqlname, owner FROM ")
+                + sql.Identifier(self.schema)
+                + sql.SQL(".t_ili2db_attrname ")
+                + where
+            )
+
+            cur.execute(parts.join(""), tuple(owners))
             return cur
 
         return {}
@@ -810,20 +849,23 @@ class PGConnector(DBConnector):
             cursor = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
             cursor.execute(
-                """SELECT distinct split_part(iliname,'.',1) as modelname
-                            FROM {schema}.t_ili2db_trafo""".format(
-                    schema=self.schema
-                )
+                sql.SQL(
+                    """
+                    SELECT distinct split_part(iliname,'.',1) as modelname
+                    FROM {}.t_ili2db_trafo
+                    """
+                ).format(sql.Identifier(self.schema))
             )
 
             models = cursor.fetchall()
 
             cursor.execute(
-                """SELECT modelname, content
-                           FROM {schema}.t_ili2db_model
-                        """.format(
-                    schema=self.schema
-                )
+                sql.SQL(
+                    """
+                    SELECT modelname, content
+                    FROM {}.t_ili2db_model
+                    """
+                ).format(sql.Identifier(self.schema))
             )
 
             contents = cursor.fetchall()
@@ -852,14 +894,14 @@ class PGConnector(DBConnector):
     def ili_version(self):
         cur = self.conn.cursor()
         cur.execute(
-            """SELECT *
-                       FROM information_schema.columns
-                       WHERE table_schema = '{schema}'
-                       AND(table_name='t_ili2db_attrname' OR table_name = 't_ili2db_model' )
-                       AND(column_name='owner' OR column_name = 'file' )
-                    """.format(
-                schema=self.schema
-            )
+            """
+            SELECT *
+            FROM information_schema.columns
+            WHERE table_schema = %s
+            AND(table_name='t_ili2db_attrname' OR table_name = 't_ili2db_model')
+            AND(column_name='owner' OR column_name = 'file')
+            """,
+            (self.schema,),
         )
         if cur.rowcount > 1:
             self.new_message.emit(
@@ -875,10 +917,11 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor()
             cur.execute(
                 sql.SQL(
-                    """SELECT setting
-                           FROM {}.{}
-                           WHERE tag = %s
-                        """
+                    """
+                    SELECT setting
+                    FROM {}.{}
+                    WHERE tag = %s
+                    """
                 ).format(
                     sql.Identifier(self.schema), sql.Identifier(PG_SETTINGS_TABLE)
                 ),
@@ -893,17 +936,20 @@ class PGConnector(DBConnector):
         if self.schema and self._table_exists(PG_BASKET_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
-                """SELECT b.t_id as basket_t_id,
-                            b.t_ili_tid as basket_t_ili_tid,
-                            b.topic as topic,
-                            d.t_id as dataset_t_id,
-                            d.datasetname as datasetname from {schema}.{basket_table} b
-                            JOIN {schema}.{dataset_table} d
-                            ON b.dataset = d.t_id
-                        """.format(
-                    schema=self.schema,
-                    basket_table=PG_BASKET_TABLE,
-                    dataset_table=PG_DATASET_TABLE,
+                sql.SQL(
+                    """SELECT b.t_id as basket_t_id,
+                    b.t_ili_tid as basket_t_ili_tid,
+                    b.topic as topic,
+                    b.attachmentkey as attachmentkey,
+                    d.t_id as dataset_t_id,
+                    d.datasetname as datasetname from {schema}.{basket_table} b
+                    JOIN {schema}.{dataset_table} d
+                    ON b.dataset = d.t_id
+                    """
+                ).format(
+                    schema=sql.Identifier(self.schema),
+                    basket_table=sql.Identifier(PG_BASKET_TABLE),
+                    dataset_table=sql.Identifier(PG_DATASET_TABLE),
                 )
             )
             return cur.fetchall()
@@ -913,11 +959,12 @@ class PGConnector(DBConnector):
         if self.schema and self._table_exists(PG_DATASET_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
-                """SELECT t_id, datasetname
-                           FROM {schema}.{dataset_table}
-                        """.format(
-                    schema=self.schema, dataset_table=PG_DATASET_TABLE
-                )
+                sql.SQL(
+                    """
+                    SELECT t_id, datasetname
+                    FROM {}.{}
+                    """
+                ).format(sql.Identifier(self.schema), sql.Identifier(PG_DATASET_TABLE))
             )
             return cur.fetchall()
         return {}
@@ -927,14 +974,14 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
                 cur.execute(
-                    """
-                    INSERT INTO {schema}.{dataset_table} VALUES (nextval('{schema}.{sequence}'), %(datasetname)s)
-                    """.format(
-                        schema=self.schema,
-                        sequence="t_ili2db_seq",
-                        dataset_table=PG_DATASET_TABLE,
+                    sql.SQL(
+                        """
+                        INSERT INTO {}.{} VALUES (nextval(%s), %s)
+                        """
+                    ).format(
+                        sql.Identifier(self.schema), sql.Identifier(PG_DATASET_TABLE)
                     ),
-                    {"datasetname": datasetname},
+                    ("{}.{}".format(self.schema, "t_ili2db_seq"), datasetname),
                 )
                 self.conn.commit()
                 return True, self.tr('Successfully created dataset "{}".').format(
@@ -975,52 +1022,98 @@ class PGConnector(DBConnector):
         if self.schema and self._table_exists("t_ili2db_classname"):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
-                """
+                sql.SQL(
+                    """
                     SELECT DISTINCT (string_to_array(cn.iliname, '.'))[1] as model,
                     (string_to_array(cn.iliname, '.'))[2] as topic,
                     ma.attr_value as bid_domain,
-                    {relevance}
+
+                    -- relevance is emitted by going recursively through the inheritance table.
+                    -- If nothing on this topic is extended, it is relevant. Otherwise it's not (except if it's extended by itself)
+                    CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
+                    SELECT substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) as childTopic , substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) as baseTopic
+                    FROM {schema}.T_ILI2DB_INHERITANCE
+                    WHERE substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) = substring( CN.IliName from 1 for position('.' in substring( CN.IliName from position('.' in CN.IliName)+1))+position('.' in CN.IliName)-1) -- model.topic
+                    AND substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) != substring( CN.IliName from 1 for position('.' in substring( CN.IliName from position('.' in CN.IliName)+1))+position('.' in CN.IliName)-1) -- model.topic
+                    UNION
+                    SELECT substring( inheritance.thisClass from 1 for position('.' in substring( inheritance.thisClass from position('.' in inheritance.thisClass)+1))+position('.' in inheritance.thisClass)-1) as childTopic , substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) as baseTopic FROM children
+                    JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance ON substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) = children.childTopic
+                    )SELECT count(childTopic) FROM children)>0 THEN FALSE ELSE TRUE END AS relevance
+
                     FROM {schema}.t_ili2db_classname as cn
                     LEFT JOIN {schema}.t_ili2db_table_prop as tp
                     ON cn.sqlname = tp.tablename
                     LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
                     ON CONCAT((string_to_array(cn.iliname, '.'))[1],'.',(string_to_array(cn.iliname, '.'))[2]) = ma.ilielement and ma.attr_name = 'ili2db.ili.bidDomain'
-					WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and ( tp.setting != 'ENUM' or  tp.setting IS NULL )
-                """.format(
-                    schema=self.schema,
-                    # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not (except if it's extended by itself)
-                    relevance="""
-                        CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
-                        SELECT substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) as childTopic , substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) as baseTopic
-                        FROM {schema}.T_ILI2DB_INHERITANCE
-                        WHERE substring( baseClass from 1 for position('.' in substring( baseClass from position('.' in baseClass)+1))+position('.' in baseClass)-1) = substring( CN.IliName from 1 for position('.' in substring( CN.IliName from position('.' in CN.IliName)+1))+position('.' in CN.IliName)-1) -- model.topic
-                        AND substring( thisClass from 1 for position('.' in substring( thisClass from position('.' in thisClass)+1))+position('.' in thisClass)-1) != substring( CN.IliName from 1 for position('.' in substring( CN.IliName from position('.' in CN.IliName)+1))+position('.' in CN.IliName)-1) -- model.topic
-                        UNION
-                        SELECT substring( inheritance.thisClass from 1 for position('.' in substring( inheritance.thisClass from position('.' in inheritance.thisClass)+1))+position('.' in inheritance.thisClass)-1) as childTopic , substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) as baseTopic FROM children
-                        JOIN {schema}.T_ILI2DB_INHERITANCE as inheritance ON substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in baseClass)+1))+position('.' in inheritance.baseClass)-1) = children.childTopic
-                        )SELECT count(childTopic) FROM children)>0 THEN FALSE ELSE TRUE END AS relevance
-                    """.format(
-                        schema=self.schema
-                    ),
-                )
+                    WHERE array_length(string_to_array(cn.iliname, '.'),1) > 2 and ( tp.setting != 'ENUM' or  tp.setting IS NULL )
+                    """
+                ).format(schema=sql.Identifier(self.schema))
             )
             return cur.fetchall()
 
         return {}
 
+    def get_classes_relevance(self):
+        if self.schema and self._table_exists("t_ili2db_classname"):
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                sql.SQL(
+                    """
+                    SELECT
+                        c.iliname as iliname,
+                        c.SqlName as sqlname,
+                        CASE WHEN c.iliname IN (
+                                WITH names AS (
+                                    WITH topic_level_name AS (
+                                        SELECT
+                                        thisClass as fullname,
+                                        substring(thisClass from 1 for position('.' in thisClass)-1) as model,
+                                        substring(thisClass from position('.' in thisClass)+1) as topicclass
+                                        FROM {schema}.t_ili2db_inheritance
+                                    )
+                                    SELECT fullname, model, topicclass, substring(topicclass from position('.' in topicclass)+1) as class
+                                    FROM topic_level_name
+                                )
+                                SELECT i.baseClass as base
+                                FROM {schema}.t_ili2db_inheritance i
+                                LEFT JOIN names extend_names
+                                ON thisClass = extend_names.fullname
+                                LEFT JOIN names base_names
+                                ON baseClass = base_names.fullname
+                                -- it's extended
+                                WHERE baseClass IS NOT NULL
+                                -- in a different model
+                                AND base_names.model != extend_names.model
+                                AND (
+                                    -- with the same name
+                                    base_names.class = extend_names.class
+                                    OR
+                                    -- multiple times in a same extended model
+                                    (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM {schema}.t_ili2db_inheritance JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
+                                )
+                            )
+                            THEN FALSE ELSE TRUE END AS relevance
+                    FROM {schema}.t_ili2db_classname c
+                    """
+                ).format(schema=sql.Identifier(self.schema))
+            )
+            return cur.fetchall()
+        return []
+
     def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self.schema and self._table_exists(PG_BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
-                """
-                    SELECT * FROM {schema}.{basket_table}
-                    WHERE dataset = {dataset_tid} and topic = '{topic}'
-                """.format(
-                    schema=self.schema,
-                    basket_table=PG_BASKET_TABLE,
-                    dataset_tid=dataset_tid,
-                    topic=topic,
-                )
+                sql.SQL(
+                    """
+                    SELECT * FROM {}.{}
+                    WHERE dataset = %s and topic = %s;
+                    """
+                ).format(
+                    sql.Identifier(self.schema),
+                    sql.Identifier(PG_BASKET_TABLE),
+                ),
+                (dataset_tid, topic),
             )
             if cur.fetchone():
                 return False, self.tr('Basket for topic "{}" already exists.').format(
@@ -1030,22 +1123,25 @@ class PGConnector(DBConnector):
                 if not tilitid_value:
                     # default value
                     tilitid_value = "uuid_generate_v4()"
-                elif not isinstance(tilitid_value, numbers.Number):
-                    tilitid_value = f"'{tilitid_value}'"
+
                 cur.execute(
-                    """
-                    INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (nextval('{schema}.{sequence}'), {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
-                """.format(
-                        schema=self.schema,
-                        sequence="t_ili2db_seq",
-                        tid_name=self.tid,
-                        tilitid_name=self.tilitid,
-                        basket_table=PG_BASKET_TABLE,
-                        dataset_tid=dataset_tid,
-                        topic=topic,
-                        tilitid=tilitid_value,
-                    )
+                    sql.SQL(
+                        """
+                        INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey)
+                        VALUES (nextval(%s), %s, %s, %s, 'modelbaker')
+                        """
+                    ).format(
+                        schema=sql.Identifier(self.schema),
+                        basket_table=sql.Identifier(PG_BASKET_TABLE),
+                        tid_name=sql.Identifier(self.tid),
+                        tilitid_name=sql.Identifier(self.tilitid),
+                    ),
+                    (
+                        "{}.{}".format(self.schema, "t_ili2db_seq"),
+                        dataset_tid,
+                        topic,
+                        tilitid_value,
+                    ),
                 )
                 self.conn.commit()
                 return True, self.tr(
@@ -1063,10 +1159,11 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor()
             cur.execute(
                 sql.SQL(
-                    """SELECT setting
-                           FROM {}.{}
-                           WHERE tag = %s
-                        """
+                    """
+                    SELECT setting
+                    FROM {}.{}
+                    WHERE tag = %s
+                    """
                 ).format(
                     sql.Identifier(self.schema), sql.Identifier(PG_SETTINGS_TABLE)
                 ),
@@ -1083,9 +1180,10 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 sql.SQL(
-                    """SELECT tag, setting
-                           FROM {}.{}
-                            """
+                    """
+                    SELECT tag, setting
+                    FROM {}.{}
+                    """
                 ).format(sql.Identifier(self.schema), sql.Identifier(PG_SETTINGS_TABLE))
             )
             result = cur.fetchall()
@@ -1095,11 +1193,11 @@ class PGConnector(DBConnector):
         if self.schema:
             cur = self.conn.cursor()
             cur.execute(
-                """
-                    SELECT last_value FROM {schema}.{sequence};
-                """.format(
-                    schema=self.schema, sequence="t_ili2db_seq"
-                )
+                sql.SQL(
+                    """
+                    SELECT last_value FROM {}.{};
+                    """
+                ).format(sql.Identifier(self.schema), sql.Identifier("t_ili2db_seq"))
             )
             content = cur.fetchone()
             if content:
@@ -1111,11 +1209,12 @@ class PGConnector(DBConnector):
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
-                """
-                SELECT nextval('{schema}.{sequence}')
-                """.format(
-                    schema=self.schema, sequence="t_ili2db_seq"
-                )
+                sql.SQL(
+                    """
+                    SELECT nextval(%s)
+                    """
+                ),
+                ("{}.{}".format(self.schema, "t_ili2db_seq"),),
             )
             content = cur.fetchone()
             if content:
@@ -1127,11 +1226,14 @@ class PGConnector(DBConnector):
             cur = self.conn.cursor()
             try:
                 cur.execute(
-                    """
-                    ALTER SEQUENCE {schema}.{sequence} RESTART WITH {value};
-                    """.format(
-                        schema=self.schema, sequence="t_ili2db_seq", value=value
-                    )
+                    sql.SQL(
+                        """
+                        ALTER SEQUENCE {}.{} RESTART WITH %s;
+                        """
+                    ).format(
+                        sql.Identifier(self.schema), sql.Identifier("t_ili2db_seq")
+                    ),
+                    (value,),
                 )
                 self.conn.commit()
                 return True, self.tr(
@@ -1149,8 +1251,10 @@ class PGConnector(DBConnector):
         cursor = self.conn.cursor()
         try:
             cursor.execute(
-                """SELECT schema_name
-                           FROM information_schema.schemata"""
+                """
+                SELECT schema_name
+                FROM information_schema.schemata
+                """
             )
         except psycopg2.errors.Error as e:
             error_message = " ".join(e.args)

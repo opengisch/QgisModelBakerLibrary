@@ -16,7 +16,10 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 import logging
+from typing import TYPE_CHECKING, Optional, Union
 
 from qgis.core import (
     Qgis,
@@ -31,6 +34,10 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication, QSettings
 
+if TYPE_CHECKING:
+    from .fields import Field
+    from .project import Project
+
 from ..generator.config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES
 from ..utils.globals import OptimizeStrategy
 from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
@@ -39,29 +46,33 @@ from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
 class Layer:
     def __init__(
         self,
-        provider=None,
-        uri=None,
-        name=None,
-        srid=None,
-        extent=None,
-        geometry_column=None,
-        wkb_type=QgsWkbTypes.Unknown,
-        alias=None,
-        is_domain=False,
-        is_structure=False,
-        is_nmrel=False,
-        display_expression=None,
-        coordinate_precision=None,
-        is_basket_table=False,
-        is_dataset_table=False,
-        ili_name=None,
-        is_relevant=True,
-        all_topics=[],  # all the topics this class (or an instance of it) are located
-        relevant_topics=[],  # the topics of the most extended instance of it only
-        definitionfile=None,
-        qmlstylefile=None,
-        styles={},
-    ):
+        provider: str = None,
+        uri: str = None,
+        name: str = None,
+        srid: Optional[int] = None,
+        extent: Optional[str] = None,
+        geometry_column: str = None,
+        wkb_type: QgsWkbTypes = QgsWkbTypes.Unknown,
+        alias: Optional[str] = None,
+        is_domain: bool = False,
+        is_structure: bool = False,
+        is_nmrel: bool = False,
+        display_expression: str = None,
+        coordinate_precision: Optional[float] = None,
+        is_basket_table: bool = False,
+        is_dataset_table: bool = False,
+        ili_name: Optional[str] = None,
+        is_relevant: bool = True,
+        all_topics: list[
+            str
+        ] = [],  # all the topics this class (or an instance of it) are located
+        relevant_topics: list[
+            str
+        ] = [],  # the topics of the most extended instance of it only
+        definitionfile: Optional[str] = None,
+        qmlstylefile: Optional[str] = None,
+        styles: dict[str, dict[str, str]] = {},
+    ) -> None:
         self.provider = provider
         self.uri = uri
         self.name = name
@@ -111,7 +122,7 @@ class Layer:
         self.checked = True
         self.featurecount = False
 
-    def dump(self):
+    def dump(self) -> dict:
         definition = dict()
         definition["provider"] = self.provider
         definition["uri"] = self.uri
@@ -132,7 +143,7 @@ class Layer:
         definition["form"] = self.__form.dump()
         return definition
 
-    def load(self, definition):
+    def load(self, definition: dict) -> None:
         self.provider = definition["provider"]
         self.uri = definition["uri"]
         self.is_domain = definition["isdomain"]
@@ -151,7 +162,7 @@ class Layer:
         self.styles = definition["styles"]
         self.__form.load(definition["form"])
 
-    def create(self):
+    def create(self) -> Union[QgsRasterLayer, QgsVectorLayer]:
         if self.definitionfile:
             if self.__layer is None:
                 layers = QgsLayerDefinition.loadLayerDefinitionLayers(
@@ -196,11 +207,11 @@ class Layer:
 
         return self.__layer
 
-    def create_form(self, project):
+    def create_form(self, project: Project) -> None:
         edit_form = self.__form.create(self, self.__layer, project)
         self.__layer.setEditFormConfig(edit_form)
 
-    def load_styles(self):
+    def load_styles(self) -> None:
         if self.qmlstylefile:
             self.__layer.loadNamedStyle(self.qmlstylefile)
         if self.styles:
@@ -215,7 +226,7 @@ class Layer:
             # set the default style
             self.__layer.styleManager().setCurrentStyle("default")
 
-    def store_variables(self, project):
+    def store_variables(self, project: Project) -> None:
         """
         Set the layer variables according to the strategy
         """
@@ -232,13 +243,15 @@ class Layer:
             self.__layer, "oid_domain", self.oid_domain
         )
 
-    def _create_layer(self, uri, layer_name, provider):
+    def _create_layer(
+        self, uri: str, layer_name: str, provider: str
+    ) -> Union[QgsRasterLayer, QgsVectorLayer]:
         if provider and provider.lower() == "wms":
             return QgsRasterLayer(uri, layer_name, provider)
         # return QgsVectorLayer even when it's an invalid layer with no provider
         return QgsVectorLayer(uri, layer_name, provider)
 
-    def post_generate(self, project):
+    def post_generate(self, project: Project) -> None:
         """
         Will be called when the whole project has been generated and
         therefore all relations are available and the form
@@ -328,15 +341,15 @@ class Layer:
                     widget = FormFieldWidget(field.alias, field.name)
                     self.__form.add_element(widget)
 
-    def source(self):
+    def source(self) -> QgsDataSourceUri:
         return QgsDataSourceUri(self.uri)
 
     @property
-    def layer(self):
+    def layer(self) -> Union[QgsRasterLayer, QgsVectorLayer]:
         return self.__layer
 
     @property
-    def real_id(self):
+    def real_id(self) -> Optional[str]:
         """
         The layer id. Only valid after creating the layer.
         """
@@ -346,20 +359,20 @@ class Layer:
             return None
 
     @property
-    def oid_domain(self):
+    def oid_domain(self) -> Optional[str]:
         t_ili_tid_field = self.t_ili_tid_field
         if t_ili_tid_field:
             return t_ili_tid_field.oid_domain
         return None
 
     @property
-    def t_ili_tid_field(self):
+    def t_ili_tid_field(self) -> Optional[Field]:
         for field in self.fields:
             if field.name.lower() == "t_ili_tid":
                 return field
         return None
 
-    def isPureLinkTable(self, project):
+    def isPureLinkTable(self, project: Project) -> bool:
         """
         Returns True if the layer is a pure link table in a n:m relation.
         With "pure" it is meant the layer has no more fields than foreign keys and its id.

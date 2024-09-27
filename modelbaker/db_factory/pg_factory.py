@@ -15,10 +15,15 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
+from typing import Optional
+
 from qgis.PyQt.QtCore import QCoreApplication
 
 from ..dbconnector.db_connector import DBConnectorError
 from ..dbconnector.pg_connector import PGConnector
+from .db_command_config_manager import Ili2DbCommandConfiguration
 from .db_factory import DbFactory
 from .pg_command_config_manager import PgCommandConfigManager
 from .pg_layer_uri import PgLayerUri
@@ -27,16 +32,20 @@ from .pg_layer_uri import PgLayerUri
 class PgFactory(DbFactory):
     """Creates an entire set of objects so that modelbaker supports Postgres/Postgis database."""
 
-    def get_db_connector(self, uri, schema):
+    def get_db_connector(self, uri: str, schema: Optional[str]) -> PGConnector:
         return PGConnector(uri, schema)
 
-    def get_db_command_config_manager(self, configuration):
+    def get_db_command_config_manager(
+        self, configuration: Ili2DbCommandConfiguration
+    ) -> PgCommandConfigManager:
         return PgCommandConfigManager(configuration)
 
-    def get_layer_uri(self, uri):
+    def get_layer_uri(self, uri: str) -> PgLayerUri:
         return PgLayerUri(uri)
 
-    def pre_generate_project(self, configuration):
+    def pre_generate_project(
+        self, configuration: Ili2DbCommandConfiguration
+    ) -> tuple[bool, str]:
         result = not configuration.db_use_super_login
         message = ""
 
@@ -61,7 +70,9 @@ class PgFactory(DbFactory):
 
         return result, message
 
-    def post_generate_project_validations(self, configuration):
+    def post_generate_project_validations(
+        self, configuration: Ili2DbCommandConfiguration
+    ) -> tuple[bool, str]:
         result = False
         message = ""
 

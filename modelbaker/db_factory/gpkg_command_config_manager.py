@@ -15,8 +15,11 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 from qgis.PyQt.QtCore import QSettings
 
+from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 from .db_command_config_manager import DbCommandConfigManager
 
 
@@ -31,21 +34,21 @@ class GpkgCommandConfigManager(DbCommandConfigManager):
 
     _settings_base_path = "ili2gpkg/"
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su=False, qgis=False):
+    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
         return self.configuration.dbfile
 
-    def get_db_args(self, hide_password=False, su=False):
+    def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
         return ["--dbfile", self.configuration.dbfile]
 
-    def save_config_in_qsettings(self):
+    def save_config_in_qsettings(self) -> None:
         settings = QSettings()
         settings.setValue(
             self._settings_base_path + "dbfile", self.configuration.dbfile
         )
 
-    def load_config_from_qsettings(self):
+    def load_config_from_qsettings(self) -> None:
         settings = QSettings()
         self.configuration.dbfile = settings.value(self._settings_base_path + "dbfile")

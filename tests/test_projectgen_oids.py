@@ -23,7 +23,7 @@ import os
 import pathlib
 import tempfile
 
-from qgis.core import QgsExpressionContextUtils, QgsProject
+from qgis.core import QgsExpressionContextUtils, QgsFieldConstraints, QgsProject
 from qgis.testing import start_app, unittest
 
 from modelbaker.dataobjects.project import Project
@@ -62,6 +62,8 @@ class TestProjectOIDs(unittest.TestCase):
     """
 
     def test_oids_tids_postgis(self):
+        self._set_pg_naming()
+
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
@@ -121,6 +123,8 @@ class TestProjectOIDs(unittest.TestCase):
         self._oids_tids_hide(generator, strategy)
 
     def test_oids_tids_geopackage(self):
+        self._set_pg_naming(False)
+
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
@@ -153,7 +157,7 @@ class TestProjectOIDs(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._oids_tids_none(generator, strategy, True)
+        self._oids_tids_none(generator, strategy)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -166,7 +170,7 @@ class TestProjectOIDs(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._oids_tids_group(generator, strategy, True)
+        self._oids_tids_group(generator, strategy)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -179,9 +183,10 @@ class TestProjectOIDs(unittest.TestCase):
             consider_basket_handling=True,
         )
 
-        self._oids_tids_hide(generator, strategy, True)
+        self._oids_tids_hide(generator, strategy)
 
     def test_oids_tids_mssql(self):
+        self._set_pg_naming(False)
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
@@ -219,7 +224,7 @@ class TestProjectOIDs(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._oids_tids_none(generator, strategy, True)
+        self._oids_tids_none(generator, strategy)
 
         ### 2. OptimizeStrategy.GROUP ###
         strategy = OptimizeStrategy.GROUP
@@ -233,7 +238,7 @@ class TestProjectOIDs(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._oids_tids_group(generator, strategy, True)
+        self._oids_tids_group(generator, strategy)
 
         ### 3. OptimizeStrategy.HIDE ###
         strategy = OptimizeStrategy.HIDE
@@ -247,9 +252,9 @@ class TestProjectOIDs(unittest.TestCase):
             optimize_strategy=strategy,
         )
 
-        self._oids_tids_hide(generator, strategy, True)
+        self._oids_tids_hide(generator, strategy)
 
-    def _oids_tids_none(self, generator, strategy, not_pg=False):
+    def _oids_tids_none(self, generator, strategy):
 
         project = Project(
             optimize_strategy=strategy,
@@ -268,11 +273,12 @@ class TestProjectOIDs(unittest.TestCase):
         project.create(None, qgis_project)
 
         # values
-        t_id_name = "T_Id" if not_pg else "t_id"
-        t_ili_tid_name = "T_Ili_Tid" if not_pg else "t_ili_tid"
+
         expected_uuid_expression = "uuid('WithoutBraces')"
-        expected_i32_expression = t_id_name
-        expected_standard_expression = f"'ch100000' || lpad( {t_id_name}, 8, 0 )"
+        expected_i32_expression = self.tid_fieldname
+        expected_standard_expression = (
+            f"'ch100000' || lpad( {self.tid_fieldname}, 8, 0 )"
+        )
         expected_other_expression = "'_' || uuid('WithoutBraces')"
 
         # check layertree
@@ -301,13 +307,22 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression() == expected_other_expression
+                )
+                # check if not null and unique constraints are set (shouldn't be)
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
                 )
                 count += 1
             # ANYOID
@@ -323,7 +338,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -331,6 +346,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # UUIDOID
             if tree_layer.layer().name() in [
@@ -349,12 +366,14 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_uuid_expression
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # STANARDOID
             if tree_layer.layer().name() in [
@@ -374,7 +393,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -383,6 +402,8 @@ class TestProjectOIDs(unittest.TestCase):
                     default_value_definition.expression()
                     == expected_standard_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # I32OID
             if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
@@ -397,12 +418,14 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_i32_expression
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
             if tree_layer.layer().name() in ["See", "Fluss"]:
@@ -420,7 +443,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -428,6 +451,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
 
         # should find 15
@@ -439,7 +464,7 @@ class TestProjectOIDs(unittest.TestCase):
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
             "default_value_expression"
-        ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+        ] = f"'chMBaker' || lpad( {self.tid_fieldname}, 8, 0 )"
         # change expression of See
         oid_settings["See"][
             "default_value_expression"
@@ -462,20 +487,20 @@ class TestProjectOIDs(unittest.TestCase):
             if tree_layer.layer().name() == "Parkplatz":
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression()
-                    == f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+                    == f"'chMBaker' || lpad( {self.tid_fieldname}, 8, 0 )"
                 )
                 count += 1
             if tree_layer.layer().name() == "See":
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -508,7 +533,7 @@ class TestProjectOIDs(unittest.TestCase):
 
         QgsProject.instance().clear()
 
-    def _oids_tids_group(self, generator, strategy, not_pg=False):
+    def _oids_tids_group(self, generator, strategy):
 
         project = Project(
             optimize_strategy=strategy,
@@ -533,11 +558,11 @@ class TestProjectOIDs(unittest.TestCase):
         tree_layers = root.findLayers()
         assert len(tree_layers) == 17
 
-        t_id_name = "T_Id" if not_pg else "t_id"
-        t_ili_tid_name = "T_Ili_Tid" if not_pg else "t_ili_tid"
         expected_uuid_expression = "uuid('WithoutBraces')"
-        expected_i32_expression = t_id_name
-        expected_standard_expression = f"'ch100000' || lpad( {t_id_name}, 8, 0 )"
+        expected_i32_expression = self.tid_fieldname
+        expected_standard_expression = (
+            f"'ch100000' || lpad( {self.tid_fieldname}, 8, 0 )"
+        )
         expected_other_expression = "'_' || uuid('WithoutBraces')"
 
         count = 0
@@ -559,13 +584,22 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression() == expected_other_expression
+                )
+                # check if not null and unique constraints are set (shouldn't)
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
                 )
                 count += 1
             # ANYOID
@@ -581,7 +615,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -589,6 +623,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # UUIDOID
             if tree_layer.layer().name() in [
@@ -607,12 +643,14 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_uuid_expression
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # STANARDOID
             if tree_layer.layer().name() in [
@@ -632,7 +670,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -641,6 +679,8 @@ class TestProjectOIDs(unittest.TestCase):
                     default_value_definition.expression()
                     == expected_standard_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # I32OID
             if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
@@ -655,12 +695,14 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_i32_expression
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
             if tree_layer.layer().name() in ["See", "Fluss"]:
@@ -678,7 +720,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -686,6 +728,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
 
         # should find 15
@@ -697,7 +741,7 @@ class TestProjectOIDs(unittest.TestCase):
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
             "default_value_expression"
-        ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+        ] = f"'chMBaker' || lpad( {self.tid_fieldname}, 8, 0 )"
         # change expression of See
         oid_settings["See"][
             "default_value_expression"
@@ -720,20 +764,20 @@ class TestProjectOIDs(unittest.TestCase):
             if tree_layer.layer().name() == "Parkplatz":
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression()
-                    == f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+                    == f"'chMBaker' || lpad( {self.tid_fieldname}, 8, 0 )"
                 )
                 count += 1
             if tree_layer.layer().name() == "See":
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -766,7 +810,7 @@ class TestProjectOIDs(unittest.TestCase):
         assert count == 3
         QgsProject.instance().clear()
 
-    def _oids_tids_hide(self, generator, strategy, not_pg=False):
+    def _oids_tids_hide(self, generator, strategy):
 
         project = Project(
             optimize_strategy=strategy,
@@ -791,11 +835,11 @@ class TestProjectOIDs(unittest.TestCase):
         tree_layers = root.findLayers()
         assert len(tree_layers) == 16
 
-        t_id_name = "T_Id" if not_pg else "t_id"
-        t_ili_tid_name = "T_Ili_Tid" if not_pg else "t_ili_tid"
         expected_uuid_expression = "uuid('WithoutBraces')"
-        expected_i32_expression = t_id_name
-        expected_standard_expression = f"'ch100000' || lpad( {t_id_name}, 8, 0 )"
+        expected_i32_expression = self.tid_fieldname
+        expected_standard_expression = (
+            f"'ch100000' || lpad( {self.tid_fieldname}, 8, 0 )"
+        )
         expected_other_expression = "'_' || uuid('WithoutBraces')"
 
         # "Wohnraum.Gebaeude" is hidden because of the strategy
@@ -818,13 +862,22 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression() == expected_other_expression
+                )
+                # check if not null and unique constraints are set (shouldn't)
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintUnique
+                )
+                assert not (
+                    t_ili_tid_field.constraints().constraints()
+                    & QgsFieldConstraints.ConstraintNotNull
                 )
                 count += 1
             # ANYOID
@@ -840,7 +893,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -848,6 +901,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # UUIDOID
             if tree_layer.layer().name() in ["Quartier.Gebaeude", "Wald"]:
@@ -862,12 +917,14 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_uuid_expression
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # STANARDOID
             if tree_layer.layer().name() in [
@@ -887,7 +944,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -896,6 +953,8 @@ class TestProjectOIDs(unittest.TestCase):
                     default_value_definition.expression()
                     == expected_standard_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # I32OID
             if tree_layer.layer().name() in ["Wiese", "Spass.Gebaeude"]:
@@ -910,12 +969,14 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert default_value_definition.expression() == expected_i32_expression
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
             # OIDMadness_V1.TypeID or OIDMadness_V1.TypeIDShort
             if tree_layer.layer().name() in ["See", "Fluss"]:
@@ -933,7 +994,7 @@ class TestProjectOIDs(unittest.TestCase):
 
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -941,6 +1002,8 @@ class TestProjectOIDs(unittest.TestCase):
                 assert (
                     default_value_definition.expression() == expected_other_expression
                 )
+                # check if not null and unique constraints are set
+                self._check_t_ili_tid_field_constraints(t_ili_tid_field)
                 count += 1
 
         # should find 14
@@ -952,7 +1015,7 @@ class TestProjectOIDs(unittest.TestCase):
         # change expression of Parkplatz
         oid_settings["Parkplatz"][
             "default_value_expression"
-        ] = f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+        ] = f"'chMBaker' || lpad( {self.tid_fieldname}, 8, 0 )"
         # change expression of See
         oid_settings["See"][
             "default_value_expression"
@@ -975,20 +1038,20 @@ class TestProjectOIDs(unittest.TestCase):
             if tree_layer.layer().name() == "Parkplatz":
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
                 assert default_value_definition is not None
                 assert (
                     default_value_definition.expression()
-                    == f"'chMBaker' || lpad( {t_id_name}, 8, 0 )"
+                    == f"'chMBaker' || lpad( {self.tid_fieldname}, 8, 0 )"
                 )
                 count += 1
             if tree_layer.layer().name() == "See":
                 # have look at the t_ili_tid field
                 fields = tree_layer.layer().fields()
-                field_idx = fields.lookupField(t_ili_tid_name)
+                field_idx = fields.lookupField(self.tilitid_fieldname)
                 t_ili_tid_field = fields.field(field_idx)
                 # check default value expression
                 default_value_definition = t_ili_tid_field.defaultValueDefinition()
@@ -1020,6 +1083,36 @@ class TestProjectOIDs(unittest.TestCase):
         assert count == 3
 
         QgsProject.instance().clear()
+
+    def _check_t_ili_tid_field_constraints(self, t_ili_tid_field):
+        assert (
+            t_ili_tid_field.constraints().constraints()
+            & QgsFieldConstraints.ConstraintUnique
+        )
+        assert (
+            t_ili_tid_field.constraints().constraints()
+            & QgsFieldConstraints.ConstraintNotNull
+        )
+        assert (
+            t_ili_tid_field.constraints().constraintStrength(
+                QgsFieldConstraints.ConstraintUnique
+            )
+            == QgsFieldConstraints.ConstraintStrengthHard
+        )
+        assert (
+            t_ili_tid_field.constraints().constraintStrength(
+                QgsFieldConstraints.ConstraintNotNull
+            )
+            == QgsFieldConstraints.ConstraintStrengthHard
+        )
+
+    def _set_pg_naming(self, is_pg=True):
+        if is_pg:
+            self.tilitid_fieldname = "t_ili_tid"
+            self.tid_fieldname = "t_id"
+        else:
+            self.tilitid_fieldname = "T_Ili_Tid"
+            self.tid_fieldname = "T_Id"
 
     def print_info(self, text):
         logging.info(text)

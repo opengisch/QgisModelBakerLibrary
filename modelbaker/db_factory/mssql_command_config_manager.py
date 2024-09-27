@@ -15,8 +15,11 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 from qgis.PyQt.QtCore import QSettings
 
+from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 from .db_command_config_manager import DbCommandConfigManager
 
 
@@ -24,10 +27,10 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
 
     _settings_base_path = "ili2mssql/"
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su=False, qgis=False):
+    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
         separator = ";"
         uri = []
         uri += ["DRIVER={{{}}}".format(self.configuration.db_odbc_driver)]
@@ -44,7 +47,7 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
 
         return separator.join(uri)
 
-    def get_db_args(self, hide_password=False, su=False):
+    def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
         db_args = list()
         db_args += ["--dbhost", self.configuration.dbhost]
         if self.configuration.dbport:
@@ -65,7 +68,7 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
 
         return db_args
 
-    def save_config_in_qsettings(self):
+    def save_config_in_qsettings(self) -> None:
         settings = QSettings()
 
         settings.setValue(self._settings_base_path + "host", self.configuration.dbhost)
@@ -87,7 +90,7 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
             self._settings_base_path + "odbc_driver", self.configuration.db_odbc_driver
         )
 
-    def load_config_from_qsettings(self):
+    def load_config_from_qsettings(self) -> None:
         settings = QSettings()
 
         self.configuration.dbhost = settings.value(

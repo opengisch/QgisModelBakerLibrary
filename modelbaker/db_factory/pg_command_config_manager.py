@@ -15,9 +15,12 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 from qgis.PyQt.QtCore import QSettings
 
-from ..libs import pgserviceparser
+from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
+from ..utils import db_utils
 from .db_command_config_manager import DbCommandConfigManager
 
 
@@ -32,10 +35,10 @@ class PgCommandConfigManager(DbCommandConfigManager):
 
     _settings_base_path = "ili2pg/"
 
-    def __init__(self, configuration):
+    def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su=False, qgis=False):
+    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
         uri = []
 
         if su:
@@ -60,56 +63,44 @@ class PgCommandConfigManager(DbCommandConfigManager):
             uri += ["service='{}'".format(self.configuration.dbservice)]
 
         # only set the params when they are not available in the service
-        if not pgserviceparser.service_config(self.configuration.dbservice).get(
-            "sslmode", None
-        ):
+        service_config, _ = db_utils.get_service_config(self.configuration.dbservice)
+        if not service_config or not service_config.get("sslmode", None):
             if self.configuration.sslmode:
                 uri += ["sslmode='{}'".format(self.configuration.sslmode)]
 
-        if not pgserviceparser.service_config(self.configuration.dbservice).get(
-            "host", None
-        ):
+        if not service_config or not service_config.get("host", None):
             uri += ["host={}".format(self.configuration.dbhost)]
 
-        if not pgserviceparser.service_config(self.configuration.dbservice).get(
-            "port", None
-        ):
+        if not service_config or not service_config.get("port", None):
             if self.configuration.dbport:
                 uri += ["port={}".format(self.configuration.dbport)]
 
-        if not pgserviceparser.service_config(self.configuration.dbservice).get(
-            "dbname", None
-        ):
+        if not service_config or not service_config.get("dbname", None):
             uri += ["dbname='{}'".format(self.configuration.database)]
 
         # only provide authcfg to the uri when it's needed for QGIS specific things
         if (
             qgis
             and self.configuration.dbauthid
-            and not (
-                pgserviceparser.service_config(self.configuration.dbservice).get(
-                    "user", None
-                )
-                and pgserviceparser.service_config(self.configuration.dbservice).get(
-                    "password", None
+            and (
+                not service_config
+                or not (
+                    service_config.get("user", None)
+                    and service_config.get("password", None)
                 )
             )
         ):
             uri += ["authcfg={}".format(self.configuration.dbauthid)]
         else:
-            if not pgserviceparser.service_config(self.configuration.dbservice).get(
-                "user", None
-            ):
+            if not service_config or not service_config.get("user", None):
                 uri += ["user={}".format(self.configuration.dbusr)]
-            if not pgserviceparser.service_config(self.configuration.dbservice).get(
-                "password", None
-            ):
+            if not service_config or not service_config.get("password", None):
                 if self.configuration.dbpwd:
                     uri += ["password={}".format(self.configuration.dbpwd)]
 
         return " ".join(uri)
 
-    def get_db_args(self, hide_password=False, su=False):
+    def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
         db_args = list()
         db_args += ["--dbhost", self.configuration.dbhost]
         if self.configuration.dbport:
@@ -141,12 +132,12 @@ class PgCommandConfigManager(DbCommandConfigManager):
         ]
         return db_args
 
-    def get_schema_import_args(self):
+    def get_schema_import_args(self) -> list[str]:
         args = list()
         args += ["--setupPgExt"]
         return args
 
-    def save_config_in_qsettings(self):
+    def save_config_in_qsettings(self) -> None:
         settings = QSettings()
         # PostgreSQL specific options
         settings.setValue(self._settings_base_path + "host", self.configuration.dbhost)
@@ -171,8 +162,11 @@ class PgCommandConfigManager(DbCommandConfigManager):
         settings.setValue(
             self._settings_base_path + "service", self.configuration.dbservice
         )
+        settings.setValue(
+            self._settings_base_path + "sslmode", self.configuration.sslmode
+        )
 
-    def load_config_from_qsettings(self):
+    def load_config_from_qsettings(self) -> None:
         settings = QSettings()
 
         self.configuration.dbhost = settings.value(
@@ -195,4 +189,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
         )
         self.configuration.db_use_super_login = settings.value(
             self._settings_base_path + "usesuperlogin", defaultValue=False, type=bool
+        )
+        self.configuration.sslmode = settings.value(
+            self._settings_base_path + "sslmode"
         )

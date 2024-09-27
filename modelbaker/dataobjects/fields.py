@@ -16,12 +16,18 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
 
-from qgis.core import QgsDefaultValue, QgsEditorWidgetSetup
+from typing import TYPE_CHECKING
+
+from qgis.core import QgsDefaultValue, QgsEditorWidgetSetup, QgsFieldConstraints
+
+if TYPE_CHECKING:
+    from .layers import Layer
 
 
 class Field:
-    def __init__(self, name):
+    def __init__(self, name: str) -> None:
         self.name = name
         self.alias = None
         self.read_only = False
@@ -31,18 +37,18 @@ class Field:
         self.enum_domain = None
         self.oid_domain = None
 
-    def dump(self):
+    def dump(self) -> dict:
         definition = dict()
         if self.alias:
             definition["alias"] = self.alias
 
         return definition
 
-    def load(self, definition):
+    def load(self, definition: dict) -> None:
         if "alias" in definition:
             self.alias = definition["alias"]
 
-    def create(self, layer):
+    def create(self, layer: Layer) -> None:
         field_idx = layer.layer.fields().indexOf(self.name)
 
         if self.alias:
@@ -55,3 +61,16 @@ class Field:
         if self.default_value_expression:
             default_value = QgsDefaultValue(self.default_value_expression)
             layer.layer.setDefaultValueDefinition(field_idx, default_value)
+
+        if self.oid_domain:
+            # if defined, then set not null and unique constraints
+            layer.layer.setFieldConstraint(
+                field_idx,
+                QgsFieldConstraints.ConstraintNotNull,
+                QgsFieldConstraints.ConstraintStrengthHard,
+            )
+            layer.layer.setFieldConstraint(
+                field_idx,
+                QgsFieldConstraints.ConstraintUnique,
+                QgsFieldConstraints.ConstraintStrengthHard,
+            )

@@ -77,10 +77,8 @@ class GPKGConnector(DBConnector):
         cursor.execute(
             """SELECT count(name)
             FROM sqlite_master
-            WHERE name = '{}';
-                    """.format(
-                GPKG_METADATA_TABLE
-            )
+            WHERE name = ?;""",
+            (GPKG_METADATA_TABLE,),
         )
         result = cursor.fetchone()[0] == 1
         cursor.close()
@@ -91,10 +89,8 @@ class GPKGConnector(DBConnector):
         cursor.execute(
             """SELECT count(name)
             FROM sqlite_master
-            WHERE name = '{}';
-                    """.format(
-                tablename
-            )
+            WHERE name = ?;""",
+            (tablename,),
         )
         result = cursor.fetchone()[0] == 1
         cursor.close()
@@ -297,11 +293,10 @@ class GPKGConnector(DBConnector):
 
         cursor = self.conn.cursor()
         cursor.execute(
-            """
-                        SELECT *
-                        FROM {meta_attr_table}
-        """.format(
-                meta_attr_table=GPKG_METAATTRS_TABLE
+            """SELECT *
+            FROM "{}";
+            """.format(
+                GPKG_METAATTRS_TABLE
             )
         )
         records = cursor.fetchall()
@@ -314,15 +309,15 @@ class GPKGConnector(DBConnector):
 
         cursor = self.conn.cursor()
         cursor.execute(
-            """
-                        SELECT
-                          attr_name,
-                          attr_value
-                        FROM {meta_attr_table}
-                        WHERE ilielement='{ili_name}'
-        """.format(
-                meta_attr_table=GPKG_METAATTRS_TABLE, ili_name=ili_name
-            )
+            """SELECT
+              attr_name,
+              attr_value
+            FROM "{}"
+            WHERE ilielement=?;
+            """.format(
+                GPKG_METAATTRS_TABLE
+            ),
+            (ili_name,),
         )
         records = cursor.fetchall()
         cursor.close()
@@ -330,7 +325,7 @@ class GPKGConnector(DBConnector):
 
     def get_fields_info(self, table_name):
         cursor = self.conn.cursor()
-        cursor.execute("PRAGMA table_info({});".format(table_name))
+        cursor.execute("""PRAGMA table_info("{}");""".format(table_name))
         columns_info = cursor.fetchall()
 
         columns_prop = list()
@@ -342,10 +337,8 @@ class GPKGConnector(DBConnector):
                 """
                 SELECT *
                 FROM t_ili2db_column_prop
-                WHERE tablename = '{}'
-                """.format(
-                    table_name
-                )
+                WHERE tablename = ?;""",
+                (table_name,),
             )
             columns_prop = cursor.fetchall()
 
@@ -355,20 +348,16 @@ class GPKGConnector(DBConnector):
                     """
                     SELECT SqlName, IliName
                     FROM t_ili2db_attrname
-                    WHERE owner = '{}'
-                    """.format(
-                        table_name
-                    )
+                    WHERE owner = ?;""",
+                    (table_name,),
                 )
             else:
                 cursor.execute(
                     """
                     SELECT SqlName, IliName
                     FROM t_ili2db_attrname
-                    WHERE colowner = '{}'
-                    """.format(
-                        table_name
-                    )
+                    WHERE colowner = ?;""",
+                    (table_name,),
                 )
             columns_full_name = cursor.fetchall()
 
@@ -449,11 +438,9 @@ class GPKGConnector(DBConnector):
         cursor = self.conn.cursor()
         cursor.execute(
             """SELECT sql
-                          FROM sqlite_master
-                          WHERE name = '{}' AND type = 'table'
-                       """.format(
-                table_name
-            )
+            FROM sqlite_master
+            WHERE name = ? AND type = 'table';""",
+            (table_name,),
         )
 
         # Create a mapping in the form of
@@ -470,6 +457,26 @@ class GPKGConnector(DBConnector):
         cursor.close()
         return constraint_mapping
 
+    def get_t_type_map_info(self, table_name):
+        if self.metadata_exists():
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                SELECT *
+                FROM t_ili2db_column_prop
+                WHERE tablename = ?
+                AND tag = 'ch.ehi.ili2db.types';""",
+                (table_name,),
+            )
+            types_entries = cursor.fetchall()
+
+            types_mapping = dict()
+            for types_entry in types_entries:
+                values = eval(types_entry["setting"])
+                types_mapping[types_entry["columnname"]] = values
+            return types_mapping
+        return {}
+
     def get_relations_info(self, filter_layer_list=[]):
         # We need to get the PK for each table, so first get tables_info
         # and then build something more searchable
@@ -480,7 +487,7 @@ class GPKGConnector(DBConnector):
         cursor = self.conn.cursor()
         complete_records = list()
         for table_info_name, table_info in tables_info_dict.items():
-            cursor.execute("PRAGMA foreign_key_list({});".format(table_info_name))
+            cursor.execute("""PRAGMA foreign_key_list("{}");""".format(table_info_name))
             foreign_keys = cursor.fetchall()
 
             for foreign_key in foreign_keys:
@@ -504,13 +511,15 @@ class GPKGConnector(DBConnector):
                         FROM t_ili2db_attrname AS ATTRNAME
                         INNER JOIN t_ili2db_meta_attrs AS META_ATTRS
                         ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.assocKind'
-                        WHERE ATTRNAME.sqlname = '{referencing_column}' AND ATTRNAME.{colowner} = '{referencing_table}' AND ATTRNAME.target = '{referenced_table}'
-                    """.format(
-                            referencing_column=foreign_key["from"],
-                            referencing_table=table_info["tablename"],
-                            referenced_table=foreign_key["table"],
-                            colowner="owner" if self.ili_version() == 3 else "colowner",
-                        )
+                        WHERE ATTRNAME.sqlname = ? AND ATTRNAME.{colowner} = ? AND ATTRNAME.target = ?;
+                        """.format(
+                            colowner="owner" if self.ili_version() == 3 else "colowner"
+                        ),
+                        (
+                            foreign_key["from"],
+                            table_info["tablename"],
+                            foreign_key["table"],
+                        ),
                     )
                     strength_record = cursor.fetchone()
                     record["strength"] = (
@@ -523,13 +532,15 @@ class GPKGConnector(DBConnector):
                         FROM t_ili2db_attrname AS ATTRNAME
                         INNER JOIN t_ili2db_meta_attrs AS META_ATTRS
                         ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.attrCardinalityMax'
-                        WHERE ATTRNAME.sqlname = '{referencing_column}' AND ATTRNAME.{colowner} = '{referencing_table}' AND ATTRNAME.target = '{referenced_table}'
-                    """.format(
-                            referencing_column=foreign_key["from"],
-                            referencing_table=table_info["tablename"],
-                            referenced_table=foreign_key["table"],
-                            colowner="owner" if self.ili_version() == 3 else "colowner",
-                        )
+                        WHERE ATTRNAME.sqlname = ? AND ATTRNAME.{colowner} = ? AND ATTRNAME.target = ?;
+                        """.format(
+                            colowner="owner" if self.ili_version() == 3 else "colowner"
+                        ),
+                        (
+                            foreign_key["from"],
+                            table_info["tablename"],
+                            foreign_key["table"],
+                        ),
                     )
                     cardinality_max_record = cursor.fetchone()
                     record["cardinality_max"] = (
@@ -585,9 +596,9 @@ class GPKGConnector(DBConnector):
 
             cursor.execute(
                 """SELECT iliname, sqlname
-                              FROM t_ili2db_classname
-                              {where}
-                           """.format(
+                FROM t_ili2db_classname
+                {where}
+                """.format(
                     where=where
                 )
             )
@@ -605,9 +616,9 @@ class GPKGConnector(DBConnector):
         )
         cursor.execute(
             """SELECT *
-                           FROM t_ili2db_classname
-                           WHERE iliname IN ({class_names})
-                        """.format(
+            FROM t_ili2db_classname
+            WHERE iliname IN ({class_names})
+            """.format(
                 class_names=class_names
             )
         )
@@ -619,9 +630,9 @@ class GPKGConnector(DBConnector):
         attr_names = "'" + "','".join(attrs_list) + "'"
         cursor.execute(
             """SELECT iliname, sqlname, owner
-                           FROM t_ili2db_attrname
-                           WHERE iliname IN ({attr_names})
-                        """.format(
+            FROM t_ili2db_attrname
+            WHERE iliname IN ({attr_names})
+            """.format(
                 attr_names=attr_names
             )
         )
@@ -633,9 +644,9 @@ class GPKGConnector(DBConnector):
         owner_names = "'" + "','".join(owners) + "'"
         cursor.execute(
             """SELECT iliname, sqlname, owner
-                           FROM t_ili2db_attrname
-                           WHERE owner IN ({owner_names})
-                        """.format(
+            FROM t_ili2db_attrname
+            WHERE owner IN ({owner_names})
+            """.format(
                 owner_names=owner_names
             )
         )
@@ -647,14 +658,14 @@ class GPKGConnector(DBConnector):
 
         cursor.execute(
             """SELECT distinct substr(iliname, 1, pos-1) AS modelname from
-                                    (SELECT *, instr(iliname,'.') AS pos FROM t_ili2db_trafo)"""
+            (SELECT *, instr(iliname,'.') AS pos FROM t_ili2db_trafo)"""
         )
 
         models = cursor.fetchall()
 
         cursor.execute(
             """SELECT modelname, content
-                          FROM t_ili2db_model """
+            FROM t_ili2db_model"""
         )
 
         contents = cursor.fetchall()
@@ -708,12 +719,12 @@ class GPKGConnector(DBConnector):
             cursor = self.conn.cursor()
             cursor.execute(
                 """SELECT setting
-                            FROM {}
-                            WHERE tag = ?
-                            """.format(
+                FROM "{}"
+                WHERE tag = ?
+                """.format(
                     GPKG_SETTINGS_TABLE
                 ),
-                ["ch.ehi.ili2db.BasketHandling"],
+                ("ch.ehi.ili2db.BasketHandling",),
             )
             content = cursor.fetchone()
             cursor.close()
@@ -726,13 +737,14 @@ class GPKGConnector(DBConnector):
             cursor = self.conn.cursor()
             cursor.execute(
                 """SELECT b.t_id as basket_t_id,
-                            b.t_ili_tid as basket_t_ili_tid,
-                            b.topic as topic,
-                            d.t_id as dataset_t_id,
-                            d.datasetname as datasetname from {basket_table} b
-                            JOIN {dataset_table} d
-                            ON b.dataset = d.t_id
-                        """.format(
+                b.t_ili_tid as basket_t_ili_tid,
+                b.topic as topic,
+                b.attachmentkey as attachmentkey,
+                d.t_id as dataset_t_id,
+                d.datasetname as datasetname from "{basket_table}" b
+                JOIN "{dataset_table}" d
+                ON b.dataset = d.t_id;
+                """.format(
                     basket_table=GPKG_BASKET_TABLE, dataset_table=GPKG_DATASET_TABLE
                 )
             )
@@ -746,8 +758,8 @@ class GPKGConnector(DBConnector):
             cursor = self.conn.cursor()
             cursor.execute(
                 """SELECT t_id, datasetname
-                           FROM {dataset_table}
-                        """.format(
+                FROM "{dataset_table}";
+                """.format(
                     dataset_table=GPKG_DATASET_TABLE
                 )
             )
@@ -831,7 +843,7 @@ class GPKGConnector(DBConnector):
                     ON CN.sqlname = TP.tablename
                     LEFT JOIN T_ILI2DB_META_ATTRS as MA
                     ON substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) = MA.ilielement and MA.attr_name = 'ili2db.ili.bidDomain'
-					WHERE topic != '' and ( TP.setting != 'ENUM' or TP.setting IS NULL )
+                    WHERE topic != '' and ( TP.setting != 'ENUM' or TP.setting IS NULL )
                 """.format(
                     # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not (except if it's extended by itself)
                     relevance="""
@@ -852,16 +864,68 @@ class GPKGConnector(DBConnector):
             return contents
         return {}
 
+    def get_classes_relevance(self):
+        if self._table_exists("T_ILI2DB_CLASSNAME"):
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                SELECT
+                    c.iliname as iliname,
+                    c.SqlName as sqlname,
+                    CASE WHEN c.iliname IN (
+                            WITH names AS (
+                                WITH class_level_name AS(
+                                    WITH topic_level_name AS (
+                                        SELECT
+                                        thisClass as fullname,
+                                        substr(thisClass, 0, instr(thisClass, '.')) as model,
+                                        substr(ltrim(thisClass,substr(thisClass, 0, instr(thisClass, '.'))),2) as topicclass
+                                        FROM T_ILI2DB_INHERITANCE
+                                    )
+                                    SELECT *, ltrim(topicclass,substr(topicclass, 0, instr(topicclass, '.'))) as class_with_dot
+                                    FROM topic_level_name
+                                )
+                                SELECT fullname, model, topicclass, substr(class_with_dot, instr(class_with_dot,'.')+1) as class
+                                FROM class_level_name
+                                )
+                                SELECT i.baseClass as iliname
+                                FROM T_ILI2DB_INHERITANCE i
+                                LEFT JOIN names extend_names
+                                ON thisClass = extend_names.fullname
+                                LEFT JOIN names base_names
+                                ON baseClass = base_names.fullname
+                                -- it's extended
+                                LEFT JOIN T_ILI2DB_CLASSNAME c
+                                ON IliName = i.baseClass
+                                WHERE baseClass IS NOT NULL
+                                -- in a different model
+                                AND base_names.model != extend_names.model
+                                AND (
+                                    -- with the same name
+                                    base_names.class = extend_names.class
+                                    OR
+                                    -- multiple times in the same extended model
+                                    (SELECT MAX(count) FROM (SELECT COUNT(baseClass) AS count FROM T_ILI2DB_INHERITANCE JOIN names extend_names ON thisClass = extend_names.fullname WHERE baseClass = i.baseClass GROUP BY baseClass, extend_names.model) AS counts )>1
+                                )
+                    ) THEN FALSE ELSE TRUE END AS relevance
+                FROM T_ILI2DB_CLASSNAME c
+                """
+            )
+            contents = cursor.fetchall()
+            cursor.close()
+            return contents
+        return []
+
     def create_basket(self, dataset_tid, topic, tilitid_value=None):
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
-                """
-                    SELECT * FROM {basket_table}
-                    WHERE dataset = {dataset_tid} and topic = '{topic}'
+                """SELECT * FROM {basket_table}
+                WHERE dataset = ? and topic = ?
                 """.format(
-                    basket_table=GPKG_BASKET_TABLE, dataset_tid=dataset_tid, topic=topic
-                )
+                    basket_table=GPKG_BASKET_TABLE
+                ),
+                (dataset_tid, topic),
             )
             if cursor.fetchone():
                 cursor.close()
@@ -885,17 +949,19 @@ class GPKGConnector(DBConnector):
                     tilitid_value = f"'{tilitid_value}'"
                 cursor.execute(
                     """
-                    INSERT INTO {basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES ({next_id}, {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
-                """.format(
+                    INSERT INTO "{basket_table}" ("{tid_name}", dataset, topic, "{tilitid_name}", attachmentkey )
+                    VALUES (?, ?, ?, ?, 'modelbaker')
+                    """.format(
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
                         basket_table=GPKG_BASKET_TABLE,
-                        next_id=next_id,
-                        dataset_tid=dataset_tid,
-                        topic=topic,
-                        tilitid=tilitid_value,
-                    )
+                    ),
+                    (
+                        next_id,
+                        dataset_tid,
+                        topic,
+                        tilitid_value,
+                    ),
                 )
                 self.conn.commit()
                 cursor.close()
@@ -915,12 +981,12 @@ class GPKGConnector(DBConnector):
             cursor = self.conn.cursor()
             cursor.execute(
                 """SELECT setting
-                            FROM {}
-                            WHERE tag = ?
-                            """.format(
+                FROM "{}"
+                WHERE tag = ?
+                """.format(
                     GPKG_SETTINGS_TABLE
                 ),
-                ["ch.ehi.ili2db.TidHandling"],
+                ("ch.ehi.ili2db.TidHandling",),
             )
             content = cursor.fetchone()
             cursor.close()
@@ -934,8 +1000,8 @@ class GPKGConnector(DBConnector):
             cursor = self.conn.cursor()
             cursor.execute(
                 """SELECT *
-                            FROM {}
-                            """.format(
+                FROM "{}"
+                """.format(
                     GPKG_SETTINGS_TABLE
                 )
             )
@@ -949,11 +1015,9 @@ class GPKGConnector(DBConnector):
             # fetch last unique id of field_name
             cursor = self.conn.cursor()
             cursor.execute(
-                """
-                    SELECT T_LastUniqueId, T_CreateDate FROM T_KEY_OBJECT
-                    WHERE T_Key = ?
-                """,
-                [field_name],
+                """SELECT T_LastUniqueId, T_CreateDate FROM T_KEY_OBJECT
+                WHERE T_Key = ?""",
+                (field_name,),
             )
 
             content = cursor.fetchone()
@@ -1005,12 +1069,9 @@ class GPKGConnector(DBConnector):
         if self._table_exists("T_KEY_OBJECT"):
             cursor = self.conn.cursor()
             cursor.execute(
-                """
-                    SELECT T_LastUniqueId FROM T_KEY_OBJECT
-                    WHERE T_Key = '{}'
-                """.format(
-                    self.tid
-                )
+                """SELECT T_LastUniqueId FROM T_KEY_OBJECT
+                WHERE T_Key = ?;""",
+                (self.tid,),
             )
 
             content = cursor.fetchone()
@@ -1037,23 +1098,19 @@ class GPKGConnector(DBConnector):
                     cursor.execute(
                         """
                         INSERT INTO T_KEY_OBJECT (T_Key, T_LastUniqueId, T_LastChange, T_CreateDate, T_User )
-                        VALUES ('{tid}', {value}, date('now'), date('now'), 'modelbaker')
-                        """.format(
-                            tid=self.tid, value=value
-                        )
+                        VALUES (?, ?, date('now'), date('now'), 'modelbaker')
+                        """,
+                        (self.tid, value),
                     )
                 else:
                     # just update it
                     cursor.execute(
-                        """
-                            UPDATE T_KEY_OBJECT SET
-                            T_LastUniqueID = {value},
-                            T_LastChange = date('now'),
-                            T_User = 'modelbaker'
-                            WHERE T_Key = '{tid}';
-                        """.format(
-                            tid=self.tid, value=value
-                        )
+                        """UPDATE T_KEY_OBJECT SET
+                        T_LastUniqueID = ?,
+                        T_LastChange = date('now'),
+                        T_User = 'modelbaker'
+                        WHERE T_Key = ?;""",
+                        (value, self.tid),
                     )
                 self.conn.commit()
                 cursor.close()

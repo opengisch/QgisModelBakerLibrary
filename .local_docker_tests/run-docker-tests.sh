@@ -19,20 +19,3 @@
 set -e
 
 /usr/src/tests/testdata/mssql/setup-mssql.sh
-
-# Default to postgres15 unless another host has been defined (i.e. postgres13 from github ci)
-export PGHOST=${PGHOST-postgres15}
-
-# rationale: Wait for postgres container to become available
-echo "Wait a moment while loading the database."
-while ! PGPASSWORD='docker' psql -h $PGHOST -U docker -p 5432 -l &> /dev/null
-do
-  printf "."
-  sleep 2
-done
-echo ""
-
-pushd /usr/src
-DEFAULT_PARAMS='-v'
-xvfb-run python -m pytest ${@:-`echo $DEFAULT_PARAMS`} $1 $2
-popd

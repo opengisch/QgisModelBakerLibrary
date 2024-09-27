@@ -15,6 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 from abc import ABC, abstractmethod
 
 from ..iliwrapper.ili2dbconfig import (
@@ -32,7 +34,7 @@ class DbCommandConfigManager(ABC):
     :ivar configuration object that will be managed
     """
 
-    def __init__(self, configuration: Ili2DbCommandConfiguration):
+    def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         """
         :param configuration: Configuration object that will be managed.
         :type configuration: :class:`Ili2DbCommandConfiguration`
@@ -40,7 +42,7 @@ class DbCommandConfigManager(ABC):
         self.configuration = configuration
 
     @abstractmethod
-    def get_uri(self, su: bool = False, qgis: bool = False):
+    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
         """Gets database uri (connection string) for db connectors (:class:`DBConnector`).
 
         :param bool su: *True* to use super user credentials, *False* otherwise.
@@ -50,7 +52,7 @@ class DbCommandConfigManager(ABC):
         """
 
     @abstractmethod
-    def get_db_args(self, hide_password=False, su=False):
+    def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
         """Gets a list of ili2db arguments related to database.
 
         :param bool hide_password: *True* to mask the password, *False* otherwise.
@@ -59,7 +61,7 @@ class DbCommandConfigManager(ABC):
         :rtype: list
         """
 
-    def get_schema_import_args(self):
+    def get_schema_import_args(self) -> list[str]:
         """Gets a list of ili2db arguments to use in operation schema import.
 
         :return: ili2db arguments list.
@@ -67,7 +69,7 @@ class DbCommandConfigManager(ABC):
         """
         return list()
 
-    def get_ili2db_args(self, hide_password=False):
+    def get_ili2db_args(self, hide_password: bool = False) -> list[str]:
         """Gets a complete list of ili2db arguments in order to execute the app.
 
         :param bool hide_password: *True* to mask the password, *False* otherwise.
@@ -84,14 +86,14 @@ class DbCommandConfigManager(ABC):
         return ili2dbargs
 
     @abstractmethod
-    def save_config_in_qsettings(self):
+    def save_config_in_qsettings(self) -> None:
         """Saves configuration values related to database in QSettings.
 
         :return: None
         """
 
     @abstractmethod
-    def load_config_from_qsettings(self):
+    def load_config_from_qsettings(self) -> None:
         """Loads configuration values related to database from Qsettings.
 
         :return: None

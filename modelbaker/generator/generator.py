@@ -16,7 +16,10 @@
  *                                                                         *
  ***************************************************************************/
 """
+from __future__ import annotations
+
 import re
+from typing import Optional
 
 from qgis.core import QgsApplication, QgsRelation, QgsWkbTypes
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QObject, pyqtSignal
@@ -26,6 +29,7 @@ from ..dataobjects.layers import Layer
 from ..dataobjects.legend import LegendGroup
 from ..dataobjects.relations import Relation
 from ..db_factory.db_simple_factory import DbSimpleFactory
+from ..iliwrapper.globals import DbIliMode
 from ..utils.globals import OptimizeStrategy
 from ..utils.qt_utils import slugify
 from .config import BASKET_FIELDNAMES, IGNORED_FIELDNAMES, READONLY_FIELDNAMES
@@ -40,16 +44,16 @@ class Generator(QObject):
 
     def __init__(
         self,
-        tool,
-        uri,
-        inheritance,
-        schema=None,
-        pg_estimated_metadata=False,
-        parent=None,
-        mgmt_uri=None,
-        consider_basket_handling=False,
-        optimize_strategy=OptimizeStrategy.NONE,
-    ):
+        tool: DbIliMode,
+        uri: str,
+        inheritance: str,
+        schema: Optional[str] = None,
+        pg_estimated_metadata: bool = False,
+        parent: QObject = None,
+        mgmt_uri: Optional[str] = None,
+        consider_basket_handling: bool = False,
+        optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
+    ) -> None:
         """
         Creates a new Generator objects.
         :param uri: The uri that should be used in the resulting project. If authcfg is used, make sure the mgmt_uri is set as well.
@@ -78,21 +82,21 @@ class Generator(QObject):
 
         self.collected_print_messages = []
 
-    def print_info(self, text):
+    def print_info(self, text: str) -> None:
         self.stdout.emit(text)
 
-    def print_messages(self):
+    def print_messages(self) -> None:
         for message in self.collected_print_messages:
             self.new_message.emit(message["level"], message["text"])
         self.collected_print_messages.clear()
 
-    def append_print_message(self, level, text):
+    def append_print_message(self, level, text) -> None:
         message = {"level": level, "text": text}
 
         if message not in self.collected_print_messages:
             self.collected_print_messages.append(message)
 
-    def layers(self, filter_layer_list=[]):
+    def layers(self, filter_layer_list: list = []) -> list[Layer]:
         ignore_basket_tables = not self.basket_handling
         tables_info = self.get_tables_info_without_ignored_tables(ignore_basket_tables)
         layers = list()
@@ -271,9 +275,12 @@ class Generator(QObject):
             # Configure fields for current table
             fields_info = self.get_fields_info(record["tablename"])
             min_max_info = self.get_min_max_info(record["tablename"])
+            # We get the value map values from the check-constraints (only pg support) and additionally we check the t_type values in the ili2db-meta-tables
             value_map_info = self.get_value_map_info(record["tablename"])
-            re_iliname = re.compile(r".*\.(.*)$")
+            t_type_map_info = self.get_t_type_map_info(record["tablename"])
+            value_map_info.update(t_type_map_info)
 
+            re_iliname = re.compile(r".*\.(.*)$")
             for fielddef in fields_info:
                 column_name = fielddef["column_name"]
                 fully_qualified_name = (
@@ -337,9 +344,25 @@ class Generator(QObject):
 
                 if column_name in value_map_info:
                     field.widget = "ValueMap"
-                    field.widget_config["map"] = [
-                        {val: val} for val in value_map_info[column_name]
-                    ]
+
+                    # if it's the t_type column, then handle concerning relevance
+                    if column_name.lower() == "t_type":
+                        tables_relevance_info = self.get_tables_relevance()
+                        field.widget_config["map"] = []
+                        for val in value_map_info[column_name]:
+                            if (
+                                not tables_relevance_info[val]["relevance"]
+                                and self.optimize_strategy == OptimizeStrategy.HIDE
+                            ):
+                                continue
+                            field.widget_config["map"].append(
+                                {tables_relevance_info[val]["iliname"]: val}
+                            )
+                            field.default_value_expression = f"'{val}'"
+                    else:
+                        field.widget_config["map"] = [
+                            {val: val} for val in value_map_info[column_name]
+                        ]
 
                 if "attr_mapping" in fielddef and fielddef["attr_mapping"] == "ARRAY":
                     field.widget = "List"
@@ -432,11 +455,13 @@ class Generator(QObject):
 
     def _rename_ambiguous_layers(self, layers, second_pass=False):
         # rename ambiguous layers with topic (on not second_pass) or model (on second_pass) prefix
-        # on irrelevant layers only if we don't ride OptimizeStrategy.HIDE
+        # on irrelevant layers only if we don't ride OptimizeStrategy.HIDE or we do but on smart1
         aliases = [
             l.alias
             for l in layers
-            if l.is_relevant or self.optimize_strategy != OptimizeStrategy.HIDE
+            if l.is_relevant
+            or self.optimize_strategy != OptimizeStrategy.HIDE
+            or self.inheritance == "smart1"
         ]
         ambiguous_aliases = [alias for alias in aliases if aliases.count(alias) > 1]
         for layer in layers:
@@ -471,12 +496,14 @@ class Generator(QObject):
                     if (
                         not referencing_layer.is_relevant
                         and self.optimize_strategy == OptimizeStrategy.HIDE
+                        and self.inheritance == "smart2"
                     ):
                         continue
                     for referenced_layer in layer_map[record["referenced_table"]]:
                         if (
                             not referenced_layer.is_relevant
                             and self.optimize_strategy == OptimizeStrategy.HIDE
+                            and self.inheritance == "smart2"
                         ):
                             continue
                         relation = Relation()
@@ -683,7 +710,10 @@ class Generator(QObject):
         else:
             irrelevant_layers = []
             relevant_layers = []
-            if self.optimize_strategy == OptimizeStrategy.NONE:
+            if (
+                self.optimize_strategy == OptimizeStrategy.NONE
+                or self.inheritance == "smart1"
+            ):
                 relevant_layers = layers
             else:
                 for layer in layers:
@@ -878,6 +908,22 @@ class Generator(QObject):
 
     def get_value_map_info(self, table_name):
         return self._db_connector.get_value_map_info(table_name)
+
+    def get_tables_relevance(self):
+        """
+        Returns a dict with relevance info per sqlname of class.
+        """
+        tables_relevance = {}
+        for record in self._db_connector.get_classes_relevance():
+            tables_relevance[record["sqlname"]] = {
+                "iliname": record["iliname"],
+                "relevance": record["relevance"],
+            }
+
+        return tables_relevance
+
+    def get_t_type_map_info(self, table_name):
+        return self._db_connector.get_t_type_map_info(table_name)
 
     def get_relations_info(self, filter_layer_list=[]):
         return self._db_connector.get_relations_info(filter_layer_list)

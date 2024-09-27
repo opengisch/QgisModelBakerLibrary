@@ -25,7 +25,6 @@ import tempfile
 import zipfile
 
 from qgis.PyQt.QtCore import QCoreApplication
-from qgis.PyQt.QtGui import QColor
 
 from ..utils.qt_utils import NetworkError, download_file
 from .globals import DbIliMode
@@ -139,20 +138,6 @@ def get_all_modeldir_in_path(path, lambdafunction=None):
     # Remove duplicates
     modeldirs = list(dict.fromkeys(modeldirs))
     return ";".join(modeldirs)
-
-
-def color_log_text(text, txt_edit):
-    textlines = text.splitlines()
-    for textline in textlines:
-        if textline.startswith("Warning:"):
-            txt_edit.setTextColor(QColor("#FFBF00"))
-            txt_edit.append(textline)
-        elif "error" in textline.lower() or "failed" in textline.lower():
-            txt_edit.setTextColor(QColor("#aa2222"))
-            txt_edit.append(textline)
-        else:
-            txt_edit.setTextColor(QColor("#2a2a2a"))
-            txt_edit.append(textline)
 
 
 def get_java_path(base_configuration):

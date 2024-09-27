@@ -1,0 +1,21 @@
+version: '3'
+services:
+  mssql:
+    image: mcr.microsoft.com/mssql/server:2019-CU11-ubuntu-20.04
+    environment:
+      ACCEPT_EULA: Y
+      SA_PASSWORD: <YourStrong!Passw0rd>
+    ports:
+      - "1433:1433"
+
+  qgis:
+    build:
+      context: ..
+      dockerfile: ./.docker/Dockerfile
+      args:
+        QGIS_TEST_VERSION: latest
+    tty: true
+    volumes:
+      - ..:/usr/src
+    links:
+      - mssql

@@ -1,0 +1,13 @@
+docker-compose up -d
+
+docker exec -it local_docker_tests_qgis_1 bash
+
+in docker:
+/usr/src/.local_docker_tests/run-docker-tests.sh;
+java -jar /usr/src/modelbaker/iliwrapper/bin/ili2mssql-5.0.0/ili2mssql-5.0.0.jar --schemaimport --dbhost mssql --dbusr sa --dbpwd '<YourStrong!Passw0rd>' --dbdatabase gis --dbschema optimal_staedtische_manuel --coalesceCatalogueRef --createEnumTabs --createNumChecks --createUnique --createFk --createFkIdx --coalesceMultiSurface --coalesceMultiLine --coalesceMultiPoint --coalesceArray --beautifyEnumDispName --createGeomIdx --createMetaInfo --expandMultilingual --createTypeConstraint --createEnumTabsWithId --createTidCol --importTid --smart2Inheritance --strokeArcs --createBasketCol --defaultSrsAuth EPSG --defaultSrsCode 2056 --preScript NULL --postScript NULL --models Staedtische_Ortsplanung_V1_1 --iliMetaAttrs NULL /usr/src/tests/testdata/ilimodels/Staedtische_Ortsplanung_V1_1.ili
+
+lokal: installiere vscode plugin mssql client und connecte:
+localhost
+1433
+sa
+'<YourStrong!Passw0rd>'

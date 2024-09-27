@@ -25,17 +25,17 @@ def get_tool_version(tool, db_ili_version):
         if db_ili_version == 3:
             return "3.11.3"
         else:
-            return "5.0.1"
+            return "5.1.0"
     elif tool == DbIliMode.ili2pg:
         if db_ili_version == 3:
             return "3.11.2"
         else:
-            return "5.0.1"
+            return "5.1.0"
     elif tool == DbIliMode.ili2mssql:
         if db_ili_version == 3:
             return "3.12.2"
         else:
-            return "5.0.1"
+            return "5.1.0"
 
     return "0"
 
