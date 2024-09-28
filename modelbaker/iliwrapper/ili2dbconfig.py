@@ -111,31 +111,35 @@ class BaseConfiguration:
 
 
 class Ili2DbCommandConfiguration:
-    def __init__(self):
-        self.base_configuration = BaseConfiguration()
+    def __init__(self, other=None):
+        if not isinstance(other, Ili2DbCommandConfiguration):
+            self.base_configuration = BaseConfiguration()
 
-        self.dbport = ""
-        self.dbhost = ""
-        self.dbpwd = ""
-        self.dbusr = ""
-        self.dbauthid = ""
-        self.db_use_super_login = False
-        self.database = ""
-        self.dbschema = ""
-        self.dbfile = ""
-        self.dbservice = None
-        self.sslmode = None
-        self.tool = None
-        self.ilifile = ""
-        self.ilimodels = ""
-        self.tomlfile = ""
-        self.dbinstance = ""
-        self.db_odbc_driver = ""
-        self.disable_validation = False
-        self.metaconfig = None
-        self.metaconfig_id = None
-        self.metaconfig_params_only = False
-        self.db_ili_version = None
+            self.dbport = ""
+            self.dbhost = ""
+            self.dbpwd = ""
+            self.dbusr = ""
+            self.dbauthid = ""
+            self.db_use_super_login = False
+            self.database = ""
+            self.dbschema = ""
+            self.dbfile = ""
+            self.dbservice = None
+            self.sslmode = None
+            self.tool = None
+            self.ilifile = ""
+            self.ilimodels = ""
+            self.tomlfile = ""
+            self.dbinstance = ""
+            self.db_odbc_driver = ""
+            self.disable_validation = False
+            self.metaconfig = None
+            self.metaconfig_id = None
+            self.metaconfig_params_only = False
+            self.db_ili_version = None
+        else:
+            # We got an 'other' object from which we'll get parameters
+            self.__dict__ = other.__dict__.copy()
 
     def append_args(self, args, values, consider_metaconfig=False, force_append=False):
 
@@ -186,8 +190,8 @@ class Ili2DbCommandConfiguration:
 
 
 class ExportConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, other: Ili2DbCommandConfiguration = None):
+        super().__init__(other)
         self.xtffile = ""
         self.with_exporttid = False
         self.iliexportmodels = ""
@@ -228,8 +232,8 @@ class ExportConfiguration(Ili2DbCommandConfiguration):
 
 
 class SchemaImportConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, other: Ili2DbCommandConfiguration = None):
+        super().__init__(other)
         self.inheritance = "smart1"
         self.create_basket_col = False
         self.create_import_tid = True
@@ -323,8 +327,8 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
 
 class ImportDataConfiguration(SchemaImportConfiguration):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, other: Ili2DbCommandConfiguration = None):
+        super().__init__(other)
         self.xtffile = ""
         self.delete_data = False
         self.with_importtid = False
@@ -376,8 +380,8 @@ class ImportDataConfiguration(SchemaImportConfiguration):
 
 
 class UpdateDataConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, other: Ili2DbCommandConfiguration = None):
+        super().__init__(other)
         self.xtffile = ""
         self.dataset = ""
         self.delete_data = False
@@ -414,8 +418,8 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
 
 
 class ValidateConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, other: Ili2DbCommandConfiguration = None):
+        super().__init__(other)
         self.ilimodels = ""
         self.topics = ""
         self.dataset = ""
@@ -475,8 +479,8 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
 
 class DeleteConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, other: Ili2DbCommandConfiguration = None):
+        super().__init__(other)
         self.dataset = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
