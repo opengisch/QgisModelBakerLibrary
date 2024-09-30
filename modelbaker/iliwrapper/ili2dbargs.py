@@ -52,11 +52,18 @@ def _get_db_args(configuration, hide_password=False):
             db_args += ["--dbport", configuration.dbport]
         if su:
             db_args += ["--dbusr", configuration.base_configuration.super_pg_user]
+        elif configuration.dbauthid:
+            # Operations like Export can work with authconf
+            # and with no superuser login
+            from ..utils.db_utils import get_authconfig_map
+
+            authconfig_map = get_authconfig_map(configuration.dbauthid)
+            db_args += ["--dbusr", authconfig_map.get("username")]
         else:
             db_args += ["--dbusr", configuration.dbusr]
         if (
             not su
-            and configuration.dbpwd
+            and (configuration.dbpwd or configuration.dbauthid)
             or su
             and configuration.base_configuration.super_pg_password
         ):
@@ -68,8 +75,16 @@ def _get_db_args(configuration, hide_password=False):
                         "--dbpwd",
                         configuration.base_configuration.super_pg_password,
                     ]
-                else:
+                elif configuration.dbpwd:
                     db_args += ["--dbpwd", configuration.dbpwd]
+                elif configuration.dbauthid:
+                    # Operations like Export can work with authconf
+                    # and with no superuser login
+                    from ..utils.db_utils import get_authconfig_map
+
+                    authconfig_map = get_authconfig_map(configuration.dbauthid)
+                    db_args += ["--dbpwd", authconfig_map.get("password")]
+
         db_args += ["--dbdatabase", configuration.database]
         db_args += ["--dbschema", configuration.dbschema or configuration.database]
 
