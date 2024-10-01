@@ -21,6 +21,7 @@ import logging
 
 from qgis.PyQt.QtCore import QDir, QFile
 
+from ..utils.db_utils import get_authconfig_map
 from .globals import DbIliMode
 from .ili2dbconfig import SchemaImportConfiguration
 
@@ -55,8 +56,6 @@ def _get_db_args(configuration, hide_password=False):
         elif configuration.dbauthid:
             # Operations like Export can work with authconf
             # and with no superuser login
-            from ..utils.db_utils import get_authconfig_map
-
             authconfig_map = get_authconfig_map(configuration.dbauthid)
             db_args += ["--dbusr", authconfig_map.get("username")]
         else:
@@ -80,8 +79,6 @@ def _get_db_args(configuration, hide_password=False):
                 elif configuration.dbauthid:
                     # Operations like Export can work with authconf
                     # and with no superuser login
-                    from ..utils.db_utils import get_authconfig_map
-
                     authconfig_map = get_authconfig_map(configuration.dbauthid)
                     db_args += ["--dbpwd", authconfig_map.get("password")]
 
