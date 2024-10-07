@@ -266,7 +266,7 @@ class GPKGConnector(DBConnector):
         for record in filtered_records:
             cursor.execute(
                 """
-                PRAGMA table_info({})
+                PRAGMA table_info("{}")
                 """.format(
                     record["tablename"]
                 )
