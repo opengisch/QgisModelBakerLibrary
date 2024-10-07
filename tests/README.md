@@ -28,7 +28,7 @@ These are dirty notes for the quickest way to test mssql queries manually in the
 
 1. Create a new dir. E.g. `.local_docker_test`
 2. Copy the original docker-compose file from directory `.docker` and remove everything except the qgis and the mssql container.
-3. Copy the original Dockerfile as well. Leaf it like it is...
+3. Copy the original Dockerfile as well. Leave it like it is...
 4. Copy the original `run-docker-tests.sh` and remove everything except:
     ```bash
     set -e

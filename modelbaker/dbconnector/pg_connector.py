@@ -49,6 +49,7 @@ class PGConnector(DBConnector):
         self.iliCodeName = "ilicode"
         self.tid = "t_id"
         self.tilitid = "t_ili_tid"
+        self.attachmentKey = "attachmentkey"
         self.dispName = "dispname"
         self.basket_table_name = PG_BASKET_TABLE
         self.dataset_table_name = PG_DATASET_TABLE
@@ -1100,7 +1101,9 @@ class PGConnector(DBConnector):
             return cur.fetchall()
         return []
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         if self.schema and self._table_exists(PG_BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1128,7 +1131,7 @@ class PGConnector(DBConnector):
                     sql.SQL(
                         """
                         INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey)
-                        VALUES (nextval(%s), %s, %s, %s, 'modelbaker')
+                        VALUES (nextval(%s), %s, %s, %s, %s)
                         """
                     ).format(
                         schema=sql.Identifier(self.schema),
@@ -1141,6 +1144,7 @@ class PGConnector(DBConnector):
                         dataset_tid,
                         topic,
                         tilitid_value,
+                        attachment_key,
                     ),
                 )
                 self.conn.commit()
@@ -1153,6 +1157,48 @@ class PGConnector(DBConnector):
                     'Could not create basket for topic "{}": {}'
                 ).format(topic, error_message)
         return False, self.tr('Could not create basket for topic "{}".').format(topic)
+
+    def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        if self.schema and self._table_exists(PG_BASKET_TABLE):
+            cur = self.conn.cursor()
+            try:
+                cur.execute(
+                    sql.SQL(
+                        """
+                        UPDATE {schema}.{basket_table}
+                        SET dataset = %s,
+                            {t_ili_tid} = %s,
+                            {attachment_key} = %s
+                        WHERE {tid_name} = %s
+                        """
+                    ).format(
+                        schema=sql.Identifier(self.schema),
+                        basket_table=sql.Identifier(PG_BASKET_TABLE),
+                        t_ili_tid=sql.Identifier(self.tilitid),
+                        attachment_key=sql.Identifier(self.attachmentKey),
+                        tid_name=sql.Identifier(self.tid),
+                    ),
+                    (
+                        basket_config["dataset_t_id"],
+                        basket_config["bid_value"],
+                        basket_config["attachmentkey"],
+                        basket_config["basket_t_id"],
+                    ),
+                )
+                self.conn.commit()
+                return True, self.tr(
+                    'Successfully edited basket for topic "{}" and dataset "{}".'
+                ).format(basket_config["topic"], basket_config["datasetname"])
+            except psycopg2.errors.Error as e:
+                error_message = " ".join(e.args)
+                return False, self.tr(
+                    'Could not edit basket for topic "{}" and dataset "{}": {}'
+                ).format(
+                    basket_config["topic"], basket_config["datasetname"], error_message
+                )
+        return False, self.tr(
+            'Could not edit basket for topic "{}" and dataset "{}"'
+        ).format(basket_config["topic"], basket_config["datasetname"])
 
     def get_tid_handling(self):
         if self.schema and self._table_exists(PG_SETTINGS_TABLE):

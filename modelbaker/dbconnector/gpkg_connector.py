@@ -54,6 +54,7 @@ class GPKGConnector(DBConnector):
         self.tid = "T_Id"
         self.tilitid = "T_Ili_Tid"
         self.dispName = "dispName"
+        self.attachmentKey = "attachmentKey"
         self.basket_table_name = GPKG_BASKET_TABLE
         self.dataset_table_name = GPKG_DATASET_TABLE
 
@@ -915,7 +916,9 @@ class GPKGConnector(DBConnector):
             return contents
         return []
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -947,7 +950,7 @@ class GPKGConnector(DBConnector):
                 cursor.execute(
                     """
                     INSERT INTO "{basket_table}" ("{tid_name}", dataset, topic, "{tilitid_name}", attachmentkey )
-                    VALUES (?, ?, ?, ?, 'modelbaker')
+                    VALUES (?, ?, ?, ?, ?)
                     """.format(
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
@@ -958,6 +961,7 @@ class GPKGConnector(DBConnector):
                         dataset_tid,
                         topic,
                         tilitid_value,
+                        attachment_key,
                     ),
                 )
                 self.conn.commit()
@@ -972,6 +976,47 @@ class GPKGConnector(DBConnector):
                     'Could not create basket for topic "{}": {}'
                 ).format(topic, error_message)
         return False, self.tr('Could not create basket for topic "{}".').format(topic)
+
+    def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        if self._table_exists(GPKG_BASKET_TABLE):
+            cursor = self.conn.cursor()
+            try:
+                cursor.execute(
+                    """
+                    UPDATE {basket_table}
+                    SET dataset = ?,
+                        {t_ili_tid} = ?,
+                        {attachment_key} = ?
+                    WHERE {tid_name} = ?
+                    """.format(
+                        basket_table=GPKG_BASKET_TABLE,
+                        t_ili_tid=self.tilitid,
+                        attachment_key=self.attachmentKey,
+                        tid_name=self.tid,
+                    ),
+                    (
+                        basket_config["dataset_t_id"],
+                        basket_config["bid_value"],
+                        basket_config["attachmentkey"],
+                        basket_config["basket_t_id"],
+                    ),
+                )
+                self.conn.commit()
+                cursor.close()
+                return True, self.tr(
+                    'Successfully edited basket for topic "{}" and dataset "{}".'
+                ).format(basket_config["topic"], basket_config["datasetname"])
+            except sqlite3.Error as e:
+                cursor.close()
+                error_message = " ".join(e.args)
+                return False, self.tr(
+                    'Could not edit basket for topic "{}" and dataset "{}": {}'
+                ).format(
+                    basket_config["topic"], basket_config["datasetname"], error_message
+                )
+        return False, self.tr(
+            'Could not edit basket for topic "{}" and dataset "{}"'
+        ).format(basket_config["topic"], basket_config["datasetname"])
 
     def get_tid_handling(self):
         if self._table_exists(GPKG_SETTINGS_TABLE):
