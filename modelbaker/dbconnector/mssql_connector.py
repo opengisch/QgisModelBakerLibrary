@@ -51,6 +51,7 @@ class MssqlConnector(DBConnector):
         self.iliCodeName = "iliCode"
         self.tid = "T_Id"
         self.tilitid = "T_Ili_Tid"
+        self.attachmentKey = "attachmentkey"
         self.dispName = "dispName"
         self.basket_table_name = BASKET_TABLE
         self.dataset_table_name = DATASET_TABLE
@@ -737,6 +738,9 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_models(self):
+        if not self._table_exists("t_ili2db_trafo"):
+            return {}
+
         # Get MODELS
         if self.schema:
             cur = self.conn.cursor()
@@ -1053,7 +1057,9 @@ WHERE TABLE_SCHEMA='{schema}'
             result = self._get_dict_result(cur)
         return result
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1080,7 +1086,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, 'modelbaker')
+                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, {attachment_key})
                 """.format(
                         schema=self.schema,
                         sequence="t_ili2db_seq",
@@ -1090,6 +1096,7 @@ WHERE TABLE_SCHEMA='{schema}'
                         dataset_tid=dataset_tid,
                         topic=topic,
                         tilitid=tilitid_value,
+                        attachment_key=attachment_key,
                     )
                 )
                 self.conn.commit()
@@ -1102,6 +1109,46 @@ WHERE TABLE_SCHEMA='{schema}'
                     'Could not create basket for topic "{}": {}'
                 ).format(topic, error_message)
         return False, self.tr('Could not create basket for topic "{}".').format(topic)
+
+    def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        if self.schema and self._table_exists(BASKET_TABLE):
+            cur = self.conn.cursor()
+            try:
+                cur.execute(
+                    """
+                    UPDATE {schema}.{basket_table}
+                    SET dataset = ?,
+                        {t_ili_tid} = ?,
+                        {attachment_key} = ?
+                    WHERE {tid_name} = ?
+                    """.format(
+                        schema=self.schema,
+                        basket_table=BASKET_TABLE,
+                        t_ili_tid=self.tilitid,
+                        attachment_key=self.attachmentKey,
+                        tid_name=self.tid,
+                    ),
+                    (
+                        basket_config["dataset_t_id"],
+                        basket_config["bid_value"],
+                        basket_config["attachmentkey"],
+                        basket_config["basket_t_id"],
+                    ),
+                )
+                self.conn.commit()
+                return True, self.tr(
+                    'Successfully edited basket for topic "{}" and dataset "{}".'
+                ).format(basket_config["topic"], basket_config["datasetname"])
+            except pyodbc.errors.Error as e:
+                error_message = " ".join(e.args)
+                return False, self.tr(
+                    'Could not edit basket for topic "{}" and dataset "{}": {}'
+                ).format(
+                    basket_config["topic"], basket_config["datasetname"], error_message
+                )
+        return False, self.tr(
+            'Could not edit basket for topic "{}" and dataset "{}"'
+        ).format(basket_config["topic"], basket_config["datasetname"])
 
     def get_tid_handling(self):
         if self.schema and self._table_exists(SETTINGS_TABLE):
