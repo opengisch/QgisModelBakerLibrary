@@ -121,6 +121,7 @@ class Layer:
         self.expanded = True
         self.checked = True
         self.featurecount = False
+        self.private = False
 
     def dump(self) -> dict:
         definition = dict()

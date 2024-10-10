@@ -668,6 +668,7 @@ class Generator(QObject):
                 current_node.expanded = item_properties.get("expanded", True)
                 current_node.checked = item_properties.get("checked", True)
                 current_node.featurecount = item_properties.get("featurecount", False)
+                current_node.private = item_properties.get("private", False)
                 if "uri" in item_properties:
                     current_node.uri = item_properties.get("uri")
                 if "provider" in item_properties:

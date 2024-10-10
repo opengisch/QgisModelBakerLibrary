@@ -24,6 +24,7 @@ from qgis.core import (
     QgsLayerDefinition,
     QgsLayerTreeGroup,
     QgsLayerTreeLayer,
+    QgsMapLayer,
     QgsProject,
 )
 
@@ -124,6 +125,8 @@ class LegendGroup:
                     layernode.setExpanded(item.expanded)
                     layernode.setItemVisibilityChecked(item.checked)
                     layernode.setCustomProperty("showFeatureCount", item.featurecount)
+                    if item.private:
+                        layer.setFlags(layer.flags() | QgsMapLayer.Private)
                     group.insertChildNode(index, layernode)
             static_index += 1
 
