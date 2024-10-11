@@ -940,7 +940,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 return True, self.tr('Successfully created dataset "{}".').format(
                     datasetname
                 )
-            except pyodbc.errors.UniqueViolation as e:
+            except pyodbc.UniqueViolation as e:
                 return False, self.tr('Dataset with name "{}" already exists.').format(
                     datasetname
                 )
@@ -965,7 +965,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 return True, self.tr('Successfully created dataset "{}".').format(
                     datasetname
                 )
-            except pyodbc.errors.UniqueViolation as e:
+            except pyodbc.UniqueViolation as e:
                 return False, self.tr('Dataset with name "{}" already exists.').format(
                     datasetname
                 )
@@ -1086,7 +1086,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 cur.execute(
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
-                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, {attachment_key})
+                    VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, '{attachment_key}')
                 """.format(
                         schema=self.schema,
                         sequence="t_ili2db_seq",
@@ -1103,7 +1103,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 return True, self.tr(
                     'Successfully created basket for topic "{}".'
                 ).format(topic)
-            except pyodbc.errors.Error as e:
+            except pyodbc.Error as e:
                 error_message = " ".join(e.args)
                 return False, self.tr(
                     'Could not create basket for topic "{}": {}'
@@ -1139,7 +1139,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 return True, self.tr(
                     'Successfully edited basket for topic "{}" and dataset "{}".'
                 ).format(basket_config["topic"], basket_config["datasetname"])
-            except pyodbc.errors.Error as e:
+            except pyodbc.Error as e:
                 error_message = " ".join(e.args)
                 return False, self.tr(
                     'Could not edit basket for topic "{}" and dataset "{}": {}'
@@ -1215,7 +1215,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 return True, self.tr(
                     'Successfully reset sequence value to "{}".'
                 ).format(value)
-            except pyodbc.errors.Error as e:
+            except pyodbc.Error as e:
                 error_message = " ".join(e.args)
                 return False, self.tr("Could not reset sequence: {}").format(
                     error_message
