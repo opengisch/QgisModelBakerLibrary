@@ -19,7 +19,7 @@ services:
       - "POSTGRES_HOST_AUTH_METHOD=md5"
 
   mssql:
-    image: mcr.microsoft.com/mssql/server:2019-CU11-ubuntu-20.04
+    image: mcr.microsoft.com/mssql/server:2019-CU28-ubuntu-20.04
     environment:
       ACCEPT_EULA: Y
       SA_PASSWORD: <YourStrong!Passw0rd>
