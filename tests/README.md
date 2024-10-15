@@ -28,13 +28,13 @@ These are dirty notes for the quickest way to test mssql queries manually in the
 
 1. Create a new dir. E.g. `.local_docker_test`
 2. Copy the original docker-compose file from directory `.docker` and remove everything except the qgis and the mssql container (remove the postgis dependency in qgis as well).
-4. Copy the original `run-docker-tests.sh` and remove everything except:
+3. Copy the original `run-docker-tests.sh` and remove everything except:
     ```bash
     set -e
 
     /usr/src/tests/testdata/mssql/setup-mssql.sh
     ```
-5. Do the following:
+4. Do the following:
     Go to the local folder
     ```bash
     export QGIS_TEST_VERSION=latest
@@ -48,7 +48,7 @@ These are dirty notes for the quickest way to test mssql queries manually in the
     java -jar /usr/src/modelbaker/iliwrapper/bin/ili2mssql-5.0.0/ili2mssql-5.0.0.jar --schemaimport --dbhost mssql --dbusr sa --dbpwd '<YourStrong!Passw0rd>' --dbdatabase gis --dbschema optimal_polymorph_manuel --coalesceCatalogueRef --createEnumTabs --createNumChecks --createUnique --createFk --createFkIdx --coalesceMultiSurface --coalesceMultiLine --coalesceMultiPoint --coalesceArray --beautifyEnumDispName --createGeomIdx --createMetaInfo --expandMultilingual --createTypeConstraint --createEnumTabsWithId --createTidCol --importTid --smart2Inheritance --strokeArcs --createBasketCol --defaultSrsAuth EPSG --defaultSrsCode 2056 --preScript NULL --postScript NULL --models Polymorphic_Ortsplanung_V1_1 --iliMetaAttrs NULL /usr/src/tests/testdata/ilimodels/Polymorphic_Ortsplanung_V1_1.ili
     ```
     (Surely this could be done without this qgis container, but there you have everything for the set up already...)
-6. Now connect (with eg. the VS Code extension) with these params:
+5. Now connect (with eg. the VS Code extension) with these params:
     ```
     localhost
     1433
