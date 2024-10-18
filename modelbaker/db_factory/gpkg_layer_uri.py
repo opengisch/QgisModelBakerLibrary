@@ -34,4 +34,8 @@ class GpkgLayerUri(LayerUri):
         data_source_uri = "{uri}|layername={table}".format(
             uri=self.uri, table=record["tablename"]
         )
+        if record["geometry_column"]:
+            data_source_uri = "{} ({})".format(
+                data_source_uri, record["geometry_column"]
+            )
         return data_source_uri
