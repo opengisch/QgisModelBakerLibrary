@@ -16,7 +16,6 @@
  ***************************************************************************/
 """
 import errno
-import numbers
 import os
 import re
 import sqlite3
@@ -55,6 +54,7 @@ class GPKGConnector(DBConnector):
         self.tid = "T_Id"
         self.tilitid = "T_Ili_Tid"
         self.dispName = "dispName"
+        self.attachmentKey = "attachmentKey"
         self.basket_table_name = GPKG_BASKET_TABLE
         self.dataset_table_name = GPKG_DATASET_TABLE
 
@@ -212,12 +212,12 @@ class GPKGConnector(DBConnector):
             interlis_joins = """LEFT JOIN T_ILI2DB_TABLE_PROP p
                    ON p.tablename = s.name
                       AND p.tag = 'ch.ehi.ili2db.tableKind'
-                LEFT JOIN t_ili2db_table_prop alias
+                LEFT JOIN T_ILI2DB_TABLE_PROP alias
                    ON alias.tablename = s.name
                       AND alias.tag = 'ch.ehi.ili2db.dispName'
-                LEFT JOIN t_ili2db_classname c
+                LEFT JOIN T_ILI2DB_CLASSNAME c
                    ON s.name == c.sqlname
-                LEFT JOIN t_ili2db_attrname attrs
+                LEFT JOIN T_ILI2DB_ATTRNAME attrs
                    ON c.iliname = attrs.iliname """
         try:
             cursor.execute(
@@ -267,7 +267,7 @@ class GPKGConnector(DBConnector):
         for record in filtered_records:
             cursor.execute(
                 """
-                PRAGMA table_info({})
+                PRAGMA table_info("{}")
                 """.format(
                     record["tablename"]
                 )
@@ -336,7 +336,7 @@ class GPKGConnector(DBConnector):
             cursor.execute(
                 """
                 SELECT *
-                FROM t_ili2db_column_prop
+                FROM T_ILI2DB_COLUMN_PROP
                 WHERE tablename = ?;""",
                 (table_name,),
             )
@@ -347,7 +347,7 @@ class GPKGConnector(DBConnector):
                 cursor.execute(
                     """
                     SELECT SqlName, IliName
-                    FROM t_ili2db_attrname
+                    FROM T_ILI2DB_ATTRNAME
                     WHERE owner = ?;""",
                     (table_name,),
                 )
@@ -355,7 +355,7 @@ class GPKGConnector(DBConnector):
                 cursor.execute(
                     """
                     SELECT SqlName, IliName
-                    FROM t_ili2db_attrname
+                    FROM T_ILI2DB_ATTRNAME
                     WHERE colowner = ?;""",
                     (table_name,),
                 )
@@ -463,7 +463,7 @@ class GPKGConnector(DBConnector):
             cursor.execute(
                 """
                 SELECT *
-                FROM t_ili2db_column_prop
+                FROM T_ILI2DB_COLUMN_PROP
                 WHERE tablename = ?
                 AND tag = 'ch.ehi.ili2db.types';""",
                 (table_name,),
@@ -508,8 +508,8 @@ class GPKGConnector(DBConnector):
                     # Get strength
                     cursor.execute(
                         """SELECT META_ATTRS.attr_value as strength
-                        FROM t_ili2db_attrname AS ATTRNAME
-                        INNER JOIN t_ili2db_meta_attrs AS META_ATTRS
+                        FROM T_ILI2DB_ATTRNAME AS ATTRNAME
+                        INNER JOIN T_ILI2DB_META_ATTRS AS META_ATTRS
                         ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.assocKind'
                         WHERE ATTRNAME.sqlname = ? AND ATTRNAME.{colowner} = ? AND ATTRNAME.target = ?;
                         """.format(
@@ -529,8 +529,8 @@ class GPKGConnector(DBConnector):
                     # Get cardinality max
                     cursor.execute(
                         """SELECT META_ATTRS.attr_value as cardinality_max
-                        FROM t_ili2db_attrname AS ATTRNAME
-                        INNER JOIN t_ili2db_meta_attrs AS META_ATTRS
+                        FROM T_ILI2DB_ATTRNAME AS ATTRNAME
+                        INNER JOIN T_ILI2DB_META_ATTRS AS META_ATTRS
                         ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.attrCardinalityMax'
                         WHERE ATTRNAME.sqlname = ? AND ATTRNAME.{colowner} = ? AND ATTRNAME.target = ?;
                         """.format(
@@ -561,14 +561,14 @@ class GPKGConnector(DBConnector):
             cursor.execute(
                 """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
                             meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max
-                            FROM t_ili2db_column_prop as cprop
-                            LEFT JOIN t_ili2db_classname as cname
+                            FROM T_ILI2DB_COLUMN_PROP as cprop
+                            LEFT JOIN T_ILI2DB_CLASSNAME as cname
                             ON cname.sqlname = cprop.tablename
-                            LEFT JOIN t_ili2db_meta_attrs as meta_attrs_array
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_array
                             ON LOWER(meta_attrs_array.ilielement) = LOWER(cname.iliname||'.'||cprop.columnname) AND meta_attrs_array.attr_name = 'ili2db.mapping'
-                            LEFT JOIN t_ili2db_meta_attrs as meta_attrs_cardinality_min
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_min
                             ON LOWER(meta_attrs_cardinality_min.ilielement) = LOWER(cname.iliname||'.'||cprop.columnname) AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
-                            LEFT JOIN t_ili2db_meta_attrs as meta_attrs_cardinality_max
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
                             ON LOWER(meta_attrs_cardinality_max.ilielement) = LOWER(cname.iliname||'.'||cprop.columnname) AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
                             WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey' AND meta_attrs_array.attr_value = 'ARRAY'
                             """
@@ -596,7 +596,7 @@ class GPKGConnector(DBConnector):
 
             cursor.execute(
                 """SELECT iliname, sqlname
-                FROM t_ili2db_classname
+                FROM T_ILI2DB_CLASSNAME
                 {where}
                 """.format(
                     where=where
@@ -616,7 +616,7 @@ class GPKGConnector(DBConnector):
         )
         cursor.execute(
             """SELECT *
-            FROM t_ili2db_classname
+            FROM T_ILI2DB_CLASSNAME
             WHERE iliname IN ({class_names})
             """.format(
                 class_names=class_names
@@ -630,7 +630,7 @@ class GPKGConnector(DBConnector):
         attr_names = "'" + "','".join(attrs_list) + "'"
         cursor.execute(
             """SELECT iliname, sqlname, owner
-            FROM t_ili2db_attrname
+            FROM T_ILI2DB_ATTRNAME
             WHERE iliname IN ({attr_names})
             """.format(
                 attr_names=attr_names
@@ -644,7 +644,7 @@ class GPKGConnector(DBConnector):
         owner_names = "'" + "','".join(owners) + "'"
         cursor.execute(
             """SELECT iliname, sqlname, owner
-            FROM t_ili2db_attrname
+            FROM T_ILI2DB_ATTRNAME
             WHERE owner IN ({owner_names})
             """.format(
                 owner_names=owner_names
@@ -653,19 +653,22 @@ class GPKGConnector(DBConnector):
         return cursor
 
     def get_models(self):
+        if not self._table_exists("T_ILI2DB_TRAFO"):
+            return {}
+
         # Get MODELS
         cursor = self.conn.cursor()
 
         cursor.execute(
             """SELECT distinct substr(iliname, 1, pos-1) AS modelname from
-            (SELECT *, instr(iliname,'.') AS pos FROM t_ili2db_trafo)"""
+            (SELECT *, instr(iliname,'.') AS pos FROM T_ILI2DB_TRAFO)"""
         )
 
         models = cursor.fetchall()
 
         cursor.execute(
             """SELECT modelname, content
-            FROM t_ili2db_model"""
+            FROM T_ILI2DB_MODEL"""
         )
 
         contents = cursor.fetchall()
@@ -693,13 +696,13 @@ class GPKGConnector(DBConnector):
 
     def ili_version(self):
         cursor = self.conn.cursor()
-        cursor.execute("""PRAGMA table_info(t_ili2db_attrname)""")
+        cursor.execute("""PRAGMA table_info(T_ILI2DB_ATTRNAME)""")
         table_info = cursor.fetchall()
         result = 0
         for column_info in table_info:
             if column_info[1] == "Owner":
                 result += 1
-        cursor.execute("""PRAGMA table_info(t_ili2db_model)""")
+        cursor.execute("""PRAGMA table_info(T_ILI2DB_MODEL)""")
         table_info = cursor.fetchall()
         for column_info in table_info:
             if column_info[1] == "file":
@@ -916,7 +919,9 @@ class GPKGConnector(DBConnector):
             return contents
         return []
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -944,13 +949,11 @@ class GPKGConnector(DBConnector):
                     ).format(topic, fetch_and_increment_feedback)
                 if not tilitid_value:
                     # default value
-                    tilitid_value = f"'{uuid.uuid4()}'"
-                elif not isinstance(tilitid_value, numbers.Number):
-                    tilitid_value = f"'{tilitid_value}'"
+                    tilitid_value = f"{uuid.uuid4()}"
                 cursor.execute(
                     """
                     INSERT INTO "{basket_table}" ("{tid_name}", dataset, topic, "{tilitid_name}", attachmentkey )
-                    VALUES (?, ?, ?, ?, 'modelbaker')
+                    VALUES (?, ?, ?, ?, ?)
                     """.format(
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
@@ -961,6 +964,7 @@ class GPKGConnector(DBConnector):
                         dataset_tid,
                         topic,
                         tilitid_value,
+                        attachment_key,
                     ),
                 )
                 self.conn.commit()
@@ -975,6 +979,47 @@ class GPKGConnector(DBConnector):
                     'Could not create basket for topic "{}": {}'
                 ).format(topic, error_message)
         return False, self.tr('Could not create basket for topic "{}".').format(topic)
+
+    def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        if self._table_exists(GPKG_BASKET_TABLE):
+            cursor = self.conn.cursor()
+            try:
+                cursor.execute(
+                    """
+                    UPDATE {basket_table}
+                    SET dataset = ?,
+                        {t_ili_tid} = ?,
+                        {attachment_key} = ?
+                    WHERE {tid_name} = ?
+                    """.format(
+                        basket_table=GPKG_BASKET_TABLE,
+                        t_ili_tid=self.tilitid,
+                        attachment_key=self.attachmentKey,
+                        tid_name=self.tid,
+                    ),
+                    (
+                        basket_config["dataset_t_id"],
+                        basket_config["bid_value"],
+                        basket_config["attachmentkey"],
+                        basket_config["basket_t_id"],
+                    ),
+                )
+                self.conn.commit()
+                cursor.close()
+                return True, self.tr(
+                    'Successfully edited basket for topic "{}" and dataset "{}".'
+                ).format(basket_config["topic"], basket_config["datasetname"])
+            except sqlite3.Error as e:
+                cursor.close()
+                error_message = " ".join(e.args)
+                return False, self.tr(
+                    'Could not edit basket for topic "{}" and dataset "{}": {}'
+                ).format(
+                    basket_config["topic"], basket_config["datasetname"], error_message
+                )
+        return False, self.tr(
+            'Could not edit basket for topic "{}" and dataset "{}"'
+        ).format(basket_config["topic"], basket_config["datasetname"])
 
     def get_tid_handling(self):
         if self._table_exists(GPKG_SETTINGS_TABLE):

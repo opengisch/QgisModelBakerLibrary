@@ -343,9 +343,26 @@ class DBConnector(QObject):
         """
         return []
 
-    def create_basket(self, dataset_tid, topic, tilitid_value=None):
+    def create_basket(
+        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
+    ):
         """
         Returns the state and the errormessage
+        """
+        return False, None
+
+    def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        """
+        Returns the state and the errormessage
+
+        The basket_config must have the following keys:
+
+            dataset_t_id
+            datasetname
+            topic
+            bid_value
+            attachmentkey
+            basket_t_id
         """
         return False, None
 
