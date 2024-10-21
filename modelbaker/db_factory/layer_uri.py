@@ -35,7 +35,7 @@ class LayerUri(ABC):
         self.provider = None
 
     @abstractmethod
-    def get_data_source_uri(self, record: dict) -> str:
+    def get_data_source_uri(self, record: dict, multigeom: bool) -> str:
         """Provides layer uri based on database uri and specific information of the data source.
 
         :param str record: Dictionary containing specific information of the data source.

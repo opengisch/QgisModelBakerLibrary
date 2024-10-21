@@ -23,7 +23,7 @@ class MssqlLayerUri(LayerUri):
         LayerUri.__init__(self, uri)
         self.provider = "mssql"
 
-    def get_data_source_uri(self, record: dict) -> str:
+    def get_data_source_uri(self, record: dict, multigeom: bool) -> str:
         if record["geometry_column"]:
             data_source_uri = '{uri} key={primary_key} estimatedmetadata=true srid={srid} type={type} table="{schema}"."{table}" ({geometry_column}) sql='.format(
                 uri=self._get_layer_uri_common(),
