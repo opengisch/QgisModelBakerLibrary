@@ -1,0 +1,32 @@
+INTERLIS 2.3;
+
+MODEL MultiGeom (en)
+AT "http://modelbaker.ch"
+VERSION "2024-06-22" =
+
+    IMPORTS GeometryCHLV95_V1;
+
+    DOMAIN
+      Line = POLYLINE WITH (STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2;
+      Surface = SURFACE WITH (STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS > 0.005;
+
+      TOPIC Spots =
+
+        CLASS POI =
+          Name: TEXT;
+          Point: GeometryCHLV95_V1.Coord2;
+        END POI;
+
+        CLASS GOI =
+          Name: TEXT;
+          Point: GeometryCHLV95_V1.Coord2;
+          Line: Line;
+          Surface: Surface;
+        END GOI;
+
+        CLASS NoGeomClass =
+          Name: TEXT;
+        END NoGeomClass;
+      END Spots;
+
+END MultiGeom.

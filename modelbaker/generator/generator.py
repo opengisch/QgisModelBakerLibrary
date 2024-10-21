@@ -252,7 +252,13 @@ class Generator(QObject):
 
             layer = Layer(
                 layer_uri.provider,
-                layer_uri.get_data_source_uri(record),
+                layer_uri.get_data_source_uri(
+                    record,
+                    bool(
+                        table_appearance_count[record["tablename"]] > 1
+                        and "geometry_column" in record
+                    ),
+                ),
                 record.get("tablename"),
                 record.get("srid"),
                 record.get("extent"),
