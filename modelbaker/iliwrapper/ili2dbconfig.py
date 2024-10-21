@@ -240,6 +240,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.create_import_tid = True
         self.srs_auth = "EPSG"  # Default SRS auth in ili2db
         self.srs_code = 2056  # Default SRS code in ili2db
+        self.create_gpkg_multigeom = False
         self.stroke_arcs = True
         self.pre_script = ""
         self.post_script = ""
@@ -298,13 +299,16 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--strokeArcs=False"])
 
+        if self.tool == DbIliMode.gpkg:
+            if self.create_gpkg_multigeom:
+                self.append_args(args, ["--gpkgMultiGeomPerTable"], True)
+            elif self.db_ili_version is None or self.db_ili_version > 3:
+                self.append_args(args, ["--gpkgMultiGeomPerTable=False"])
+
         if self.create_basket_col:
             self.append_args(args, ["--createBasketCol"])
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--createBasketCol=False"])
-
-        if self.tool == DbIliMode.gpkg:
-            self.append_args(args, ["--gpkgMultiGeomPerTable"], True)
 
         self.append_args(args, ["--defaultSrsAuth", self.srs_auth])
 
