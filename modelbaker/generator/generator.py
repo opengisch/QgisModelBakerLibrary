@@ -177,7 +177,9 @@ class Generator(QObject):
             if not relevant_topics and base_topic and base_topic.count(".") > 0:
                 relevant_topics.append(base_topic)
 
-            alias = record["table_alias"] if "table_alias" in record else None
+            # Get table name in this order: translation if exists,
+            # alias (dispName) if exists, or ili_name.
+            alias = record.get("table_tr", record.get("table_alias", None))
             if not alias:
                 short_name = None
                 if is_domain and is_attribute:
@@ -283,22 +285,24 @@ class Generator(QObject):
             re_iliname = re.compile(r".*\.(.*)$")
             for fielddef in fields_info:
                 column_name = fielddef["column_name"]
-                fully_qualified_name = (
-                    fielddef["fully_qualified_name"]
-                    if "fully_qualified_name" in fielddef
-                    else None
-                )
-                m = (
-                    re_iliname.match(fully_qualified_name)
-                    if fully_qualified_name
-                    else None
-                )
 
-                alias = None
-                if "column_alias" in fielddef:
-                    alias = fielddef["column_alias"]
-                if m and not alias:
-                    alias = m.group(1)
+                # Get field name in this order: translation if exists,
+                # alias (dispName) if exists, or ili_name.
+                alias = fielddef.get("column_tr", fielddef.get("column_alias", None))
+
+                if not alias:
+                    fully_qualified_name = (
+                        fielddef["fully_qualified_name"]
+                        if "fully_qualified_name" in fielddef
+                        else None
+                    )
+                    m = (
+                        re_iliname.match(fully_qualified_name)
+                        if fully_qualified_name
+                        else None
+                    )
+                    if m:
+                        alias = m.group(1)
 
                 field = Field(column_name)
                 field.alias = alias
