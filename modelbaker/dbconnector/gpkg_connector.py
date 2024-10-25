@@ -50,7 +50,7 @@ class GPKGConnector(DBConnector):
         self.conn.row_factory = sqlite3.Row
         self.uri = uri
         self._bMetadataTable = self._metadata_exists()
-        self._tables_info = self._get_tables_info()
+        self._tables_info = []
         self.iliCodeName = "iliCode"
         self.tid = "T_Id"
         self.tilitid = "T_Ili_Tid"
@@ -98,6 +98,8 @@ class GPKGConnector(DBConnector):
         return result
 
     def get_tables_info(self):
+        if not self._tables_info:
+            self._tables_info = self._get_tables_info()
         return self._tables_info
 
     def _get_tables_info(self):
