@@ -401,7 +401,7 @@ class DBConnector(QObject):
         """
         Returns whether the preferred translation language was successfully set
         """
-        if len(lang) == 2:
+        if len(lang) == 2 and lang != "__":
             self._lang = lang
             return True
 
@@ -416,6 +416,12 @@ class DBConnector(QObject):
             - The preferred language set.
         """
         return False, ""
+
+    def get_available_languages(self) -> list[str]:
+        """
+        Returns a list of available languages in the t_ili2db_nls table.
+        """
+        return []
 
 
 class DBConnectorError(Exception):

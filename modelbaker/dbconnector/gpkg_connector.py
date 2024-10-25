@@ -106,10 +106,7 @@ class GPKGConnector(DBConnector):
         interlis_joins = ""
         tr_enabled, lang = self.get_translation_handling()
         if tr_enabled:
-            self.new_message.emit(
-                Qgis.Info,
-                f"Getting tables info with preferred language {lang}.",
-            )
+            self.stdout.emit(f"Getting tables info with preferred language {lang}.")
 
         if self.metadata_exists():
             interlis_fields = """p.setting AS kind_settings,
@@ -1213,3 +1210,20 @@ class GPKGConnector(DBConnector):
 
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(GPKG_NLS_TABLE) and self._lang != "", self._lang
+
+    def get_available_languages(self):
+        if not self._table_exists(GPKG_NLS_TABLE):
+            return []
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """SELECT DISTINCT
+            lang
+            FROM "{}";
+            """.format(
+                GPKG_NLS_TABLE
+            )
+        )
+        records = cursor.fetchall()
+        cursor.close()
+        return [record["lang"] for record in records]

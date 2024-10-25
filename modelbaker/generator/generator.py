@@ -53,6 +53,7 @@ class Generator(QObject):
         mgmt_uri: Optional[str] = None,
         consider_basket_handling: bool = False,
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
+        preferred_language: str = "",
     ) -> None:
         """
         Creates a new Generator objects.
@@ -75,6 +76,8 @@ class Generator(QObject):
         self._db_connector.new_message.connect(self.append_print_message)
         self.basket_handling = consider_basket_handling and self.get_basket_handling()
         self.optimize_strategy = optimize_strategy
+
+        self._db_connector.set_preferred_translation(preferred_language)
 
         self._additional_ignored_layers = (
             []
