@@ -519,6 +519,7 @@ class Generator(QObject):
                         relation.referencing_field = record["referencing_column"]
                         relation.referenced_field = record["referenced_column"]
                         relation.name = record["constraint_name"]
+                        relation.translate_name = record.get("tr_enabled", False)
                         relation.strength = (
                             QgsRelation.Composition
                             if "strength" in record

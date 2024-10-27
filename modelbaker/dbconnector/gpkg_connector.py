@@ -525,6 +525,8 @@ class GPKGConnector(DBConnector):
 
         cursor = self.conn.cursor()
         complete_records = list()
+        tr_enabled, lang = self.get_translation_handling()
+
         for table_info_name, table_info in tables_info_dict.items():
             cursor.execute("""PRAGMA foreign_key_list("{}");""".format(table_info_name))
             foreign_keys = cursor.fetchall()
@@ -543,6 +545,9 @@ class GPKGConnector(DBConnector):
                     record["referenced_table"],
                     record["referenced_column"],
                 )
+                if tr_enabled:
+                    record["tr_enabled"] = True
+
                 if self._table_exists(GPKG_METAATTRS_TABLE):
                     # Get strength
                     cursor.execute(
