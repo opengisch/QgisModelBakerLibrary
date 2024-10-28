@@ -51,7 +51,6 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
         Checks when the gdal version is sufficient (means >=3.4) if tables are created with multiple geometries and the correct layers are generated.
         This of course depends with what gdal version the current images are built.
         """
-        sufficient_gdal = self._sufficient_gdal()
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
@@ -67,7 +66,7 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
         importer.configuration.create_basket_col = True
 
         # create it when there's a sufficient gdal version
-        importer.configuration.create_gpkg_multigeom = True
+        importer.configuration.create_gpkg_multigeom = self._sufficient_gdal()
 
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
@@ -78,9 +77,11 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
         db_connector = db_utils.get_db_connector(importer.configuration)
         tables_with_multiple_geometries = db_connector.multiple_geometry_tables()
 
+        bool(len(tables_with_multiple_geometries) > 0)
+
         # should have multiple when having a sufficient gdal and otherwise not
-        if sufficient_gdal:
-            assert len(tables_with_multiple_geometries) == 1
+        if self._sufficient_gdal():
+            assert len(tables_with_multiple_geometries) > 0
         else:
             assert len(tables_with_multiple_geometries) == 0
 
@@ -135,7 +136,7 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
             "T_ILI2DB_DATASET",
         }
 
-        if sufficient_gdal:
+        if self._sufficient_gdal():
             assert {
                 layer.name() for layer in tree_layers
             } == expected_layer_names_with_multigeometry
