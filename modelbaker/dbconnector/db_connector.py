@@ -399,7 +399,10 @@ class DBConnector(QObject):
 
     def set_preferred_translation(self, lang: str) -> bool:
         """
-        Returns whether the preferred translation language was successfully set
+        Returns whether the preferred translation language was successfully set.
+
+        Note: By convention, a value of __ means the preferred language will be
+              the original (non-translated) model language.
         """
         if len(lang) == 2 and lang != "__":
             self._lang = lang

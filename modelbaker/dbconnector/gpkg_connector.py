@@ -106,11 +106,14 @@ class GPKGConnector(DBConnector):
         cursor = self.conn.cursor()
         interlis_fields = ""
         interlis_joins = ""
-        tr_enabled, lang = self.get_translation_handling()
-        if tr_enabled:
-            self.stdout.emit(f"Getting tables info with preferred language {lang}.")
 
         if self.metadata_exists():
+            tr_enabled, lang = self.get_translation_handling()
+            if tr_enabled:
+                self.stdout.emit(
+                    f"Getting tables info with preferred language '{lang}'."
+                )
+
             interlis_fields = """p.setting AS kind_settings,
                 alias.setting AS table_alias,
                 c.iliname AS ili_name,
@@ -350,11 +353,6 @@ class GPKGConnector(DBConnector):
         meta_attrs = list()
         columns_tr = list()
         tr_enabled, lang = self.get_translation_handling()
-        if tr_enabled:
-            self.new_message.emit(
-                Qgis.Info,
-                f"Getting fields info with preferred language {lang}.",
-            )
 
         if self.metadata_exists():
             cursor.execute(

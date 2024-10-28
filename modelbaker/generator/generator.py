@@ -182,7 +182,10 @@ class Generator(QObject):
 
             # Get table name in this order: translation if exists,
             # alias (dispName) if exists, or ili_name.
-            alias = record.get("table_tr", record.get("table_alias", None))
+            alias = record.get("table_tr", None)
+            if not alias:
+                alias = record.get("table_alias", None)
+
             if not alias:
                 short_name = None
                 if is_domain and is_attribute:
@@ -291,7 +294,9 @@ class Generator(QObject):
 
                 # Get field name in this order: translation if exists,
                 # alias (dispName) if exists, or ili_name.
-                alias = fielddef.get("column_tr", fielddef.get("column_alias", None))
+                alias = fielddef.get("column_tr", None)
+                if not alias:
+                    alias = fielddef.get("column_alias", None)
 
                 if not alias:
                     fully_qualified_name = (
