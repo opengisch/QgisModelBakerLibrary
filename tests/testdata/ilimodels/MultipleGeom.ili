@@ -1,6 +1,6 @@
 INTERLIS 2.3;
 
-MODEL MultiGeom (en)
+MODEL MultipleGeom (en)
 AT "http://modelbaker.ch"
 VERSION "2024-06-22" =
 
@@ -29,4 +29,4 @@ VERSION "2024-06-22" =
         END NoGeomClass;
       END Spots;
 
-END MultiGeom.
+END MultipleGeom.
