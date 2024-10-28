@@ -89,7 +89,6 @@ def get_configuration_from_sourceprovider(provider, configuration):
         configuration.dbschema = layer_source.schema()
         valid = bool(
             configuration.dbusr
-            and configuration.dbpwd
             and configuration.dbhost
             and configuration.database
             and configuration.dbschema
@@ -113,6 +112,7 @@ def get_configuration_from_sourceprovider(provider, configuration):
             and configuration.database
             and configuration.dbschema
         )
+    configuration.tool = mode
     return valid, mode
 
 
@@ -122,7 +122,9 @@ def get_db_connector(configuration):
 
     db_factory = db_simple_factory.create_factory(configuration.tool)
     config_manager = db_factory.get_db_command_config_manager(configuration)
-    uri_string = config_manager.get_uri(configuration.db_use_super_login)
+    uri_string = config_manager.get_uri(
+        configuration.db_use_super_login, QgsApplication.userLoginName()
+    )
 
     try:
         return db_factory.get_db_connector(uri_string, schema)

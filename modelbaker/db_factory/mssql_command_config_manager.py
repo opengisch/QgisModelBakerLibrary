@@ -30,7 +30,9 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
     def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
+    def get_uri(
+        self, su: bool = False, qgis: bool = False, fallback_user: str = None
+    ) -> str:
         separator = ";"
         uri = []
         uri += ["DRIVER={{{}}}".format(self.configuration.db_odbc_driver)]

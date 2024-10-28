@@ -42,11 +42,14 @@ class DbCommandConfigManager(ABC):
         self.configuration = configuration
 
     @abstractmethod
-    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
+    def get_uri(
+        self, su: bool = False, qgis: bool = False, fallback_user: str = None
+    ) -> str:
         """Gets database uri (connection string) for db connectors (:class:`DBConnector`).
 
         :param bool su: *True* to use super user credentials, *False* otherwise.
         :param bool qgis: *True* to use qgis specific credentials (e.g. authcfg), *False* otherwise.
+        :param str fallback_user: a username as fallback most possibly used when you want to pass your os account name to connect the database
         :return: Database uri (connection string).
         :rtype str
         """

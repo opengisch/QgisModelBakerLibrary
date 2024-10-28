@@ -75,12 +75,12 @@ class DbFactory(ABC):
 
     @abstractmethod
     def post_generate_project_validations(
-        self, configuration: Ili2DbCommandConfiguration
+        self, configuration: Ili2DbCommandConfiguration, fallback_user: str = None
     ) -> tuple[bool, str]:
         """This method will be called after an operation of generate project is executed.
 
-        :param configuration: Configuration parameters with which were executed the operation of generate project.
-        :type configuration: :class:`Ili2DbCommandConfiguration`
+        :param class:`Ili2DbCommandConfiguration` configuration: Configuration parameters with which were executed the operation of generate project.
+        :param str fallback_user: a username as fallback most possibly used when you want to pass your os account name to connect the database
         :return: *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise.
         """
 

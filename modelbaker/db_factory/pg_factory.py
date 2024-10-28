@@ -71,13 +71,15 @@ class PgFactory(DbFactory):
         return result, message
 
     def post_generate_project_validations(
-        self, configuration: Ili2DbCommandConfiguration
+        self, configuration: Ili2DbCommandConfiguration, fallback_user: str = None
     ) -> tuple[bool, str]:
         result = False
         message = ""
 
         config_manager = self.get_db_command_config_manager(configuration)
-        uri = config_manager.get_uri(configuration.db_use_super_login)
+        uri = config_manager.get_uri(
+            su=configuration.db_use_super_login, fallback_user=fallback_user
+        )
 
         connector = self.get_db_connector(uri, configuration.dbschema)
 

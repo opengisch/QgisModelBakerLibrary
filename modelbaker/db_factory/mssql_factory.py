@@ -45,7 +45,7 @@ class MssqlFactory(DbFactory):
         return True, ""
 
     def post_generate_project_validations(
-        self, configuration: Ili2DbCommandConfiguration
+        self, configuration: Ili2DbCommandConfiguration, fallback_user: str = None
     ) -> tuple[bool, str]:
         return True, ""
 
