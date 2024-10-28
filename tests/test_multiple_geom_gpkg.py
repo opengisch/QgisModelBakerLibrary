@@ -35,8 +35,6 @@ from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from tests.utils import iliimporter_config, testdata_path
 
-CATALOGUE_DATASETNAME = "Catset"
-
 start_app()
 
 test_path = pathlib.Path(__file__).parent.absolute()
@@ -53,6 +51,7 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
         Checks when the gdal version is sufficient (means >=3.4) if tables are created with multiple geometries and the correct layers are generated.
         This of course depends with what gdal version the current images are built.
         """
+        sufficient_gdal = self._sufficient_gdal()
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
@@ -61,23 +60,29 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
         importer.configuration.ilimodels = "MultipleGeom"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
-            "tmp_optimal_oid_madness_{:%Y%m%d%H%M%S%f}.gpkg".format(
-                datetime.datetime.now()
-            ),
+            "tmp_multiple_geom_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
         )
         importer.configuration.srs_code = 2056
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
 
         # create it when there's a sufficient gdal version
-        importer.configuration.create_gpkg_multigeom = self._sufficient_gdal()
+        importer.configuration.create_gpkg_multigeom = True
 
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
         # check geometry table
-        self._check_geometry_table(importer.configuration)
+        # check if there are multiple geometry columns of the same table
+        db_connector = db_utils.get_db_connector(importer.configuration)
+        tables_with_multiple_geometries = db_connector.multiple_geometry_tables()
+
+        # should have multiple when having a sufficient gdal and otherwise not
+        if sufficient_gdal:
+            assert len(tables_with_multiple_geometries) == 1
+        else:
+            assert len(tables_with_multiple_geometries) == 0
 
         # create project
         config_manager = GpkgCommandConfigManager(importer.configuration)
@@ -130,7 +135,7 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
             "T_ILI2DB_DATASET",
         }
 
-        if self._sufficient_gdal():
+        if sufficient_gdal:
             assert {
                 layer.name() for layer in tree_layers
             } == expected_layer_names_with_multigeometry
@@ -138,18 +143,6 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
             assert {
                 layer.name() for layer in tree_layers
             } == expected_layer_names_without_multigeometry
-
-    def _check_geometry_table(self, configuration):
-        # check if there are multiple geometry columns of the same table
-        db_connector = db_utils.get_db_connector(configuration)
-        tables_with_multiple_geometries = db_connector.multiple_geometry_tables()
-
-        has_it = bool(len(tables_with_multiple_geometries) > 0)
-
-        # should have multiple when having a sufficient gdal and otherwise not
-        assert (has_it and self._sufficient_gdal()) or (
-            not has_it and not self._sufficient_gdal()
-        )
 
     def _sufficient_gdal(self):
         return bool(int(gdal.VersionInfo("VERSION_NUM")) >= 3080000)
