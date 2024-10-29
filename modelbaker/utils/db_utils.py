@@ -71,8 +71,8 @@ def get_configuration_from_sourceprovider(provider, configuration):
     mode = ""
     valid = False
     if provider.name() == "postgres":
+        configuration.tool = mode = DbIliMode.pg
         layer_source = QgsDataSourceUri(provider.dataSourceUri())
-        mode = DbIliMode.pg
         configuration.dbservice = layer_source.service()
         service_map, _ = get_service_config(configuration.dbservice)
         if layer_source.authConfigId():
@@ -94,11 +94,11 @@ def get_configuration_from_sourceprovider(provider, configuration):
             and configuration.dbschema
         )
     elif provider.name() == "ogr" and provider.storageType() == "GPKG":
-        mode = DbIliMode.gpkg
+        configuration.tool = mode = DbIliMode.gpkg
         configuration.dbfile = provider.dataSourceUri().split("|")[0].strip()
         valid = bool(configuration.dbfile)
     elif provider.name() == "mssql":
-        mode = DbIliMode.mssql
+        configuration.tool = mode = DbIliMode.mssql
         layer_source = QgsDataSourceUri(provider.dataSourceUri())
         configuration.dbhost = layer_source.host()
         configuration.dbusr = layer_source.username()
@@ -112,7 +112,6 @@ def get_configuration_from_sourceprovider(provider, configuration):
             and configuration.database
             and configuration.dbschema
         )
-    configuration.tool = mode
     return valid, mode
 
 
@@ -123,7 +122,8 @@ def get_db_connector(configuration):
     db_factory = db_simple_factory.create_factory(configuration.tool)
     config_manager = db_factory.get_db_command_config_manager(configuration)
     uri_string = config_manager.get_uri(
-        configuration.db_use_super_login, QgsApplication.userLoginName()
+        su=configuration.db_use_super_login,
+        fallback_user=QgsApplication.userLoginName(),
     )
 
     try:
