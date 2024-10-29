@@ -38,7 +38,9 @@ class PgCommandConfigManager(DbCommandConfigManager):
     def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
+    def get_uri(
+        self, su: bool = False, qgis: bool = False, fallback_user: str = None
+    ) -> str:
         uri = []
 
         if su:
@@ -98,7 +100,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
                 uri += ["password={}".format(authconfig_map.get("password"))]
         else:
             if not service_config or not service_config.get("user", None):
-                uri += ["user={}".format(self.configuration.dbusr)]
+                uri += ["user={}".format(self.configuration.dbusr or fallback_user)]
             if not service_config or not service_config.get("password", None):
                 if self.configuration.dbpwd:
                     uri += ["password={}".format(self.configuration.dbpwd)]

@@ -37,7 +37,9 @@ class GpkgCommandConfigManager(DbCommandConfigManager):
     def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         DbCommandConfigManager.__init__(self, configuration)
 
-    def get_uri(self, su: bool = False, qgis: bool = False) -> str:
+    def get_uri(
+        self, su: bool = False, qgis: bool = False, fallback_user: str = None
+    ) -> str:
         return self.configuration.dbfile
 
     def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
