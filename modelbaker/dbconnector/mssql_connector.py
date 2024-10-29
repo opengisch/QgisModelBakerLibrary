@@ -29,6 +29,7 @@ METAATTRS_TABLE = "t_ili2db_meta_attrs"
 SETTINGS_TABLE = "t_ili2db_settings"
 DATASET_TABLE = "T_ILI2DB_DATASET"
 BASKET_TABLE = "T_ILI2DB_BASKET"
+NLS_TABLE = "t_ili2db_nls"
 
 
 class MssqlConnector(DBConnector):
@@ -114,6 +115,7 @@ class MssqlConnector(DBConnector):
 
         if self.schema:
             metadata_exists = self.metadata_exists()
+            tr_enabled, lang = self.get_translation_handling()
 
             ln = "\n"
             stmt = ""
@@ -231,6 +233,8 @@ class MssqlConnector(DBConnector):
                     + """   ,substring( c.iliname, 1, CHARINDEX('.', substring( c.iliname, CHARINDEX('.', c.iliname)+1, len(c.iliname)))+CHARINDEX('.', c.iliname)-1) as base_topic
                 """
                 )
+            if tr_enabled:
+                stmt += ln + "    , nls.label AS table_tr"
             stmt += ln + "FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS AS Tab"
             stmt += ln + "INNER JOIN INFORMATION_SCHEMA.CONSTRAINT_COLUMN_USAGE AS Col"
             stmt += ln + "    ON Col.Constraint_Name = Tab.Constraint_Name"
@@ -264,6 +268,10 @@ class MssqlConnector(DBConnector):
                 stmt += ln + "    ON tbls.TABLE_NAME = tgeomtype.tablename"
                 stmt += ln + "    AND clm.COLUMN_NAME = tgeomtype.columnname"
                 stmt += ln + "    AND tgeomtype.tag= 'ch.ehi.ili2db.geomType'"
+            if tr_enabled:
+                stmt += ln + "LEFT JOIN {schema}.t_ili2db_nls nls"
+                stmt += ln + "    ON c.iliname = nls.ilielement"
+                stmt += ln + "    AND nls.lang = '{lang}'".format(lang=lang)
             stmt += (
                 ln
                 + "WHERE tbls.TABLE_TYPE = 'BASE TABLE' AND tbls.TABLE_SCHEMA = '{schema}'"
@@ -481,6 +489,7 @@ class MssqlConnector(DBConnector):
         if self.schema:
             metadata_exists = self.metadata_exists()
             metaattrs_exists = self._table_exists(METAATTRS_TABLE)
+            tr_enabled, lang = self.get_translation_handling()
             ln = "\n"
             stmt = ""
 
@@ -506,6 +515,8 @@ class MssqlConnector(DBConnector):
                         + "    , attr_mapping.attr_value AS attr_mapping"
                     )
             stmt += ln + "    , null AS comment"
+            if tr_enabled:
+                stmt += ln + "    , nls.label AS column_tr"
             stmt += ln + "FROM INFORMATION_SCHEMA.COLUMNS AS c"
             if metadata_exists:
                 stmt += ln + "LEFT JOIN {schema}.t_ili2db_column_prop unit"
@@ -545,6 +556,10 @@ class MssqlConnector(DBConnector):
                     stmt += ln + "LEFT JOIN {schema}.t_ili2db_meta_attrs attr_mapping"
                     stmt += ln + "    ON full_name.iliname=attr_mapping.ilielement AND"
                     stmt += ln + "    attr_mapping.attr_name='ili2db.mapping'"
+                if tr_enabled:
+                    stmt += ln + "LEFT JOIN {schema}.t_ili2db_nls nls"
+                    stmt += ln + "    ON full_name.iliname = nls.ilielement"
+                    stmt += ln + "    AND nls.lang = '{lang}'".format(lang=lang)
             stmt += ln + "WHERE TABLE_NAME = '{table}' AND TABLE_SCHEMA = '{schema}'"
             if metadata_exists and metaattrs_exists:
                 stmt += ln + "ORDER BY attr_order;"
@@ -625,6 +640,9 @@ class MssqlConnector(DBConnector):
 
         if self.schema:
             cur = self.conn.cursor()
+            translate = (
+                ", 1 AS tr_enabled" if self.get_translation_handling()[0] else ""
+            )
             schema_where1 = (
                 "AND KCU1.CONSTRAINT_SCHEMA = '{}'".format(self.schema)
                 if self.schema
@@ -681,6 +699,7 @@ class MssqlConnector(DBConnector):
                     ,KCU1.ORDINAL_POSITION AS ordinal_position
                     {strength_field}
                     {cardinality_max_field}
+                    {translate}
                 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
 
                 INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
@@ -706,6 +725,7 @@ class MssqlConnector(DBConnector):
                 strength_join=strength_join,
                 cardinality_max_field=cardinality_max_field,
                 cardinality_max_join=cardinality_max_join,
+                translate=translate,
             )
             cur.execute(query)
             result = self._get_dict_result(cur)
@@ -1222,3 +1242,20 @@ WHERE TABLE_SCHEMA='{schema}'
                 )
 
         return False, self.tr("Could not reset sequence")
+
+    def get_translation_handling(self) -> tuple[bool, str]:
+        return self._table_exists(NLS_TABLE) and self._lang != "", self._lang
+
+    def get_available_languages(self):
+        if self.schema and self._table_exists(NLS_TABLE):
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                SELECT DISTINCT
+                lang
+                FROM {schema}.t_ili2db_nls
+                """
+            ).format(schema=self.schema)
+
+            return [row.lang for row in cur.fetchall()]
+        return []
