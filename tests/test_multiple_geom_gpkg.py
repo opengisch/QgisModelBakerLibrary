@@ -48,7 +48,7 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
 
     def test_multiple_geom_geopackage(self):
         """
-        Checks when the gdal version is sufficient (means >=3.4) if tables are created with multiple geometries and the correct layers are generated.
+        Checks when the gdal version is sufficient (means >=3.8) if tables are created with multiple geometries and the correct layers are generated.
         This of course depends with what gdal version the current images are built.
         """
 
@@ -76,8 +76,6 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
         # check if there are multiple geometry columns of the same table
         db_connector = db_utils.get_db_connector(importer.configuration)
         tables_with_multiple_geometries = db_connector.multiple_geometry_tables()
-
-        bool(len(tables_with_multiple_geometries) > 0)
 
         # should have multiple when having a sufficient gdal and otherwise not
         if self._sufficient_gdal():

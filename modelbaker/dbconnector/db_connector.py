@@ -346,6 +346,7 @@ class DBConnector(QObject):
     def multiple_geometry_tables(self):
         """
         Returns a list of tables having multiple geometry columns.
+        It's only usefull on GeoPackage.
         """
         return []
 
