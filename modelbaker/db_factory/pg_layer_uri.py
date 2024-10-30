@@ -31,7 +31,7 @@ class PgLayerUri(LayerUri):
         self.pg_estimated_metadata = False
         self.provider = "postgres"
 
-    def get_data_source_uri(self, record: dict, multigeom: bool) -> str:
+    def get_data_source_uri(self, record: dict) -> str:
         if record["geometry_column"]:
             str_pg_estimated_metadata = (
                 "true" if self.pg_estimated_metadata else "false"

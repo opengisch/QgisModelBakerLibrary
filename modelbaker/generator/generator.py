@@ -250,15 +250,14 @@ class Generator(QObject):
             if coord_decimals:
                 coordinate_precision = 1 / (10**coord_decimals)
 
+            layer_uri.gpkg_multigeom = bool(
+                table_appearance_count[record["tablename"]] > 1
+                and "geometry_column" in record
+            )
+
             layer = Layer(
                 layer_uri.provider,
-                layer_uri.get_data_source_uri(
-                    record,
-                    bool(
-                        table_appearance_count[record["tablename"]] > 1
-                        and "geometry_column" in record
-                    ),
-                ),
+                layer_uri.get_data_source_uri(record),
                 record.get("tablename"),
                 record.get("srid"),
                 record.get("extent"),
