@@ -29,9 +29,14 @@ class GpkgLayerUri(LayerUri):
     def __init__(self, uri: str) -> None:
         LayerUri.__init__(self, uri)
         self.provider = "ogr"
+        self.gpkg_multigeom = False
 
     def get_data_source_uri(self, record: dict) -> str:
         data_source_uri = "{uri}|layername={table}".format(
             uri=self.uri, table=record["tablename"]
         )
+        if self.gpkg_multigeom:
+            data_source_uri = "{} ({})".format(
+                data_source_uri, record["geometry_column"]
+            )
         return data_source_uri
