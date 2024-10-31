@@ -961,6 +961,25 @@ class GPKGConnector(DBConnector):
             return contents
         return []
 
+    def multiple_geometry_tables(self):
+        tables = []
+        if self._table_exists("gpkg_geometry_columns"):
+            cursor = self.conn.cursor()
+            cursor.execute(
+                """
+                SELECT table_name
+                FROM gpkg_geometry_columns
+                GROUP BY table_name
+                HAVING COUNT(table_name)>1
+            """
+            )
+            records = cursor.fetchall()
+            cursor.close()
+            for record in records:
+                tables.append(record["table_name"])
+
+        return tables
+
     def create_basket(
         self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
     ):

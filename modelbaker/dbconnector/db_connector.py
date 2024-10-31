@@ -343,6 +343,13 @@ class DBConnector(QObject):
         """
         return []
 
+    def multiple_geometry_tables(self):
+        """
+        Returns a list of tables having multiple geometry columns.
+        It's only usefull on GeoPackage.
+        """
+        return []
+
     def create_basket(
         self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
     ):
