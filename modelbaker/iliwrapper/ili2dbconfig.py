@@ -482,6 +482,7 @@ class DeleteConfiguration(Ili2DbCommandConfiguration):
     def __init__(self, other: Ili2DbCommandConfiguration = None):
         super().__init__(other)
         self.dataset = ""
+        self.baskets = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         args = list()
@@ -491,7 +492,11 @@ class DeleteConfiguration(Ili2DbCommandConfiguration):
 
         self.append_args(args, extra_args)
 
-        self.append_args(args, ["--dataset", self.dataset])
+        if self.dataset:
+            self.append_args(args, ["--dataset", self.dataset])
+
+        if self.baskets:
+            self.append_args(args, ["--baskets", self.baskets])
 
         self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
 
