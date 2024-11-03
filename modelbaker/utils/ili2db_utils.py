@@ -40,9 +40,48 @@ class Ili2DbUtils(QObject):
 
         self._log = ""
 
+    def delete_baskets(
+        self, baskets: str, configuration: Ili2DbCommandConfiguration = None
+    ):
+        """
+        :param baskets: Semicolon-separated list of baskets to be deleted
+        :param configuration: Base Ili2DbCommandConfiguration object
+        :return: Tuple with boolean result and optional message
+        """
+        deleter = ilideleter.Deleter()
+        deleter.tool = configuration.tool
+        deleter.configuration = DeleteConfiguration(configuration)
+        deleter.configuration.baskets = baskets
+
+        with OverrideCursor(Qt.WaitCursor):
+            self._connect_ili_executable_signals(deleter)
+            self._log = ""
+
+            res = True
+            msg = self.tr("Basket(s) '{}' successfully deleted!").format(baskets)
+            try:
+                if deleter.run() != ilideleter.Deleter.SUCCESS:
+                    msg = self.tr(
+                        "An error occurred when deleting the basket(s) '{}' from the DB (check the QGIS log panel)."
+                    ).format(baskets)
+                    res = False
+                    self.log_on_error.emit(self._log)
+            except JavaNotFoundError as e:
+                msg = e.error_string
+                res = False
+
+            self._disconnect_ili_executable_signals(deleter)
+
+        return res, msg
+
     def delete_dataset(
         self, dataset: str, configuration: Ili2DbCommandConfiguration = None
     ):
+        """
+        :param dataset: Dataset id to be deleted
+        :param configuration: Base Ili2DbCommandConfiguration object
+        :return: Tuple with boolean result and optional message
+        """
         deleter = ilideleter.Deleter()
         deleter.tool = configuration.tool
         deleter.configuration = DeleteConfiguration(configuration)
