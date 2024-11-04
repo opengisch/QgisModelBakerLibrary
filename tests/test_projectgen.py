@@ -127,10 +127,10 @@ class TestProjectGen(unittest.TestCase):
                     tab_list = [tab.name() for tab in tabs]
                     expected_tab_list = [
                         "General",
-                        "parzellenidentifikation",
-                        "egrid_",
-                        "deponietyp",
-                        "untersmassn",
+                        "Parzellenidentifikation",
+                        "EGRID_",
+                        "Deponietyp",
+                        "UntersMassn",
                     ]
                     assert set(tab_list) == set(expected_tab_list)
                     assert len(tab_list) == len(expected_tab_list)
@@ -246,10 +246,10 @@ class TestProjectGen(unittest.TestCase):
                     tab_list = [tab.name() for tab in tabs]
                     expected_tab_list = [
                         "General",
-                        "parzellenidentifikation",
-                        "egrid_",
-                        "deponietyp",
-                        "untersmassn",
+                        "Parzellenidentifikation",
+                        "EGRID_",
+                        "Deponietyp",
+                        "UntersMassn",
                     ]
                     assert len(tab_list) == len(expected_tab_list)
                     assert set(tab_list) == set(expected_tab_list)
@@ -363,11 +363,11 @@ class TestProjectGen(unittest.TestCase):
                     tab_list = [tab.name() for tab in tabs]
                     expected_tab_list = [
                         "General",
-                        "parzellenidentifikation",
-                        "belasteter_standort_geo_lage_punkt",
-                        "egrid_",
-                        "deponietyp",
-                        "untersmassn",
+                        "Parzellenidentifikation",
+                        "Geo_Lage_Punkt",
+                        "EGRID_",
+                        "Deponietyp",
+                        "UntersMassn",
                     ]
                     assert len(tab_list) == len(expected_tab_list)
                     assert set(tab_list) == set(expected_tab_list)
@@ -465,8 +465,8 @@ class TestProjectGen(unittest.TestCase):
                     expected_tab_list = [
                         "General",
                         "Parzellenidentifikation",
-                        "belasteter_standort_geo_lage_punkt",
-                        "egrid_",
+                        "Belasteter_Standort (Geo_Lage_Punkt)",
+                        "EGRID_",
                         "Deponietyp",
                         "UntersMassn",
                     ]
@@ -525,7 +525,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 16
+        assert len(ignored_layers) == 15
         assert len(available_layers) == 23
         assert len(relations) == 13
 
@@ -624,7 +624,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 18
+        assert len(ignored_layers) == 17
         assert len(available_layers) == 21
         assert len(relations) == 12
 
@@ -740,7 +740,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 10
+        assert len(ignored_layers) == 9
         assert len(available_layers) == 29
         assert len(relations) == 23
 
@@ -2502,13 +2502,13 @@ class TestProjectGen(unittest.TestCase):
         tab_job = None
         efc = contact_layer.layer.editFormConfig()
         for tab in efc.tabs():
-            if tab.name() == "address":
+            if tab.name() == "Address":
                 tab_address = tab
-            elif tab.name() == "identificator":
+            elif tab.name() == "Identificator":
                 tab_identificator = tab
-            elif tab.name() == "ahvnr":
+            elif tab.name() == "AHVNr":
                 tab_ahvnr = tab
-            elif tab.name() == "job":
+            elif tab.name() == "Job":
                 tab_job = tab
         assert tab_address
         assert tab_identificator
@@ -2591,13 +2591,13 @@ class TestProjectGen(unittest.TestCase):
         tab_job = None
         efc = contact_layer.layer.editFormConfig()
         for tab in efc.tabs():
-            if tab.name() == "address":
+            if tab.name() == "Address":
                 tab_address = tab
-            elif tab.name() == "identificator":
+            elif tab.name() == "Identificator":
                 tab_identificator = tab
-            elif tab.name() == "ahvnr":
+            elif tab.name() == "AHVNr":
                 tab_ahvnr = tab
-            elif tab.name() == "job":
+            elif tab.name() == "Job":
                 tab_job = tab
         assert tab_address
         assert tab_identificator
@@ -2682,13 +2682,13 @@ class TestProjectGen(unittest.TestCase):
         tab_job = None
         efc = contact_layer.layer.editFormConfig()
         for tab in efc.tabs():
-            if tab.name() == "address":
+            if tab.name() == "Address":
                 tab_address = tab
-            elif tab.name() == "identificator":
+            elif tab.name() == "Identificator":
                 tab_identificator = tab
-            elif tab.name() == "ahvnr":
+            elif tab.name() == "AHVNr":
                 tab_ahvnr = tab
-            elif tab.name() == "job":
+            elif tab.name() == "Job":
                 tab_job = tab
         assert tab_address
         assert tab_identificator
@@ -4206,7 +4206,7 @@ class TestProjectGen(unittest.TestCase):
                     tab_list = [tab.name() for tab in tabs]
                     expected_tab_list = [
                         "General",
-                        "maphieritem",
+                        "MapHierItem",
                     ]
                     assert set(tab_list) == set(expected_tab_list)
                     assert len(tab_list) == len(expected_tab_list)
