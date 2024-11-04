@@ -327,9 +327,9 @@ class Layer:
                     continue
 
                 if nm_relation:
-                    tab = FormTab(nm_relation.referenced_layer.name)
+                    tab = FormTab(nm_relation.referenced_layer.alias)
                 else:
-                    tab = FormTab(relation.referencing_layer.name)
+                    tab = FormTab(relation.referencing_layer.alias)
 
                 widget = FormRelationWidget(relation, nm_relation)
                 tab.addChild(widget)

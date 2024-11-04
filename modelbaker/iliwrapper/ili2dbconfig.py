@@ -324,6 +324,9 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--postScript", "NULL"])
 
+        if self.db_ili_version is None or self.db_ili_version > 3:
+            self.append_args(args, ["--createNlsTab"])
+
         self.append_args(
             args, Ili2DbCommandConfiguration.to_ili2db_args(self), force_append=True
         )

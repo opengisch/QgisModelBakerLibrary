@@ -15,6 +15,7 @@ class Relation:
         self.child_domain_name = None
         self.qgis_relation = None
         self._id = None
+        self.translate_name = False
 
     def dump(self) -> dict:
         definition = dict()
@@ -57,10 +58,31 @@ class Relation:
 
         relation.setId(self._id)
         relation.setName(self.name)
-        relation.setReferencingLayer(self.referencing_layer.create().id())
-        relation.setReferencedLayer(self.referenced_layer.create().id())
+        referencing_qgis_layer = self.referencing_layer.create()
+        referenced_qgis_layer = self.referenced_layer.create()
+        relation.setReferencingLayer(referencing_qgis_layer.id())
+        relation.setReferencedLayer(referenced_qgis_layer.id())
         relation.addFieldPair(self.referencing_field, self.referenced_field)
         relation.setStrength(self.strength)
+
+        if self.translate_name:
+            # Grab translated table and field names from QGIS objects
+            index = referencing_qgis_layer.fields().indexOf(self.referencing_field)
+            referencing_field_alias = referencing_qgis_layer.fields().at(index).alias()
+            index = referenced_qgis_layer.fields().indexOf(self.referenced_field)
+            referenced_field_alias = referenced_qgis_layer.fields().at(index).alias()
+            tr_name = "{}_({})_{}_({})".format(
+                referencing_qgis_layer.name(),
+                referencing_field_alias
+                if referencing_field_alias
+                else self.referencing_field,
+                referenced_qgis_layer.name(),
+                referenced_field_alias
+                if referenced_field_alias
+                else self.referenced_field,
+            )
+            relation.setName(tr_name)
+
         self.qgis_relation = relation
         return relation
 

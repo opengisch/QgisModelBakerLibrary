@@ -31,6 +31,7 @@ PG_METAATTRS_TABLE = "t_ili2db_meta_attrs"
 PG_SETTINGS_TABLE = "t_ili2db_settings"
 PG_DATASET_TABLE = "t_ili2db_dataset"
 PG_BASKET_TABLE = "t_ili2db_basket"
+PG_NLS_TABLE = "t_ili2db_nls"
 
 
 class PGConnector(DBConnector):
@@ -160,10 +161,18 @@ class PGConnector(DBConnector):
             model_where = ""
             attribute_name = ""
             attribute_left_join = ""
+            translations_left_join = ""
             relevance = ""
             topics = ""
+            translations = ""
 
             if self.metadata_exists():
+                tr_enabled, lang = self.get_translation_handling()
+                if tr_enabled:
+                    self.stdout.emit(
+                        f"Getting tables info with preferred language '{lang}'."
+                    )
+
                 kind_settings_field = "p.setting AS kind_settings,"
                 table_alias = "alias.setting AS table_alias,"
                 ili_name = "c.iliname AS ili_name,"
@@ -265,6 +274,8 @@ class PGConnector(DBConnector):
                     )
                 )
 
+                translations = """nls.label AS table_tr,""" if tr_enabled else ""
+
                 domain_left_join = """LEFT JOIN {}.t_ili2db_table_prop p
                               ON p.tablename = tbls.tablename
                               AND p.tag = 'ch.ehi.ili2db.tableKind'""".format(
@@ -283,6 +294,16 @@ class PGConnector(DBConnector):
                 attribute_left_join = """LEFT JOIN {}.t_ili2db_attrname attrs
                       ON c.iliname = attrs.iliname""".format(
                     self.schema
+                )
+                translations_left_join = (
+                    """LEFT JOIN {}.t_ili2db_nls nls
+                      ON c.iliname = nls.ilielement
+                      AND nls.lang = '{}'
+                """.format(
+                        self.schema, lang
+                    )
+                    if tr_enabled
+                    else ""
                 )
 
             schema_where = "AND schemaname = '{}'".format(self.schema)
@@ -306,6 +327,7 @@ class PGConnector(DBConnector):
                   {coord_decimals}
                   {relevance}
                   {topics}
+                  {translations}
                   g.type AS simple_type,
                   format_type(ga.atttypid, ga.atttypmod) as formatted_type
                 FROM pg_catalog.pg_tables tbls
@@ -318,6 +340,7 @@ class PGConnector(DBConnector):
                 {alias_left_join}
                 {model_where}
                 {attribute_left_join}
+                {translations_left_join}
                 LEFT JOIN public.geometry_columns g
                   ON g.f_table_schema = tbls.schemaname
                   AND g.f_table_name = tbls.tablename
@@ -334,8 +357,10 @@ class PGConnector(DBConnector):
                     coord_decimals=coord_decimals,
                     relevance=relevance,
                     topics=topics,
+                    translations=translations,
                     domain_left_join=domain_left_join,
                     alias_left_join=alias_left_join,
+                    translations_left_join=translations_left_join,
                     model_where=model_where,
                     attribute_name=attribute_name,
                     attribute_left_join=attribute_left_join,
@@ -430,6 +455,7 @@ class PGConnector(DBConnector):
             oid_domain_field = ""
             attr_order_field = ""
             attr_mapping_field = ""
+            translations = ""
             column_alias = ""
             unit_join = ""
             text_kind_join = ""
@@ -439,15 +465,19 @@ class PGConnector(DBConnector):
             oid_domain_join = ""
             attr_order_join = ""
             attr_mapping_join = ""
+            translations_left_join = ""
             order_by_attr_order = ""
 
             if self.metadata_exists():
+                tr_enabled, lang = self.get_translation_handling()
+
                 unit_field = "unit.setting AS unit,"
                 text_kind_field = "txttype.setting AS texttype,"
                 column_alias = "alias.setting AS column_alias,"
                 full_name_field = "full_name.iliname as fully_qualified_name,"
                 enum_domain_field = "enum_domain.setting as enum_domain,"
                 oid_domain_field = "oid_domain.setting as oid_domain,"
+                translations = """nls.label AS column_tr,""" if tr_enabled else ""
                 unit_join = """LEFT JOIN {}.t_ili2db_column_prop unit
                                                     ON c.table_name=unit.tablename AND
                                                     c.column_name=unit.columnname AND
@@ -486,6 +516,7 @@ class PGConnector(DBConnector):
                                                     oid_domain.tag = 'ch.ehi.ili2db.oidDomain'""".format(
                     self.schema
                 )
+
                 if self._table_exists(PG_METAATTRS_TABLE):
                     attr_order_field = "COALESCE(to_number(form_order.attr_value, '999'), 999) as attr_order,"
                     attr_order_join = """LEFT JOIN {schema}.{t_ili2db_meta_attrs} form_order
@@ -509,6 +540,17 @@ class PGConnector(DBConnector):
                         schema=self.schema, t_ili2db_meta_attrs=PG_METAATTRS_TABLE
                     )
 
+                    translations_left_join = (
+                        """LEFT JOIN {}.t_ili2db_nls nls
+                                          ON full_name.iliname = nls.ilielement
+                                          AND nls.lang = '{}'
+                                    """.format(
+                            self.schema, lang
+                        )
+                        if tr_enabled
+                        else ""
+                    )
+
                 fields_cur.execute(
                     """
                     SELECT
@@ -523,6 +565,7 @@ class PGConnector(DBConnector):
                       {oid_domain_field}
                       {attr_order_field}
                       {attr_mapping_field}
+                      {translations}
                       pgd.description AS comment
                     FROM pg_catalog.pg_statio_all_tables st
                     LEFT JOIN information_schema.columns c ON c.table_schema=st.schemaname AND c.table_name=st.relname
@@ -535,6 +578,7 @@ class PGConnector(DBConnector):
                     {oid_domain_join}
                     {attr_order_join}
                     {attr_mapping_join}
+                    {translations_left_join}
                     WHERE st.relid = '{schema}."{table}"'::regclass
                     {order_by_attr_order};
                     """.format(
@@ -548,6 +592,7 @@ class PGConnector(DBConnector):
                         oid_domain_field=oid_domain_field,
                         attr_order_field=attr_order_field,
                         attr_mapping_field=attr_mapping_field,
+                        translations=translations,
                         unit_join=unit_join,
                         text_kind_join=text_kind_join,
                         disp_name_join=disp_name_join,
@@ -556,6 +601,7 @@ class PGConnector(DBConnector):
                         oid_domain_join=oid_domain_join,
                         attr_order_join=attr_order_join,
                         attr_mapping_join=attr_mapping_join,
+                        translations_left_join=translations_left_join,
                         order_by_attr_order=order_by_attr_order,
                     )
                 )
@@ -669,6 +715,8 @@ class PGConnector(DBConnector):
             cardinality_max_field = ""
             cardinality_max_join = ""
             cardinality_max_group_by = ""
+            translate = ""
+
             if self._table_exists(PG_METAATTRS_TABLE):
                 strength_field = ", META_ATTRS.attr_value as strength"
                 strength_join = """
@@ -696,8 +744,12 @@ class PGConnector(DBConnector):
                 )
                 cardinality_max_group_by = ", META_ATTRS_CARDINALITY.attr_value"
 
+                translate = (
+                    ", true AS tr_enabled" if self.get_translation_handling()[0] else ""
+                )
+
             cur.execute(
-                """SELECT RC.CONSTRAINT_NAME, KCU1.TABLE_NAME AS referencing_table, KCU1.COLUMN_NAME AS referencing_column, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME AS referenced_table, KCU2.COLUMN_NAME AS referenced_column, KCU1.ORDINAL_POSITION{strength_field}{cardinality_max_field}
+                """SELECT RC.CONSTRAINT_NAME, KCU1.TABLE_NAME AS referencing_table, KCU1.COLUMN_NAME AS referencing_column, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME AS referenced_table, KCU2.COLUMN_NAME AS referenced_column, KCU1.ORDINAL_POSITION{strength_field}{cardinality_max_field}{translate}
                             FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
                             INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
                              ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME {schema_where1} {filter_layer_where}
@@ -718,6 +770,7 @@ class PGConnector(DBConnector):
                     cardinality_max_field=cardinality_max_field,
                     cardinality_max_join=cardinality_max_join,
                     cardinality_max_group_by=cardinality_max_group_by,
+                    translate=translate,
                 )
             )
             return cur
@@ -1314,3 +1367,21 @@ class PGConnector(DBConnector):
 
         # Transform list of tuples into list
         return list(sum(schemas, ()))
+
+    def get_translation_handling(self) -> tuple[bool, str]:
+        return self._table_exists(PG_NLS_TABLE) and self._lang != "", self._lang
+
+    def get_available_languages(self):
+        if self.schema and self._table_exists(PG_NLS_TABLE):
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                sql.SQL(
+                    """
+                    SELECT DISTINCT
+                    lang
+                    FROM {schema}.t_ili2db_nls
+                    """
+                ).format(schema=sql.Identifier(self.schema))
+            )
+            return [row["lang"] for row in cur.fetchall()]
+        return []

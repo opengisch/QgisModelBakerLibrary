@@ -96,6 +96,9 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
 
     def command(self, hide_password):
         ili2db_jar_arg = self._ili2db_jar_arg()
+        if ili2db_jar_arg == self.ILI2DB_NOT_FOUND:
+            return "ili2db tool not found!"
+
         args = self._args(hide_password)
         java_path = self._escaped_arg(
             get_java_path(self.configuration.base_configuration)

@@ -49,6 +49,8 @@ IGNORED_TABLES = [
     "T_ILI2DB_BASKET",
     "t_ili2db_dataset",
     "T_ILI2DB_DATASET",
+    "t_ili2db_nls",
+    "T_ILI2DB_NLS",
 ]
 
 BASKET_TABLES = [

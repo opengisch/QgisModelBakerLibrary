@@ -32,6 +32,7 @@ GPKG_METAATTRS_TABLE = "T_ILI2DB_META_ATTRS"
 GPKG_SETTINGS_TABLE = "T_ILI2DB_SETTINGS"
 GPKG_DATASET_TABLE = "T_ILI2DB_DATASET"
 GPKG_BASKET_TABLE = "T_ILI2DB_BASKET"
+GPKG_NLS_TABLE = "T_ILI2DB_NLS"
 
 
 class GPKGConnector(DBConnector):
@@ -49,7 +50,7 @@ class GPKGConnector(DBConnector):
         self.conn.row_factory = sqlite3.Row
         self.uri = uri
         self._bMetadataTable = self._metadata_exists()
-        self._tables_info = self._get_tables_info()
+        self._tables_info = []
         self.iliCodeName = "iliCode"
         self.tid = "T_Id"
         self.tilitid = "T_Ili_Tid"
@@ -97,6 +98,8 @@ class GPKGConnector(DBConnector):
         return result
 
     def get_tables_info(self):
+        if not self._tables_info:
+            self._tables_info = self._get_tables_info()
         return self._tables_info
 
     def _get_tables_info(self):
@@ -105,6 +108,12 @@ class GPKGConnector(DBConnector):
         interlis_joins = ""
 
         if self.metadata_exists():
+            tr_enabled, lang = self.get_translation_handling()
+            if tr_enabled:
+                self.stdout.emit(
+                    f"Getting tables info with preferred language '{lang}'."
+                )
+
             interlis_fields = """p.setting AS kind_settings,
                 alias.setting AS table_alias,
                 c.iliname AS ili_name,
@@ -139,7 +148,9 @@ class GPKGConnector(DBConnector):
                 substr(c.iliname, 0, instr(c.iliname, '.')) AS model,
                 attrs.sqlname as attribute_name,
                 {relevance_field},
-                {topics},""".format(
+                {topics},
+                {translations}  -- Optional. Trailing comma omitted on purpose.
+                """.format(
                 relevance_field="""CASE WHEN c.iliname IN (
                             -- used to get the class names from the full names
                             WITH names AS (
@@ -208,6 +219,7 @@ class GPKGConnector(DBConnector):
                     )
                     SELECT childTopic, baseTopic, is_a_base FROM children)"""
                 ),
+                translations="""nls.label AS table_tr,""" if tr_enabled else "",
             )
             interlis_joins = """LEFT JOIN T_ILI2DB_TABLE_PROP p
                    ON p.tablename = s.name
@@ -218,7 +230,15 @@ class GPKGConnector(DBConnector):
                 LEFT JOIN T_ILI2DB_CLASSNAME c
                    ON s.name == c.sqlname
                 LEFT JOIN T_ILI2DB_ATTRNAME attrs
-                   ON c.iliname = attrs.iliname """
+                   ON c.iliname = attrs.iliname
+                {translations}""".format(
+                translations=f"""LEFT JOIN T_ILI2DB_NLS nls
+                    ON c.iliname = nls.ilielement
+                    AND nls.lang = '{lang}'
+                """
+                if tr_enabled
+                else ""
+            )
         try:
             cursor.execute(
                 """
@@ -331,6 +351,8 @@ class GPKGConnector(DBConnector):
         columns_prop = list()
         columns_full_name = list()
         meta_attrs = list()
+        columns_tr = list()
+        tr_enabled, lang = self.get_translation_handling()
 
         if self.metadata_exists():
             cursor.execute(
@@ -342,7 +364,6 @@ class GPKGConnector(DBConnector):
             )
             columns_prop = cursor.fetchall()
 
-        if self.metadata_exists():
             if self.ili_version() == 3:
                 cursor.execute(
                     """
@@ -361,9 +382,20 @@ class GPKGConnector(DBConnector):
                 )
             columns_full_name = cursor.fetchall()
 
-        if self.metadata_exists() and self._table_exists(GPKG_METAATTRS_TABLE):
-            meta_attrs = self.get_meta_attrs_info()
+            if self._table_exists(GPKG_METAATTRS_TABLE):
+                meta_attrs = self.get_meta_attrs_info()
 
+            if tr_enabled:
+                cursor.execute(
+                    """
+                    SELECT ilielement, label
+                    FROM T_ILI2DB_NLS
+                    WHERE lang = ?;""",
+                    (lang,),
+                )
+                columns_tr = cursor.fetchall()
+
+        # Build result dict from query results
         complete_records = list()
         for column_info in columns_info:
             record = {}
@@ -385,6 +417,11 @@ class GPKGConnector(DBConnector):
             for column_full_name in columns_full_name:
                 if column_full_name["sqlname"] == column_info["name"]:
                     record["fully_qualified_name"] = column_full_name["iliname"]
+
+                    for column_tr in columns_tr:
+                        if column_full_name["iliname"] == column_tr["ilielement"]:
+                            record["column_tr"] = column_tr["label"]
+                            break
                     break
 
             for column_prop in columns_prop:
@@ -486,6 +523,8 @@ class GPKGConnector(DBConnector):
 
         cursor = self.conn.cursor()
         complete_records = list()
+        tr_enabled, lang = self.get_translation_handling()
+
         for table_info_name, table_info in tables_info_dict.items():
             cursor.execute("""PRAGMA foreign_key_list("{}");""".format(table_info_name))
             foreign_keys = cursor.fetchall()
@@ -504,6 +543,9 @@ class GPKGConnector(DBConnector):
                     record["referenced_table"],
                     record["referenced_column"],
                 )
+                if tr_enabled:
+                    record["tr_enabled"] = True
+
                 if self._table_exists(GPKG_METAATTRS_TABLE):
                     # Get strength
                     cursor.execute(
@@ -1189,3 +1231,23 @@ class GPKGConnector(DBConnector):
                 )
 
         return False, self.tr("Could not reset T_LastUniqueId")
+
+    def get_translation_handling(self) -> tuple[bool, str]:
+        return self._table_exists(GPKG_NLS_TABLE) and self._lang != "", self._lang
+
+    def get_available_languages(self):
+        if not self._table_exists(GPKG_NLS_TABLE):
+            return []
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """SELECT DISTINCT
+            lang
+            FROM "{}";
+            """.format(
+                GPKG_NLS_TABLE
+            )
+        )
+        records = cursor.fetchall()
+        cursor.close()
+        return [record["lang"] for record in records]

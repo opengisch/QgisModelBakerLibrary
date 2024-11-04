@@ -53,6 +53,7 @@ class Generator(QObject):
         mgmt_uri: Optional[str] = None,
         consider_basket_handling: bool = False,
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
+        preferred_language: str = "",
     ) -> None:
         """
         Creates a new Generator objects.
@@ -75,6 +76,8 @@ class Generator(QObject):
         self._db_connector.new_message.connect(self.append_print_message)
         self.basket_handling = consider_basket_handling and self.get_basket_handling()
         self.optimize_strategy = optimize_strategy
+
+        self._db_connector.set_preferred_translation(preferred_language)
 
         self._additional_ignored_layers = (
             []
@@ -177,7 +180,12 @@ class Generator(QObject):
             if not relevant_topics and base_topic and base_topic.count(".") > 0:
                 relevant_topics.append(base_topic)
 
-            alias = record["table_alias"] if "table_alias" in record else None
+            # Get table name in this order: translation if exists,
+            # alias (dispName) if exists, or ili_name.
+            alias = record.get("table_tr", None)
+            if not alias:
+                alias = record.get("table_alias", None)
+
             if not alias:
                 short_name = None
                 if is_domain and is_attribute:
@@ -288,22 +296,26 @@ class Generator(QObject):
             re_iliname = re.compile(r".*\.(.*)$")
             for fielddef in fields_info:
                 column_name = fielddef["column_name"]
-                fully_qualified_name = (
-                    fielddef["fully_qualified_name"]
-                    if "fully_qualified_name" in fielddef
-                    else None
-                )
-                m = (
-                    re_iliname.match(fully_qualified_name)
-                    if fully_qualified_name
-                    else None
-                )
 
-                alias = None
-                if "column_alias" in fielddef:
-                    alias = fielddef["column_alias"]
-                if m and not alias:
-                    alias = m.group(1)
+                # Get field name in this order: translation if exists,
+                # alias (dispName) if exists, or ili_name.
+                alias = fielddef.get("column_tr", None)
+                if not alias:
+                    alias = fielddef.get("column_alias", None)
+
+                if not alias:
+                    fully_qualified_name = (
+                        fielddef["fully_qualified_name"]
+                        if "fully_qualified_name" in fielddef
+                        else None
+                    )
+                    m = (
+                        re_iliname.match(fully_qualified_name)
+                        if fully_qualified_name
+                        else None
+                    )
+                    if m:
+                        alias = m.group(1)
 
                 field = Field(column_name)
                 field.alias = alias
@@ -517,6 +529,7 @@ class Generator(QObject):
                         relation.referencing_field = record["referencing_column"]
                         relation.referenced_field = record["referenced_column"]
                         relation.name = record["constraint_name"]
+                        relation.translate_name = record.get("tr_enabled", False)
                         relation.strength = (
                             QgsRelation.Composition
                             if "strength" in record

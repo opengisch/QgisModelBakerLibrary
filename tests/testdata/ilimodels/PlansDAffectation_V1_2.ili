@@ -1,0 +1,225 @@
+INTERLIS 2.3;
+
+/** Modèle de géodonnées minimal
+ * Plans d'affectation (cantonaux/communaux)
+ * Jeu de géodonnées de base No. 73
+ */
+
+!! Version    | Who   | Modification
+!!------------------------------------------------------------------------------
+!! 2023-03-20 | ARE   | - DOMAIN SurfacePartition supprimé
+!!                    | - CLASS AffectationPrimaire_SurfaceDeZones: Geometrie du type SurfaceUnique (SURFACE)
+!!                    | - CLASS AffectationPrimaire_SurfaceDeZones: CONSTRAINT pour garantir la topologie AREA
+!!                    | - CLASS Type et Type_Ct: Attribut Code, Longeur de champ 40 caractères
+!!------------------------------------------------------------------------------
+!! 2021-11-19 | KOGIS | Localisation_V1 replaced by LocalisationCH_V1
+!!------------------------------------------------------------------------------
+!! 2021-09-01 | ARE   | Version 1.2
+!!                    | Adaption au modèle-cadre RDPPF version 2.0 du 14 avril 2021 :
+!!                    | - DOMAIN StatutJuridique adapté, TypeDocument nouveau
+!!                    | - STRUCTURE LocalisedBlob et MultilingualBlob nouveaux
+!!                    | - CLASS Geometrie, Zone_SensibiliteAuBruit, LimiteDeLaForet_Ligne, DistancesParRapportALa Foret_Ligne: nouvel attribut publieJusque
+!!                    | - CLASS Document adapté au modèle-cadre RDPPF
+!!                    | - CLASS Service adapté au modèle-cadre RDPPF
+!!                    | Modifications techniques ultérieures
+!!                    | - MODEL PlansDAffectation_V1_2 : qu’un modèle, les deux modèles separés pour MN03 et le catalogue ne sont plus nécessaires
+!!                    | - CLASS AffectationPrincipale_CH s’appelle maintenant Catalogue_CH, elle est multilingue (Designation comme MultilingualText).
+!!                    | - ASSOCIATION Geometrie_Document inséré additionellement pour permettre un lien direct entre les classes Geometrie et Document
+!!                    | - TOPIC GeodonneesDeBase maintenant avec BASKET OID du type TypeID
+!!                    | - CLASS JeuDeDonnees : Attribut BasketID maintenant du type TypeID, nouvel méta-attribut pour la vérification de l’ID
+!!------------------------------------------------------------------------------
+
+!!@ technicalContact=mailto:info@are.admin.ch
+!!@ furtherInformation=https://www.are.admin.ch/mgm
+!!@ IDGeoIV=73
+MODEL PlansDAffectation_V1_2 (fr)
+AT "https://models.geo.admin.ch/ARE/"
+VERSION "2023-03-20"
+TRANSLATION OF Nutzungsplanung_V1_2 ["2023-03-20"] =
+  IMPORTS CHAdminCodes_V1,InternationalCodes_V1,LocalisationCH_V1,GeometryCHLV95_V1;
+
+  DOMAIN
+
+    SurfaceUnique = SURFACE WITH (ARCS,STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS>0.05;
+
+    TypeID = OID TEXT*60;
+
+    StatutJuridique = (
+      enVigueur,
+      ModificationAvecEffetAnticipe,
+      ModificationSansEffetAnticipe
+    );
+
+    TypeDocument = (
+      DispositionJuridique,
+      BaseLegale,
+      Renvoi
+    );
+
+    ForceObligatoire = (
+      Contenu_contraignant,
+      Contenu_informatif,
+      Contenu_indicatif,
+      Contenu_dAideALaMiseEnOeuvre
+    );
+
+  STRUCTURE LocalisedUri =
+    Language : InternationalCodes_V1.LanguageCode_ISO639_1;
+    Text : MANDATORY URI;
+  END LocalisedUri;
+
+  STRUCTURE MultilingualUri =
+    LocalisedText : BAG {1..*} OF PlansDAffectation_V1_2.LocalisedUri;
+    UNIQUE (LOCAL) LocalisedText: Language;
+  END MultilingualUri;
+
+  STRUCTURE LocalisedBlob =
+    Language : InternationalCodes_V1.LanguageCode_ISO639_1;
+    Blob : MANDATORY BLACKBOX BINARY;
+  END LocalisedBlob;
+
+  STRUCTURE MultilingualBlob =
+    LocalisedBlob : BAG {1..*} OF PlansDAffectation_V1_2.LocalisedBlob;
+    UNIQUE (LOCAL) LocalisedBlob: Language;
+  END MultilingualBlob;
+
+  TOPIC Catalogue_CH =
+    BASKET OID AS TypeID;
+
+    CLASS Catalogue_CH (FINAL) =
+      OID AS TypeID;
+      Code : MANDATORY 11 .. 99;
+      Designation : MANDATORY LocalisationCH_V1.MultilingualText;
+    END Catalogue_CH;
+
+  END Catalogue_CH;
+
+  TOPIC DispositionsJuridiques =
+    DEPENDS ON PlansDAffectation_V1_2.Catalogue_CH;
+
+    CLASS Document =
+      Type : MANDATORY PlansDAffectation_V1_2.TypeDocument;
+      Titre : MANDATORY LocalisationCH_V1.MultilingualText;
+      Abreviation : LocalisationCH_V1.MultilingualText;
+      NoOfficiel : LocalisationCH_V1.MultilingualText;
+      SeulementCommune : CHAdminCodes_V1.CHMunicipalityCode;
+      TexteSurInternet : PlansDAffectation_V1_2.MultilingualUri;
+      Document : PlansDAffectation_V1_2.MultilingualBlob;
+      IndexExtrait : MANDATORY -1000 .. 1000;
+      StatutJuridique : MANDATORY PlansDAffectation_V1_2.StatutJuridique;
+      publieDepuis : MANDATORY INTERLIS.XMLDate;
+      publieJusque : INTERLIS.XMLDate;
+    END Document;
+
+  END DispositionsJuridiques;
+
+  TOPIC GeodonneesDeBase =
+    BASKET OID AS TypeID;
+    DEPENDS ON PlansDAffectation_V1_2.Catalogue_CH,PlansDAffectation_V1_2.DispositionsJuridiques;
+
+    CLASS Geometrie (ABSTRACT) =
+      publieDepuis : MANDATORY INTERLIS.XMLDate;
+      publieJusque : INTERLIS.XMLDate;
+      StatutJuridique : MANDATORY PlansDAffectation_V1_2.StatutJuridique;
+      Remarques : MTEXT;
+    END Geometrie;
+
+    CLASS Type =
+      Code : MANDATORY TEXT*40;
+      Designation : MANDATORY TEXT*80;
+      Abreviation : TEXT*12;
+      ForceObligatoire : MANDATORY PlansDAffectation_V1_2.ForceObligatoire;
+      IndiceUtilisation : 0.00 .. 9.00;
+      IndiceUtilisationType : TEXT*40;
+      Remarques : MTEXT;
+      Symbole : BLACKBOX BINARY;
+    END Type;
+
+    CLASS Type_Ct =
+      Code : MANDATORY TEXT*40;
+      Designation : MANDATORY TEXT*80;
+      Abreviation : TEXT*12;
+      Remarques : MTEXT;
+    END Type_Ct;
+
+    CLASS AffectationPrimaire_SurfaceDeZones
+    EXTENDS Geometrie =
+      Geometrie : MANDATORY PlansDAffectation_V1_2.SurfaceUnique;
+    SET CONSTRAINT WHERE StatutJuridique == #enVigueur:
+      INTERLIS.areAreas(ALL, UNDEFINED, >> Geometrie);
+    END AffectationPrimaire_SurfaceDeZones;
+
+    CLASS ContenuLineaire
+    EXTENDS Geometrie =
+      Geometrie : MANDATORY GeometryCHLV95_V1.Line;
+    END ContenuLineaire;
+
+    CLASS ContenuPonctuel
+    EXTENDS Geometrie =
+      Geometrie : MANDATORY GeometryCHLV95_V1.Coord2;
+    END ContenuPonctuel;
+
+    CLASS ZoneSuperposee
+    EXTENDS Geometrie =
+      Geometrie : MANDATORY PlansDAffectation_V1_2.SurfaceUnique;
+    END ZoneSuperposee;
+
+    ASSOCIATION Type_Document =
+      Type (EXTERNAL) -- {0..*} Type;
+      Document (EXTERNAL) -- {0..*} PlansDAffectation_V1_2.DispositionsJuridiques.Document;
+    END Type_Document;
+
+    ASSOCIATION Geometrie_Document =
+      Geometrie (EXTERNAL) -- {0..*} Geometrie;
+      Document (EXTERNAL) -- {0..*} PlansDAffectation_V1_2.DispositionsJuridiques.Document;
+    END Geometrie_Document;
+
+    ASSOCIATION Type_Geometrie =
+      Geometrie -- {0..*} Geometrie;
+      Type -<> {1} Type;
+    END Type_Geometrie;
+
+    ASSOCIATION Type_Type_Ct =
+      Type -- {0..*} Type;
+      Type_Ct (EXTERNAL) -<> {1} Type_Ct;
+    END Type_Type_Ct;
+
+    ASSOCIATION TypeCt_CatalogueCH =
+      Type_Ct -- {0..*} Type_Ct;
+      Catalogue_CH (EXTERNAL) -- {1} PlansDAffectation_V1_2.Catalogue_CH.Catalogue_CH;
+    END TypeCt_CatalogueCH;
+
+  END GeodonneesDeBase;
+
+  TOPIC MetadonneesTransfert =
+    DEPENDS ON PlansDAffectation_V1_2.DispositionsJuridiques;
+
+    CLASS Service =
+      Nom : MANDATORY LocalisationCH_V1.MultilingualText;
+      ServiceSurInternet : PlansDAffectation_V1_2.MultilingualUri;
+      IDE : TEXT*12;
+      Ligne1 : TEXT*80;
+      Ligne2 : TEXT*80;
+      Rue : TEXT*100;
+      Numero : TEXT*7;
+      NPA : TEXT*4;
+      Localite : TEXT*40;
+      UNIQUE IDE;
+    END Service;
+
+    CLASS JeuDeDonnees =
+      !!@ basketRef=PlansDAffectation_V1_2.GeodonneesDeBase
+      BasketID : MANDATORY TypeID;
+      Version : MANDATORY INTERLIS.XMLDate;
+      DateDeLivraison : INTERLIS.XMLDate;
+      Remarques : MTEXT;
+    END JeuDeDonnees;
+
+    ASSOCIATION Donnees_orgResp =
+      OrganismeResponsable -<> {1} Service;
+      JeuDeDonnees -- {0..*} JeuDeDonnees;
+    END Donnees_orgResp;
+
+  END MetadonneesTransfert;
+
+END PlansDAffectation_V1_2.

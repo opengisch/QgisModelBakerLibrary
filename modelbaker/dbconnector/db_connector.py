@@ -15,7 +15,6 @@
  *                                                                         *
  ***************************************************************************/
 """
-
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 
 from .config import BASKET_TABLES, IGNORED_ILI_ELEMENTS, IGNORED_SCHEMAS, IGNORED_TABLES
@@ -38,6 +37,7 @@ class DBConnector(QObject):
         self.dispName = ""  # For BAG OF config, specific for each DB
         self.basket_table_name = ""  # For basket handling, specific for each DB
         self.dataset_table_name = ""  # For basket handling, specific for each DB
+        self._lang = ""  # Preferred tr language for table/column info (2 characters)
 
     def map_data_types(self, data_type):
         """Map provider date/time types to QGIS date/time types"""
@@ -403,6 +403,35 @@ class DBConnector(QObject):
         Resets the current value of the sequence used for the t_id
         """
         return False, None
+
+    def set_preferred_translation(self, lang: str) -> bool:
+        """
+        Returns whether the preferred translation language was successfully set.
+
+        Note: By convention, a value of __ means the preferred language will be
+              the original (non-translated) model language.
+        """
+        if len(lang) == 2 and lang != "__":
+            self._lang = lang
+            return True
+
+        return False
+
+    def get_translation_handling(self) -> tuple[bool, str]:
+        """
+        Whether there is translation support for this DB.
+
+        :return: Tuple containing:
+            - Whether the t_ili2db_nls is present and the DB connector has a preferred language set.
+            - The preferred language set.
+        """
+        return False, ""
+
+    def get_available_languages(self) -> list[str]:
+        """
+        Returns a list of available languages in the t_ili2db_nls table.
+        """
+        return []
 
 
 class DBConnectorError(Exception):
