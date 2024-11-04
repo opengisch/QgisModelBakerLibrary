@@ -386,16 +386,19 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 5
                 for tab in efc.tabs():
-                    if tab.name() == "stadtscng_v1_1freizeit_gebaeude":
+                    if tab.name() == "Freizeit.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "stadtscng_v1_1gewerbe_gebaeude":
+                    if tab.name() == "Gewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
+                    if (
+                        tab.name()
+                        == "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "gebaeude":
+                    if tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 4
@@ -609,17 +612,20 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and two relation editors
                 assert len(efc.tabs()) == 3
                 for tab in efc.tabs():
-                    if tab.name() == "stadtscng_v1_1freizeit_gebaeude":
+                    if tab.name() == "Freizeit.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "stadtscng_v1_1gewerbe_gebaeude":
+                    if tab.name() == "Gewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
                     if (
-                        tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude"
+                        tab.name()
+                        == "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude"
                     ):  # should not happen
                         count += 1
-                    if tab.name() == "gebaeude":  # should not happen
+                    if (
+                        tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):  # should not happen
                         count += 1
         # should find only 2
 
@@ -805,17 +811,20 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and two relation editors
                 assert len(efc.tabs()) == 3
                 for tab in efc.tabs():
-                    if tab.name() == "stadtscng_v1_1freizeit_gebaeude":
+                    if tab.name() == "Freizeit.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "stadtscng_v1_1gewerbe_gebaeude":
+                    if tab.name() == "Gewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
                     if (
-                        tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude"
+                        tab.name()
+                        == "Kantonale_Ortsplanung_V1_1.Konstruktionen.Gebaeude"
                     ):  # should not happen
                         count += 1
-                    if tab.name() == "gebaeude":  # should not happen
+                    if (
+                        tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):  # should not happen
                         count += 1
         # should find only 2
         assert count == 2
@@ -1250,28 +1259,28 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 9
                 for tab in efc.tabs():
-                    if tab.name() == "gebaeude":
+                    if tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1gewerbe_gebaeude":
+                    if tab.name() == "Gewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1freizeit_gebaeude":
+                    if tab.name() == "Freizeit.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1industriegewerbe_gebaeude":
+                    if tab.name() == "IndustrieGewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1hallen_gebaeude":
+                    if tab.name() == "Hallen.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "markthalle":
+                    if tab.name() == "Markthalle":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "turnhalletyp1":
+                    if tab.name() == "TurnhalleTyp1":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "turnhalletyp2":
+                    if tab.name() == "TurnhalleTyp2":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 8
@@ -1517,28 +1526,30 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 8
                 for tab in efc.tabs():
-                    if tab.name() == "gebaeude":  # this should not happen
+                    if (
+                        tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):  # this should not happen
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1gewerbe_gebaeude":
+                    if tab.name() == "Gewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1freizeit_gebaeude":
+                    if tab.name() == "Freizeit.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1industriegewerbe_gebaeude":
+                    if tab.name() == "IndustrieGewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1hallen_gebaeude":
+                    if tab.name() == "Hallen.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "markthalle":
+                    if tab.name() == "Markthalle":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "turnhalletyp1":
+                    if tab.name() == "TurnhalleTyp1":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "turnhalletyp2":
+                    if tab.name() == "TurnhalleTyp2":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 7
@@ -1764,28 +1775,30 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 8
                 for tab in efc.tabs():
-                    if tab.name() == "gebaeude":  # this should not happen
+                    if (
+                        tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):  # this should not happen
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1gewerbe_gebaeude":
+                    if tab.name() == "Gewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1freizeit_gebaeude":
+                    if tab.name() == "Freizeit.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1industriegewerbe_gebaeude":
+                    if tab.name() == "IndustrieGewerbe.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "polymrpng_v1_1hallen_gebaeude":
+                    if tab.name() == "Hallen.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "markthalle":
+                    if tab.name() == "Markthalle":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "turnhalletyp1":
+                    if tab.name() == "TurnhalleTyp1":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "turnhalletyp2":
+                    if tab.name() == "TurnhalleTyp2":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 7
@@ -2212,10 +2225,13 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 4
                 for tab in efc.tabs():
-                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
+                    if (
+                        tab.name()
+                        == "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "gebaeude":
+                    if tab.name() == "Bauplanung_V1_1.Konstruktionen.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 3 (one times gebaeude and two times kantnl_ng_v1_1konstruktionen_gebaeude because it's extended)
@@ -2431,10 +2447,15 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 2
                 for tab in efc.tabs():
-                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
+                    if (
+                        tab.name()
+                        == "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "gebaeude":  # this should not happen
+                    if (
+                        tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):  # this should not happen
                         count += 1
                         assert len(tab.children()) == 1
         # should find 1 (one times kantnl_ng_v1_1konstruktionen_gebaeude)
@@ -2613,10 +2634,12 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 2
                 for tab in efc.tabs():
-                    if tab.name() == "kantnl_ng_v1_1konstruktionen_gebaeude":
+                    if tab.name() == "Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
-                    if tab.name() == "gebaeude":  # this should not happen
+                    if (
+                        tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude"
+                    ):  # this should not happen
                         count += 1
                         assert len(tab.children()) == 1
         # should find 1 (one times kantnl_ng_v1_1konstruktionen_gebaeude)

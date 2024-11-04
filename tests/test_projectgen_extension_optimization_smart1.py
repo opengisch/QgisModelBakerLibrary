@@ -318,7 +318,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 2
                 for tab in efc.tabs():
-                    if tab.name() == "gebaeude":
+                    if tab.name() == "Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 1
@@ -739,7 +739,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 2
                 for tab in efc.tabs():
-                    if tab.name() == "gebaeude":
+                    if tab.name() == "Ortsplanung_V1_1.Konstruktionen.Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 1
@@ -1165,7 +1165,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
                 # one general and four relation editors
                 assert len(efc.tabs()) == 2
                 for tab in efc.tabs():
-                    if tab.name() == "strassen_gebaeude":
+                    if tab.name() == "Strassen_Gebaeude":
                         count += 1
                         assert len(tab.children()) == 1
         # should find 1 (one times gebaeude)
