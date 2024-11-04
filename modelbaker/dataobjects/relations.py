@@ -67,12 +67,10 @@ class Relation:
 
         if self.translate_name:
             # Grab translated table and field names from QGIS objects
-            referencing_field_alias = referencing_qgis_layer.fields()[
-                self.referencing_field
-            ].alias()
-            referenced_field_alias = referenced_qgis_layer.fields()[
-                self.referenced_field
-            ].alias()
+            index = referencing_qgis_layer.fields().indexOf(self.referencing_field)
+            referencing_field_alias = referencing_qgis_layer.fields().at(index).alias()
+            index = referenced_qgis_layer.fields().indexOf(self.referenced_field)
+            referenced_field_alias = referenced_qgis_layer.fields().at(index).alias()
             tr_name = "{}_({})_{}_({})".format(
                 referencing_qgis_layer.name(),
                 referencing_field_alias
