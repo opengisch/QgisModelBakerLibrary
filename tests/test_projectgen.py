@@ -464,11 +464,11 @@ class TestProjectGen(unittest.TestCase):
                     tab_list = [tab.name() for tab in tabs]
                     expected_tab_list = [
                         "General",
-                        "parzellenidentifikation",
+                        "Parzellenidentifikation",
                         "belasteter_standort_geo_lage_punkt",
                         "egrid_",
-                        "deponietyp",
-                        "untersmassn",
+                        "Deponietyp",
+                        "UntersMassn",
                     ]
                     assert len(tab_list) == len(expected_tab_list)
                     assert set(tab_list) == set(expected_tab_list)
@@ -525,7 +525,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 15
+        assert len(ignored_layers) == 16
         assert len(available_layers) == 23
         assert len(relations) == 13
 
@@ -557,7 +557,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 64
+        assert len(ignored_layers) == 65
         assert len(available_layers) == 23
         assert len(relations) == 13
 
@@ -593,7 +593,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 19
+        assert len(ignored_layers) == 20
         assert len(available_layers) == 23
         assert len(relations) == 22
 
@@ -624,7 +624,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 17
+        assert len(ignored_layers) == 18
         assert len(available_layers) == 21
         assert len(relations) == 12
 
@@ -658,7 +658,7 @@ class TestProjectGen(unittest.TestCase):
         legend = generator.legend(available_layers)
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 66
+        assert len(ignored_layers) == 67
         assert len(available_layers) == 21
         assert len(relations) == 12
 
@@ -709,7 +709,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 21
+        assert len(ignored_layers) == 22
         assert len(available_layers) == 21
         assert len(relations) == 21
 
@@ -740,7 +740,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 9
+        assert len(ignored_layers) == 10
         assert len(available_layers) == 29
         assert len(relations) == 23
 
@@ -773,7 +773,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 30
+        assert len(ignored_layers) == 31
         assert len(available_layers) == 29
         assert len(relations) == 23
 
