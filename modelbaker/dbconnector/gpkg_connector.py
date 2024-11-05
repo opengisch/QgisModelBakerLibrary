@@ -1235,7 +1235,7 @@ class GPKGConnector(DBConnector):
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(GPKG_NLS_TABLE) and self._lang != "", self._lang
 
-    def get_available_languages(self):
+    def get_available_languages(self, irrelevant_models=[]):
         if not self._table_exists(GPKG_NLS_TABLE):
             return []
 
@@ -1243,9 +1243,14 @@ class GPKGConnector(DBConnector):
         cursor.execute(
             """SELECT DISTINCT
             lang
-            FROM "{}";
+            FROM "{t_ili2db_nls}"
+            WHERE substr(iliElement, 0, instr(iliElement, '.')) NOT IN ({model_list})
+            ;
             """.format(
-                GPKG_NLS_TABLE
+                t_ili2db_nls=GPKG_NLS_TABLE,
+                model_list=",".join(
+                    [f"'{modelname}'" for modelname in irrelevant_models]
+                ),
             )
         )
         records = cursor.fetchall()
