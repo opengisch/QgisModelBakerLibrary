@@ -1371,7 +1371,7 @@ class PGConnector(DBConnector):
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(PG_NLS_TABLE) and self._lang != "", self._lang
 
-    def get_available_languages(self):
+    def get_available_languages(self, irrelevant_models=[]):
         if self.schema and self._table_exists(PG_NLS_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
@@ -1380,8 +1380,16 @@ class PGConnector(DBConnector):
                     SELECT DISTINCT
                     lang
                     FROM {schema}.t_ili2db_nls
+                    WHERE
+                    split_part(iliElement,'.',1) NOT IN ({model_list})
                     """
-                ).format(schema=sql.Identifier(self.schema))
+                ).format(
+                    schema=sql.Identifier(self.schema),
+                    model_list=sql.SQL(", ").join(
+                        sql.Placeholder() * len(irrelevant_models)
+                    ),
+                ),
+                irrelevant_models,
             )
             return [row["lang"] for row in cur.fetchall()]
         return []

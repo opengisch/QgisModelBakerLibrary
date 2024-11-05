@@ -427,9 +427,9 @@ class DBConnector(QObject):
         """
         return False, ""
 
-    def get_available_languages(self) -> list[str]:
+    def get_available_languages(self, irrelevant_models: list[str]) -> list[str]:
         """
-        Returns a list of available languages in the t_ili2db_nls table.
+        Returns a list of available languages in the t_ili2db_nls table and ignores the values for the irrelevant models
         """
         return []
 
