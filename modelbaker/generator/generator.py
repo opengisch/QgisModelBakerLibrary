@@ -251,8 +251,8 @@ class Generator(QObject):
                     ]:
                         display_expression = attr_record["attr_value"]
 
-                # for the domain we create a translated mapping expression in case there is not yet a displayexpression defined
-                if not display_expression and is_domain:
+                # for the enumeration domain we create a translated mapping expression in case there is not yet a displayexpression defined (by metaattribute)
+                if not display_expression and record.get("kind_settings") == "ENUM":
                     mapped_dispnames = self.get_domain_dispnames(record["tablename"])
                     if mapped_dispnames:
                         case_expression = "CASE\n"
