@@ -251,6 +251,27 @@ class Generator(QObject):
                     ]:
                         display_expression = attr_record["attr_value"]
 
+                # for the domain we create a translated mapping expression in case there is not yet a displayexpression defined
+                if not display_expression and is_domain:
+                    mapped_dispnames = self.get_domain_dispnames(record["tablename"])
+                    if mapped_dispnames:
+                        case_expression = "CASE\n"
+                        for entry in mapped_dispnames:
+                            if entry["label"]:
+                                case_expression += (
+                                    "WHEN iliCode = '{code}' THEN '{label}'\n".format(
+                                        code=entry["code"], label=entry["label"]
+                                    )
+                                )
+                            else:
+                                case_expression += (
+                                    "WHEN iliCode = '{code}' THEN dispName\n".format(
+                                        code=entry["code"]
+                                    )
+                                )
+                        case_expression += "END"
+                        display_expression = case_expression
+
             coord_decimals = (
                 record["coord_decimals"] if "coord_decimals" in record else None
             )
@@ -954,3 +975,6 @@ class Generator(QObject):
 
     def get_basket_handling(self):
         return self._db_connector.get_basket_handling()
+
+    def get_domain_dispnames(self, tablename):
+        return self._db_connector.get_domain_dispnames(tablename)

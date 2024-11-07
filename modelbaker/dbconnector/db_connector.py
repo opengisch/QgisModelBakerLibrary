@@ -433,6 +433,12 @@ class DBConnector(QObject):
         """
         return []
 
+    def get_domain_dispnames(self, tablename):
+        """
+        Get the domain display names with consideration of the translation
+        """
+        return []
+
 
 class DBConnectorError(Exception):
     """This error is raised when DbConnector could not connect to database.
