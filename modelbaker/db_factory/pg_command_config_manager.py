@@ -100,7 +100,10 @@ class PgCommandConfigManager(DbCommandConfigManager):
                 uri += ["password={}".format(authconfig_map.get("password"))]
         else:
             if not service_config or not service_config.get("user", None):
-                uri += ["user={}".format(self.configuration.dbusr or fallback_user)]
+                if self.configuration.dbusr:
+                    uri += ["user={}".format(self.configuration.dbusr)]
+                elif fallback_user:
+                    uri += ["user={}".format(fallback_user)]
             if not service_config or not service_config.get("password", None):
                 if self.configuration.dbpwd:
                     uri += ["password={}".format(self.configuration.dbpwd)]
