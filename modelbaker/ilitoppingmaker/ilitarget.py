@@ -62,7 +62,7 @@ class IliTarget(Target):
         _, relative_filedir_path = target.filedir_path(type)
 
         id = target.unique_id_in_target_scope(target, slugify(f"{type}_{name}_001"))
-        path = os.path.join(relative_filedir_path, name)
+        path = os.path.join(relative_filedir_path, name).replace("\\", "/")
         type = type
         toppingfile = {"id": id, "path": path, "type": type}
         target.toppingfileinfo_list.append(toppingfile)
