@@ -875,7 +875,9 @@ class GPKGConnector(DBConnector):
         return False, self.tr('Could not rename dataset to "{}".').format(datasetname)
 
     def get_topics_info(self):
-        if self._table_exists("T_ILI2DB_CLASSNAME"):
+        if self._table_exists("T_ILI2DB_CLASSNAME") and self._table_exists(
+            GPKG_METAATTRS_TABLE
+        ):
             cursor = self.conn.cursor()
             cursor.execute(
                 """

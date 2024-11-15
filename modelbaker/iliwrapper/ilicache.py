@@ -19,6 +19,7 @@
 import glob
 import logging
 import os
+import pathlib
 import re
 import shutil
 import urllib.parse
@@ -685,20 +686,21 @@ class IliDataCache(IliCache):
         file_url = self.file_url(url, file)
 
         if url is None or os.path.isdir(url):
-            file_path = file_url
+            file_path = os.path.normpath(file_url)
             # continue with the local file
-            if os.path.exists(file_url):
-                self.file_download_succeeded.emit(dataset_id, file_url)
+            if os.path.exists(file_path):
+                self.file_download_succeeded.emit(dataset_id, file_path)
             else:
                 self.file_download_failed.emit(
                     dataset_id,
-                    self.tr("Could not find local file  {}").format(file_url),
+                    self.tr("Could not find local file  {}").format(file_path),
                 )
         else:
-            file_path = os.path.join(self.CACHE_PATH, netloc, file)
+            file_path = os.path.normpath(os.path.join(self.CACHE_PATH, netloc, file))
             file_dir = os.path.dirname(file_path)
             os.makedirs(file_dir, exist_ok=True)
-
+            # in case there are backslashes in the url, remove them
+            file_url = pathlib.PureWindowsPath(file_url).as_posix()
             download_file(
                 file_url,
                 file_path,

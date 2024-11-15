@@ -993,7 +993,11 @@ WHERE TABLE_SCHEMA='{schema}'
 
     def get_topics_info(self):
         result = {}
-        if self.schema and self._table_exists("t_ili2db_classname"):
+        if (
+            self.schema
+            and self._table_exists("t_ili2db_classname")
+            and self._table_exists(METAATTRS_TABLE)
+        ):
             cur = self.conn.cursor()
             cur.execute(
                 """

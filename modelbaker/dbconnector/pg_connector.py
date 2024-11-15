@@ -1076,7 +1076,11 @@ class PGConnector(DBConnector):
         return False, self.tr('Could not rename dataset "{}".').format(datasetname)
 
     def get_topics_info(self):
-        if self.schema and self._table_exists("t_ili2db_classname"):
+        if (
+            self.schema
+            and self._table_exists("t_ili2db_classname")
+            and self._table_exists(PG_METAATTRS_TABLE)
+        ):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 sql.SQL(
