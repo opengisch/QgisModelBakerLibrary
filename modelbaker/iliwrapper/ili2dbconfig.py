@@ -512,3 +512,23 @@ class DeleteConfiguration(Ili2DbCommandConfiguration):
         self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
 
         return args
+
+
+class ExportMetaConfigConfiguration(Ili2DbCommandConfiguration):
+    def __init__(self, other: Ili2DbCommandConfiguration = None):
+        super().__init__(other)
+        self.metaconfigoutputfile = ""
+
+    def to_ili2db_args(self, extra_args=[], with_action=True):
+        args = list()
+
+        if with_action:
+            self.append_args(args, ["--exportMetaConfig"])
+
+        self.append_args(args, extra_args)
+
+        self.append_args(args, ["--metaConfig", self.metaconfigoutputfile])
+
+        self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
+
+        return args
