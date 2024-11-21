@@ -88,10 +88,7 @@ def get_configuration_from_sourceprovider(provider, configuration):
         configuration.database = layer_source.database() or service_map.get("dbname")
         configuration.dbschema = layer_source.schema()
         valid = bool(
-            configuration.dbusr
-            and configuration.dbhost
-            and configuration.database
-            and configuration.dbschema
+            configuration.dbhost and configuration.database and configuration.dbschema
         )
     elif provider.name() == "ogr" and provider.storageType() == "GPKG":
         configuration.tool = mode = DbIliMode.gpkg
