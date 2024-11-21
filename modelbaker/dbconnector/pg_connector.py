@@ -1397,3 +1397,26 @@ class PGConnector(DBConnector):
             )
             return [row["lang"] for row in cur.fetchall()]
         return []
+
+    def get_domain_dispnames(self, tablename):
+        if self.schema and self._table_exists and self._table_exists(PG_NLS_TABLE):
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                sql.SQL(
+                    """SELECT t.iliCode as code, nls.label as label
+                FROM {schema}.{tablename} t
+                LEFT JOIN {schema}.{t_ili2db_nls} nls
+                ON nls.ilielement = (t.thisClass||'.'||t.iliCode) and lang = %s
+                ;
+                """
+                ).format(
+                    schema=sql.Identifier(self.schema),
+                    tablename=sql.Identifier(tablename),
+                    t_ili2db_nls=sql.Identifier(PG_NLS_TABLE),
+                ),
+                (self._lang,),
+            )
+            records = cur.fetchall()
+
+            return records
+        return []

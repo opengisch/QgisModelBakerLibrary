@@ -1258,3 +1258,23 @@ class GPKGConnector(DBConnector):
         records = cursor.fetchall()
         cursor.close()
         return [record["lang"] for record in records]
+
+    def get_domain_dispnames(self, tablename):
+        if not self._table_exists or not self._table_exists(GPKG_NLS_TABLE):
+            return []
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """SELECT t.iliCode as code, nls.label as label
+            FROM "{tablename}" t
+            LEFT JOIN "{t_ili2db_nls}" nls
+            ON nls.ilielement = (t.thisClass||'.'||t.iliCode) and lang = '{lang}'
+            ;
+            """.format(
+                tablename=tablename, t_ili2db_nls=GPKG_NLS_TABLE, lang=self._lang
+            )
+        )
+        records = cursor.fetchall()
+        cursor.close()
+
+        return records

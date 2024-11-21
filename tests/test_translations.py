@@ -110,8 +110,22 @@ class TestTranslations(unittest.TestCase):
                 assert len(tab_list) == len(expected_tab_list)
                 assert set(tab_list) == set(expected_tab_list)
 
+            # check domain table and translated domains
+            if layer.name == "rechtsstatus":
+                count += 1
+                assert layer.alias == "StatutJuridique"
+                assert layer.layer.displayExpression() == "\n".join(
+                    [
+                        "CASE",
+                        "WHEN iliCode = 'AenderungOhneVorwirkung' THEN 'ModificationSansEffetAnticipe'",
+                        "WHEN iliCode = 'inKraft' THEN 'enVigueur'",
+                        "WHEN iliCode = 'AenderungMitVorwirkung' THEN 'ModificationAvecEffetAnticipe'",
+                        "END",
+                    ]
+                )
+
         # check if the layers have been considered
-        assert count == 1
+        assert count == 2
         assert fr_layer
 
         # Check translated relation
@@ -189,8 +203,22 @@ class TestTranslations(unittest.TestCase):
                 assert len(tab_list) == len(expected_tab_list)
                 assert set(tab_list) == set(expected_tab_list)
 
+            # check domain table and translated domains
+            if layer.name == "rechtsstatus":
+                count += 1
+                assert layer.alias == "StatutJuridique"
+                assert layer.layer.displayExpression() == "\n".join(
+                    [
+                        "CASE",
+                        "WHEN iliCode = 'AenderungOhneVorwirkung' THEN 'ModificationSansEffetAnticipe'",
+                        "WHEN iliCode = 'AenderungMitVorwirkung' THEN 'ModificationAvecEffetAnticipe'",
+                        "WHEN iliCode = 'inKraft' THEN 'enVigueur'",
+                        "END",
+                    ]
+                )
+
         # check if the layers have been considered
-        assert count == 1
+        assert count == 2
         assert fr_layer
 
         # Check translated relation
