@@ -44,7 +44,11 @@ class Ili2dbSettings(dict):
             if not "CONFIGURATION" in config or not "ch.ehi.ili2db" in config:
                 return False
 
-            self.parameters = dict(config["ch.ehi.ili2db"])
+            def parse_boolean(v):
+                return True if v == "true" else (False if v == "false" else v)
+
+            params = dict(config["ch.ehi.ili2db"])
+            self.parameters = {k: parse_boolean(v) for k, v in params.items()}
             return True
 
         return False
