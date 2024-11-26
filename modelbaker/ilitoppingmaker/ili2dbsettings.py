@@ -16,6 +16,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+import configparser
+from pathlib import Path
 
 
 class Ili2dbSettings(dict):
@@ -105,3 +107,16 @@ class Ili2dbSettings(dict):
             self.parameters["createTidCol"] = True
 
         return True
+
+    def parse_parameters_from_ini_file(self, ini_file: str) -> bool:
+        p = Path(ini_file)
+        if p.exists():
+            config = configparser.ConfigParser()
+            config.read(ini_file)
+            if not "CONFIGURATION" in config or not "ch.ehi.ili2db" in config:
+                return False
+
+            self.parameters = dict(config["ch.ehi.ili2db"])
+            return True
+
+        return False
