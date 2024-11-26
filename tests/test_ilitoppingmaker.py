@@ -25,7 +25,6 @@ import tempfile
 from qgis.core import QgsProject, QgsVectorLayer
 from qgis.testing import start_app, unittest
 
-import modelbaker.utils.db_utils as db_utils
 from modelbaker.dataobjects.project import Project
 from modelbaker.db_factory.gpkg_command_config_manager import GpkgCommandConfigManager
 from modelbaker.generator.generator import Generator
@@ -129,9 +128,9 @@ class IliToppingMakerTest(unittest.TestCase):
         configuration.dbfile = self.dbfile
         configuration.tool = DbIliMode.ili2gpkg
 
-        db_connector = db_utils.get_db_connector(configuration)
-        if db_connector:
-            topping.metaconfig.ili2db_settings.parse_parameters_from_db(db_connector)
+        # Let's pretend we've obtained the exported MetaConfig file already
+        ini_file = testdata_path("metaconfig/ini_file.ini")
+        topping.metaconfig.ili2db_settings.parse_parameters_from_ini_file(ini_file)
 
         topping.metaconfig.ili2db_settings.metaattr_path = testdata_path(
             "toml/KbS_V1_5.toml"
@@ -147,8 +146,7 @@ class IliToppingMakerTest(unittest.TestCase):
         )
         assert topping.metaconfig.ili2db_settings.parameters["createTidCol"] == True
         assert topping.metaconfig.ili2db_settings.parameters["createBasketCol"] == True
-        # unset so not existing
-        assert not topping.metaconfig.ili2db_settings.parameters.get("strokeArcs", None)
+        assert topping.metaconfig.ili2db_settings.parameters["strokeArcs"] == False
 
         # ... and finally create the cake
 
@@ -195,12 +193,10 @@ class IliToppingMakerTest(unittest.TestCase):
 
         # prepare metaconfig
         metaconfig = MetaConfig()
-        configuration = Ili2DbCommandConfiguration()
-        configuration.dbfile = self.dbfile
-        configuration.tool = DbIliMode.ili2gpkg
-        db_connector = db_utils.get_db_connector(configuration)
-        if db_connector:
-            metaconfig.ili2db_settings.parse_parameters_from_db(db_connector)
+
+        # Let's pretend we've already obtained the exported settings in the MetaConfig ini file
+        ini_file = testdata_path("metaconfig/ini_file.ini")
+        metaconfig.ili2db_settings.parse_parameters_from_ini_file(ini_file)
         metaconfig.ili2db_settings.metaattr_path = testdata_path("toml/KbS_V1_5.toml")
         metaconfig.ili2db_settings.prescript_path = ""
         metaconfig.ili2db_settings.postscript_path = (
