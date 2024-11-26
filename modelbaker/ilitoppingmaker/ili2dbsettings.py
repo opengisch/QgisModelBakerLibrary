@@ -112,6 +112,7 @@ class Ili2dbSettings(dict):
         p = Path(ini_file)
         if p.exists():
             config = configparser.ConfigParser()
+            config.optionxform = str  # To preserve case
             config.read(ini_file)
             if not "CONFIGURATION" in config or not "ch.ehi.ili2db" in config:
                 return False
