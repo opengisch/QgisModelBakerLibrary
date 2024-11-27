@@ -18,8 +18,12 @@
 """
 from qgis.PyQt.QtCore import QObject, Qt, pyqtSignal
 
-from ..iliwrapper import ilideleter
-from ..iliwrapper.ili2dbconfig import DeleteConfiguration, Ili2DbCommandConfiguration
+from ..iliwrapper import ilideleter, ilimetaconfigexporter
+from ..iliwrapper.ili2dbconfig import (
+    DeleteConfiguration,
+    ExportMetaConfigConfiguration,
+    Ili2DbCommandConfiguration,
+)
 from ..iliwrapper.ili2dbutils import JavaNotFoundError
 from ..utils.qt_utils import OverrideCursor
 
@@ -105,6 +109,43 @@ class Ili2DbUtils(QObject):
                 res = False
 
             self._disconnect_ili_executable_signals(deleter)
+
+        return res, msg
+
+    def export_metaconfig(
+        self, ini_file: str, configuration: Ili2DbCommandConfiguration = None
+    ):
+        """
+        :param ini_file: Output file
+        :param configuration: Base Ili2DbCommandConfiguration object
+        :return: Tuple with boolean result and optional message
+        """
+        metaconfig_exporter = ilimetaconfigexporter.MetaConfigExporter()
+        metaconfig_exporter.tool = configuration.tool
+        metaconfig_exporter.configuration = ExportMetaConfigConfiguration(configuration)
+        metaconfig_exporter.configuration.metaconfigoutputfile = ini_file
+
+        with OverrideCursor(Qt.WaitCursor):
+            self._connect_ili_executable_signals(metaconfig_exporter)
+            self._log = ""
+
+            res = True
+            msg = self.tr("MetaConfig successfully exported to '{}'!").format(ini_file)
+            try:
+                if (
+                    metaconfig_exporter.run()
+                    != ilimetaconfigexporter.MetaConfigExporter.SUCCESS
+                ):
+                    msg = self.tr(
+                        "An error occurred when exporting the metaconfig from the DB to '{}' (check the QGIS log panel)."
+                    ).format(ini_file)
+                    res = False
+                    self.log_on_error.emit(self._log)
+            except JavaNotFoundError as e:
+                msg = e.error_string
+                res = False
+
+            self._disconnect_ili_executable_signals(metaconfig_exporter)
 
         return res, msg
 

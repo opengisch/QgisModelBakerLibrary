@@ -40,7 +40,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     process_finished = pyqtSignal(int, int)
     cancel_process = pyqtSignal()
 
-    __done_pattern = re.compile(r"Info: \.\.\.([a-z]+ )?done")
+    __done_pattern = re.compile(r"Info: \.\.\.([a-zA-Z]+ )?done")
     __result = None
 
     def __init__(self, parent=None):
