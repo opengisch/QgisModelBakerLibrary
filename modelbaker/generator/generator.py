@@ -735,6 +735,7 @@ class Generator(QObject):
         ignore_node_names=None,
         layertree_structure=None,
         path_resolver=lambda path: path,
+        hide_systemlayers=False,
     ):
         legend = LegendGroup(
             QCoreApplication.translate("LegendGroup", "root"),
@@ -793,7 +794,7 @@ class Generator(QObject):
                 for layer in domain_layers:
                     domains.append(layer)
                 legend.append(domains)
-            if len(system_layers):
+            if len(system_layers) and not hide_systemlayers:
                 system = LegendGroup(
                     QCoreApplication.translate("LegendGroup", "system")
                 )
