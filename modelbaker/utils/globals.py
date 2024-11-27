@@ -20,11 +20,12 @@ from enum import Enum
 
 
 class DbActionType(Enum):
-    """Defines constants for generate, import data, or export actions of modelbaker."""
+    """Defines constants for generate, schema_import, import data, or export actions of modelbaker."""
 
     GENERATE = 1
     IMPORT_DATA = 2
     EXPORT = 3
+    SCHEMA_IMPORT = 4
 
 
 class OptimizeStrategy(Enum):
