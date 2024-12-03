@@ -53,9 +53,9 @@ def _get_db_args(configuration, hide_password=False):
             db_args += ["--dbport", configuration.dbport]
         if su:
             db_args += ["--dbusr", configuration.base_configuration.super_pg_user]
-        elif configuration.dbauthid:
-            # Operations like Export can work with authconf
-            # and with no superuser login
+        elif configuration.dbauthid and get_authconfig_map(configuration.dbauthid):
+            # Operations like export do not require superuser
+            # login and may be run with the credentials from the authconfig
             authconfig_map = get_authconfig_map(configuration.dbauthid)
             db_args += ["--dbusr", authconfig_map.get("username")]
         else:
@@ -67,7 +67,14 @@ def _get_db_args(configuration, hide_password=False):
             and configuration.base_configuration.super_pg_password
         ):
             if hide_password:
-                db_args += ["--dbpwd", "******"]
+                # only append placeholder for password if it has one at all
+                if configuration.dbpwd:
+                    db_args += ["--dbpwd", "******"]
+                elif configuration.dbauthid and get_authconfig_map(
+                    configuration.dbauthid
+                ):
+                    authconfig_map = get_authconfig_map(configuration.dbauthid)
+                    db_args += ["--dbpwd", "******"]
             else:
                 if su:
                     db_args += [
@@ -76,9 +83,11 @@ def _get_db_args(configuration, hide_password=False):
                     ]
                 elif configuration.dbpwd:
                     db_args += ["--dbpwd", configuration.dbpwd]
-                elif configuration.dbauthid:
-                    # Operations like Export can work with authconf
-                    # and with no superuser login
+                elif configuration.dbauthid and get_authconfig_map(
+                    configuration.dbauthid
+                ):
+                    # Operations like export do not require superuser
+                    # login and may be run with the credentials from the authconfig
                     authconfig_map = get_authconfig_map(configuration.dbauthid)
                     db_args += ["--dbpwd", authconfig_map.get("password")]
 

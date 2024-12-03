@@ -34,10 +34,10 @@ class Validator(IliExecutable):
 
     def _create_config(self):
         return ValidateConfiguration()
-        
+
     def _get_ili2db_version(self):
         return self.version
-        
+
     def _args(self, hide_password):
         args = super()._args(hide_password)
 
@@ -45,6 +45,7 @@ class Validator(IliExecutable):
             args.remove("--export3")
 
         return args
+
 
 class ValidationResultModel(QStandardItemModel):
     """
@@ -94,7 +95,7 @@ class ValidationResultModel(QStandardItemModel):
                         )
                     )
                 )
-            if root:
+            if root is not None:
                 ns = "{http://www.interlis.ch/INTERLIS2.3}"
                 for error in root.iter(ns + "IliVErrors.ErrorLog.Error"):
                     id = error.attrib["TID"]

@@ -80,7 +80,6 @@ class PgCommandConfigManager(DbCommandConfigManager):
         if not service_config or not service_config.get("dbname", None):
             uri += ["dbname='{}'".format(self.configuration.database)]
 
-        # only provide authcfg to the uri when it's needed for QGIS specific things
         if self.configuration.dbauthid and (
             not service_config
             or not (
@@ -88,16 +87,21 @@ class PgCommandConfigManager(DbCommandConfigManager):
                 and service_config.get("password", None)
             )
         ):
+            # only provide authcfg to the uri when it's needed for QGIS specific things
             if qgis:
                 uri += ["authcfg={}".format(self.configuration.dbauthid)]
             else:
-                # Operations like Export do not require superuser
-                # login and may be run with authconfig
+                # Operations like export do not require superuser
+                # login and may be run with the credentials from the authconfig
                 authconfig_map = db_utils.get_authconfig_map(
                     self.configuration.dbauthid
                 )
-                uri += ["user={}".format(authconfig_map.get("username"))]
-                uri += ["password={}".format(authconfig_map.get("password"))]
+                if authconfig_map:
+                    uri += ["user={}".format(authconfig_map.get("username"))]
+                    uri += ["password={}".format(authconfig_map.get("password"))]
+                elif fallback_user:
+                    # if the authconfig is not available, we use the fallback and get no password
+                    uri += ["user={}".format(fallback_user)]
         else:
             if not service_config or not service_config.get("user", None):
                 if self.configuration.dbusr:
