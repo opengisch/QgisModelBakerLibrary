@@ -319,12 +319,14 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.append_args(args, ["--defaultSrsCode", "{}".format(self.srs_code)])
 
         if self.pre_script:
-            self.append_args(args, ["--preScript", self.pre_script])
+            self.append_args(args, ["--preScript", self.pre_script], force_append=True)
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--preScript", "NULL"])
 
         if self.post_script:
-            self.append_args(args, ["--postScript", self.post_script])
+            self.append_args(
+                args, ["--postScript", self.post_script], force_append=True
+            )
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--postScript", "NULL"])
 
