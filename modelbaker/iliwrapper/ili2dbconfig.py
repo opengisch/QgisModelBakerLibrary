@@ -175,7 +175,7 @@ class Ili2DbCommandConfiguration:
             )
 
         if self.ilimodels:
-            self.append_args(args, ["--models", self.ilimodels])
+            self.append_args(args, ["--models", self.ilimodels], force_append=True)
 
         if self.tomlfile:
             self.append_args(args, ["--iliMetaAttrs", self.tomlfile])
