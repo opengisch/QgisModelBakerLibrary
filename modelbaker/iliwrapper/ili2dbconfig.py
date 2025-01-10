@@ -144,10 +144,14 @@ class Ili2DbCommandConfiguration:
 
     def append_args(self, args, values, consider_metaconfig=False, force_append=False):
 
-        if not force_append and self.metaconfig and self.metaconfig_id and values:
+        if not force_append and self.metaconfig_id and values:
             if self.metaconfig_params_only:
                 return
-            if consider_metaconfig and "ch.ehi.ili2db" in self.metaconfig.sections():
+            if (
+                consider_metaconfig
+                and self.metaconfig
+                and "ch.ehi.ili2db" in self.metaconfig.sections()
+            ):
                 metaconfig_ili2db_params = self.metaconfig["ch.ehi.ili2db"]
                 if values[0][2:] in metaconfig_ili2db_params.keys():
                     # if the value is set in the metaconfig, then we do consider it instead
