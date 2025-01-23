@@ -19,7 +19,6 @@
 import glob
 import logging
 import os
-import pathlib
 import re
 import shutil
 import urllib.parse
@@ -700,7 +699,7 @@ class IliDataCache(IliCache):
             file_dir = os.path.dirname(file_path)
             os.makedirs(file_dir, exist_ok=True)
             # in case there are backslashes in the url, remove them
-            file_url = pathlib.PureWindowsPath(file_url).as_posix()
+            file_url = file_url.replace("\\", "/")
             download_file(
                 file_url,
                 file_path,
