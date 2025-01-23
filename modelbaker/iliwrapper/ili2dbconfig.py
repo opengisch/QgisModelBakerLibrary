@@ -144,10 +144,14 @@ class Ili2DbCommandConfiguration:
 
     def append_args(self, args, values, consider_metaconfig=False, force_append=False):
 
-        if not force_append and self.metaconfig and self.metaconfig_id and values:
+        if not force_append and self.metaconfig_id and values:
             if self.metaconfig_params_only:
                 return
-            if consider_metaconfig and "ch.ehi.ili2db" in self.metaconfig.sections():
+            if (
+                consider_metaconfig
+                and self.metaconfig
+                and "ch.ehi.ili2db" in self.metaconfig.sections()
+            ):
                 metaconfig_ili2db_params = self.metaconfig["ch.ehi.ili2db"]
                 if values[0][2:] in metaconfig_ili2db_params.keys():
                     # if the value is set in the metaconfig, then we do consider it instead
@@ -171,7 +175,7 @@ class Ili2DbCommandConfiguration:
             )
 
         if self.ilimodels:
-            self.append_args(args, ["--models", self.ilimodels])
+            self.append_args(args, ["--models", self.ilimodels], force_append=True)
 
         if self.tomlfile:
             self.append_args(args, ["--iliMetaAttrs", self.tomlfile])
@@ -315,12 +319,14 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.append_args(args, ["--defaultSrsCode", "{}".format(self.srs_code)])
 
         if self.pre_script:
-            self.append_args(args, ["--preScript", self.pre_script])
+            self.append_args(args, ["--preScript", self.pre_script], force_append=True)
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--preScript", "NULL"])
 
         if self.post_script:
-            self.append_args(args, ["--postScript", self.post_script])
+            self.append_args(
+                args, ["--postScript", self.post_script], force_append=True
+            )
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--postScript", "NULL"])
 
