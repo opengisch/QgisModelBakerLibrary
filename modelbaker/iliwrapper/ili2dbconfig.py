@@ -314,9 +314,11 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--createBasketCol=False"])
 
-        self.append_args(args, ["--defaultSrsAuth", self.srs_auth])
+        self.append_args(args, ["--defaultSrsAuth", self.srs_auth], force_append=True)
 
-        self.append_args(args, ["--defaultSrsCode", "{}".format(self.srs_code)])
+        self.append_args(
+            args, ["--defaultSrsCode", "{}".format(self.srs_code)], force_append=True
+        )
 
         if self.pre_script:
             self.append_args(args, ["--preScript", self.pre_script], force_append=True)
