@@ -54,6 +54,7 @@ class Generator(QObject):
         consider_basket_handling: bool = False,
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
         preferred_language: str = "",
+        raw_naming=True,
     ) -> None:
         """
         Creates a new Generator objects.
@@ -76,6 +77,7 @@ class Generator(QObject):
         self._db_connector.new_message.connect(self.append_print_message)
         self.basket_handling = consider_basket_handling and self.get_basket_handling()
         self.optimize_strategy = optimize_strategy
+        self.raw_naming = raw_naming
 
         self._db_connector.set_preferred_translation(preferred_language)
 
@@ -180,12 +182,17 @@ class Generator(QObject):
             if not relevant_topics and base_topic and base_topic.count(".") > 0:
                 relevant_topics.append(base_topic)
 
-            # Get table name in this order: translation if exists,
-            # alias (dispName) if exists, or ili_name.
-            alias = record.get("table_tr", None)
+            # If raw_naming is True, the layername should be the tablename
+            # Otherwise get table name in this order:
+            # - translation if exists,
+            # - alias (dispName) if exists
+            # - otherwise get_iliname
+            # And if it's a duplicate then check to consider geometry column
+            alias = None
+            if self.raw_naming:
+                alias = record.get("tablename")
             if not alias:
-                alias = record.get("table_alias", None)
-
+                alias = record.get("table_tr", None)
             if not alias:
                 short_name = None
                 if is_domain and is_attribute:
@@ -318,9 +325,16 @@ class Generator(QObject):
             for fielddef in fields_info:
                 column_name = fielddef["column_name"]
 
-                # Get field name in this order: translation if exists,
-                # alias (dispName) if exists, or ili_name.
-                alias = fielddef.get("column_tr", None)
+                # If raw_naming is True, the fieldname should be the columnname
+                # Otherwise get field name in this order:
+                # - translation if exists,
+                # - alias (dispName) if exists
+                # - otherwise get_iliname
+                alias = None
+                if self.raw_naming:
+                    alias = column_name
+                if not alias:
+                    alias = fielddef.get("column_tr", None)
                 if not alias:
                     alias = fielddef.get("column_alias", None)
 
@@ -482,10 +496,11 @@ class Generator(QObject):
 
             layers.append(layer)
 
-        # append topic name to ambiguous layers
-        self._rename_ambiguous_layers(layers)
-        # append model name to still ambiguous layers
-        self._rename_ambiguous_layers(layers, second_pass=True)
+        if not self.raw_naming:
+            # append topic name to ambiguous layers
+            self._rename_ambiguous_layers(layers)
+            # append model name to still ambiguous layers
+            self._rename_ambiguous_layers(layers, second_pass=True)
 
         self.print_messages()
 
