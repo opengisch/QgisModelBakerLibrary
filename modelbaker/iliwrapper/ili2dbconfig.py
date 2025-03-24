@@ -354,6 +354,7 @@ class ImportDataConfiguration(SchemaImportConfiguration):
         self.dataset = ""
         self.baskets = list()
         self.with_schemaimport = False
+        self.with_importbid = False
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         args = list()
@@ -372,6 +373,9 @@ class ImportDataConfiguration(SchemaImportConfiguration):
 
         if self.with_importtid:
             self.append_args(args, ["--importTid"])
+
+        if self.with_importbid:
+            self.append_args(args, ["--importBid"])
 
         if self.dataset:
             self.append_args(args, ["--dataset", self.dataset])
