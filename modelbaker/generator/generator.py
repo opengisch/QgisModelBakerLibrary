@@ -54,7 +54,7 @@ class Generator(QObject):
         consider_basket_handling: bool = False,
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
         preferred_language: str = "",
-        raw_naming=True,
+        raw_naming=False,
     ) -> None:
         """
         Creates a new Generator objects.
