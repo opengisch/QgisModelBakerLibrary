@@ -53,7 +53,7 @@ class DBConnector(QObject):
 
     def metadata_exists(self):
         """Whether t_ili2db_table_prop table exists or not.
-        In other words... Does the DB/Schema hold an Interlis model?
+        In other words... Does the DB/Schema hold an INTERLIS model?
         """
         return False
 
