@@ -194,6 +194,8 @@ class Generator(QObject):
             if not alias:
                 alias = record.get("table_tr", None)
             if not alias:
+                alias = record.get("table_alias", None)
+            if not alias:
                 short_name = None
                 if is_domain and is_attribute:
                     short_name = ""
