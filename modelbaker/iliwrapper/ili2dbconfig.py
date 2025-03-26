@@ -80,7 +80,7 @@ class BaseConfiguration:
                 # Can be removed when ili2db has access to the UsabILIty Hub repository.
                 args += [
                     "--modeldir",
-                    "%ILI_FROM_DB;%XTF_DIR;http://models.interlis.ch/;%JAR_DIR;https://models.opengis.ch/",
+                    "%ILI_FROM_DB;%XTF_DIR;https://models.interlis.ch/;%JAR_DIR;https://models.opengis.ch/",
                 ]
         if self.debugging_enabled and self.logfile_path:
             args += ["--trace"]
@@ -96,7 +96,7 @@ class BaseConfiguration:
             dirs = [
                 "%ILI_FROM_DB",
                 "%XTF_DIR",
-                "http://models.interlis.ch/",
+                "https://models.interlis.ch/",
                 "%JAR_DIR",
             ]
         return dirs

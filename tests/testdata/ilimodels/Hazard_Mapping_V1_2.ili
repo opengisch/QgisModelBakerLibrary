@@ -30,7 +30,7 @@ INTERLIS 2.3;
    The different classes are correspondingly commented.
 
    This model calls the following different submodels:
-   -- from http://models.interlis.ch/
+   -- from https://models.interlis.ch/
         -- CONTRACTED TYPE MODEL Units (en)
         -- REFSYSTEM MODEL CoordSys (en) (implicitly; called by CHBase model)
    -- from https;//models.geo.admin.ch/CH/

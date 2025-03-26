@@ -10,7 +10,7 @@ File PlanerischerGewaesserschutz_Codetexte_V1_1.xml, VERSION="2019-07-17" (https
   <HEADERSECTION SENDER="BAFU" VERSION="2.3">
     <MODELS>
       <MODEL NAME="Units" VERSION="2012-02-20" URI="http://www.interlis.ch/models"/>
-      <MODEL NAME="CoordSys" VERSION="2015-11-24" URI="http://models.interlis.ch/models"/>
+      <MODEL NAME="CoordSys" VERSION="2015-11-24" URI="https://models.interlis.ch/models"/>
       <MODEL NAME="LocalisationCH_V1" VERSION="2011-08-30" URI="http://www.geo.admin.ch"/>
       <MODEL NAME="CHAdminCodes_V1" VERSION="2018-02-19" URI="http://models.geo.admin.ch"/>
       <MODEL NAME="GeometryCHLV03_V1" VERSION="2015-11-12" URI="http://www.geo.admin.ch"/>
