@@ -1247,8 +1247,8 @@ class GPKGConnector(DBConnector):
             lang
             FROM "{t_ili2db_nls}"
             WHERE
-            lang is not null
-            and
+            lang IS NOT NULL
+            AND
             substr(iliElement, 0, instr(iliElement, '.')) NOT IN ({model_list})
             ;
             """.format(

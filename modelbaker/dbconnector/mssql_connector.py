@@ -1259,8 +1259,8 @@ WHERE TABLE_SCHEMA='{schema}'
                 lang
                 FROM {schema}.t_ili2db_nls
                 WHERE
-                lang is not null
-                and
+                lang IS NOT NULL
+                AND
                 left(iliElement, charindex('.', iliElement)-1) NOT IN ({model_list})
                 """
             ).format(
