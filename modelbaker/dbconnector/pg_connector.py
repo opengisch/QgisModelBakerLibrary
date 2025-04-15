@@ -1385,6 +1385,8 @@ class PGConnector(DBConnector):
                     lang
                     FROM {schema}.t_ili2db_nls
                     WHERE
+                    lang IS NOT NULL
+                    AND
                     split_part(iliElement,'.',1) NOT IN ({model_list})
                     """
                 ).format(
