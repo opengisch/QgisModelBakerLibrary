@@ -1246,7 +1246,10 @@ class GPKGConnector(DBConnector):
             """SELECT DISTINCT
             lang
             FROM "{t_ili2db_nls}"
-            WHERE substr(iliElement, 0, instr(iliElement, '.')) NOT IN ({model_list})
+            WHERE
+            lang is not null
+            and
+            substr(iliElement, 0, instr(iliElement, '.')) NOT IN ({model_list})
             ;
             """.format(
                 t_ili2db_nls=GPKG_NLS_TABLE,
