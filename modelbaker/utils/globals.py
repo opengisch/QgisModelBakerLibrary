@@ -16,7 +16,7 @@
  *                                                                         *
  ***************************************************************************/
 """
-from enum import Enum
+from enum import Enum, IntEnum
 
 
 class DbActionType(Enum):
@@ -34,3 +34,26 @@ class OptimizeStrategy(Enum):
     NONE = 0
     GROUP = 1
     HIDE = 2
+
+
+class LogLevel(IntEnum):
+    INFO = 0
+    WARNING = 1
+    FAIL = 2
+    SUCCESS = 3
+    TOPPING = 4
+
+
+def default_log_function(text, level=LogLevel.INFO, silent=False):
+    if silent:
+        return
+    if level == LogLevel.INFO:
+        print(f"INFO    : {text}")
+    if level == LogLevel.WARNING:
+        print(f"WARNING : {text}")
+    if level == LogLevel.FAIL:
+        print(f"FAIL    : {text}")
+    if level == LogLevel.SUCCESS:
+        print(f"SUCCESS : {text}")
+    if level == LogLevel.TOPPING:
+        print(f"TOPPING : {text}")
