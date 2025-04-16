@@ -3,7 +3,7 @@
   <HEADERSECTION SENDER="KOGIS-20200115" VERSION="2.3">
     <MODELS>
       <MODEL NAME="IliRepository09" VERSION="2009-12-01" URI="mailto:ce@eisenhutinformatik.ch"/>
-      <MODEL NAME="IliRepository20" VERSION="2020-01-15" URI="http://models.interlis.ch/core"/>
+      <MODEL NAME="IliRepository20" VERSION="2020-01-15" URI="https://models.interlis.ch/core"/>
     </MODELS>
   </HEADERSECTION>
   <DATASECTION>
@@ -978,7 +978,7 @@
         <File>core/IliRepository20.ili</File>
         <Version>2020-01-15</Version>
         <publishingDate>2020-04-01</publishingDate>
-        <Issuer>http://models.interlis.ch/core</Issuer>
+        <Issuer>https://models.interlis.ch/core</Issuer>
         <technicalContact>mailto:info@interlis.ch</technicalContact>
         <furtherInformation>https://www.interlis.ch</furtherInformation>
         <md5>46cba395b5412de0232619a99cecb65c</md5>
