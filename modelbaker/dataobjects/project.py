@@ -35,7 +35,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 from qgis.PyQt.QtXml import QDomDocument
 
-from ..utils.globals import OptimizeStrategy
+from ..utils.globals import LogLevel, OptimizeStrategy, default_log_function
 from .layers import Layer
 from .legend import LegendGroup
 from .relations import Relation
@@ -52,6 +52,7 @@ class Project(QObject):
         evaluate_default_values: bool = True,
         context: dict[str, str] = {},
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
+        log_function=None,
     ) -> None:
         QObject.__init__(self)
         self.crs = None
@@ -67,6 +68,10 @@ class Project(QObject):
         self.mapthemes = {}
         self.context = context
         self.optimize_strategy = optimize_strategy
+        self.log_function = log_function
+
+        if not log_function:
+            self.log_function = default_log_function
 
         # {Layer_class_name: {dbattribute: {Layer_class, cardinality, Layer_domain, key_field, value_field]}
         self.bags_of_enum = dict()
@@ -160,7 +165,12 @@ class Project(QObject):
         dict_layers = {layer.layer.id(): layer for layer in self.layers}
         for relation in self.relations:
             rel = relation.create(qgis_project, qgis_relations)
-            assert rel.isValid()
+            if not rel.isValid():
+                self.log_function(
+                    f"The relation from {relation.referencing_layer.name} ({relation.referencing_layer.create().name()}) to {relation.referenced_layer.name} ({relation.referenced_layer.create().name()}) is not valid. The project may be corrupt.",
+                    LogLevel.ERROR,
+                )
+                continue
             qgis_relations.append(rel)
 
             referenced_layer = dict_layers.get(rel.referencedLayerId(), None)

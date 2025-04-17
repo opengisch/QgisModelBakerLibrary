@@ -312,7 +312,7 @@ class PGConnector(DBConnector):
 
             cur.execute(
                 """
-                SELECT
+                SELECT DISTINCT
                   tbls.schemaname AS schemaname,
                   tbls.tablename AS tablename,
                   a.attname AS primary_key,

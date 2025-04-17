@@ -242,7 +242,7 @@ class GPKGConnector(DBConnector):
         try:
             cursor.execute(
                 """
-                SELECT NULL AS schemaname,
+                SELECT DISTINCT NULL AS schemaname,
                     s.name AS tablename,
                     NULL AS primary_key,
                     g.column_name AS geometry_column,
