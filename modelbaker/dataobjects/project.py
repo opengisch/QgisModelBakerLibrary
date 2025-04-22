@@ -236,6 +236,7 @@ class Project(QObject):
 
         # Set Bag of Enum widget
         for layer_name, bag_of_enum in self.bags_of_enum.items():
+            current_layer = None
             for attribute, bag_of_enum_info in bag_of_enum.items():
                 layer_obj = bag_of_enum_info[0]
                 cardinality = bag_of_enum_info[1]
@@ -245,7 +246,9 @@ class Project(QObject):
 
                 minimal_selection = cardinality.startswith("1")
 
-                current_layer = layer_obj.create()
+                if not current_layer:
+                    # create the layer only once
+                    current_layer = layer_obj.create()
 
                 field_widget = "ValueRelation"
                 field_widget_config = {
