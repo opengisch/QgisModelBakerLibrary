@@ -4000,6 +4000,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
                 assert config["Value"] == "dispName"
 
+                if Qgis.QGIS_VERSION_INT >= 34200:
+                    assert config["OrderByField"]
+                    assert config["OrderByFieldName"] == "seq"
+                else:
+                    assert config["OrderByValue"]
+
                 count += 1
 
         assert count == 1
@@ -4062,6 +4068,11 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
                 assert config["Value"] == "dispName"
 
+                if Qgis.QGIS_VERSION_INT >= 34200:
+                    assert config["OrderByField"]
+                    assert config["OrderByFieldName"] == "seq"
+                else:
+                    assert config["OrderByValue"]
                 count += 1
 
         assert count == 1

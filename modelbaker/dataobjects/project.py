@@ -188,7 +188,9 @@ class Project(QObject):
                         "AllowMulti": False,
                         "UseCompleter": False,
                         "Value": "dispName",
-                        "OrderByValue": False,
+                        "OrderByValue": False
+                        if Qgis.QGIS_VERSION_INT >= 34200
+                        else True,  # order by value if order by field is not available yet
                         "AllowNull": True,
                         "Layer": rel.referencedLayerId(),
                         "FilterExpression": "\"{}\" = '{}'".format(
@@ -198,6 +200,8 @@ class Project(QObject):
                         else "",
                         "Key": "t_id",
                         "NofColumns": 1,
+                        "OrderByField": True,
+                        "OrderByFieldName": "seq",
                     },
                 )
             elif referenced_layer and referenced_layer.is_domain:
