@@ -3943,6 +3943,129 @@ class TestDomainClassRelation(unittest.TestCase):
         for expected_relation in expected_relations:
             assert expected_relation in relations_dicts
 
+    def test_widgets_for_domain_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "EnumsAndCats_V1"
+        importer.configuration.dbschema = "enumsandcats_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.name == "Cats":
+                # the catalogue should be a relation reference
+                field = layer.layer.fields().field("cataloguebreed")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "RelationReference")
+
+                # the enumeration with defined display expressoin should be a relation reference
+                field = layer.layer.fields().field("enumcharacterwithdispexpression")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "RelationReference")
+
+                # the enumeration should be a value relation
+                field = layer.layer.fields().field("enumcharacter")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert config["Value"] == "dispName"
+
+                count += 1
+
+        assert count == 1
+
+    def test_widgets_for_domain_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "EnumsAndCats_V1"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "enumsandcats_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.name == "Cats":
+                # the catalogue should be a relation reference
+                field = layer.layer.fields().field("cataloguebreed")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "RelationReference")
+
+                # the enumeration with defined display expressoin should be a relation reference
+                field = layer.layer.fields().field("enumcharacterwithdispexpression")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "RelationReference")
+
+                # the enumeration should be a value relation
+                field = layer.layer.fields().field("enumcharacter")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert config["Value"] == "dispName"
+
+                count += 1
+
+        assert count == 1
+
     def print_info(self, text):
         logging.info(text)
 
