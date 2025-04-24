@@ -171,7 +171,6 @@ class Project(QObject):
                     LogLevel.ERROR,
                 )
                 continue
-            qgis_relations.append(rel)
 
             referenced_layer = dict_layers.get(rel.referencedLayerId(), None)
             referencing_layer = dict_layers.get(rel.referencingLayerId(), None)
@@ -221,6 +220,8 @@ class Project(QObject):
                         "FilterFields": list(),
                     },
                 )
+
+                qgis_relations.append(rel)
             elif referenced_layer and referenced_layer.is_basket_table:
                 # list the topics we filter the basket with. On NONE strategy those should be all topics the class could be in. On optimized strategies GROUP/HIDE only the relevant topics should be listed.
                 filter_topics = (
@@ -252,6 +253,7 @@ class Project(QObject):
                         "FilterFields": list(),
                     },
                 )
+                qgis_relations.append(rel)
             else:
                 editor_widget_setup = QgsEditorWidgetSetup(
                     "RelationReference",
@@ -264,6 +266,7 @@ class Project(QObject):
                         "AllowNULL": True,
                     },
                 )
+                qgis_relations.append(rel)
 
             referencing_layer = rel.referencingLayer()
             referencing_layer.setEditorWidgetSetup(
