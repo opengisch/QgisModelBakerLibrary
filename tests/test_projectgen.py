@@ -2107,9 +2107,22 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 2
 
-        # Test constraints
+        # Test type and constraints
         for layer in available_layers:
             if layer.name == "fische":
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("valuerelation_0")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("valuerelation_1")
+                    ).type()
+                    == "ValueRelation"
+                )
+
                 assert (
                     layer.layer.constraintExpression(
                         layer.layer.fields().indexOf("valuerelation_0")
@@ -2189,9 +2202,22 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 2
 
-        # Test constraints
+        # Test type and constraints
         for layer in available_layers:
             if layer.name == "fische":
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("valuerelation_0")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("valuerelation_1")
+                    ).type()
+                    == "ValueRelation"
+                )
+
                 assert (
                     layer.layer.constraintExpression(
                         layer.layer.fields().indexOf("valuerelation_0")
