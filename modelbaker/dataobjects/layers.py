@@ -72,6 +72,7 @@ class Layer:
         definitionfile: Optional[str] = None,
         qmlstylefile: Optional[str] = None,
         styles: dict[str, dict[str, str]] = {},
+        is_enum: bool = False,
     ) -> None:
         self.provider = provider
         self.uri = uri
@@ -92,6 +93,7 @@ class Layer:
         self.fields = list()
         self.is_domain = is_domain
         self.is_structure = is_structure
+        self.is_enum = is_enum
 
         self.is_nmrel = is_nmrel
         self.srid = srid
@@ -128,6 +130,7 @@ class Layer:
         definition["uri"] = self.uri
         definition["isdomain"] = self.is_domain
         definition["isstructure"] = self.is_structure
+        definition["isenum"] = self.is_enum
         definition["isnmrel"] = self.is_nmrel
         definition["isbaskettable"] = self.is_basket_table
         definition["isdatasettable"] = self.is_dataset_table
@@ -148,6 +151,7 @@ class Layer:
         self.uri = definition["uri"]
         self.is_domain = definition["isdomain"]
         self.is_structure = definition["isstructure"]
+        self.is_enum = definition["isenum"]
         self.is_nmrel = definition["isnmrel"]
         self.is_basket_table = definition["isbaskettable"]
         self.is_dataset_table = definition["isdatasettable"]
