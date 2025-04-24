@@ -22,7 +22,7 @@ import os
 import shutil
 import tempfile
 
-from qgis.core import QgsProject
+from qgis.core import Qgis, QgsProject
 from qgis.testing import start_app, unittest
 
 from modelbaker.dataobjects.project import Project
@@ -3981,7 +3981,7 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.name == "Cats":
+            if layer.name == "cat":
                 # the catalogue should be a relation reference
                 field = layer.layer.fields().field("cataloguebreed")
                 type = field.editorWidgetSetup().type()
@@ -4049,7 +4049,7 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.name == "Cats":
+            if layer.name == "cat":
                 # the catalogue should be a relation reference
                 field = layer.layer.fields().field("cataloguebreed")
                 type = field.editorWidgetSetup().type()
