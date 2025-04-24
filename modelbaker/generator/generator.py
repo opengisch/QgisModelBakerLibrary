@@ -53,7 +53,7 @@ class Generator(QObject):
         mgmt_uri: Optional[str] = None,
         consider_basket_handling: bool = False,
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
-        preferred_language: str = "",
+        preferred_language: str = "__",
         raw_naming=False,
     ) -> None:
         """
