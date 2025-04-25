@@ -1401,7 +1401,12 @@ class PGConnector(DBConnector):
         return []
 
     def get_domain_dispnames(self, tablename):
-        if self.schema and self._table_exists and self._table_exists(PG_NLS_TABLE):
+        if (
+            self.schema
+            and self._table_exists
+            and self._table_exists(PG_NLS_TABLE)
+            and self._lang != ""
+        ):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 sql.SQL(

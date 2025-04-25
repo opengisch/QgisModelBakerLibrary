@@ -53,7 +53,7 @@ class Generator(QObject):
         mgmt_uri: Optional[str] = None,
         consider_basket_handling: bool = False,
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
-        preferred_language: str = "",
+        preferred_language: str = "__",
         raw_naming=False,
     ) -> None:
         """
@@ -134,10 +134,8 @@ class Generator(QObject):
             if filter_layer_list and record["tablename"] not in filter_layer_list:
                 continue
 
-            is_domain = (
-                record.get("kind_settings") == "ENUM"
-                or record.get("kind_settings") == "CATALOGUE"
-            )
+            is_enum = record.get("kind_settings") == "ENUM"
+            is_domain = is_enum or record.get("kind_settings") == "CATALOGUE"
             is_attribute = bool(record.get("attribute_name"))
             is_structure = record.get("kind_settings") == "STRUCTURE"
             is_nmrel = record.get("kind_settings") == "ASSOCIATION"
@@ -260,7 +258,7 @@ class Generator(QObject):
                     ]:
                         display_expression = attr_record["attr_value"]
 
-                # for the enumeration domain we create a translated mapping expression in case there is not yet a displayexpression defined (by metaattribute)
+                # for the enumeration domain we create a translated mapping expression in case there is not yet a displayexpression defined (by metaattribute) and a translation is required
                 if not display_expression and record.get("kind_settings") == "ENUM":
                     mapped_dispnames = self.get_domain_dispnames(record["tablename"])
                     if mapped_dispnames:
@@ -313,6 +311,7 @@ class Generator(QObject):
                 is_relevant,
                 all_topics,
                 relevant_topics,
+                is_enum=is_enum,
             )
 
             # Configure fields for current table

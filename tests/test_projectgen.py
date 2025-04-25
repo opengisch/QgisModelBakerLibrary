@@ -150,7 +150,7 @@ class TestProjectGen(unittest.TestCase):
                     belasteter_standort_polygon_layer.layer
                 )
             )
-            > 2
+            == 1  # only zuständigkeit kataster - the others are enum value relation
         )
         assert (
             len(
@@ -166,7 +166,7 @@ class TestProjectGen(unittest.TestCase):
                     belasteter_standort_punkt_layer.layer
                 )
             )
-            > 2
+            == 1  # only zuständigkeit kataster - the others are enum value relation
         )
         assert (
             len(
@@ -269,7 +269,7 @@ class TestProjectGen(unittest.TestCase):
                     belasteter_standort_polygon_layer.layer
                 )
             )
-            > 2
+            == 1  # only zuständigkeit kataster - the others are enum value relation
         )
         assert (
             len(
@@ -285,7 +285,7 @@ class TestProjectGen(unittest.TestCase):
                     belasteter_standort_punkt_layer.layer
                 )
             )
-            > 2
+            == 1  # only zuständigkeit kataster - the others are enum value relation
         )
         assert (
             len(

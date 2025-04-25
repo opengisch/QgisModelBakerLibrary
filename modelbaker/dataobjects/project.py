@@ -171,12 +171,39 @@ class Project(QObject):
                     LogLevel.ERROR,
                 )
                 continue
-            qgis_relations.append(rel)
 
             referenced_layer = dict_layers.get(rel.referencedLayerId(), None)
             referencing_layer = dict_layers.get(rel.referencingLayerId(), None)
 
-            if referenced_layer and referenced_layer.is_domain:
+            # on enumeration tables we use value relation, because it's less resource intensive - still when it has a display expression (defined by meta attribute or because it's a translated model, we still use relation reference)
+            if (
+                referenced_layer
+                and referenced_layer.is_enum
+                and not referenced_layer.display_expression
+            ):
+                editor_widget_setup = QgsEditorWidgetSetup(
+                    "ValueRelation",
+                    {
+                        "AllowMulti": False,
+                        "UseCompleter": False,
+                        "Value": "dispName",
+                        "OrderByValue": False
+                        if Qgis.QGIS_VERSION_INT >= 34200
+                        else True,  # order by value if order by field is not available yet
+                        "AllowNull": True,
+                        "Layer": rel.referencedLayerId(),
+                        "FilterExpression": "\"{}\" = '{}'".format(
+                            ENUM_THIS_CLASS_COLUMN, relation.child_domain_name
+                        )
+                        if relation.child_domain_name
+                        else "",
+                        "Key": "t_id",
+                        "NofColumns": 1,
+                        "OrderByField": True,
+                        "OrderByFieldName": "seq",
+                    },
+                )
+            elif referenced_layer and referenced_layer.is_domain:
                 editor_widget_setup = QgsEditorWidgetSetup(
                     "RelationReference",
                     {
@@ -193,6 +220,8 @@ class Project(QObject):
                         "FilterFields": list(),
                     },
                 )
+
+                qgis_relations.append(rel)
             elif referenced_layer and referenced_layer.is_basket_table:
                 # list the topics we filter the basket with. On NONE strategy those should be all topics the class could be in. On optimized strategies GROUP/HIDE only the relevant topics should be listed.
                 filter_topics = (
@@ -224,6 +253,7 @@ class Project(QObject):
                         "FilterFields": list(),
                     },
                 )
+                qgis_relations.append(rel)
             else:
                 editor_widget_setup = QgsEditorWidgetSetup(
                     "RelationReference",
@@ -236,6 +266,7 @@ class Project(QObject):
                         "AllowNULL": True,
                     },
                 )
+                qgis_relations.append(rel)
 
             referencing_layer = rel.referencingLayer()
             referencing_layer.setEditorWidgetSetup(

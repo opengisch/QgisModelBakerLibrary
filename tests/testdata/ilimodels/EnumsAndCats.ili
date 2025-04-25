@@ -1,0 +1,56 @@
+INTERLIS 2.3;
+
+MODEL EnumsAndCats_V1 (en)
+AT "mailto:U80863546@localhost"
+VERSION "2021-12-15"  =
+IMPORTS CatalogueObjectTrees_V1,CatalogueObjects_V1;
+
+  DOMAIN
+    !!@qgis.modelbaker.dispExpression="dispName||' ('||ilicode||')'"
+    CharacterTypeWithDispExpression = (
+      !!@ili2db.dispName="X Type"
+      x,
+      !!@ili2db.dispName="Y Type"
+      y,
+      !!@ili2db.dispName="Z Type"
+      z,
+      !!@ili2db.dispName="All other types"
+      others
+    );
+
+    CharacterType = (
+      !!@ili2db.dispName="X Type"
+      x,
+      !!@ili2db.dispName="Y Type"
+      y,
+      !!@ili2db.dispName="Z Type"
+      z,
+      !!@ili2db.dispName="All other types"
+      others
+    );
+
+  TOPIC Catalogues =
+
+	CLASS BreedItem
+    EXTENDS CatalogueObjects_V1.Catalogues.Item =
+        Code : 0 .. 9999;
+        Name : MANDATORY TEXT;
+    END BreedItem;
+
+    STRUCTURE BreedRef
+    EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
+      Reference (EXTENDED) : REFERENCE TO (EXTERNAL) BreedItem;
+    END BreedRef;
+  END Catalogues;
+
+  TOPIC Cats =
+  DEPENDS ON Catalogues;
+	CLASS Cat =
+	  Cat_Name : TEXT;
+	  CatalogueBreed : EnumsAndCats_V1.Catalogues.BreedRef;
+	  EnumCharacterWithDispExpression : EnumsAndCats_V1.CharacterTypeWithDispExpression;
+	  EnumCharacter : EnumsAndCats_V1.CharacterType;
+	END Cat;
+  END Cats;
+
+END EnumsAndCats_V1.

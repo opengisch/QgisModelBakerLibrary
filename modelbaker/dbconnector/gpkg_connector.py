@@ -1263,7 +1263,11 @@ class GPKGConnector(DBConnector):
         return [record["lang"] for record in records]
 
     def get_domain_dispnames(self, tablename):
-        if not self._table_exists or not self._table_exists(GPKG_NLS_TABLE):
+        if (
+            not self._table_exists
+            or not self._table_exists(GPKG_NLS_TABLE)
+            or self._lang == ""
+        ):
             return []
 
         cursor = self.conn.cursor()
