@@ -54,7 +54,7 @@ class Layer:
         geometry_column: str = None,
         wkb_type: QgsWkbTypes = QgsWkbTypes.Unknown,
         alias: Optional[str] = None,
-        is_domain: bool = False,
+        is_domain: bool = False,  # is enumeration or catalogue
         is_structure: bool = False,
         is_nmrel: bool = False,
         display_expression: str = None,

@@ -175,7 +175,7 @@ class Project(QObject):
             referenced_layer = dict_layers.get(rel.referencedLayerId(), None)
             referencing_layer = dict_layers.get(rel.referencingLayerId(), None)
 
-            # on enumeration tables we use value relation, because it's less ressource intensive - still when it has a display expression (defined by meta attribute or because it's a translated model, we still use relation reference)
+            # on enumeration tables we use value relation, because it's less resource intensive - still when it has a display expression (defined by meta attribute or because it's a translated model, we still use relation reference)
             if (
                 referenced_layer
                 and referenced_layer.is_enum

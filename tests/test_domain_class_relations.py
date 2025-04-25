@@ -4001,6 +4001,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["Value"] == "dispName"
 
                 if Qgis.QGIS_VERSION_INT >= 34200:
+                    assert not config["OrderByValue"]
                     assert config["OrderByField"]
                     assert config["OrderByFieldName"] == "seq"
                 else:
@@ -4069,6 +4070,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["Value"] == "dispName"
 
                 if Qgis.QGIS_VERSION_INT >= 34200:
+                    assert not config["OrderByValue"]
                     assert config["OrderByField"]
                     assert config["OrderByFieldName"] == "seq"
                 else:
