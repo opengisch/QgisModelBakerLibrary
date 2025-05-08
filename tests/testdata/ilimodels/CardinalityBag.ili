@@ -8,25 +8,97 @@ MODEL CardinalityBag
 
   TOPIC Topic =
 
+    !! Normal structure
     STRUCTURE StructText=
        text : TEXT*10;
     END StructText;
 
+    !! Enumeration structure
     STRUCTURE EI_Typ =
       EI_Typen: EI_Typen;
     END EI_Typ;
 
-    CLASS Fische =
+    !! Catalogue structure
+    CLASS RefItemItem =
+      Name : TEXT*25;
+    END RefItemItem;
+
+    STRUCTURE RefItem =
+        Reference : MANDATORY REFERENCE TO RefItemItem;
+    END RefItem;
+
+    CLASS EnumArrays =
        Name : TEXT*10;
+       !!This becomes a relation
+       EnumBagNoArray_0 : BAG {0..*} OF EI_Typ;
+       !!This becomes a relation
+       EnumBagNoArray_1 : BAG {1..*} OF EI_Typ;
+       !!This becomes a multiselectable value relation
        !!@ili2db.mapping=ARRAY
-       TextList_0 : BAG {0..*} OF StructText;
+       EnumBag_0 : BAG {0..*} OF EI_Typ;
+       !!This becomes a multiselectable value relation
        !!@ili2db.mapping=ARRAY
-       TextList_1 : BAG {1..*} OF StructText;
+       EnumBag_1 : BAG {1..*} OF EI_Typ;
+       !!This becomes a relation
+       EnumListNoArray_0 : LIST {0..*} OF EI_Typ;
+       !!This becomes a relation
+       EnumListNoArray_1 : LIST {1..*} OF EI_Typ;
+       !!This becomes a multiselectable value relation
        !!@ili2db.mapping=ARRAY
-       ValueRelation_0: BAG {0..*} OF EI_Typ;
+       EnumList_0 : LIST {0..*} OF EI_Typ;
+       !!This becomes a multiselectable value relation
        !!@ili2db.mapping=ARRAY
-       ValueRelation_1: BAG {1..*} OF EI_Typ;
-    END Fische;
+       EnumList_1 : LIST {1..*} OF EI_Typ;
+    END EnumArrays;
+
+    CLASS CatArrays =
+      Name : TEXT*10;
+      !!This becomes a relation
+      CatListNoArray_0: LIST {0..*} OF RefItem;
+      !!This becomes a relation
+      CatListNoArray_1: LIST {1..*} OF RefItem;
+      !!This becomes a multiselectable value relation
+      !!@ili2db.mapping=ARRAY
+      CatList_0: LIST {0..*} OF RefItem;
+      !!This becomes a multiselectable value relation
+      !!@ili2db.mapping=ARRAY
+      CatList_1: LIST {1..*} OF RefItem;
+      !!This becomes a relation
+      CatBagNoArray_0: BAG {0..*} OF RefItem;
+      !!This becomes a relation
+      CatBagNoArray_1: BAG {1..*} OF RefItem;
+      !!This becomes a multiselectable value relation
+      !!@ili2db.mapping=ARRAY
+      CatBag_0: BAG {0..*} OF RefItem;
+      !!This becomes a multiselectable value relation
+      !!@ili2db.mapping=ARRAY
+      CatBag_1: BAG {1..*} OF RefItem;
+    END CatArrays;
+
+    !! For reference - tests for that is made with model ArrayMapping
+    CLASS TextArrays =
+       Name : TEXT*10;
+       !!This becomes a relation
+       TextBagNoArray_0 : BAG {0..*} OF StructText;
+       !!This becomes a relation
+       TextBagNoArray_1 : BAG {1..*} OF StructText;
+       !!This becomes a list
+       !!@ili2db.mapping=ARRAY
+       TextBag_0 : BAG {0..*} OF StructText;
+       !!This becomes a list
+       !!@ili2db.mapping=ARRAY
+       TextBag_1 : BAG {1..*} OF StructText;
+       !!This becomes a relation
+       TextListNoArray_0 : LIST {0..*} OF StructText;
+       !!This becomes a relation
+       TextListNoArray_1 : LIST {1..*} OF StructText;
+       !!This becomes a list
+       !!@ili2db.mapping=ARRAY
+       TextList_0 : LIST {0..*} OF StructText;
+       !!This becomes a list
+       !!@ili2db.mapping=ARRAY
+       TextList_1 : LIST {1..*} OF StructText;
+    END TextArrays;
 
   END Topic;
 END CardinalityBag.

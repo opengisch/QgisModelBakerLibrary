@@ -2083,8 +2083,14 @@ class TestProjectGen(unittest.TestCase):
 
         # Test BAGs OF ENUM
         expected_bags_of_enum = [
-            ["fische_None", "valuerelation_0", "0..*", "ei_typen", "t_id", "dispname"],
-            ["fische_None", "valuerelation_1", "1..*", "ei_typen", "t_id", "dispname"],
+            ["enumarrays_None", "enumbag_0", "0..*", "ei_typen", "t_id", "dispname"],
+            ["enumarrays_None", "enumbag_1", "1..*", "ei_typen", "t_id", "dispname"],
+            ["enumarrays_None", "enumlist_0", "0..*", "ei_typen", "t_id", "dispname"],
+            ["enumarrays_None", "enumlist_1", "1..*", "ei_typen", "t_id", "dispname"],
+            ["catarrays_None", "catbag_0", "0..*", "refitemitem", "t_id", "dispname"],
+            ["catarrays_None", "catbag_1", "1..*", "refitemitem", "t_id", "dispname"],
+            ["catarrays_None", "catlist_0", "0..*", "refitemitem", "t_id", "dispname"],
+            ["catarrays_None", "catlist_1", "1..*", "refitemitem", "t_id", "dispname"],
         ]
 
         count = 0
@@ -2105,36 +2111,115 @@ class TestProjectGen(unittest.TestCase):
                     value_field,
                 ] in expected_bags_of_enum
 
-        assert count == 2
+        assert count == 8
 
-        # Test type and constraints
+        # Test widget type and constraints
+        count = 0
         for layer in available_layers:
-            if layer.name == "fische":
+            if layer.name == "enumarrays":
+                count += 1
                 assert (
                     layer.layer.editorWidgetSetup(
-                        layer.layer.fields().indexOf("valuerelation_0")
+                        layer.layer.fields().indexOf("enumbag_0")
                     ).type()
                     == "ValueRelation"
                 )
                 assert (
                     layer.layer.editorWidgetSetup(
-                        layer.layer.fields().indexOf("valuerelation_1")
+                        layer.layer.fields().indexOf("enumbag_1")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("enumlist_0")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("enumlist_1")
                     ).type()
                     == "ValueRelation"
                 )
 
                 assert (
                     layer.layer.constraintExpression(
-                        layer.layer.fields().indexOf("valuerelation_0")
+                        layer.layer.fields().indexOf("enumbag_0")
                     )
                     == ""
                 )
                 assert (
                     layer.layer.constraintExpression(
-                        layer.layer.fields().indexOf("valuerelation_1")
+                        layer.layer.fields().indexOf("enumbag_1")
                     )
-                    == 'array_length("valuerelation_1")>0'
+                    == 'array_length("enumbag_1")>0'
                 )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("enumlist_0")
+                    )
+                    == ""
+                )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("enumlist_1")
+                    )
+                    == 'array_length("enumlist_1")>0'
+                )
+
+            if layer.name == "catarrays":
+                count += 1
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("catbag_0")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("catbag_1")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("catlist_0")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("catlist_1")
+                    ).type()
+                    == "ValueRelation"
+                )
+
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("catbag_0")
+                    )
+                    == ""
+                )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("catbag_1")
+                    )
+                    == 'array_length("catbag_1")>0'
+                )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("catlist_0")
+                    )
+                    == ""
+                )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("catlist_1")
+                    )
+                    == 'array_length("catlist_1")>0'
+                )
+        assert count == 2
 
     def test_bagof_cardinalities_geopackage(self):
         # Schema Import
@@ -2178,8 +2263,14 @@ class TestProjectGen(unittest.TestCase):
 
         # Test BAGs OF ENUM
         expected_bags_of_enum = [
-            ["fische_None", "valuerelation_0", "0..*", "ei_typen", "T_Id", "dispName"],
-            ["fische_None", "valuerelation_1", "1..*", "ei_typen", "T_Id", "dispName"],
+            ["enumarrays_None", "enumbag_0", "0..*", "ei_typen", "T_Id", "dispName"],
+            ["enumarrays_None", "enumbag_1", "1..*", "ei_typen", "T_Id", "dispName"],
+            ["enumarrays_None", "enumlist_0", "0..*", "ei_typen", "T_Id", "dispName"],
+            ["enumarrays_None", "enumlist_1", "1..*", "ei_typen", "T_Id", "dispName"],
+            ["catarrays_None", "catbag_0", "0..*", "refitemitem", "T_Id", "dispName"],
+            ["catarrays_None", "catbag_1", "1..*", "refitemitem", "T_Id", "dispName"],
+            ["catarrays_None", "catlist_0", "0..*", "refitemitem", "T_Id", "dispName"],
+            ["catarrays_None", "catlist_1", "1..*", "refitemitem", "T_Id", "dispName"],
         ]
 
         count = 0
@@ -2200,36 +2291,115 @@ class TestProjectGen(unittest.TestCase):
                     value_field,
                 ] in expected_bags_of_enum
 
-        assert count == 2
+        assert count == 8
 
-        # Test type and constraints
+        # Test widget type and constraints
+        count = 0
         for layer in available_layers:
-            if layer.name == "fische":
+            if layer.name == "enumarrays":
+                count += 1
                 assert (
                     layer.layer.editorWidgetSetup(
-                        layer.layer.fields().indexOf("valuerelation_0")
+                        layer.layer.fields().indexOf("enumbag_0")
                     ).type()
                     == "ValueRelation"
                 )
                 assert (
                     layer.layer.editorWidgetSetup(
-                        layer.layer.fields().indexOf("valuerelation_1")
+                        layer.layer.fields().indexOf("enumbag_1")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("enumlist_0")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("enumlist_1")
                     ).type()
                     == "ValueRelation"
                 )
 
                 assert (
                     layer.layer.constraintExpression(
-                        layer.layer.fields().indexOf("valuerelation_0")
+                        layer.layer.fields().indexOf("enumbag_0")
                     )
                     == ""
                 )
                 assert (
                     layer.layer.constraintExpression(
-                        layer.layer.fields().indexOf("valuerelation_1")
+                        layer.layer.fields().indexOf("enumbag_1")
                     )
-                    == 'array_length("valuerelation_1")>0'
+                    == 'array_length("enumbag_1")>0'
                 )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("enumlist_0")
+                    )
+                    == ""
+                )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("enumlist_1")
+                    )
+                    == 'array_length("enumlist_1")>0'
+                )
+
+            if layer.name == "catarrays":
+                count += 1
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("catbag_0")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("catbag_1")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("catlist_0")
+                    ).type()
+                    == "ValueRelation"
+                )
+                assert (
+                    layer.layer.editorWidgetSetup(
+                        layer.layer.fields().indexOf("catlist_1")
+                    ).type()
+                    == "ValueRelation"
+                )
+
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("catbag_0")
+                    )
+                    == ""
+                )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("catbag_1")
+                    )
+                    == 'array_length("catbag_1")>0'
+                )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("catlist_0")
+                    )
+                    == ""
+                )
+                assert (
+                    layer.layer.constraintExpression(
+                        layer.layer.fields().indexOf("catlist_1")
+                    )
+                    == 'array_length("catlist_1")>0'
+                )
+        assert count == 2
 
     def test_relation_strength_postgis(self):
         # Schema Import
@@ -4083,6 +4253,13 @@ class TestProjectGen(unittest.TestCase):
                     layer.layer.fields().field("itemsarray").editorWidgetSetup().type()
                 )
                 self.assertEqual(type, "List")
+                type = (
+                    layer.layer.fields()
+                    .field("itemsarraybag")
+                    .editorWidgetSetup()
+                    .type()
+                )
+                self.assertEqual(type, "List")
                 count += 1
 
         assert count == 1
@@ -4126,6 +4303,13 @@ class TestProjectGen(unittest.TestCase):
             if layer.name == "theclass":
                 type = (
                     layer.layer.fields().field("itemsarray").editorWidgetSetup().type()
+                )
+                self.assertEqual(type, "List")
+                type = (
+                    layer.layer.fields()
+                    .field("itemsarraybag")
+                    .editorWidgetSetup()
+                    .type()
                 )
                 self.assertEqual(type, "List")
                 count += 1
