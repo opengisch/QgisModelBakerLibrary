@@ -10,6 +10,8 @@ VERSION "2020-06-22" =
         CLASS TheClass =
             !!@ili2db.mapping=ARRAY
             ItemsArray: LIST {0..*} OF Item;
+            !!@ili2db.mapping=ARRAY
+            ItemsArrayBag: BAG {0..*} OF Item;
         END TheClass;
 
     END JSON_Arr; !! of TOPIC
