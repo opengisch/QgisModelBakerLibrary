@@ -186,7 +186,9 @@ class Project(QObject):
                     {
                         "AllowMulti": False,
                         "UseCompleter": False,
-                        "Value": "dispName",
+                        "Value": "dispname"
+                        if referenced_layer.provider == "postgres"
+                        else "dispName",
                         "OrderByValue": False
                         if Qgis.QGIS_VERSION_INT >= 34200
                         else True,  # order by value if order by field is not available yet
@@ -197,7 +199,9 @@ class Project(QObject):
                         )
                         if relation.child_domain_name
                         else "",
-                        "Key": "t_id",
+                        "Key": "t_id"
+                        if referenced_layer.provider == "postgres"
+                        else "T_Id",
                         "NofColumns": 1,
                         "OrderByField": True,
                         "OrderByFieldName": "seq",
@@ -238,14 +242,16 @@ class Project(QObject):
                         "ShowOpenFormButton": False,
                         "AllowNULL": True,
                         "AllowAddFeatures": False,
-                        "FilterExpression": "\"topic\" IN ({}) and attribute(get_feature('{}', 't_id', \"dataset\"), 'datasetname') != '{}'".format(
+                        "FilterExpression": "\"topic\" IN ({}) and attribute(get_feature('{}', '{}', \"dataset\"), 'datasetname') != '{}'".format(
                             ",".join(
                                 [f"'{topic}'" for topic in sorted(filter_topics)]
                             ),  # create comma separated string
-                            "T_ILI2DB_DATASET"
-                            if referenced_layer.provider == "ogr"
-                            or referenced_layer.provider == "mssql"
-                            else "t_ili2db_dataset",
+                            "t_ili2db_dataset"
+                            if referenced_layer.provider == "postgres"
+                            else "T_ILI2DB_DATASET",
+                            "t_id"
+                            if referenced_layer.provider == "postgres"
+                            else "T_Id",
                             self.context.get("catalogue_datasetname", ""),
                         )
                         if filter_topics
@@ -272,7 +278,6 @@ class Project(QObject):
             referencing_layer.setEditorWidgetSetup(
                 rel.referencingFields()[0], editor_widget_setup
             )
-
         qgis_project.relationManager().setRelations(qgis_relations)
 
         # Set Bag of Enum widget
