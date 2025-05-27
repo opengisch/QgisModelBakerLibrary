@@ -3298,7 +3298,7 @@ class TestProjectGen(unittest.TestCase):
                 )
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('KbS_LV95_V1_3.Belastete_Standorte') and attribute(get_feature('T_ILI2DB_DATASET', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('KbS_LV95_V1_3.Belastete_Standorte') and attribute(get_feature('T_ILI2DB_DATASET', 'T_Id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
 
             # check the display expression of the basket table

@@ -352,7 +352,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', '{self.tid_fieldname}', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
@@ -392,9 +392,9 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
                 map = ews.config()
 
                 expected_filter_expression = (
-                    f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    f"\"topic\" IN ('Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{self.dataset_tablename}', '{self.tid_fieldname}', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                     if strategy == OptimizeStrategy.HIDE
-                    else f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    else f"\"topic\" IN ('Kantonale_Ortsplanung_V1_1.Konstruktionen','Ortsplanung_V1_1.Konstruktionen','Staedtische_Ortsplanung_V1_1.Freizeit','Staedtische_Ortsplanung_V1_1.Gewerbe') and attribute(get_feature('{self.dataset_tablename}', '{self.tid_fieldname}', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
                 assert map["FilterExpression"] == expected_filter_expression
 
@@ -773,7 +773,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', '{self.tid_fieldname}', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
@@ -812,9 +812,9 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
                 map = ews.config()
 
                 expected_filter_expression = (
-                    f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    f"\"topic\" IN ('Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{self.dataset_tablename}', '{self.tid_fieldname}', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                     if strategy == OptimizeStrategy.HIDE
-                    else f"\"topic\" IN ('Ortsplanung_V1_1.Konstruktionen','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    else f"\"topic\" IN ('Ortsplanung_V1_1.Konstruktionen','Polymorphic_Ortsplanung_V1_1.Freizeit','Polymorphic_Ortsplanung_V1_1.Gewerbe','Polymorphic_Ortsplanung_V1_1.Hallen','Polymorphic_Ortsplanung_V1_1.IndustrieGewerbe') and attribute(get_feature('{self.dataset_tablename}', '{self.tid_fieldname}', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
                 assert map["FilterExpression"] == expected_filter_expression
 
@@ -1199,7 +1199,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
                 assert (
                     map["FilterExpression"]
-                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', 't_id', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
+                    == f"\"topic\" IN ('Infrastruktur_V1.Strassen') and attribute(get_feature('{self.dataset_tablename}', '{self.tid_fieldname}', \"dataset\"), 'datasetname') != '{CATALOGUE_DATASETNAME}'"
                 )
 
                 # check default value expression
@@ -1323,10 +1323,12 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
             self.dataset_tablename = "t_ili2db_dataset"
             self.basket_fieldname = "t_basket"
             self.type_fieldname = "t_type"
+            self.tid_fieldname = "t_id"
         else:
             self.dataset_tablename = "T_ILI2DB_DATASET"
             self.basket_fieldname = "T_basket"
             self.type_fieldname = "T_Type"
+            self.tid_fieldname = "T_Id"
 
     def print_info(self, text):
         logging.info(text)
