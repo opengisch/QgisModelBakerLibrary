@@ -48,7 +48,7 @@ class Project(QObject):
 
     def __init__(
         self,
-        auto_transaction: bool = True,
+        auto_transaction: str = "True",  # TODO: Change default value when dropping QGIS <3.26 support
         evaluate_default_values: bool = True,
         context: dict[str, str] = {},
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
@@ -127,13 +127,13 @@ class Project(QObject):
     ) -> None:
         if Qgis.QGIS_VERSION_INT < 32600:
             # set auto_transaction as boolean
-            qgis_project.setAutoTransaction(self.auto_transaction)
+            qgis_project.setAutoTransaction(self.auto_transaction == "True")
         else:
             # set auto_transaction mode
             mode = Qgis.TransactionMode.Disabled
             if (
                 self.auto_transaction == Qgis.TransactionMode.AutomaticGroups.name
-                or self.auto_transaction is True
+                or self.auto_transaction == "True"  # Legacy
             ):
                 mode = Qgis.TransactionMode.AutomaticGroups
             elif self.auto_transaction == Qgis.TransactionMode.BufferedGroups.name:
