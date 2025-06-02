@@ -73,6 +73,7 @@ class Layer:
         qmlstylefile: Optional[str] = None,
         styles: dict[str, dict[str, str]] = {},
         is_enum: bool = False,
+        base_class: str = None,
     ) -> None:
         self.provider = provider
         self.uri = uri
@@ -94,6 +95,7 @@ class Layer:
         self.is_domain = is_domain
         self.is_structure = is_structure
         self.is_enum = is_enum
+        self.base_class = base_class
 
         self.is_nmrel = is_nmrel
         self.srid = srid
@@ -144,6 +146,7 @@ class Layer:
         definition["qmlstylefile"] = self.qmlstylefile
         definition["styles"] = self.styles
         definition["form"] = self.__form.dump()
+        definition["base_class"] = self.base_class
         return definition
 
     def load(self, definition: dict) -> None:
@@ -165,6 +168,7 @@ class Layer:
         self.qmlstylefile = definition["qmlstylefile"]
         self.styles = definition["styles"]
         self.__form.load(definition["form"])
+        self.base_class = definition["base_class"]
 
     def create(self) -> Union[QgsRasterLayer, QgsVectorLayer]:
         if self.definitionfile:

@@ -149,6 +149,7 @@ class GPKGConnector(DBConnector):
                 attrs.sqlname as attribute_name,
                 {relevance_field},
                 {topics},
+                i.baseclass as base_class,
                 {translations}  -- Optional. Trailing comma omitted on purpose.
                 """.format(
                 relevance_field="""CASE WHEN c.iliname IN (
@@ -229,6 +230,8 @@ class GPKGConnector(DBConnector):
                       AND alias.tag = 'ch.ehi.ili2db.dispName'
                 LEFT JOIN T_ILI2DB_CLASSNAME c
                    ON s.name == c.sqlname
+                LEFT JOIN T_ILI2DB_INHERITANCE i
+                   ON c.iliname = i.thisclass
                 LEFT JOIN T_ILI2DB_ATTRNAME attrs
                    ON c.iliname = attrs.iliname
                 {translations}""".format(

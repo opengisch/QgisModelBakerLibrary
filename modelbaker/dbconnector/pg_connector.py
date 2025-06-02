@@ -158,7 +158,9 @@ class PGConnector(DBConnector):
             coord_decimals = ""
             alias_left_join = ""
             model_name = ""
+            base_class = ""
             model_where = ""
+            base_class_left_join = ""
             attribute_name = ""
             attribute_left_join = ""
             translations_left_join = ""
@@ -202,6 +204,7 @@ class PGConnector(DBConnector):
                     self.schema
                 )
                 model_name = "left(c.iliname, strpos(c.iliname, '.')-1) AS model,"
+                base_class = "inh.baseclass as base_class,"
                 relevance = """
                         CASE WHEN c.iliname IN (
                             WITH names AS (
@@ -290,6 +293,10 @@ class PGConnector(DBConnector):
                       ON tbls.tablename = c.sqlname""".format(
                     self.schema
                 )
+                base_class_left_join = """LEFT JOIN {}.t_ili2db_inheritance inh
+                      ON c.iliname = inh.thisclass""".format(
+                    self.schema
+                )
                 attribute_name = "attrs.sqlname as attribute_name,"
                 attribute_left_join = """LEFT JOIN {}.t_ili2db_attrname attrs
                       ON c.iliname = attrs.iliname""".format(
@@ -321,6 +328,7 @@ class PGConnector(DBConnector):
                   {kind_settings_field}
                   {table_alias}
                   {model_name}
+                  {base_class}
                   {ili_name}
                   {extent}
                   {attribute_name}
@@ -339,6 +347,7 @@ class PGConnector(DBConnector):
                 {domain_left_join}
                 {alias_left_join}
                 {model_where}
+                {base_class_left_join}
                 {attribute_left_join}
                 {translations_left_join}
                 LEFT JOIN public.geometry_columns g
@@ -352,6 +361,7 @@ class PGConnector(DBConnector):
                     kind_settings_field=kind_settings_field,
                     table_alias=table_alias,
                     model_name=model_name,
+                    base_class=base_class,
                     ili_name=ili_name,
                     extent=extent,
                     coord_decimals=coord_decimals,
@@ -362,6 +372,7 @@ class PGConnector(DBConnector):
                     alias_left_join=alias_left_join,
                     translations_left_join=translations_left_join,
                     model_where=model_where,
+                    base_class_left_join=base_class_left_join,
                     attribute_name=attribute_name,
                     attribute_left_join=attribute_left_join,
                     schema_where=schema_where,

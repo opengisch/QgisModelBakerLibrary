@@ -132,6 +132,7 @@ class MssqlConnector(DBConnector):
                     ln + "    , left(c.iliname, charindex('.', c.iliname)-1) AS model"
                 )
                 stmt += ln + "    , c.iliname AS ili_name"
+                stmt += ln + "    , inh.baseclass AS base_class"
                 stmt += ln + "    , STUFF("
                 stmt += ln + "       (SELECT ';' + CAST(cp.setting AS VARCHAR(MAX))"
                 stmt += ln + "        FROM {schema}.t_ili2db_column_prop cp"
@@ -253,6 +254,8 @@ class MssqlConnector(DBConnector):
                 stmt += ln + "    AND alias.tag = 'ch.ehi.ili2db.dispName'"
                 stmt += ln + "LEFT JOIN {schema}.t_ili2db_classname AS c"
                 stmt += ln + "    ON tbls.TABLE_NAME = c.sqlname"
+                stmt += ln + "LEFT JOIN {schema}.t_ili2db_inheritance AS inh"
+                stmt += ln + "    ON c.iliname = inh.thisclass"
                 stmt += ln + "LEFT JOIN {schema}.t_ili2db_attrname AS attrs"
                 stmt += ln + "    ON c.iliname = attrs.iliname"
             stmt += ln + "LEFT JOIN INFORMATION_SCHEMA.COLUMNS AS clm"

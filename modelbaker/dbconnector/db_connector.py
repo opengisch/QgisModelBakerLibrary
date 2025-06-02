@@ -77,6 +77,7 @@ class DBConnector(QObject):
                 table_alias
                 model
                 relevance
+                base_class
         """
         return []
 
