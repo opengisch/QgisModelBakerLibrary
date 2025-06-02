@@ -180,6 +180,8 @@ class Generator(QObject):
             if not relevant_topics and base_topic and base_topic.count(".") > 0:
                 relevant_topics.append(base_topic)
 
+            base_class = record.get("base_class", None)
+
             # If raw_naming is True, the layername should be the tablename
             # Otherwise get table name in this order:
             # - translation if exists,
@@ -312,6 +314,7 @@ class Generator(QObject):
                 all_topics,
                 relevant_topics,
                 is_enum=is_enum,
+                base_class=base_class,
             )
 
             # Configure fields for current table
@@ -634,6 +637,68 @@ class Generator(QObject):
                                 record["attribute"]: new_item_list
                             }
         return (relations, bags_of_enum)
+
+    @staticmethod
+    def supress_catalogue_reference_layers(available_layers, relations, bags_of_enum):
+        # Check for catalogue items and reference layers
+        catalogue_items = []  # List of dicts
+        catalogue_refs = []  # List of dicts
+        for layer in available_layers:
+            if (
+                layer.is_domain
+                and not layer.is_enum
+                and layer.base_class == "CatalogueObjects_V1.Catalogues.Item"
+            ):
+                catalogue_items.append({"name": layer.name, "ili_name": layer.ili_name})
+
+            if layer.is_structure and layer.base_class in (
+                "CatalogueObjects_V1.Catalogues.CatalogueReference",
+                "CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference",
+            ):
+                catalogue_refs.append({"name": layer.name, "ili_name": layer.ili_name})
+
+        layers_to_remove = []
+
+        # Remove reference layer if they are not BAG OF
+        for item in catalogue_items:
+            is_bag_of = False
+            for bag_of_layer_k, bag_of_layer_v in bags_of_enum.items():
+                for bag_of_attr_k, bag_of_data in bag_of_layer_v.items():
+                    if (
+                        item["name"] == bag_of_data[2].name
+                    ):  # BAG OF's target_layer_name
+                        is_bag_of = True
+
+            if is_bag_of:
+                # It's a BAG OF, leave it, cause users will need it to add data
+                continue
+
+            # The ref has no BAG OF pointing to the item, therefore,
+            # we'll supress the ref cause users won't need it to add data.
+
+            # First get the ref pointing to the item
+            for relation in relations:
+                if relation.referenced_layer.ili_name == item["ili_name"]:
+                    for ref in catalogue_refs:
+                        if relation.referencing_layer.ili_name == ref["ili_name"]:
+                            # We've found the corresponding ref structure
+                            layers_to_remove.append(ref["ili_name"])
+                            break
+
+        # Finally, remove the ref layers that we've found are not BAGS OF from the list,
+        # as well as the relations where they are involved (i.e., referenced/referencing)
+        for layer_to_remove in layers_to_remove:
+            available_layers = [
+                layer for layer in available_layers if layer_to_remove != layer.ili_name
+            ]
+            relations = [
+                relation
+                for relation in relations
+                if relation.referenced_layer.ili_name != layer_to_remove
+                and relation.referencing_layer.ili_name != layer_to_remove
+            ]
+
+        return available_layers, relations
 
     def generate_node(self, layers, node_name, item_properties):
         if item_properties.get("group"):
