@@ -639,7 +639,7 @@ class Generator(QObject):
         return (relations, bags_of_enum)
 
     @staticmethod
-    def supress_catalogue_reference_layers(available_layers, relations, bags_of_enum):
+    def suppress_catalogue_reference_layers(available_layers, relations, bags_of_enum):
         # Check for catalogue items and reference layers
         catalogue_items = []  # List of dicts
         catalogue_refs = []  # List of dicts
@@ -674,7 +674,7 @@ class Generator(QObject):
                 continue
 
             # The ref has no BAG OF pointing to the item, therefore,
-            # we'll supress the ref cause users won't need it to add data.
+            # we'll suppress the ref cause users won't need it to add data.
 
             # First get the ref pointing to the item
             for relation in relations:
