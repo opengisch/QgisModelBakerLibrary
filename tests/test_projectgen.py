@@ -4369,6 +4369,168 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 1
 
+    def test_catalogue_reference_layer_bag_of_postgis(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/gebaeude_bag_of_V1_6.ili"
+        )
+        importer.configuration.ilimodels = "Gebaeudeinventar_Bag_Of_V1_6"
+        importer.configuration.dbschema = (
+            "catalogue_ref_bag_of_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        )
+
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that no reference layer and therefore, no relation, has been removed
+        assert layer_count_before == layer_count_after
+        assert relation_count_before == relation_count_after
+
+    def test_catalogue_reference_layer_bag_of_geopackage(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/gebaeude_bag_of_V1_6.ili"
+        )
+        importer.configuration.ilimodels = "Gebaeudeinventar_Bag_Of_V1_6"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_catalogue_ref_bag_of_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(DbIliMode.ili2gpkg, uri, "smart2")
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that no reference layer and therefore, no relation, has been removed
+        assert layer_count_before == layer_count_after
+        assert relation_count_before == relation_count_after
+
+    def test_catalogue_reference_layer_no_bag_of_postgis(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/gebaeude_V1_6.ili")
+        importer.configuration.ilimodels = "Gebaeudeinventar_V1_6"
+        importer.configuration.dbschema = (
+            "catalogue_ref_no_bag_of_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        )
+
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that one layer and one relation have been removed
+        assert layer_count_before == layer_count_after + 1
+        assert relation_count_before == relation_count_after + 1
+
+    def test_catalogue_reference_layer_no_bag_of_geopackage(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/gebaeude_V1_6.ili")
+        importer.configuration.ilimodels = "Gebaeudeinventar_V1_6"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_catalogue_ref_no_bag_of_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(DbIliMode.ili2gpkg, uri, "smart2")
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that one layer and one relation have been removed
+        assert layer_count_before == layer_count_after + 1
+        assert relation_count_before == relation_count_after + 1
+
     def test_relation_editor_widget_for_no_geometry_layers(self):
 
         importer = iliimporter.Importer()
