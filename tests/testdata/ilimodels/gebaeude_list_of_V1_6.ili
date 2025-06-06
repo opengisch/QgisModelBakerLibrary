@@ -1,0 +1,72 @@
+INTERLIS 2.3;
+
+MODEL Gebaeudeinventar_List_Of_V1_6 (de)
+
+AT "mailto:signedav@localhost"
+
+VERSION "2023-01-19" =
+  IMPORTS GeometryCHLV95_V1, CatalogueObjects_V1, LocalisationCH_V1;
+
+  TOPIC Katalog =
+
+    CLASS Heizungstyp_Item
+    EXTENDS CatalogueObjects_V1.Catalogues.Item =
+      Code : MANDATORY TEXT;
+      Beschreibung : MANDATORY LocalisationCH_V1.MultilingualText;
+    END Heizungstyp_Item;
+
+    STRUCTURE Heizungstyp_Ref
+    EXTENDS CatalogueObjects_V1.Catalogues.MandatoryCatalogueReference =
+      Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) Heizungstyp_Item;
+    END Heizungstyp_Ref;
+
+  END Katalog;
+
+  TOPIC Gebaeude =
+    DEPENDS ON Gebaeudeinventar_List_Of_V1_6.Katalog;
+
+    DOMAIN
+        Kanton = (
+            AG,AI,AR,BE,BL,BS,FR,GE,GL,GR,JU,LU,NE,NW,OW,SG,SH,SO,SZ,TG,TI,UR,VD,VS,ZG,ZH
+        );
+
+    CLASS Gebaeude =
+
+        EGID : MANDATORY TEXT*16;
+        Kantonskuerzel : MANDATORY Kanton;
+        Grundstuecksnummer : 0 .. 99999;
+        Name : TEXT;
+        Koordinaten : MANDATORY GeometryCHLV95_V1.Coord2;
+        Status : MANDATORY TEXT;
+        Bauperiode : MANDATORY TEXT;
+        Flaeche : 0.00 .. 99999.99;
+        Geschosse : 0 .. 999;
+        Zivilschutzraum : MANDATORY BOOLEAN;
+        !!@ ili2db.mapping="ARRAY"
+        Heizung3 : LIST {0..1} OF  Gebaeudeinventar_List_Of_V1_6.Katalog.Heizungstyp_Ref;
+        Datum_Heizung : INTERLIS.XMLDate;
+
+        UNIQUE EGID;
+        SET CONSTRAINT WHERE DEFINED (Heizung3) :
+            DEFINED (Datum_Heizung);
+
+    END Gebaeude;
+
+    CLASS Adresse =
+        AdrID : MANDATORY TEXT*16;
+        Strasse : TEXT*200;
+        Nummer : TEXT*8;
+        PLZ : 0 .. 9999;
+        Ort : MANDATORY TEXT*200;
+
+        UNIQUE AdrID;
+    END Adresse;
+
+    ASSOCIATION AdresseGebaeude =
+        GebaeudeAdresse -- {1..*} Adresse;
+        Gebaeude -<#> {1} Gebaeude;
+    END AdresseGebaeude;
+
+  END Gebaeude;
+
+END Gebaeudeinventar_List_Of_V1_6.
