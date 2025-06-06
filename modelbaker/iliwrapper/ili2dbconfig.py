@@ -448,6 +448,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.dataset = ""
         self.baskets = list()
         self.iliexportmodels = ""
+        self.verbose = False
         self.with_exporttid = False
         self.xtflog = ""
         self.skip_geometry_errors = False
@@ -476,6 +477,9 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.baskets:
             self.append_args(args, ["--baskets", ";".join(self.baskets)])
+
+        if self.verbose:
+            self.append_args(args, ["--verbose"])
 
         if self.with_exporttid:
             self.append_args(args, ["--exportTid"])
