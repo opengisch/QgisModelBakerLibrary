@@ -3998,7 +3998,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert config["Value"] == "dispName"
+                assert config["Value"] == "dispname"
 
                 if Qgis.QGIS_VERSION_INT >= 34200:
                     assert not config["OrderByValue"]
