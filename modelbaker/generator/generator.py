@@ -293,6 +293,16 @@ class Generator(QObject):
                 and "geometry_column" in record
             )
 
+            # since the providers use different names (e.g. T_Id vs t_id)
+            provider_names_map = {
+                "tid_name": self._db_connector.tid,
+                "tilitid_name": self._db_connector.tilitid,
+                "attachmentkey_name": self._db_connector.attachmentKey,
+                "dispname_name": self._db_connector.dispName,
+                "baskettable_name": self._db_connector.basket_table_name,
+                "datasettable_name": self._db_connector.dataset_table_name,
+            }
+
             layer = Layer(
                 layer_uri.provider,
                 layer_uri.get_data_source_uri(record),
@@ -315,6 +325,7 @@ class Generator(QObject):
                 relevant_topics,
                 is_enum=is_enum,
                 base_class=base_class,
+                provider_names_map=provider_names_map,
             )
 
             # Configure fields for current table
