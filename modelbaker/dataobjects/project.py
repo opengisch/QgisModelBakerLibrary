@@ -245,7 +245,7 @@ class Project(QObject):
                                 [f"'{topic}'" for topic in sorted(filter_topics)]
                             ),  # create comma separated string
                             referenced_layer.provider_names_map.get(
-                                "datesettable_name"
+                                "datasettable_name"
                             ),
                             referenced_layer.provider_names_map.get("tid_name"),
                             self.context.get("catalogue_datasetname", ""),
