@@ -74,6 +74,9 @@ class Layer:
         styles: dict[str, dict[str, str]] = {},
         is_enum: bool = False,
         base_class: str = None,
+        provider_names_map: dict[
+            str, str
+        ] = {},  # provider specific column names (e.g. T_Id vs t_id)
     ) -> None:
         self.provider = provider
         self.uri = uri
@@ -96,6 +99,7 @@ class Layer:
         self.is_structure = is_structure
         self.is_enum = is_enum
         self.base_class = base_class
+        self.provider_names_map = provider_names_map
 
         self.is_nmrel = is_nmrel
         self.srid = srid

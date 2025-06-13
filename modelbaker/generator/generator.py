@@ -293,6 +293,9 @@ class Generator(QObject):
                 and "geometry_column" in record
             )
 
+            # since the providers use different names (e.g. T_Id vs t_id)
+            provider_names_map = self.db_connector.get_provider_specific_names()
+
             layer = Layer(
                 layer_uri.provider,
                 layer_uri.get_data_source_uri(record),
@@ -315,6 +318,7 @@ class Generator(QObject):
                 relevant_topics,
                 is_enum=is_enum,
                 base_class=base_class,
+                provider_names_map=provider_names_map,
             )
 
             # Configure fields for current table

@@ -39,6 +39,19 @@ class DBConnector(QObject):
         self.dataset_table_name = ""  # For basket handling, specific for each DB
         self._lang = ""  # Preferred tr language for table/column info (2 characters)
 
+    def get_provider_specific_names(self):
+        """
+        Returns a dictionary of the provider-specific names defined in the initialization of the derived classes.
+        """
+        return {
+            "tid_name": self.tid,
+            "tilitid_name": self.tilitid,
+            "attachmentkey_name": self.attachmentKey,
+            "dispname_name": self.dispName,
+            "baskettable_name": self.basket_table_name,
+            "datasettable_name": self.dataset_table_name,
+        }
+
     def map_data_types(self, data_type):
         """Map provider date/time types to QGIS date/time types"""
         return None
