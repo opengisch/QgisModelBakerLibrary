@@ -573,10 +573,16 @@ class GPKGConnector(DBConnector):
 
                     # Get cardinality max
                     cursor.execute(
-                        """SELECT META_ATTRS.attr_value as cardinality_max
+                        """SELECT META_ATTRS_ATTR_MAX.attr_value as attr_cardinality_max, META_ATTRS_ATTR_MIN.attr_value as attr_cardinality_min, META_ATTRS_ASSOC_MAX.attr_value as assoc_cardinality_max, META_ATTRS_ASSOC_MIN.attr_value as assoc_cardinality_min
                         FROM T_ILI2DB_ATTRNAME AS ATTRNAME
-                        INNER JOIN T_ILI2DB_META_ATTRS AS META_ATTRS
-                        ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.attrCardinalityMax'
+                        LEFT JOIN T_ILI2DB_META_ATTRS AS META_ATTRS_ATTR_MAX
+                        ON META_ATTRS_ATTR_MAX.ilielement = ATTRNAME.iliname AND META_ATTRS_ATTR_MAX.attr_name = 'ili2db.ili.attrCardinalityMax'
+                        LEFT JOIN T_ILI2DB_META_ATTRS AS META_ATTRS_ATTR_MIN
+                        ON META_ATTRS_ATTR_MIN.ilielement = ATTRNAME.iliname AND META_ATTRS_ATTR_MIN.attr_name = 'ili2db.ili.attrCardinalityMin'
+                        LEFT JOIN T_ILI2DB_META_ATTRS AS META_ATTRS_ASSOC_MAX
+                        ON META_ATTRS_ASSOC_MAX.ilielement = ATTRNAME.iliname AND META_ATTRS_ASSOC_MAX.attr_name = 'ili2db.ili.assocCardinalityMax'
+                        LEFT JOIN T_ILI2DB_META_ATTRS AS META_ATTRS_ASSOC_MIN
+                        ON META_ATTRS_ASSOC_MIN.ilielement = ATTRNAME.iliname AND META_ATTRS_ASSOC_MIN.attr_name = 'ili2db.ili.assocCardinalityMin'
                         WHERE ATTRNAME.sqlname = ? AND ATTRNAME.{colowner} = ? AND ATTRNAME.target = ?;
                         """.format(
                             colowner="owner" if self.ili_version() == 3 else "colowner"
@@ -587,13 +593,27 @@ class GPKGConnector(DBConnector):
                             foreign_key["table"],
                         ),
                     )
-                    cardinality_max_record = cursor.fetchone()
+                    cardinality_record = cursor.fetchone()
                     record["cardinality_max"] = (
-                        cardinality_max_record["cardinality_max"]
-                        if cardinality_max_record
+                        cardinality_record["attr_cardinality_max"]
+                        if cardinality_record
                         else ""
                     )
-
+                    record["cardinality_min"] = (
+                        cardinality_record["attr_cardinality_min"]
+                        if cardinality_record
+                        else ""
+                    )
+                    record["assoc_cardinality_max"] = (
+                        cardinality_record["assoc_cardinality_max"]
+                        if cardinality_record
+                        else ""
+                    )
+                    record["assoc_cardinality_min"] = (
+                        cardinality_record["assoc_cardinality_min"]
+                        if cardinality_record
+                        else ""
+                    )
                 complete_records.append(record)
 
         cursor.close()
