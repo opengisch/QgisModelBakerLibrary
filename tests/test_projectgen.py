@@ -2439,19 +2439,21 @@ class TestProjectGen(unittest.TestCase):
 
         assert (
             qgis_project.relationManager().relation("agg3_agg3_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
         assert (
             qgis_project.relationManager().relation("agg3_agg3_b_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
+        # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc3_assoc3_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
+        # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc3_assoc3_b_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
         assert (
             qgis_project.relationManager().relation("classb1_agg1_a_fkey").strength()
@@ -2516,25 +2518,27 @@ class TestProjectGen(unittest.TestCase):
             qgis_project.relationManager()
             .relation("agg3_agg3_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
         assert (
             qgis_project.relationManager()
             .relation("agg3_agg3_b_classb1_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
+        # join table to parent table should be composition
         assert (
             qgis_project.relationManager()
             .relation("assoc3_assoc3_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
+        # join table to parent table should be composition
         assert (
             qgis_project.relationManager()
             .relation("assoc3_assoc3_b_classb1_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
         assert (
             qgis_project.relationManager()
@@ -2611,19 +2615,21 @@ class TestProjectGen(unittest.TestCase):
 
         assert (
             qgis_project.relationManager().relation("agg3_agg3_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
         assert (
             qgis_project.relationManager().relation("agg3_agg3_b_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
+        # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc3_assoc3_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
+        # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc3_assoc3_b_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.Composition
         )
         assert (
             qgis_project.relationManager().relation("classb1_agg1_a_fkey").strength()
@@ -2644,6 +2650,235 @@ class TestProjectGen(unittest.TestCase):
         # and that's the one with the strength 1 (composition)
         assert (
             qgis_project.relationManager().relation("classb1_comp1_a_fkey").strength()
+            == QgsRelation.Composition
+        )
+
+    def test_relation_strength_fakecomposition_postgis(self):
+        # Test wheter associations with cardinality {1} or linking table relations become compositions in QGIS as they need a parent, even though they are not compositions in INTERLIS
+
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels//CompAssoc23.ili")
+        importer.configuration.ilimodels = "CompAssoc"
+        importer.configuration.dbschema = "compassoc_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # join table to parent table should be composition
+        assert (
+            qgis_project.relationManager().relation("assoc_assoc_a_fkey").strength()
+            == QgsRelation.Composition
+        )
+        # join table to parent table should be composition
+        assert (
+            qgis_project.relationManager().relation("assoc_assoc_b_fkey").strength()
+            == QgsRelation.Composition
+        )
+        # join table to basket table should be association
+        assert (
+            qgis_project.relationManager().relation("assoc_t_basket_fkey").strength()
+            == QgsRelation.Association
+        )
+        # real composition -<#>{0..1} should be composition
+        assert (
+            qgis_project.relationManager().relation("classb1_comp_a_fkey").strength()
+            == QgsRelation.Composition
+        )
+        # fake composition --{0..1} should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("classb1_fakecomp_1a_fkey")
+            .strength()
+            == QgsRelation.Composition
+        )
+        # fake composition -<>{0..1} should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("classb1_fakecomp_2a_fkey")
+            .strength()
+            == QgsRelation.Composition
+        )
+
+    def test_relation_strength_fakecomposition_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels//CompAssoc23.ili")
+        importer.configuration.ilimodels = "CompAssoc"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_compassoc_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # join table to parent table should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("assoc_assoc_a_classa1_T_Id")
+            .strength()
+            == QgsRelation.Composition
+        )
+        # join table to parent table should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("assoc_assoc_b_classb1_T_Id")
+            .strength()
+            == QgsRelation.Composition
+        )
+        # join table to basket table should be association
+        assert (
+            qgis_project.relationManager()
+            .relation("assoc_T_basket_T_ILI2DB_BASKET_T_Id")
+            .strength()
+            == QgsRelation.Association
+        )
+        # real composition -<#>{0..1} should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("classb1_comp_a_classa1_T_Id")
+            .strength()
+            == QgsRelation.Composition
+        )
+        # fake composition --{0..1} should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("classb1_fakecomp_1a_classa1_T_Id")
+            .strength()
+            == QgsRelation.Composition
+        )
+        # fake composition -<>{0..1} should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("classb1_fakecomp_2a_classa1_T_Id")
+            .strength()
+            == QgsRelation.Composition
+        )
+
+    def test_relation_strength_fakecomposition_mssql(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2mssql
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels//CompAssoc23.ili")
+        importer.configuration.ilimodels = "CompAssoc"
+        importer.configuration.dbschema = "compassoc{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
+            drv="{ODBC Driver 17 for SQL Server}",
+            server=importer.configuration.dbhost,
+            db=importer.configuration.database,
+            uid=importer.configuration.dbusr,
+            pwd=importer.configuration.dbpwd,
+        )
+
+        generator = Generator(
+            DbIliMode.ili2mssql, uri, "smart2", importer.configuration.dbschema
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # join table to parent table should be composition
+        assert (
+            qgis_project.relationManager().relation("assoc_assoc_a_fkey").strength()
+            == QgsRelation.Composition
+        )
+        # join table to parent table should be composition
+        assert (
+            qgis_project.relationManager().relation("assoc_assoc_b_fkey").strength()
+            == QgsRelation.Composition
+        )
+        # join table to basket table should be association
+        assert (
+            qgis_project.relationManager().relation("assoc_t_basket_fkey").strength()
+            == QgsRelation.Association
+        )
+        # real composition -<#>{0..1} should be composition
+        assert (
+            qgis_project.relationManager().relation("classb1_comp_a_fkey").strength()
+            == QgsRelation.Composition
+        )
+        # fake composition --{0..1} should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("classb1_fakecomp_1a_fkey")
+            .strength()
+            == QgsRelation.Composition
+        )
+        # fake composition -<>{0..1} should be composition
+        assert (
+            qgis_project.relationManager()
+            .relation("classb1_fakecomp_2a_fkey")
+            .strength()
             == QgsRelation.Composition
         )
 
@@ -2727,7 +2962,7 @@ class TestProjectGen(unittest.TestCase):
 
         for child in tab_ahvnr.children():
             if "one_to_one" in child.relationEditorConfiguration():
-                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
+                self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
             if "one_to_one" in child.relationEditorConfiguration():
@@ -2816,7 +3051,7 @@ class TestProjectGen(unittest.TestCase):
 
         for child in tab_ahvnr.children():
             if "one_to_one" in child.relationEditorConfiguration():
-                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
+                self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
             if "one_to_one" in child.relationEditorConfiguration():
@@ -2907,7 +3142,7 @@ class TestProjectGen(unittest.TestCase):
 
         for child in tab_ahvnr.children():
             if "one_to_one" in child.relationEditorConfiguration():
-                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
+                self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
             if "one_to_one" in child.relationEditorConfiguration():

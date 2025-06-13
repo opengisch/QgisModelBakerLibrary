@@ -1,0 +1,41 @@
+INTERLIS 2.3;
+
+MODEL CompAssoc
+  AT "http://modelbaker.ch" VERSION "2025-06-10" =
+
+  TOPIC Test =
+
+    CLASS ClassA1=
+    END ClassA1;
+
+    CLASS ClassB1 =
+    END ClassB1;
+
+    /* Composition and fake composition leading to QGIS compositions */
+
+    !! Real composition
+    ASSOCIATION comp =
+      comp_a -<#> {1} ClassA1;
+      comp_b -- {0..*} ClassB1;
+    END comp;
+
+    !! Association that leads to QGIS composition
+    ASSOCIATION fakecomp1 =
+      fakecomp_1a -- {1} ClassA1;
+      fakecomp_1b -- {0..*} ClassB1;
+    END fakecomp1;
+
+    ASSOCIATION fakecomp2 =
+      fakecomp_2a -<> {1} ClassA1;
+      fakecomp_2b -- {0..*} ClassB1;
+    END fakecomp2;
+
+    /* Association leading to two QGIS compositions (because normalized the relations from the linking table are compositions) */
+
+    ASSOCIATION assoc =
+      assoc_a -- {0..*} ClassA1;
+      assoc_b -- {0..*} ClassB1;
+    END assoc;
+
+  END Test;
+END CompAssoc.
