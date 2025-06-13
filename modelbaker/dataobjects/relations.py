@@ -12,6 +12,7 @@ class Relation:
         self.name = None
         self.strength = QgsRelation.Association
         self.cardinality_max = None
+        self.cardinality_min = None
         self.child_domain_name = None
         self.qgis_relation = None
         self._id = None
@@ -25,6 +26,7 @@ class Relation:
         definition["referencedField"] = self.referenced_field
         definition["strength"] = self.strength
         definition["cardinality_max"] = self.cardinality_max
+        definition["cardinality_min"] = self.cardinality_min
         definition["child_domain_name"] = self.child_domain_name
 
         return definition
@@ -36,6 +38,7 @@ class Relation:
         self.referenced_field = definition["referencedField"]
         self.strength = definition["strength"]
         self.cardinality_max = definition["cardinality_max"]
+        self.cardinality_min = definition["cardinality_min"]
         self.child_domain_name = definition["child_domain_name"]
 
     def create(

@@ -664,8 +664,8 @@ class MssqlConnector(DBConnector):
 
             strength_field = ""
             strength_join = ""
-            cardinality_max_field = ""
-            cardinality_max_join = ""
+            cardinality_fields = ""
+            cardinality_join = ""
             if self._table_exists(METAATTRS_TABLE):
                 strength_field = ",META_ATTRS.attr_value as strength"
                 strength_join = """
@@ -678,14 +678,21 @@ class MssqlConnector(DBConnector):
                     colowner="owner" if self.ili_version() == 3 else "colowner",
                 )
 
-                cardinality_max_field = (
-                    ",META_ATTRS_CARDINALITY.attr_value as cardinality_max"
-                )
-                cardinality_max_join = """
+                cardinality_fields = """
+                            , META_ATTRS_ATTR_CARDINALITY_MAX.attr_value as cardinality_max, META_ATTRS_ATTR_CARDINALITY_MIN.attr_value as cardinality_min
+                            , META_ATTRS_ASSOC_CARDINALITY_MAX.attr_value as assoc_cardinality_max, META_ATTRS_ASSOC_CARDINALITY_MIN.attr_value as assoc_cardinality_min
+                            """
+                cardinality_join = """
                 LEFT JOIN {schema}.t_ili2db_attrname AS ATTRNAME_CARDINALITY
                     ON ATTRNAME_CARDINALITY.sqlname = KCU1.COLUMN_NAME AND ATTRNAME_CARDINALITY.{colowner} = KCU1.TABLE_NAME AND ATTRNAME_CARDINALITY.target = KCU2.TABLE_NAME
-                LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS_CARDINALITY
-                    ON META_ATTRS_CARDINALITY.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_CARDINALITY.attr_name = 'ili2db.ili.attrCardinalityMax'
+                LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS_ATTR_CARDINALITY_MAX
+                    ON META_ATTRS_ATTR_CARDINALITY_MAX.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ATTR_CARDINALITY_MAX.attr_name = 'ili2db.ili.attrCardinalityMax'
+                LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS_ATTR_CARDINALITY_MIN
+                    ON META_ATTRS_ATTR_CARDINALITY_MIN.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ATTR_CARDINALITY_MIN.attr_name = 'ili2db.ili.attrCardinalityMin'
+                LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS_ASSOC_CARDINALITY_MAX
+                    ON META_ATTRS_ASSOC_CARDINALITY_MAX.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ASSOC_CARDINALITY_MAX.attr_name = 'ili2db.ili.assocCardinalityMax'
+                LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS_ASSOC_CARDINALITY_MIN
+                    ON META_ATTRS_ASSOC_CARDINALITY_MIN.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ASSOC_CARDINALITY_MIN.attr_name = 'ili2db.ili.assocCardinalityMin'
                     """.format(
                     schema=self.schema,
                     colowner="owner" if self.ili_version() == 3 else "colowner",
@@ -701,7 +708,7 @@ class MssqlConnector(DBConnector):
                     ,KCU2.COLUMN_NAME AS referenced_column
                     ,KCU1.ORDINAL_POSITION AS ordinal_position
                     {strength_field}
-                    {cardinality_max_field}
+                    {cardinality_fields}
                     {translate}
                 FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
 
@@ -716,7 +723,7 @@ class MssqlConnector(DBConnector):
                     AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
                     AND KCU2.ORDINAL_POSITION = KCU1.ORDINAL_POSITION
                 {strength_join}
-                {cardinality_max_join}
+                {cardinality_join}
 
                 WHERE 1=1 {schema_where1} {schema_where2} {filter_layer_where}
                 order by constraint_name, ordinal_position
@@ -726,8 +733,8 @@ class MssqlConnector(DBConnector):
                 filter_layer_where=filter_layer_where,
                 strength_field=strength_field,
                 strength_join=strength_join,
-                cardinality_max_field=cardinality_max_field,
-                cardinality_max_join=cardinality_max_join,
+                cardinality_fields=cardinality_fields,
+                cardinality_join=cardinality_join,
                 translate=translate,
             )
             cur.execute(query)

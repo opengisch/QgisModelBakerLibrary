@@ -174,6 +174,7 @@ class DBConnector(QObject):
                 referenced_column_name
                 strength
                 cardinality_max
+                cardinality_min
         """
         return []
 
