@@ -2962,7 +2962,7 @@ class TestProjectGen(unittest.TestCase):
 
         for child in tab_ahvnr.children():
             if "one_to_one" in child.relationEditorConfiguration():
-                self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
             if "one_to_one" in child.relationEditorConfiguration():
@@ -3051,7 +3051,7 @@ class TestProjectGen(unittest.TestCase):
 
         for child in tab_ahvnr.children():
             if "one_to_one" in child.relationEditorConfiguration():
-                self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
             if "one_to_one" in child.relationEditorConfiguration():
@@ -3142,7 +3142,7 @@ class TestProjectGen(unittest.TestCase):
 
         for child in tab_ahvnr.children():
             if "one_to_one" in child.relationEditorConfiguration():
-                self.assertTrue(child.relationEditorConfiguration()["one_to_one"])
+                self.assertFalse(child.relationEditorConfiguration()["one_to_one"])
 
         for child in tab_job.children():
             if "one_to_one" in child.relationEditorConfiguration():

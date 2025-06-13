@@ -570,21 +570,16 @@ class Generator(QObject):
                         relation.referenced_field = record["referenced_column"]
                         relation.name = record["constraint_name"]
                         relation.translate_name = record.get("tr_enabled", False)
-                        # the cardinality is read from the attr.cardinality or the assoc.cardinality depending if it's a structure or an association
-                        if relation.referencing_layer.is_structure:
-                            relation.cardinality_max = record.get(
-                                "cardinality_max", None
-                            )
-                            relation.cardinality_min = record.get(
-                                "cardinality_min", None
-                            )
-                        else:
-                            relation.cardinality_max = record.get(
-                                "assoc_cardinality_max", None
-                            )
-                            relation.cardinality_min = record.get(
-                                "assoc_cardinality_min", None
-                            )
+                        relation.cardinality_max = record.get("cardinality_max", None)
+                        relation.cardinality_min = record.get("cardinality_min", None)
+
+                        # cardinalities of associations are not (yet) exposed by relation and only used for the strength below
+                        association_cardinality_max = record.get(
+                            "assoc_cardinality_max", None
+                        )
+                        association_cardinality_min = record.get(
+                            "assoc_cardinality_min", None
+                        )
 
                         relation.strength = QgsRelation.Association
                         if (
@@ -599,16 +594,12 @@ class Generator(QObject):
                             )
                             # or if it's a ..{1} cardinality it depends on a parent...
                             or (
-                                relation.cardinality_max == "1"
-                                and relation.cardinality_min == "1"
+                                association_cardinality_max == "1"
+                                and association_cardinality_min == "1"
                             )
                         ):
                             # ...then it's a composition in QGIS
                             relation.strength = QgsRelation.Composition
-
-                        print(
-                            f"{relation.referencing_layer.name} - {relation.referencing_field}: {relation.cardinality_min} - {relation.cardinality_max}, results in {relation.strength}"
-                        )
 
                         # For domain-class relations, if we have an extended domain, get its child name
                         child_name = None
