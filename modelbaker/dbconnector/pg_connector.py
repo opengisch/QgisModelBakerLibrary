@@ -983,7 +983,7 @@ class PGConnector(DBConnector):
         )
         if cur.rowcount > 1:
             self.new_message.emit(
-                Qgis.Warning,
+                Qgis.MessageLevel.Warning,
                 "DB schema created with ili2db version 3. Better use version 4.",
             )
             return 3

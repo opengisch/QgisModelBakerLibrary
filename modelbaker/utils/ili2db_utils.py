@@ -57,7 +57,7 @@ class Ili2DbUtils(QObject):
         deleter.configuration = DeleteConfiguration(configuration)
         deleter.configuration.baskets = baskets
 
-        with OverrideCursor(Qt.WaitCursor):
+        with OverrideCursor(Qt.CursorShape.WaitCursor):
             self._connect_ili_executable_signals(deleter)
             self._log = ""
 
@@ -91,7 +91,7 @@ class Ili2DbUtils(QObject):
         deleter.configuration = DeleteConfiguration(configuration)
         deleter.configuration.dataset = dataset
 
-        with OverrideCursor(Qt.WaitCursor):
+        with OverrideCursor(Qt.CursorShape.WaitCursor):
             self._connect_ili_executable_signals(deleter)
             self._log = ""
 
@@ -125,7 +125,7 @@ class Ili2DbUtils(QObject):
         metaconfig_exporter.configuration = ExportMetaConfigConfiguration(configuration)
         metaconfig_exporter.configuration.metaconfigoutputfile = ini_file
 
-        with OverrideCursor(Qt.WaitCursor):
+        with OverrideCursor(Qt.CursorShape.WaitCursor):
             self._connect_ili_executable_signals(metaconfig_exporter)
             self._log = ""
 
