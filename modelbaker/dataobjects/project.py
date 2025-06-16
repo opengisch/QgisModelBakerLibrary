@@ -186,9 +186,9 @@ class Project(QObject):
                     {
                         "AllowMulti": False,
                         "UseCompleter": False,
-                        "Value": "dispname"
-                        if referenced_layer.provider == "postgres"
-                        else "dispName",
+                        "Value": referenced_layer.provider_names_map.get(
+                            "dispname_name"
+                        ),
                         "OrderByValue": False
                         if Qgis.QGIS_VERSION_INT >= 34200
                         else True,  # order by value if order by field is not available yet
@@ -199,9 +199,7 @@ class Project(QObject):
                         )
                         if relation.child_domain_name
                         else "",
-                        "Key": "t_id"
-                        if referenced_layer.provider == "postgres"
-                        else "T_Id",
+                        "Key": referenced_layer.provider_names_map.get("tid_name"),
                         "NofColumns": 1,
                         "OrderByField": True,
                         "OrderByFieldName": "seq",
@@ -246,12 +244,10 @@ class Project(QObject):
                             ",".join(
                                 [f"'{topic}'" for topic in sorted(filter_topics)]
                             ),  # create comma separated string
-                            "t_ili2db_dataset"
-                            if referenced_layer.provider == "postgres"
-                            else "T_ILI2DB_DATASET",
-                            "t_id"
-                            if referenced_layer.provider == "postgres"
-                            else "T_Id",
+                            referenced_layer.provider_names_map.get(
+                                "datasettable_name"
+                            ),
+                            referenced_layer.provider_names_map.get("tid_name"),
                             self.context.get("catalogue_datasetname", ""),
                         )
                         if filter_topics
