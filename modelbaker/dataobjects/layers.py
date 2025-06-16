@@ -52,7 +52,7 @@ class Layer:
         srid: Optional[int] = None,
         extent: Optional[str] = None,
         geometry_column: str = None,
-        wkb_type: QgsWkbTypes = QgsWkbTypes.Unknown,
+        wkb_type: QgsWkbTypes = QgsWkbTypes.Type.Unknown,
         alias: Optional[str] = None,
         is_domain: bool = False,  # is enumeration or catalogue
         is_structure: bool = False,

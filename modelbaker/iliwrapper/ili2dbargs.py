@@ -97,7 +97,7 @@ def _get_db_args(configuration, hide_password=False):
         if configuration.sslmode:
             temporary_filename = "{}/modelbaker-dbargs.conf".format(QDir.tempPath())
             temporary_file = QFile(temporary_filename)
-            if temporary_file.open(QFile.WriteOnly):
+            if temporary_file.open(QFile.OpenModeFlag.WriteOnly):
                 temporary_file.write(
                     "sslmode={}".format(configuration.sslmode).encode("utf-8")
                 )
