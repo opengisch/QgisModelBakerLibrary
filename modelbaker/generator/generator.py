@@ -294,7 +294,7 @@ class Generator(QObject):
             )
 
             # since the providers use different names (e.g. T_Id vs t_id)
-            provider_names_map = self.db_connector.get_provider_specific_names()
+            provider_names_map = self._db_connector.get_provider_specific_names()
 
             layer = Layer(
                 layer_uri.provider,
