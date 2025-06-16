@@ -99,7 +99,10 @@ class TestProjectGen(unittest.TestCase):
                 belasteter_standort_punkt_layer = layer
                 count += 1
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 fields = {field.name() for field in tabs[0].children()}
                 assert fields == {
@@ -218,7 +221,10 @@ class TestProjectGen(unittest.TestCase):
                 belasteter_standort_punkt_layer = layer
                 count += 1
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 fields = {field.name() for field in tabs[0].children()}
                 assert fields == {
@@ -336,7 +342,10 @@ class TestProjectGen(unittest.TestCase):
             if layer.name == "belasteter_standort":  # Polygon
                 count += 1
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 fields = {field.name() for field in tabs[0].children()}
                 assert fields == {
@@ -437,7 +446,10 @@ class TestProjectGen(unittest.TestCase):
             if layer.name == "belasteter_standort":  # Polygon
                 count += 1
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 fields = {field.name() for field in tabs[0].children()}
                 assert fields == {
@@ -2439,42 +2451,42 @@ class TestProjectGen(unittest.TestCase):
 
         assert (
             qgis_project.relationManager().relation("agg3_agg3_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         assert (
             qgis_project.relationManager().relation("agg3_agg3_b_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc3_assoc3_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc3_assoc3_b_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         assert (
             qgis_project.relationManager().relation("classb1_agg1_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager().relation("classb1_agg2_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager().relation("classb1_assoc1_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager().relation("classb1_assoc2_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         # and that's the one with the strength 1 (composition)
         assert (
             qgis_project.relationManager().relation("classb1_comp1_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
 
     def test_relation_strength_geopackage(self):
@@ -2518,58 +2530,58 @@ class TestProjectGen(unittest.TestCase):
             qgis_project.relationManager()
             .relation("agg3_agg3_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         assert (
             qgis_project.relationManager()
             .relation("agg3_agg3_b_classb1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager()
             .relation("assoc3_assoc3_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager()
             .relation("assoc3_assoc3_b_classb1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         assert (
             qgis_project.relationManager()
             .relation("classb1_agg1_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager()
             .relation("classb1_agg2_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager()
             .relation("classb1_assoc1_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager()
             .relation("classb1_assoc2_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         # and that's the one with the strength 1 (composition)
         assert (
             qgis_project.relationManager()
             .relation("classb1_comp1_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
 
     def test_relation_strength_mssql(self):
@@ -2615,42 +2627,42 @@ class TestProjectGen(unittest.TestCase):
 
         assert (
             qgis_project.relationManager().relation("agg3_agg3_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         assert (
             qgis_project.relationManager().relation("agg3_agg3_b_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc3_assoc3_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc3_assoc3_b_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         assert (
             qgis_project.relationManager().relation("classb1_agg1_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager().relation("classb1_agg2_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager().relation("classb1_assoc1_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         assert (
             qgis_project.relationManager().relation("classb1_assoc2_a_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         # and that's the one with the strength 1 (composition)
         assert (
             qgis_project.relationManager().relation("classb1_comp1_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
 
     def test_relation_strength_fakecomposition_postgis(self):
@@ -2694,36 +2706,36 @@ class TestProjectGen(unittest.TestCase):
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc_assoc_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc_assoc_b_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to basket table should be association
         assert (
             qgis_project.relationManager().relation("assoc_t_basket_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         # real composition -<#>{0..1} should be composition
         assert (
             qgis_project.relationManager().relation("classb1_comp_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # fake composition --{0..1} should be composition
         assert (
             qgis_project.relationManager()
             .relation("classb1_fakecomp_1a_fkey")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # fake composition -<>{0..1} should be composition
         assert (
             qgis_project.relationManager()
             .relation("classb1_fakecomp_2a_fkey")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
 
     def test_relation_strength_fakecomposition_geopackage(self):
@@ -2768,42 +2780,42 @@ class TestProjectGen(unittest.TestCase):
             qgis_project.relationManager()
             .relation("assoc_assoc_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager()
             .relation("assoc_assoc_b_classb1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to basket table should be association
         assert (
             qgis_project.relationManager()
             .relation("assoc_T_basket_T_ILI2DB_BASKET_T_Id")
             .strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         # real composition -<#>{0..1} should be composition
         assert (
             qgis_project.relationManager()
             .relation("classb1_comp_a_classa1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # fake composition --{0..1} should be composition
         assert (
             qgis_project.relationManager()
             .relation("classb1_fakecomp_1a_classa1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # fake composition -<>{0..1} should be composition
         assert (
             qgis_project.relationManager()
             .relation("classb1_fakecomp_2a_classa1_T_Id")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
 
     def test_relation_strength_fakecomposition_mssql(self):
@@ -2850,36 +2862,36 @@ class TestProjectGen(unittest.TestCase):
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc_assoc_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to parent table should be composition
         assert (
             qgis_project.relationManager().relation("assoc_assoc_b_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # join table to basket table should be association
         assert (
             qgis_project.relationManager().relation("assoc_t_basket_fkey").strength()
-            == QgsRelation.Association
+            == QgsRelation.RelationStrength.Association
         )
         # real composition -<#>{0..1} should be composition
         assert (
             qgis_project.relationManager().relation("classb1_comp_a_fkey").strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # fake composition --{0..1} should be composition
         assert (
             qgis_project.relationManager()
             .relation("classb1_fakecomp_1a_fkey")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
         # fake composition -<>{0..1} should be composition
         assert (
             qgis_project.relationManager()
             .relation("classb1_fakecomp_2a_fkey")
             .strength()
-            == QgsRelation.Composition
+            == QgsRelation.RelationStrength.Composition
         )
 
     def test_relation_cardinality_postgis(self):
@@ -3597,7 +3609,7 @@ class TestProjectGen(unittest.TestCase):
             int(IliDataItemModel.Roles.ID),
             "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_localfiletest",
             1,
-            Qt.MatchExactly,
+            Qt.MatchFlag.MatchExactly,
         )
         assert bool(matches_on_id) is True
 
@@ -3856,7 +3868,7 @@ class TestProjectGen(unittest.TestCase):
                     continue
                 matches = qml_file_model.match(
                     qml_file_model.index(0, 0),
-                    Qt.DisplayRole,
+                    Qt.ItemDataRole.DisplayRole,
                     qml_section[layer_qml],
                     1,
                 )
@@ -3897,7 +3909,10 @@ class TestProjectGen(unittest.TestCase):
             ):
                 count += 1
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 assert len(tabs) == 5
                 assert tabs[0].name() == "Allgemein"
@@ -3990,7 +4005,7 @@ class TestProjectGen(unittest.TestCase):
             int(IliDataItemModel.Roles.ID),
             "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0_gpkg_localfiletest",
             1,
-            Qt.MatchExactly,
+            Qt.MatchFlag.MatchExactly,
         )
         assert bool(matches_on_id) is True
 
@@ -4246,7 +4261,7 @@ class TestProjectGen(unittest.TestCase):
                     continue
                 matches = qml_file_model.match(
                     qml_file_model.index(0, 0),
-                    Qt.DisplayRole,
+                    Qt.ItemDataRole.DisplayRole,
                     qml_section[layer_qml],
                     1,
                 )
@@ -4285,7 +4300,10 @@ class TestProjectGen(unittest.TestCase):
             if layer.name == "belasteter_standort":
                 count += 1
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 assert len(tabs) == 5
                 assert tabs[0].name() == "Allgemein"
@@ -4889,7 +4907,10 @@ class TestProjectGen(unittest.TestCase):
             if layer.name == "amap":
                 count += 1
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
 
                 if Qgis.QGIS_VERSION_INT >= 31600:
@@ -4907,7 +4928,7 @@ class TestProjectGen(unittest.TestCase):
         # when the referencing layer is a structure, it should be a composition
         for relation in relations:
             if relation.referencing_layer.name == "maphierref":
-                assert relation.strength == QgsRelation.Composition
+                assert relation.strength == QgsRelation.RelationStrength.Composition
                 count += 1
 
         assert count == 2
@@ -4937,7 +4958,7 @@ class TestProjectGen(unittest.TestCase):
 
         for file_id in id_list:
             matches = topping_file_model.match(
-                topping_file_model.index(0, 0), Qt.DisplayRole, file_id, 1
+                topping_file_model.index(0, 0), Qt.ItemDataRole.DisplayRole, file_id, 1
             )
             if matches:
                 file_path = matches[0].data(int(topping_file_model.Roles.LOCALFILEPATH))

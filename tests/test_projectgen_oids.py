@@ -318,11 +318,11 @@ class TestProjectOIDs(unittest.TestCase):
                 # check if not null and unique constraints are set (shouldn't be)
                 assert not (
                     t_ili_tid_field.constraints().constraints()
-                    & QgsFieldConstraints.ConstraintUnique
+                    & QgsFieldConstraints.Constraint.ConstraintUnique
                 )
                 assert not (
                     t_ili_tid_field.constraints().constraints()
-                    & QgsFieldConstraints.ConstraintNotNull
+                    & QgsFieldConstraints.Constraint.ConstraintNotNull
                 )
                 count += 1
             # ANYOID
@@ -595,11 +595,11 @@ class TestProjectOIDs(unittest.TestCase):
                 # check if not null and unique constraints are set (shouldn't)
                 assert not (
                     t_ili_tid_field.constraints().constraints()
-                    & QgsFieldConstraints.ConstraintUnique
+                    & QgsFieldConstraints.Constraint.ConstraintUnique
                 )
                 assert not (
                     t_ili_tid_field.constraints().constraints()
-                    & QgsFieldConstraints.ConstraintNotNull
+                    & QgsFieldConstraints.Constraint.ConstraintNotNull
                 )
                 count += 1
             # ANYOID
@@ -873,11 +873,11 @@ class TestProjectOIDs(unittest.TestCase):
                 # check if not null and unique constraints are set (shouldn't)
                 assert not (
                     t_ili_tid_field.constraints().constraints()
-                    & QgsFieldConstraints.ConstraintUnique
+                    & QgsFieldConstraints.Constraint.ConstraintUnique
                 )
                 assert not (
                     t_ili_tid_field.constraints().constraints()
-                    & QgsFieldConstraints.ConstraintNotNull
+                    & QgsFieldConstraints.Constraint.ConstraintNotNull
                 )
                 count += 1
             # ANYOID
@@ -1087,23 +1087,23 @@ class TestProjectOIDs(unittest.TestCase):
     def _check_t_ili_tid_field_constraints(self, t_ili_tid_field):
         assert (
             t_ili_tid_field.constraints().constraints()
-            & QgsFieldConstraints.ConstraintUnique
+            & QgsFieldConstraints.Constraint.ConstraintUnique
         )
         assert (
             t_ili_tid_field.constraints().constraints()
-            & QgsFieldConstraints.ConstraintNotNull
+            & QgsFieldConstraints.Constraint.ConstraintNotNull
         )
         assert (
             t_ili_tid_field.constraints().constraintStrength(
-                QgsFieldConstraints.ConstraintUnique
+                QgsFieldConstraints.Constraint.ConstraintUnique
             )
-            == QgsFieldConstraints.ConstraintStrengthHard
+            == QgsFieldConstraints.ConstraintStrength.ConstraintStrengthHard
         )
         assert (
             t_ili_tid_field.constraints().constraintStrength(
-                QgsFieldConstraints.ConstraintNotNull
+                QgsFieldConstraints.Constraint.ConstraintNotNull
             )
-            == QgsFieldConstraints.ConstraintStrengthHard
+            == QgsFieldConstraints.ConstraintStrength.ConstraintStrengthHard
         )
 
     def _set_pg_naming(self, is_pg=True):

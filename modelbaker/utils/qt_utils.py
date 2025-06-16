@@ -71,7 +71,7 @@ def selectFileNameToSave(
         title,
         line_edit_widget.text(),
         file_filter,
-        options=QFileDialog.DontConfirmOverwrite
+        options=QFileDialog.Option.DontConfirmOverwrite
         if dont_confirm_overwrite
         else QFileDialog.Options(),
     )
@@ -161,9 +161,10 @@ def download_file(
     network_access_manager = QgsNetworkAccessManager.instance()
 
     req = QNetworkRequest(QUrl(url))
-    req.setAttribute(QNetworkRequest.CacheSaveControlAttribute, False)
+    req.setAttribute(QNetworkRequest.Attribute.CacheSaveControlAttribute, False)
     req.setAttribute(
-        QNetworkRequest.CacheLoadControlAttribute, QNetworkRequest.AlwaysNetwork
+        QNetworkRequest.Attribute.CacheLoadControlAttribute,
+        QNetworkRequest.CacheLoadControl.AlwaysNetwork,
     )
     req.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
     reply = network_access_manager.get(req)
@@ -173,7 +174,7 @@ def download_file(
 
     def finished(filename, reply, on_error, on_success, on_finished):
         file = QFile(filename)
-        file.open(QIODevice.WriteOnly)
+        file.open(QIODevice.OpenModeFlag.WriteOnly)
         file.write(reply.readAll())
         file.close()
         if reply.error() and on_error:
@@ -200,7 +201,7 @@ def download_file(
     if not on_finished and not on_success:
         loop = QEventLoop()
         reply.finished.connect(loop.quit)
-        loop.exec_()
+        loop.exec()
 
         if reply.error():
             raise NetworkError(reply.error(), reply.errorString())

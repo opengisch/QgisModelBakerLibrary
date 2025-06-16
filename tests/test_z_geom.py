@@ -55,7 +55,7 @@ class TestGeomZ(unittest.TestCase):
             layer for layer in available_layers if "obstacle" in layer.uri
         )
         obstacle_layer.create()
-        assert obstacle_layer.layer.wkbType() == QgsWkbTypes.PointZ
+        assert obstacle_layer.layer.wkbType() == QgsWkbTypes.Type.PointZ
 
     def print_info(self, text):
         logging.info(text)
