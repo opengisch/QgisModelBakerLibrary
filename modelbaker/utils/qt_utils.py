@@ -24,6 +24,7 @@ from functools import partial
 
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import (
+    QT_VERSION_STR,
     QCoreApplication,
     QEventLoop,
     QFile,
@@ -166,7 +167,9 @@ def download_file(
         QNetworkRequest.Attribute.CacheLoadControlAttribute,
         QNetworkRequest.CacheLoadControl.AlwaysNetwork,
     )
-    req.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
+
+    if QT_VERSION_STR < "6.0.0":
+        req.setAttribute(QNetworkRequest.FollowRedirectsAttribute, True)
     reply = network_access_manager.get(req)
 
     def on_download_progress(bytes_received, bytes_total):
