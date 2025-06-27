@@ -18,7 +18,9 @@
 """
 
 import datetime
+import logging
 import pathlib
+import shutil
 import tempfile
 
 from qgis.testing import start_app, unittest
@@ -26,8 +28,6 @@ from qgis.testing import start_app, unittest
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from tests.utils import iliimporter_config
-
-CATALOGUE_DATASETNAME = "Catset"
 
 start_app()
 
@@ -52,14 +52,29 @@ class TestDbParams(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
-        # now we remove the password - it should fail now
-        importer.configuration.dbpwd = None
+        # now we add the sslmode "require" by dbparams and it should fail
+        importer.configuration.dbparam_map = {"sslmode": "require"}
         assert importer.run() == iliimporter.Importer.ERROR
 
-        # now we add the password by dbparams and it should succeed again
-        importer.configuration.dbparam_map = {"password": "docker"}
+        # change sslmode to "disable" by dbparams and it should succeed again
+        importer.configuration.dbparam_map = {"sslmode": "disable"}
         assert importer.run() == iliimporter.Importer.SUCCESS
 
-        # now we add a wrong password by dbparams and it should fail again
-        importer.configuration.dbparam_map = {"password": "ducker"}
+        # now we add the readonly "true" by dbparams and it should fail
+        importer.configuration.dbparam_map = {"sslmode": "disable", "readOnly": "true"}
+        assert importer.run() == iliimporter.Importer.ERROR
+
+        # change readonly to "false" by dbparams and it should s    ucceed again
+        importer.configuration.dbparam_map = {"sslmode": "disable", "readOnly": "false"}
         assert importer.run() == iliimporter.Importer.SUCCESS
+
+    def print_info(self, text):
+        logging.info(text)
+
+    def print_error(self, text):
+        logging.error(text)
+
+    @classmethod
+    def tearDownClass(cls):
+        """Run after all tests."""
+        shutil.rmtree(cls.basetestpath, True)
