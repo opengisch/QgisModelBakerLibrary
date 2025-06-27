@@ -100,14 +100,14 @@ def _get_db_args(configuration, hide_password=False):
             if temporary_file.open(QFile.WriteOnly):
                 if configuration.sslmode:
                     temporary_file.write(
-                        "sslmode={}".format(configuration.sslmode).encode("utf-8")
+                        "sslmode={}\n".format(configuration.sslmode).encode("utf-8")
                     )
                 if configuration.dbparam_map:
                     for key in configuration.dbparam_map.keys():
                         temporary_file.write(
-                            "{}={}".format(key, configuration.dbparam_map[key]).encode(
-                                "utf-8"
-                            )
+                            "{}={}\n".format(
+                                key, configuration.dbparam_map[key]
+                            ).encode("utf-8")
                         )
                 temporary_file.close()
                 db_args += ["--dbparams", temporary_filename]
