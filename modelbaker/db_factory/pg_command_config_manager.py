@@ -179,6 +179,9 @@ class PgCommandConfigManager(DbCommandConfigManager):
         settings.setValue(
             self._settings_base_path + "sslmode", self.configuration.sslmode
         )
+        settings.setValue(
+            self._settings_base_path + "dbparam_map", self.configuration.dbparam_map
+        )
 
     def load_config_from_qsettings(self) -> None:
         settings = QSettings()
@@ -206,4 +209,7 @@ class PgCommandConfigManager(DbCommandConfigManager):
         )
         self.configuration.sslmode = settings.value(
             self._settings_base_path + "sslmode"
+        )
+        self.configuration.dbparam_map = settings.value(
+            self._settings_base_path + "dbparam_map", {}
         )
