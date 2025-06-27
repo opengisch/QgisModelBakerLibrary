@@ -25,10 +25,17 @@ import urllib.parse
 import xml.etree.ElementTree as ET
 from enum import Enum
 
-from PyQt5.QtCore import QDir, QObject, QSortFilterProxyModel, Qt, QTimer, pyqtSignal
-from PyQt5.QtGui import QPalette, QRegion, QStandardItem, QStandardItemModel
-from PyQt5.QtWidgets import QGridLayout, QItemDelegate, QLabel, QStyle, QWidget
 from qgis.core import Qgis, QgsMessageLog
+from qgis.PyQt.QtCore import (
+    QDir,
+    QObject,
+    QSortFilterProxyModel,
+    Qt,
+    QTimer,
+    pyqtSignal,
+)
+from qgis.PyQt.QtGui import QPalette, QRegion, QStandardItem, QStandardItemModel
+from qgis.PyQt.QtWidgets import QGridLayout, QItemDelegate, QLabel, QStyle, QWidget
 
 from ..utils.qt_utils import download_file
 from .ili2dbutils import get_all_modeldir_in_path
@@ -50,7 +57,7 @@ class IliCache(QObject):
         self.model = IliModelItemModel()
         self.sorted_model = QSortFilterProxyModel()
         self.sorted_model.setSourceModel(self.model)
-        self.sorted_model.sort(0, Qt.AscendingOrder)
+        self.sorted_model.sort(0, Qt.SortOrder.AscendingOrder)
         self.directories = None
         if self.base_configuration:
             self.directories = self.base_configuration.model_directories
@@ -290,7 +297,7 @@ class IliCache(QObject):
             try:
                 fileModels = self.parse_ili_file(ilifile, "latin1")
                 self.new_message.emit(
-                    Qgis.Warning,
+                    Qgis.MessageLevel.Warning,
                     self.tr(
                         "Even though the ili file `{}` could be read, it is not in UTF-8. Please encode your ili models in UTF-8.".format(
                             os.path.basename(ilifile)
@@ -299,7 +306,7 @@ class IliCache(QObject):
                 )
             except UnicodeDecodeError as e:
                 self.new_message.emit(
-                    Qgis.Critical,
+                    Qgis.MessageLevel.Critical,
                     self.tr(
                         "Could not parse ili file `{}` with UTF-8 nor Latin-1 encodings. Please encode your ili models in UTF-8.".format(
                             os.path.basename(ilifile)
@@ -366,8 +373,8 @@ class IliCache(QObject):
 
 class IliModelItemModel(QStandardItemModel):
     class Roles(Enum):
-        ILIREPO = Qt.UserRole + 1
-        VERSION = Qt.UserRole + 2
+        ILIREPO = Qt.ItemDataRole.UserRole + 1
+        VERSION = Qt.ItemDataRole.UserRole + 2
 
         def __int__(self):
             return self.value
@@ -387,8 +394,10 @@ class IliModelItemModel(QStandardItemModel):
                     continue
 
                 item = QStandardItem()
-                item.setData(model["name"], int(Qt.DisplayRole))
-                item.setData(model["name"], int(Qt.EditRole))  # considered in completer
+                item.setData(model["name"], int(Qt.ItemDataRole.DisplayRole))
+                item.setData(
+                    model["name"], int(Qt.ItemDataRole.EditRole)
+                )  # considered in completer
                 item.setData(model["repository"], int(IliModelItemModel.Roles.ILIREPO))
                 item.setData(model["version"], int(IliModelItemModel.Roles.VERSION))
 
@@ -408,9 +417,9 @@ class ModelCompleterDelegate(QItemDelegate):
         self.widget.setLayout(QGridLayout())
         self.widget.layout().setContentsMargins(2, 0, 0, 0)
         self.model_label = QLabel()
-        self.model_label.setAttribute(Qt.WA_TranslucentBackground)
+        self.model_label.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.repository_label = QLabel()
-        self.repository_label.setAlignment(Qt.AlignRight)
+        self.repository_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.widget.layout().addWidget(self.model_label, 0, 0)
         self.widget.layout().addWidget(self.repository_label, 0, 1)
 
@@ -430,13 +439,17 @@ class ModelCompleterDelegate(QItemDelegate):
         self.widget.setMinimumSize(rect.size())
 
         model_palette = option.palette
-        if option.state & QStyle.State_Selected:
+        if option.state & QStyle.StateFlag.State_Selected:
             model_palette.setColor(
-                QPalette.WindowText,
-                model_palette.color(QPalette.Active, QPalette.HighlightedText),
+                QPalette.ColorRole.WindowText,
+                model_palette.color(
+                    QPalette.ColorGroup.Active, QPalette.ColorRole.HighlightedText
+                ),
             )
 
-        self.widget.render(painter, rect.topLeft(), QRegion(), QWidget.DrawChildren)
+        self.widget.render(
+            painter, rect.topLeft(), QRegion(), QWidget.RenderFlag.DrawChildren
+        )
 
 
 class IliDataCache(IliCache):
@@ -456,7 +469,7 @@ class IliDataCache(IliCache):
             lambda: self.model_refreshed.emit(self.model.rowCount())
         )
         self.sorted_model.setSourceModel(self.model)
-        self.sorted_model.sort(0, Qt.AscendingOrder)
+        self.sorted_model.sort(0, Qt.SortOrder.AscendingOrder)
         self.filter_models = models.split(";") if models else []
         self.type = type
         self.directories = (
@@ -718,16 +731,16 @@ class IliDataCache(IliCache):
 
 class IliDataItemModel(QStandardItemModel):
     class Roles(Enum):
-        ILIREPO = Qt.UserRole + 1
-        VERSION = Qt.UserRole + 2
-        MODELS = Qt.UserRole + 3
-        RELATIVEFILEPATH = Qt.UserRole + 4
-        OWNER = Qt.UserRole + 5
-        TITLE = Qt.UserRole + 6
-        ID = Qt.UserRole + 7
-        URL = Qt.UserRole + 8
-        MODEL_LINKS = Qt.UserRole + 9
-        SHORT_DESCRIPTION = Qt.UserRole + 10
+        ILIREPO = Qt.ItemDataRole.UserRole + 1
+        VERSION = Qt.ItemDataRole.UserRole + 2
+        MODELS = Qt.ItemDataRole.UserRole + 3
+        RELATIVEFILEPATH = Qt.ItemDataRole.UserRole + 4
+        OWNER = Qt.ItemDataRole.UserRole + 5
+        TITLE = Qt.ItemDataRole.UserRole + 6
+        ID = Qt.ItemDataRole.UserRole + 7
+        URL = Qt.ItemDataRole.UserRole + 8
+        MODEL_LINKS = Qt.ItemDataRole.UserRole + 9
+        SHORT_DESCRIPTION = Qt.ItemDataRole.UserRole + 10
 
         def __int__(self):
             return self.value
@@ -759,9 +772,9 @@ class IliDataItemModel(QStandardItemModel):
                 ):
                     short_description = dataitem["short_description"][0]["text"]
 
-                item.setData(display_value, int(Qt.DisplayRole))
-                item.setData(display_value, int(Qt.EditRole))
-                item.setData(short_description, int(Qt.ToolTipRole))
+                item.setData(display_value, int(Qt.ItemDataRole.DisplayRole))
+                item.setData(display_value, int(Qt.ItemDataRole.EditRole))
+                item.setData(short_description, int(Qt.ItemDataRole.ToolTipRole))
                 item.setData(dataitem["id"], int(IliDataItemModel.Roles.ID))
                 item.setData(
                     dataitem["repository"], int(IliDataItemModel.Roles.ILIREPO)
@@ -801,9 +814,9 @@ class IliDataFileCompleterDelegate(QItemDelegate):
         self.widget.setLayout(QGridLayout())
         self.widget.layout().setContentsMargins(2, 0, 0, 0)
         self.ilidatafile_label = QLabel()
-        self.ilidatafile_label.setAttribute(Qt.WA_TranslucentBackground)
+        self.ilidatafile_label.setAttribute(Qt.WidgetAttribute.WA_TranslucentBackground)
         self.repository_label = QLabel()
-        self.repository_label.setAlignment(Qt.AlignRight)
+        self.repository_label.setAlignment(Qt.AlignmentFlag.AlignRight)
         self.widget.layout().addWidget(self.ilidatafile_label, 0, 0)
         self.widget.layout().addWidget(self.repository_label, 0, 1)
 
@@ -813,7 +826,7 @@ class IliDataFileCompleterDelegate(QItemDelegate):
 
     def drawDisplay(self, painter, option, rect, text):
         repository = option.index.data(int(IliDataItemModel.Roles.ILIREPO))
-        display_text = option.index.data(int(Qt.DisplayRole))
+        display_text = option.index.data(int(Qt.ItemDataRole.DisplayRole))
 
         self.repository_label.setText(
             '<font color="#666666"><i>{repository}</i></font>'.format(
@@ -826,13 +839,17 @@ class IliDataFileCompleterDelegate(QItemDelegate):
         self.widget.setMinimumSize(rect.size())
 
         model_palette = option.palette
-        if option.state & QStyle.State_Selected:
+        if option.state & QStyle.StateFlag.State_Selected:
             model_palette.setColor(
-                QPalette.WindowText,
-                model_palette.color(QPalette.Active, QPalette.HighlightedText),
+                QPalette.ColorRole.WindowText,
+                model_palette.color(
+                    QPalette.ColorGroup.Active, QPalette.ColorRole.HighlightedText
+                ),
             )
 
-        self.widget.render(painter, rect.topLeft(), QRegion(), QWidget.DrawChildren)
+        self.widget.render(
+            painter, rect.topLeft(), QRegion(), QWidget.RenderFlag.DrawChildren
+        )
 
 
 class IliToppingFileCache(IliDataCache):
@@ -849,7 +866,7 @@ class IliToppingFileCache(IliDataCache):
         IliDataCache.__init__(self, configuration)
         self.model = IliToppingFileItemModel()
         self.sorted_model.setSourceModel(self.model)
-        self.sorted_model.sort(0, Qt.AscendingOrder)
+        self.sorted_model.sort(0, Qt.SortOrder.AscendingOrder)
         self.file_ids = file_ids
         self.tool_dir = (
             tool_dir
@@ -986,12 +1003,12 @@ class IliToppingFileCache(IliDataCache):
 
 class IliToppingFileItemModel(QStandardItemModel):
     class Roles(Enum):
-        ILIREPO = Qt.UserRole + 1
-        VERSION = Qt.UserRole + 2
-        RELATIVEFILEPATH = Qt.UserRole + 3
-        LOCALFILEPATH = Qt.UserRole + 4
-        OWNER = Qt.UserRole + 5
-        URL = Qt.UserRole + 6
+        ILIREPO = Qt.ItemDataRole.UserRole + 1
+        VERSION = Qt.ItemDataRole.UserRole + 2
+        RELATIVEFILEPATH = Qt.ItemDataRole.UserRole + 3
+        LOCALFILEPATH = Qt.ItemDataRole.UserRole + 4
+        OWNER = Qt.ItemDataRole.UserRole + 5
+        URL = Qt.ItemDataRole.UserRole + 6
 
         def __int__(self):
             return self.value
@@ -1009,8 +1026,8 @@ class IliToppingFileItemModel(QStandardItemModel):
                 if any(toppingfile["id"] == s for s in ids):
                     continue
                 item = QStandardItem()
-                item.setData(toppingfile["id"], int(Qt.DisplayRole))
-                item.setData(toppingfile["id"], int(Qt.EditRole))
+                item.setData(toppingfile["id"], int(Qt.ItemDataRole.DisplayRole))
+                item.setData(toppingfile["id"], int(Qt.ItemDataRole.EditRole))
                 item.setData(
                     toppingfile["repository"],
                     int(IliToppingFileItemModel.Roles.ILIREPO),

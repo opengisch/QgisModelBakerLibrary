@@ -316,7 +316,7 @@ class Project(QObject):
                     )
 
         for layer in self.layers:
-            if layer.layer.type() == QgsMapLayer.VectorLayer:
+            if layer.layer.type() == QgsMapLayer.LayerType.VectorLayer:
                 # even when a style will be loaded we create the form because not sure if the style contains form settngs
                 layer.create_form(self)
                 layer.store_variables(self)

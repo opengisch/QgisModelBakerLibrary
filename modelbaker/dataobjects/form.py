@@ -116,7 +116,7 @@ class Form:
         root_container.clear()
         for element in self.__elements:
             root_container.addChildElement(element.create(root_container, qgis_layer))
-        edit_form_config.setLayout(QgsEditFormConfig.TabLayout)
+        edit_form_config.setLayout(QgsEditFormConfig.EditorLayout.TabLayout)
         # set nm-rel if referencing tables are junction table
         for relation in project.relations:
             if relation.referenced_layer == layer:
