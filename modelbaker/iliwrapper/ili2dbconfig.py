@@ -127,6 +127,7 @@ class Ili2DbCommandConfiguration:
             self.dbfile = ""
             self.dbservice = None
             self.sslmode = None
+            self.dbparam_map = {}
             self.tool = None
             self.ilifile = ""
             self.ilimodels = ""

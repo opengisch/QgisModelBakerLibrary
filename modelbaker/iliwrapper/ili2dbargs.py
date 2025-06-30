@@ -95,12 +95,19 @@ def _get_db_args(configuration, hide_password=False):
         db_args += ["--dbschema", configuration.dbschema or configuration.database]
 
         if configuration.sslmode:
+            if "sslmode" not in configuration.dbparam_map:
+                configuration.dbparam_map["sslmode"] = configuration.sslmode
+        if configuration.dbparam_map:
             temporary_filename = "{}/modelbaker-dbargs.conf".format(QDir.tempPath())
             temporary_file = QFile(temporary_filename)
             if temporary_file.open(QFile.WriteOnly):
-                temporary_file.write(
-                    "sslmode={}".format(configuration.sslmode).encode("utf-8")
-                )
+                if configuration.dbparam_map:
+                    for key in configuration.dbparam_map.keys():
+                        temporary_file.write(
+                            "{}={}\n".format(
+                                key, configuration.dbparam_map[key]
+                            ).encode("utf-8")
+                        )
                 temporary_file.close()
                 db_args += ["--dbparams", temporary_filename]
             else:
