@@ -64,7 +64,7 @@ class TestDbParams(unittest.TestCase):
         importer.configuration.dbparam_map = {"sslmode": "disable", "readOnly": "true"}
         assert importer.run() == iliimporter.Importer.ERROR
 
-        # change readonly to "false" by dbparams and it should s    ucceed again
+        # change readonly to "false" by dbparams and it should succeed again
         importer.configuration.dbparam_map = {"sslmode": "disable", "readOnly": "false"}
         assert importer.run() == iliimporter.Importer.SUCCESS
 
