@@ -303,7 +303,7 @@ class Generator(QObject):
                 record.get("srid"),
                 record.get("extent"),
                 record.get("geometry_column"),
-                QgsWkbTypes.parseType(record["type"]) or QgsWkbTypes.Unknown,
+                QgsWkbTypes.parseType(record["type"]) or QgsWkbTypes.Type.Unknown,
                 alias,
                 is_domain,
                 is_structure,
@@ -437,14 +437,14 @@ class Generator(QObject):
                     field.widget_config["calendar_popup"] = True
 
                     dateFormat = QLocale(QgsApplication.instance().locale()).dateFormat(
-                        QLocale.ShortFormat
+                        QLocale.FormatType.ShortFormat
                     )
                     timeFormat = QLocale(QgsApplication.instance().locale()).timeFormat(
-                        QLocale.ShortFormat
+                        QLocale.FormatType.ShortFormat
                     )
                     dateTimeFormat = QLocale(
                         QgsApplication.instance().locale()
-                    ).dateTimeFormat(QLocale.ShortFormat)
+                    ).dateTimeFormat(QLocale.FormatType.ShortFormat)
 
                     if data_type == self._db_connector.QGIS_TIME_TYPE:
                         field.widget_config["display_format"] = timeFormat
@@ -585,7 +585,7 @@ class Generator(QObject):
                             "assoc_cardinality_min", None
                         )
 
-                        relation.strength = QgsRelation.Association
+                        relation.strength = QgsRelation.RelationStrength.Association
                         if (
                             # if it's a defined composition...
                             record.get("strength", None) == "COMPOSITE"
@@ -603,7 +603,7 @@ class Generator(QObject):
                             )
                         ):
                             # ...then it's a composition in QGIS
-                            relation.strength = QgsRelation.Composition
+                            relation.strength = QgsRelation.RelationStrength.Composition
 
                         # For domain-class relations, if we have an extended domain, get its child name
                         child_name = None
@@ -968,11 +968,11 @@ class Generator(QObject):
         for layer in layers:
             if layer.geometry_column:
                 geometry_type = QgsWkbTypes.geometryType(layer.wkb_type)
-                if geometry_type == QgsWkbTypes.PointGeometry:
+                if geometry_type == QgsWkbTypes.GeometryType.PointGeometry:
                     point_layers.append(layer)
-                elif geometry_type == QgsWkbTypes.LineGeometry:
+                elif geometry_type == QgsWkbTypes.GeometryType.LineGeometry:
                     line_layers.append(layer)
-                elif geometry_type == QgsWkbTypes.PolygonGeometry:
+                elif geometry_type == QgsWkbTypes.GeometryType.PolygonGeometry:
                     polygon_layers.append(layer)
             else:
                 if layer.is_domain:

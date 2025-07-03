@@ -100,7 +100,7 @@ def _get_db_args(configuration, hide_password=False):
         if configuration.dbparam_map:
             temporary_filename = "{}/modelbaker-dbargs.conf".format(QDir.tempPath())
             temporary_file = QFile(temporary_filename)
-            if temporary_file.open(QFile.WriteOnly):
+            if temporary_file.open(QFile.OpenModeFlag.WriteOnly):
                 if configuration.dbparam_map:
                     for key in configuration.dbparam_map.keys():
                         temporary_file.write(

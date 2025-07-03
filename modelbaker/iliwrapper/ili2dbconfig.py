@@ -169,7 +169,7 @@ class Ili2DbCommandConfiguration:
         )
 
         proxy = QgsNetworkAccessManager.instance().fallbackProxy()
-        if proxy.type() == QNetworkProxy.HttpProxy:
+        if proxy.type() == QNetworkProxy.ProxyType.HttpProxy:
             self.append_args(args, ["--proxy", proxy.hostName()], force_append=True)
             self.append_args(
                 args, ["--proxyPort", str(proxy.port())], force_append=True

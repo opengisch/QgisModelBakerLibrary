@@ -66,11 +66,11 @@ class Field:
             # if defined, then set not null and unique constraints
             layer.layer.setFieldConstraint(
                 field_idx,
-                QgsFieldConstraints.ConstraintNotNull,
-                QgsFieldConstraints.ConstraintStrengthHard,
+                QgsFieldConstraints.Constraint.ConstraintNotNull,
+                QgsFieldConstraints.ConstraintStrength.ConstraintStrengthHard,
             )
             layer.layer.setFieldConstraint(
                 field_idx,
-                QgsFieldConstraints.ConstraintUnique,
-                QgsFieldConstraints.ConstraintStrengthHard,
+                QgsFieldConstraints.Constraint.ConstraintUnique,
+                QgsFieldConstraints.ConstraintStrength.ConstraintStrengthHard,
             )

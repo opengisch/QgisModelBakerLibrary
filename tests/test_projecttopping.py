@@ -365,7 +365,10 @@ class TestProjectTopping(unittest.TestCase):
             ):
                 count += 1
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 assert len(tabs) == 5
                 assert tabs[0].name() == "Allgemein"
@@ -460,7 +463,10 @@ class TestProjectTopping(unittest.TestCase):
 
                 # default style
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 assert len(tabs) == 5
                 assert tabs[0].name() == "Allgemein"
@@ -477,7 +483,10 @@ class TestProjectTopping(unittest.TestCase):
                 # robot style (in binary)
                 style_manager.setCurrentStyle("robot")
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 assert len(tabs) == 5
                 assert (
@@ -503,7 +512,10 @@ class TestProjectTopping(unittest.TestCase):
                 # french style (in french)
                 style_manager.setCurrentStyle("french")
                 edit_form_config = layer.layer.editFormConfig()
-                assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+                assert (
+                    edit_form_config.layout()
+                    == QgsEditFormConfig.EditorLayout.TabLayout
+                )
                 tabs = edit_form_config.tabs()
                 assert len(tabs) == 5
                 assert tabs[0].name() == "Général"
@@ -952,7 +964,7 @@ class TestProjectTopping(unittest.TestCase):
 
         # check qml from file at punkt_standort
         edit_form_config = punkt_standort.layer().editFormConfig()
-        assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+        assert edit_form_config.layout() == QgsEditFormConfig.EditorLayout.TabLayout
         tabs = edit_form_config.tabs()
         assert len(tabs) == 5
         assert tabs[0].name() == "Allgemein"
@@ -964,7 +976,7 @@ class TestProjectTopping(unittest.TestCase):
 
         # check qml from file at polygon_standort
         edit_form_config = polygon_standort.layer().editFormConfig()
-        assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+        assert edit_form_config.layout() == QgsEditFormConfig.EditorLayout.TabLayout
         tabs = edit_form_config.tabs()
         assert len(tabs) == 5
         assert tabs[0].name() == "Allgemein"
@@ -1064,7 +1076,7 @@ class TestProjectTopping(unittest.TestCase):
         # check qml from file
         assert belasteter_standort_geo_lage_punkt
         edit_form_config = belasteter_standort_geo_lage_punkt.layer.editFormConfig()
-        assert edit_form_config.layout() == QgsEditFormConfig.TabLayout
+        assert edit_form_config.layout() == QgsEditFormConfig.EditorLayout.TabLayout
         tabs = edit_form_config.tabs()
         assert len(tabs) == 5
         assert tabs[0].name() == "Allgemein"
@@ -1226,7 +1238,7 @@ class TestProjectTopping(unittest.TestCase):
 
         for file_id in id_list:
             matches = topping_file_model.match(
-                topping_file_model.index(0, 0), Qt.DisplayRole, file_id, 1
+                topping_file_model.index(0, 0), Qt.ItemDataRole.DisplayRole, file_id, 1
             )
             if matches:
                 file_path = matches[0].data(int(topping_file_model.Roles.LOCALFILEPATH))

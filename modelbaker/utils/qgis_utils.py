@@ -56,12 +56,12 @@ def get_first_index_for_layer_type(layer_type, group, ignore_node_names=None):
             # specific position (e.g., at the top), so, skip it to get indices
             continue
         if (
-            tree_node.nodeType() == QgsLayerTreeNode.NodeGroup
+            tree_node.nodeType() == QgsLayerTreeNode.NodeType.NodeGroup
             and layer_type != "unknown"
         ):
             return None
         elif (
-            tree_node.nodeType() == QgsLayerTreeNode.NodeGroup
+            tree_node.nodeType() == QgsLayerTreeNode.NodeType.NodeGroup
             and layer_type == "unknown"
         ):
             # We've reached the lowest index in the layer tree before a group
@@ -108,15 +108,15 @@ def get_layer_type(layer):
     """
     To deal with all layer types, map their types to known values
     """
-    if layer.type() == QgsMapLayer.VectorLayer:
+    if layer.type() == QgsMapLayer.LayerType.VectorLayer:
         if layer.isSpatial():
-            if layer.geometryType() == QgsWkbTypes.UnknownGeometry:
+            if layer.geometryType() == QgsWkbTypes.GeometryType.UnknownGeometry:
                 return "unknown"
             else:
                 return layer_order[layer.geometryType()]  # Point, Line or Polygon
         else:
             return "table"
-    elif layer.type() == QgsMapLayer.RasterLayer:
+    elif layer.type() == QgsMapLayer.LayerType.RasterLayer:
         return "raster"
     else:
         return "unknown"
@@ -162,7 +162,7 @@ class QgisProjectUtils:
         tree_layers = root.findLayers()
         for tree_layer in tree_layers:
             # get t_ili_tid field OID field
-            if tree_layer.layer().type() != QgsMapLayer.VectorLayer:
+            if tree_layer.layer().type() != QgsMapLayer.LayerType.VectorLayer:
                 continue
             fields = tree_layer.layer().fields()
             field_idx = fields.lookupField("t_ili_tid")
@@ -205,11 +205,11 @@ class QgisProjectUtils:
             # get the constraints
             oid_setting["not_null"] = bool(
                 t_ili_tid_field.constraints().constraints()
-                & QgsFieldConstraints.ConstraintNotNull
+                & QgsFieldConstraints.Constraint.ConstraintNotNull
             )
             oid_setting["unique"] = bool(
                 t_ili_tid_field.constraints().constraints()
-                & QgsFieldConstraints.ConstraintUnique
+                & QgsFieldConstraints.Constraint.ConstraintUnique
             )
 
             oid_settings[tree_layer.layer().name()] = oid_setting
@@ -268,48 +268,48 @@ class QgisProjectUtils:
                 if (
                     not bool(
                         t_ili_tid_field.constraints().constraints()
-                        & QgsFieldConstraints.ConstraintNotNull
+                        & QgsFieldConstraints.Constraint.ConstraintNotNull
                     )
                     and oid_setting["not_null"]
                 ):
                     layer.setFieldConstraint(
                         field_idx,
-                        QgsFieldConstraints.ConstraintNotNull,
-                        QgsFieldConstraints.ConstraintStrengthHard,
+                        QgsFieldConstraints.Constraint.ConstraintNotNull,
+                        QgsFieldConstraints.ConstraintStrength.ConstraintStrengthHard,
                     )
                 if (
                     bool(
                         t_ili_tid_field.constraints().constraints()
-                        & QgsFieldConstraints.ConstraintNotNull
+                        & QgsFieldConstraints.Constraint.ConstraintNotNull
                     )
                     and not oid_setting["not_null"]
                 ):
                     layer.removeFieldConstraint(
                         field_idx,
-                        QgsFieldConstraints.ConstraintNotNull,
+                        QgsFieldConstraints.Constraint.ConstraintNotNull,
                     )
                 if (
                     not bool(
                         t_ili_tid_field.constraints().constraints()
-                        & QgsFieldConstraints.ConstraintUnique
+                        & QgsFieldConstraints.Constraint.ConstraintUnique
                     )
                     and oid_setting["unique"]
                 ):
                     layer.setFieldConstraint(
                         field_idx,
-                        QgsFieldConstraints.ConstraintUnique,
-                        QgsFieldConstraints.ConstraintStrengthHard,
+                        QgsFieldConstraints.Constraint.ConstraintUnique,
+                        QgsFieldConstraints.ConstraintStrength.ConstraintStrengthHard,
                     )
                 if (
                     bool(
                         t_ili_tid_field.constraints().constraints()
-                        & QgsFieldConstraints.ConstraintUnique
+                        & QgsFieldConstraints.Constraint.ConstraintUnique
                     )
                     and not oid_setting["unique"]
                 ):
                     layer.removeFieldConstraint(
                         field_idx,
-                        QgsFieldConstraints.ConstraintUnique,
+                        QgsFieldConstraints.Constraint.ConstraintUnique,
                     )
 
     def _found_tilitid(self, container):

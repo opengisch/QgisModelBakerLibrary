@@ -20,8 +20,8 @@
 import xml.etree.ElementTree as CET
 from enum import Enum
 
-from PyQt5.QtCore import Qt
-from PyQt5.QtGui import QStandardItem, QStandardItemModel
+from qgis.PyQt.QtCore import Qt
+from qgis.PyQt.QtGui import QStandardItem, QStandardItemModel
 
 from .ili2dbconfig import ValidateConfiguration
 from .iliexecutable import IliExecutable
@@ -53,21 +53,21 @@ class ValidationResultModel(QStandardItemModel):
     """
 
     class Roles(Enum):
-        ID = Qt.UserRole + 1
-        MESSAGE = Qt.UserRole + 2
-        TYPE = Qt.UserRole + 3
-        OBJ_TAG = Qt.UserRole + 4
-        TID = Qt.UserRole + 5
-        TECH_ID = Qt.UserRole + 6
-        USER_ID = Qt.UserRole + 7
-        ILI_Q_NAME = Qt.UserRole + 8
-        DATA_SOURCE = Qt.UserRole + 9
-        LINE = Qt.UserRole + 10
-        COORD_X = Qt.UserRole + 11
-        COORD_Y = Qt.UserRole + 12
-        TECH_DETAILS = Qt.UserRole + 13
+        ID = Qt.ItemDataRole.UserRole + 1
+        MESSAGE = Qt.ItemDataRole.UserRole + 2
+        TYPE = Qt.ItemDataRole.UserRole + 3
+        OBJ_TAG = Qt.ItemDataRole.UserRole + 4
+        TID = Qt.ItemDataRole.UserRole + 5
+        TECH_ID = Qt.ItemDataRole.UserRole + 6
+        USER_ID = Qt.ItemDataRole.UserRole + 7
+        ILI_Q_NAME = Qt.ItemDataRole.UserRole + 8
+        DATA_SOURCE = Qt.ItemDataRole.UserRole + 9
+        LINE = Qt.ItemDataRole.UserRole + 10
+        COORD_X = Qt.ItemDataRole.UserRole + 11
+        COORD_Y = Qt.ItemDataRole.UserRole + 12
+        TECH_DETAILS = Qt.ItemDataRole.UserRole + 13
 
-        FIXED = Qt.UserRole + 14
+        FIXED = Qt.ItemDataRole.UserRole + 14
 
         def __int__(self):
             return self.value

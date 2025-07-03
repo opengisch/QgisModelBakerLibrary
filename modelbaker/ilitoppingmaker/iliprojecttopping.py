@@ -73,12 +73,12 @@ class IliProjectTopping(ProjectTopping):
         Creates everything - generates all the files.
         Returns the path to the ilidata.xml file.
         """
-        self.stdout.emit(self.tr("Generate everything."), Qgis.Info)
+        self.stdout.emit(self.tr("Generate everything."), Qgis.MessageLevel.Info)
         ilidata_path = None
         if not project:
             self.stdout.emit(
                 self.tr("Cannot generate anything without having a QGIS project."),
-                Qgis.Warning,
+                Qgis.MessageLevel.Warning,
             )
             return False
         # Creates and sets the project_topping considering the passed QgsProject and the existing ExportSettings.
@@ -94,7 +94,9 @@ class IliProjectTopping(ProjectTopping):
 
         # generate metaconfig (topping) file
         if self.metaconfig.generate_files(self.target):
-            self.stdout.emit(self.tr("MetaConfig written to INI file."), Qgis.Info)
+            self.stdout.emit(
+                self.tr("MetaConfig written to INI file."), Qgis.MessageLevel.Info
+            )
 
         # generate ilidata
         ilidata = IliData()
@@ -104,7 +106,7 @@ class IliProjectTopping(ProjectTopping):
         if ilidata_path:
             self.stdout.emit(
                 self.tr("IliData written to XML file: {}").format(ilidata_path),
-                Qgis.Info,
+                Qgis.MessageLevel.Info,
             )
 
         return ilidata_path

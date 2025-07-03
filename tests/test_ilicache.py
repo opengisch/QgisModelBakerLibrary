@@ -370,18 +370,18 @@ class IliCacheTest(unittest.TestCase):
             int(IliDataItemModel.Roles.ID),
             "ch.opengis.ili.config.KbS_LV95_V1_4_config_V1_0",
             1,
-            Qt.MatchExactly,
+            Qt.MatchFlag.MatchExactly,
         )
         assert bool(matches_on_id) is True
 
         if matches_on_id:
             assert (
                 "Einfaches Styling und Tree und TOML und SH Cat (OPENGIS.ch)"
-                == matches_on_id[0].data(Qt.EditRole)
+                == matches_on_id[0].data(Qt.ItemDataRole.EditRole)
             )
             assert (
                 "Einfaches Styling und Tree und TOML und SH Cat (OPENGIS.ch)"
-                == matches_on_id[0].data(Qt.DisplayRole)
+                == matches_on_id[0].data(Qt.ItemDataRole.DisplayRole)
             )
             assert "test_repo" == matches_on_id[0].data(
                 int(IliDataItemModel.Roles.ILIREPO)
@@ -450,14 +450,16 @@ class IliCacheTest(unittest.TestCase):
             int(IliDataItemModel.Roles.ID),
             "ch.opengis.ili.config.PlanerischerGewaesserschutz_config_localfile",
             1,
-            Qt.MatchExactly,
+            Qt.MatchFlag.MatchExactly,
         )
         assert bool(matches_on_id) is True
 
         if matches_on_id:
-            assert "Mit lokalem Legendenkatalog" == matches_on_id[0].data(Qt.EditRole)
             assert "Mit lokalem Legendenkatalog" == matches_on_id[0].data(
-                Qt.DisplayRole
+                Qt.ItemDataRole.EditRole
+            )
+            assert "Mit lokalem Legendenkatalog" == matches_on_id[0].data(
+                Qt.ItemDataRole.DisplayRole
             )
             assert os.path.join(
                 test_path, "testdata", "ilirepo", "usabilityhub"
@@ -631,19 +633,19 @@ class IliCacheTest(unittest.TestCase):
 
         matches_on_id = ilitoppingfilecache_model.match(
             ilitoppingfilecache_model.index(0, 0),
-            Qt.DisplayRole,
+            Qt.ItemDataRole.DisplayRole,
             "ilidata:ch.opengis.topping.opengisch_KbS_LV95_V1_4_001",
             1,
-            Qt.MatchExactly,
+            Qt.MatchFlag.MatchExactly,
         )
         assert bool(matches_on_id) is True
         if matches_on_id:
             assert (
                 "ilidata:ch.opengis.topping.opengisch_KbS_LV95_V1_4_001"
-            ), matches_on_id[0].data(Qt.EditRole)
+            ), matches_on_id[0].data(Qt.ItemDataRole.EditRole)
             assert (
                 "ilidata:ch.opengis.topping.opengisch_KbS_LV95_V1_4_001"
-            ), matches_on_id[0].data(Qt.DisplayRole)
+            ), matches_on_id[0].data(Qt.ItemDataRole.DisplayRole)
             assert "test_repo", matches_on_id[0].data(
                 int(IliToppingFileItemModel.Roles.ILIREPO)
             )

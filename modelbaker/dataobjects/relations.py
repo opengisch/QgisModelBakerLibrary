@@ -10,7 +10,7 @@ class Relation:
         self.referencing_field = None
         self.referenced_field = None
         self.name = None
-        self.strength = QgsRelation.Association
+        self.strength = QgsRelation.RelationStrength.Association
         self.cardinality_max = None
         self.cardinality_min = None
         self.child_domain_name = None
