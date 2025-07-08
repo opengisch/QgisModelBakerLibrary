@@ -32,7 +32,7 @@ from qgis.PyQt.QtCore import (
     QObject,
     QUrl,
 )
-from qgis.PyQt.QtNetwork import QNetworkRequest
+from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
 from qgis.PyQt.QtWidgets import QApplication, QFileDialog
 
 
@@ -180,9 +180,9 @@ def download_file(
         file.open(QIODevice.OpenModeFlag.WriteOnly)
         file.write(reply.readAll())
         file.close()
-        if reply.error() and on_error:
+        if reply.error() != QNetworkReply.NetworkError.NoError and on_error:
             on_error(reply.error(), reply.errorString())
-        elif not reply.error() and on_success:
+        elif on_success:
             on_success()
 
         if on_finished:
@@ -206,7 +206,7 @@ def download_file(
         reply.finished.connect(loop.quit)
         loop.exec()
 
-        if reply.error():
+        if reply.error() != QNetworkReply.NetworkError.NoError:
             raise NetworkError(reply.error(), reply.errorString())
         else:
             return filename
