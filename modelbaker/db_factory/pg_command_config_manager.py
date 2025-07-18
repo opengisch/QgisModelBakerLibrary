@@ -120,25 +120,34 @@ class PgCommandConfigManager(DbCommandConfigManager):
         if self.configuration.dbport:
             db_args += ["--dbport", self.configuration.dbport]
         if su:
-            db_args += ["--dbusr", self.configuration.base_configuration.super_pg_user]
+            if self.configuration.base_configuration.super_pg_user:
+                db_args += [
+                    "--dbusr",
+                    self.configuration.base_configuration.super_pg_user,
+                ]
         else:
-            db_args += ["--dbusr", self.configuration.dbusr]
+            if self.configuration.dbusr:
+                db_args += ["--dbusr", self.configuration.dbusr]
         if (
             not su
             and self.configuration.dbpwd
             or su
             and self.configuration.base_configuration.super_pg_password
         ):
-            if hide_password:
-                db_args += ["--dbpwd", "******"]
-            else:
-                if su:
-                    db_args += [
-                        "--dbpwd",
-                        self.configuration.base_configuration.super_pg_password,
-                    ]
+            if (
+                self.configuration.dbpwd
+                or self.configuration.base_configuration.super_pg_password
+            ):
+                if hide_password:
+                    db_args += ["--dbpwd", "******"]
                 else:
-                    db_args += ["--dbpwd", self.configuration.dbpwd]
+                    if su:
+                        db_args += [
+                            "--dbpwd",
+                            self.configuration.base_configuration.super_pg_password,
+                        ]
+                    else:
+                        db_args += ["--dbpwd", self.configuration.dbpwd]
         db_args += ["--dbdatabase", self.configuration.database]
         db_args += [
             "--dbschema",
