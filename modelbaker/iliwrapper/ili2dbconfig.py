@@ -214,6 +214,7 @@ class ExportConfiguration(Ili2DbCommandConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--disableValidation"])
+            self.append_args(args, ["--skipGeometryErrors"])
 
         if self.with_exporttid:
             self.append_args(args, ["--exportTid"])
@@ -368,6 +369,7 @@ class ImportDataConfiguration(SchemaImportConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--disableValidation"])
+            self.append_args(args, ["--skipGeometryErrors"])
 
         if self.delete_data:
             self.append_args(args, ["--deleteData"])
@@ -425,6 +427,7 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--disableValidation"])
+            self.append_args(args, ["--skipGeometryErrors"])
 
         if self.with_importtid:
             self.append_args(args, ["--importTid"])
