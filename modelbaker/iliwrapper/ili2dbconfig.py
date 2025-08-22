@@ -357,6 +357,7 @@ class ImportDataConfiguration(SchemaImportConfiguration):
         self.baskets = list()
         self.with_schemaimport = False
         self.with_importbid = False
+        # requires sqlEnableNull on schema:
         self.skip_reference_errors = False
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
@@ -417,6 +418,7 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
         self.delete_data = False
         self.with_importtid = False
         self.with_importbid = False
+        # requires sqlEnableNull on schema:
         self.skip_reference_errors = False
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
