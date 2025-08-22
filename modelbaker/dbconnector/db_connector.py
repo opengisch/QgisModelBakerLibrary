@@ -235,7 +235,7 @@ class DBConnector(QObject):
                 ):
                     detected_tables.append(record["tablename"])
                     continue
-            if "schemaname" in record:
+            if "schemaname" in record and record["schemaname"]:
                 ignored = False
                 for ignored_schema_pattern in IGNORED_SCHEMAS:
                     if fnmatch.fnmatch(record["schemaname"], ignored_schema_pattern):
