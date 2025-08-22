@@ -1374,7 +1374,7 @@ class PGConnector(DBConnector):
 
         return False, self.tr("Could not reset sequence")
 
-    def get_schemas(self):
+    def get_all_schemas(self):
         cursor = self.conn.cursor()
         try:
             cursor.execute(
