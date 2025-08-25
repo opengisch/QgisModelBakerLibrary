@@ -15,6 +15,8 @@
  *                                                                         *
  ***************************************************************************/
 """
+import fnmatch
+
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 
 from .config import BASKET_TABLES, IGNORED_ILI_ELEMENTS, IGNORED_SCHEMAS, IGNORED_TABLES
@@ -233,8 +235,13 @@ class DBConnector(QObject):
                 ):
                     detected_tables.append(record["tablename"])
                     continue
-            if "schemaname" in record:
-                if record["schemaname"] in IGNORED_SCHEMAS:
+            if "schemaname" in record and record["schemaname"]:
+                ignored = False
+                for ignored_schema_pattern in IGNORED_SCHEMAS:
+                    if fnmatch.fnmatch(record["schemaname"], ignored_schema_pattern):
+                        ignored = True
+                        break
+                if ignored:
                     static_tables.append(record["tablename"])
                     continue
             if "tablename" in record:
@@ -451,6 +458,30 @@ class DBConnector(QObject):
     def get_domain_dispnames(self, tablename):
         """
         Get the domain display names with consideration of the translation
+        """
+        return []
+
+    def get_schemas(self, ignore_system_schemas=True):
+        result = []
+        all_schemas = self.get_all_schemas()
+
+        if not ignore_system_schemas:
+            result = all_schemas
+        else:
+            # filter ignored schemas
+            for schema in all_schemas:
+                ignored = False
+                for ignored_schema_pattern in IGNORED_SCHEMAS:
+                    if fnmatch.fnmatch(schema, ignored_schema_pattern):
+                        ignored = True
+                if ignored:
+                    continue
+                result.append(schema)
+        return result
+
+    def get_all_schemas(self):
+        """
+        Get the schemas from PostgreSQL. Otherwise empty.
         """
         return []
 

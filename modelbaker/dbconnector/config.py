@@ -1,4 +1,4 @@
-IGNORED_SCHEMAS = ["pg_catalog", "information_schema"]
+IGNORED_SCHEMAS = ["pg_catalog", "information_schema", "pg_*"]
 
 IGNORED_TABLES = [
     "spatial_ref_sys",
