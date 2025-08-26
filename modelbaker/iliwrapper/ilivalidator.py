@@ -118,7 +118,7 @@ class ValidationResultModel(QStandardItemModel):
                             coord_y = self.get_element_text(coord.find(ns + "C2"))
                     tech_details = self.get_element_text(error.find(ns + "TechDetails"))
 
-                    if type in ["Error", "Warning"] and message != "...validate failed":
+                    if type in ["Error"] and message != "...validate failed":
                         item = QStandardItem()
                         item.setData(id, int(ValidationResultModel.Roles.ID))
                         item.setData(message, int(ValidationResultModel.Roles.MESSAGE))
