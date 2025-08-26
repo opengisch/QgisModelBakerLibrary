@@ -28,6 +28,7 @@ class BaseConfiguration:
     def __init__(self):
         self.super_pg_user = "postgres"
         self.super_pg_password = "postgres"
+        self.dbparam_map = {}
 
         self.custom_model_directories_enabled = False
         self.custom_model_directories = ""
@@ -39,6 +40,7 @@ class BaseConfiguration:
     def save(self, settings):
         settings.setValue("SuperUser", self.super_pg_user)
         settings.setValue("SuperPassword", self.super_pg_password)
+        settings.setValue("CustomDbParameters", self.dbparam_map)
         settings.setValue(
             "CustomModelDirectoriesEnabled", self.custom_model_directories_enabled
         )
@@ -50,6 +52,7 @@ class BaseConfiguration:
     def restore(self, settings):
         self.super_pg_user = settings.value("SuperUser", "postgres", str)
         self.super_pg_password = settings.value("SuperPassword", "postgres", str)
+        self.dbparam_map = settings.value("CustomDbParameters", {}, dict)
         self.custom_model_directories_enabled = settings.value(
             "CustomModelDirectoriesEnabled", False, bool
         )
@@ -127,7 +130,6 @@ class Ili2DbCommandConfiguration:
             self.dbfile = ""
             self.dbservice = None
             self.sslmode = None
-            self.dbparam_map = {}
             self.tool = None
             self.ilifile = ""
             self.ilimodels = ""
