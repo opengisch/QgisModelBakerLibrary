@@ -214,6 +214,7 @@ class ExportConfiguration(Ili2DbCommandConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--disableValidation"])
+            self.append_args(args, ["--skipGeometryErrors"])
 
         if self.with_exporttid:
             self.append_args(args, ["--exportTid"])
@@ -356,6 +357,8 @@ class ImportDataConfiguration(SchemaImportConfiguration):
         self.baskets = list()
         self.with_schemaimport = False
         self.with_importbid = False
+        # requires sqlEnableNull on schema:
+        self.skip_reference_errors = False
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         args = list()
@@ -368,6 +371,10 @@ class ImportDataConfiguration(SchemaImportConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--disableValidation"])
+            self.append_args(args, ["--skipGeometryErrors"])
+
+        if self.skip_reference_errors:
+            self.append_args(args, ["--skipReferenceErrors"])
 
         if self.delete_data:
             self.append_args(args, ["--deleteData"])
@@ -411,6 +418,8 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
         self.delete_data = False
         self.with_importtid = False
         self.with_importbid = False
+        # requires sqlEnableNull on schema:
+        self.skip_reference_errors = False
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         args = list()
@@ -425,6 +434,10 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
 
         if self.disable_validation:
             self.append_args(args, ["--disableValidation"])
+            self.append_args(args, ["--skipGeometryErrors"])
+
+        if self.skip_reference_errors:
+            self.append_args(args, ["--skipReferenceErrors"])
 
         if self.with_importtid:
             self.append_args(args, ["--importTid"])
