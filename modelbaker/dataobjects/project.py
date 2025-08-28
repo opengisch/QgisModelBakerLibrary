@@ -168,7 +168,7 @@ class Project(QObject):
             if not rel.isValid():
                 self.log_function(
                     f"The relation from {relation.referencing_layer.name} ({relation.referencing_layer.create().name()}) to {relation.referenced_layer.name} ({relation.referenced_layer.create().name()}) is not valid. The project may be corrupt.",
-                    LogLevel.ERROR,
+                    LogLevel.FAIL,
                 )
                 continue
 
