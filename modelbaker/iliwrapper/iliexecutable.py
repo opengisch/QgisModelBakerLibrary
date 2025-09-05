@@ -24,8 +24,8 @@ from qgis.PyQt.QtCore import QEventLoop, QObject, QProcess, pyqtSignal
 
 from ..utils.qt_utils import AbstractQObjectMeta
 from .ili2dbargs import get_ili2db_args
-from .ili2dbconfig import Ili2DbCommandConfiguration
-from .ili2dbutils import JavaNotFoundError, get_ili2db_bin, get_java_path
+from .ili2dbconfig import Ili2CCommandConfiguration, Ili2DbCommandConfiguration
+from .ili2dbutils import JavaNotFoundError, get_ili2c_bin, get_ili2db_bin, get_java_path
 
 
 class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
@@ -150,6 +150,110 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
             proc.start(java_path, ili2db_jar_arg + args)
         else:
             proc.start(self.command_with_password(edited_command))
+
+        if not proc.waitForStarted():
+            proc = None
+
+        if not proc:
+            raise JavaNotFoundError()
+
+        self.process_started.emit(self.command_without_password(edited_command))
+
+        self.__result = self.ERROR
+
+        loop = QEventLoop()
+        proc.finished.connect(loop.exit)
+        loop.exec()
+
+        self.process_finished.emit(proc.exitCode(), self.__result)
+        return self.__result
+
+    def stderr_ready(self, proc):
+        text = bytes(proc.readAllStandardError()).decode(self.encoding)
+
+        if self.__done_pattern.search(text):
+            self.__result = self.SUCCESS
+
+        self.stderr.emit(text)
+
+    def stdout_ready(self, proc):
+        text = bytes(proc.readAllStandardOutput()).decode(self.encoding)
+        self.stdout.emit(text)
+
+
+class IliCompiler(QObject):
+    SUCCESS = 0
+    ERROR = 1000
+    ILI2C_NOT_FOUND = 1001
+
+    stdout = pyqtSignal(str)
+    stderr = pyqtSignal(str)
+    process_started = pyqtSignal(str)
+    process_finished = pyqtSignal(int, int)
+    cancel_process = pyqtSignal()
+
+    __done_pattern = re.compile(r"Info: \.\.\.([a-zA-Z]+ )?done")
+    __result = None
+
+    def __init__(self, parent=None):
+        QObject.__init__(self, parent)
+        self.filename = None
+        self.tool = None
+        self.configuration = self._create_config()
+        _, self.encoding = locale.getlocale()
+
+        # Lets python try to determine the default locale
+        if not self.encoding:
+            _, self.encoding = locale.getdefaultlocale()
+
+        # This might be unset
+        # (https://stackoverflow.com/questions/1629699/locale-getlocale-problems-on-osx)
+        if not self.encoding:
+            self.encoding = "UTF8"
+
+    def _create_config(self) -> Ili2CCommandConfiguration:
+        """Creates the configuration that will be used by *run* method.
+        :return: ili2db configuration"""
+        return Ili2CCommandConfiguration()
+
+    def _args(self, hide_password):
+        """Gets the list of ili2db arguments from configuration.
+
+        :param bool hide_password: *True* to mask the password, *False* otherwise.
+        :return: ili2db arguments list.
+        :rtype: list
+        """
+        self.configuration.to_ili2c_args()
+
+    def _ili2c_jar_arg(self):
+        ili2c_bin = get_ili2c_bin(self.stdout, self.stderr)
+        if not ili2c_bin:
+            return self.ILI2C_NOT_FOUND
+        return ["-jar", ili2c_bin]
+
+    def _escaped_arg(self, argument):
+        if '"' in argument:
+            argument = argument.replace('"', '"""')
+        if " " in argument:
+            argument = '"' + argument + '"'
+        return argument
+
+    def run(self):
+        proc = QProcess()
+        self.cancel_process.connect(proc.terminate)
+        proc.readyReadStandardError.connect(
+            functools.partial(self.stderr_ready, proc=proc)
+        )
+        proc.readyReadStandardOutput.connect(
+            functools.partial(self.stdout_ready, proc=proc)
+        )
+
+        ili2c_jar_arg = self._ili2c_jar_arg()
+        if ili2c_jar_arg == self.ILI2C_NOT_FOUND:
+            return self.ILI2C_NOT_FOUND
+        args = self._args(False)
+        java_path = get_java_path(self.configuration.base_configuration)
+        proc.start(java_path, ili2c_jar_arg + args)
 
         if not proc.waitForStarted():
             proc = None

@@ -28,7 +28,12 @@ from qgis.PyQt.QtCore import QCoreApplication
 
 from ..utils.qt_utils import NetworkError, download_file
 from .globals import DbIliMode
-from .ili2dbtools import get_tool_url, get_tool_version
+from .ili2dbtools import (
+    get_ili2c_tool_url,
+    get_ili2c_tool_version,
+    get_tool_url,
+    get_tool_version,
+)
 
 
 def get_ili2db_bin(tool, db_ili_version, stdout, stderr):
@@ -123,6 +128,75 @@ def get_ili2db_bin(tool, db_ili_version, stdout, stderr):
             return None
 
     return ili2db_file
+
+
+def get_ili2c_bin(stdout, stderr):
+    ili_tool_version = get_ili2c_tool_version()
+    ili_tool_url = get_ili2c_tool_url()
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    ili2c_dir = "ili2c-{}".format(ili_tool_version)
+
+    ili2c_file = os.path.join(
+        dir_path,
+        "bin",
+        ili2c_dir,
+        "ili2c.jar".format(version=ili_tool_version),
+    )
+
+    if not os.path.isfile(ili2c_file):
+        try:
+            os.makedirs(os.path.join(dir_path, "bin", ili2c_dir), exist_ok=True)
+        except FileExistsError:
+            pass
+
+        tmpfile = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+
+        stdout.emit(
+            QCoreApplication.translate(
+                "ili2dbutils",
+                "Downloading ili2c version {}…".format(ili_tool_version),
+            )
+        )
+
+        try:
+            download_file(
+                ili_tool_url,
+                tmpfile.name,
+                on_progress=lambda received, total: stdout.emit("."),
+            )
+        except NetworkError as e:
+            stderr.emit(
+                QCoreApplication.translate(
+                    "ili2dbutils",
+                    'Could not download ili2c\n\n  Error: {error}\n\nFile "{file}" not found. Please download and extract <a href="{ili2db_url}">ili2c</a>'.format(
+                        ili2db_url=ili_tool_url,
+                        error=e.msg,
+                        file=ili2c_file,
+                    ),
+                )
+            )
+            return None
+
+        try:
+            with zipfile.ZipFile(tmpfile.name, "r") as z:
+                z.extractall(os.path.join(dir_path, "bin", ili2c_dir))
+        except zipfile.BadZipFile:
+            # We will realize soon enough that the files were not extracted
+            pass
+
+        if not os.path.isfile(ili2c_file):
+            stderr.emit(
+                QCoreApplication.translate(
+                    "ili2dbutils",
+                    'File "{file}" not found. Please download and extract <a href="{ili2c_url}">ili2c</a>.'.format(
+                        file=ili2c_file, ili2c_url=ili_tool_url
+                    ),
+                )
+            )
+            return None
+
+    return ili2c_file
 
 
 def get_all_modeldir_in_path(path, lambdafunction=None):
