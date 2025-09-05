@@ -223,7 +223,7 @@ class IliCompiler(QObject):
         :return: ili2db arguments list.
         :rtype: list
         """
-        self.configuration.to_ili2c_args()
+        return self.configuration.to_ili2c_args()
 
     def _ili2c_jar_arg(self):
         ili2c_bin = get_ili2c_bin(self.stdout, self.stderr)
@@ -253,6 +253,7 @@ class IliCompiler(QObject):
             return self.ILI2C_NOT_FOUND
         args = self._args(False)
         java_path = get_java_path(self.configuration.base_configuration)
+
         proc.start(java_path, ili2c_jar_arg + args)
 
         if not proc.waitForStarted():
@@ -261,7 +262,7 @@ class IliCompiler(QObject):
         if not proc:
             raise JavaNotFoundError()
 
-        self.process_started.emit(self.command_without_password(edited_command))
+        # self.process_started.emit(self.command_without_password(edited_command))
 
         self.__result = self.ERROR
 

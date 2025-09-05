@@ -571,7 +571,7 @@ class Ili2CCommandConfiguration:
         if not isinstance(other, Ili2CCommandConfiguration):
             self.base_configuration = BaseConfiguration()
 
-            self.o = ""
+            self.oIMD16 = True
             self.imdfile = ""
             self.ilifile = ""
         else:
@@ -585,8 +585,8 @@ class Ili2CCommandConfiguration:
 
         args = self.base_configuration.to_ili2db_args(False, False)
 
-        if self.o:
-            self.append_args(args, ["-o", self.o])
+        if self.oIMD16:
+            self.append_args(args, ["-oIMD16"])
 
         if self.imdfile:
             self.append_args(args, ["--out", self.imdfile])
