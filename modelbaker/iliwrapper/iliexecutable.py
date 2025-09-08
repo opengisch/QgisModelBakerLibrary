@@ -182,7 +182,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
 
 
 class IliCompiler(QObject):
-    SUCCESS = 0
+    SUCCESS = 1000  # not sure why it returns 1000 but whatever
     ERROR = 1000
     ILI2C_NOT_FOUND = 1001
 
@@ -216,7 +216,7 @@ class IliCompiler(QObject):
         :return: ili2db configuration"""
         return Ili2CCommandConfiguration()
 
-    def _args(self, hide_password):
+    def _args(self):
         """Gets the list of ili2db arguments from configuration.
 
         :param bool hide_password: *True* to mask the password, *False* otherwise.
@@ -238,6 +238,25 @@ class IliCompiler(QObject):
             argument = '"' + argument + '"'
         return argument
 
+    def command(self):
+        ili2c_jar_arg = self._ili2c_jar_arg()
+        if ili2c_jar_arg == self.ILI2C_NOT_FOUND:
+            return "ili2c tool not found!"
+
+        args = self._args()
+        java_path = self._escaped_arg(
+            get_java_path(self.configuration.base_configuration)
+        )
+        command_args = ili2c_jar_arg + args
+
+        valid_args = []
+        for command_arg in command_args:
+            valid_args.append(self._escaped_arg(command_arg))
+
+        command = java_path + " " + " ".join(valid_args)
+
+        return command
+
     def run(self):
         proc = QProcess()
         self.cancel_process.connect(proc.terminate)
@@ -251,7 +270,7 @@ class IliCompiler(QObject):
         ili2c_jar_arg = self._ili2c_jar_arg()
         if ili2c_jar_arg == self.ILI2C_NOT_FOUND:
             return self.ILI2C_NOT_FOUND
-        args = self._args(False)
+        args = self._args()
         java_path = get_java_path(self.configuration.base_configuration)
 
         proc.start(java_path, ili2c_jar_arg + args)
@@ -262,7 +281,7 @@ class IliCompiler(QObject):
         if not proc:
             raise JavaNotFoundError()
 
-        # self.process_started.emit(self.command_without_password(edited_command))
+        self.process_started.emit(self.command())
 
         self.__result = self.ERROR
 
