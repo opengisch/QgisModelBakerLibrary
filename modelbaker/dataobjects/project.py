@@ -34,7 +34,14 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 from qgis.PyQt.QtXml import QDomDocument
+from QgisModelBaker.libs.modelbaker.libs.ili2py.interfaces.interlis.interlis_24.ilismeta.ilismeta16_2022_10_10.enum_type_type import (
+    EnumTypeType,
+)
+from QgisModelBaker.libs.modelbaker.libs.ili2py.writers.py.interlis23.python import (
+    Enumeration,
+)
 
+from ..pythonizer.pythonizer import Pythonizer
 from ..utils.globals import LogLevel, OptimizeStrategy, default_log_function
 from .layers import Layer
 from .legend import LegendGroup
@@ -52,6 +59,9 @@ class Project(QObject):
         evaluate_default_values: bool = True,
         context: dict[str, str] = {},
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
+        pythonize_enums=None,
+        configuration=None,
+        models=[],
         log_function=None,
     ) -> None:
         QObject.__init__(self)
@@ -68,6 +78,9 @@ class Project(QObject):
         self.mapthemes = {}
         self.context = context
         self.optimize_strategy = optimize_strategy
+        self.pythonize_enums = pythonize_enums
+        self.configuration = configuration
+        self.models = models
         self.log_function = log_function
 
         if not log_function:
@@ -315,6 +328,58 @@ class Project(QObject):
                         self.tr("The minimal selection is 1"),
                     )
 
+        if self.pythonize_enums:
+            self.log_function(
+                f"Let's get all the enums via ili2py and write them into Value Maps... Just for fun.",
+                LogLevel.INFO,
+            )
+            pythonizer = Pythonizer()
+            model_files = pythonizer.model_files(
+                self.configuration.base_configuration, self.models
+            )
+            self.log_function(
+                f"Received modelfiles {model_files} for models {self.models}",
+                LogLevel.INFO,
+            )
+            if model_files:
+                result, imd_file = pythonizer.compile(
+                    self.configuration.base_configuration, model_files[0]
+                )
+                if result:
+                    self.log_function(
+                        f"Having a nice imd {imd_file}",
+                        LogLevel.INFO,
+                    )
+                    index, _ = pythonizer.pythonize(imd_file)
+                    if index:
+                        self.log_function(
+                            "Having a proper index",
+                            LogLevel.INFO,
+                        )
+                    for layer in self.layers:
+                        for field in layer.fields:
+                            # if field.enum_domain:
+                            if not field.ili_name:
+                                continue
+                            imd_field_object = index.index.get(field.ili_name)
+                            if not hasattr(imd_field_object, "type_value"):
+                                continue
+                            imd_field_type_oid = imd_field_object.type_value.ref
+                            imd_field_type_object = index.index.get(imd_field_type_oid)
+
+                            if isinstance(imd_field_type_object, EnumTypeType):
+                                self.log_function(
+                                    f"Having a field with an enum {field.ili_name}",
+                                    LogLevel.INFO,
+                                )
+
+                                enum_object = Enumeration.from_imd(
+                                    imd_field_type_object, index
+                                )
+                                self.log_function(
+                                    f"Enum value: {enum_object.values}",
+                                    LogLevel.INFO,
+                                )
         for layer in self.layers:
             if layer.layer.type() == QgsMapLayer.LayerType.VectorLayer:
                 # even when a style will be loaded we create the form because not sure if the style contains form settngs

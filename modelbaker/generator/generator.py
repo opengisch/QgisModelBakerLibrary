@@ -332,7 +332,11 @@ class Generator(QObject):
             re_iliname = re.compile(r".*\.(.*)$")
             for fielddef in fields_info:
                 column_name = fielddef["column_name"]
-
+                ili_name = fully_qualified_name = (
+                    fielddef["fully_qualified_name"]
+                    if "fully_qualified_name" in fielddef
+                    else None
+                )
                 # If raw_naming is True, the fieldname should be the columnname
                 # Otherwise get field name in this order:
                 # - translation if exists,
@@ -345,22 +349,14 @@ class Generator(QObject):
                     alias = fielddef.get("column_tr", None)
                 if not alias:
                     alias = fielddef.get("column_alias", None)
-
                 if not alias:
-                    fully_qualified_name = (
-                        fielddef["fully_qualified_name"]
-                        if "fully_qualified_name" in fielddef
-                        else None
-                    )
-                    m = (
-                        re_iliname.match(fully_qualified_name)
-                        if fully_qualified_name
-                        else None
-                    )
-                    if m:
-                        alias = m.group(1)
+                    if ili_name:
+                        m = re_iliname.match(ili_name) if ili_name else None
+                        if m:
+                            alias = m.group(1)
 
                 field = Field(column_name)
+                field.ili_name = ili_name
                 field.alias = alias
 
                 # Should we hide the field?
