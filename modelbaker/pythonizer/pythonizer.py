@@ -14,7 +14,9 @@ from QgisModelBaker.libs.modelbaker.libs.ili2py.mappers.helpers import Index
 from QgisModelBaker.libs.modelbaker.libs.ili2py.readers.interlis_24.ilismeta16.xsdata import (
     Imd16Reader,
 )
-from QgisModelBaker.libs.modelbaker.libs.ili2py.writers.py import Library
+from QgisModelBaker.libs.modelbaker.libs.ili2py.writers.py.python_structure import (
+    Library,
+)
 
 from ..utils.globals import default_log_function
 

@@ -37,7 +37,7 @@ from qgis.PyQt.QtXml import QDomDocument
 from QgisModelBaker.libs.modelbaker.libs.ili2py.interfaces.interlis.interlis_24.ilismeta.ilismeta16_2022_10_10.enum_type_type import (
     EnumTypeType,
 )
-from QgisModelBaker.libs.modelbaker.libs.ili2py.writers.py.interlis23.python import (
+from QgisModelBaker.libs.modelbaker.libs.ili2py.writers.py.python_structure import (
     Enumeration,
 )
 
