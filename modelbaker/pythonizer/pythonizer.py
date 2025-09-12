@@ -1,8 +1,9 @@
 import datetime
 import os
 
+import QgisModelBaker.libs.modelbaker.utils.db_utils as db_utils
 from qgis.core import Qgis
-from qgis.PyQt.QtCore import QEventLoop, QObject, QStandardPaths, QTimer
+from qgis.PyQt.QtCore import QEventLoop, QFile, QObject, QStandardPaths, QTimer
 from QgisModelBaker.libs.modelbaker.iliwrapper import iliexecutable
 from QgisModelBaker.libs.modelbaker.iliwrapper.ili2dbconfig import (
     Ili2CCommandConfiguration,
@@ -69,7 +70,32 @@ class Pythonizer(QObject):
         library = Library.from_imd(metamodel.datasection.ModelData, index, library_name)
         return index, library
 
-    def model_files(self, base_configuration, model_list):
+    def model_files_generated_from_db(self, configuration, model_list):
+        model_files = []
+        # this could be improved i guess, we already have the models read from the same function. but yes. poc etc.
+        db_connector = db_utils.get_db_connector(configuration)
+        db_connector.get_models()
+        model_records = db_connector.get_models()
+        for record in model_records:
+            name = record["modelname"].split("{")[0]
+            if name in model_list:
+                modelfilepath = os.path.join(
+                    QStandardPaths.writableLocation(
+                        QStandardPaths.StandardLocation.TempLocation
+                    ),
+                    "temp_{}_{:%Y%m%d%H%M%S%f}.ili".format(
+                        name, datetime.datetime.now()
+                    ),
+                )
+                file = QFile(modelfilepath)
+                if file.open(QFile.OpenModeFlag.WriteOnly):
+                    file.write(record["content"].encode("utf-8"))
+                    file.close()
+                model_files.append(modelfilepath)
+                print(modelfilepath)
+        return model_files
+
+    def model_files_from_repo(self, base_configuration, model_list):
         model_file_cache = IliModelFileCache(base_configuration, model_list)
         # we wait for the download or we timeout after 30 seconds and we apply what we have
         loop = QEventLoop()

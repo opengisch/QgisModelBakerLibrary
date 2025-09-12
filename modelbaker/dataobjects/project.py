@@ -194,6 +194,9 @@ class Project(QObject):
                 and referenced_layer.is_enum
                 and not referenced_layer.display_expression
             ):
+                if self.pythonize_enums:
+                    continue
+
                 editor_widget_setup = QgsEditorWidgetSetup(
                     "ValueRelation",
                     {
@@ -219,6 +222,9 @@ class Project(QObject):
                     },
                 )
             elif referenced_layer and referenced_layer.is_domain:
+
+                if self.pythonize_enums:
+                    continue
                 editor_widget_setup = QgsEditorWidgetSetup(
                     "RelationReference",
                     {
@@ -334,8 +340,8 @@ class Project(QObject):
                 LogLevel.INFO,
             )
             pythonizer = Pythonizer()
-            model_files = pythonizer.model_files(
-                self.configuration.base_configuration, self.models
+            model_files = pythonizer.model_files_generated_from_db(
+                self.configuration, self.models
             )
             self.log_function(
                 f"Received modelfiles {model_files} for models {self.models}",
@@ -358,6 +364,7 @@ class Project(QObject):
                         )
                     for layer in self.layers:
                         for field in layer.fields:
+
                             # if field.enum_domain:
                             if not field.ili_name:
                                 continue
@@ -380,6 +387,15 @@ class Project(QObject):
                                     f"Enum value: {enum_object.values}",
                                     LogLevel.INFO,
                                 )
+                                widget = "ValueMap"
+                                config = {"map": {}}
+                                config["map"] = [
+                                    {val: val} for val in enum_object.values
+                                ]
+                                setup = QgsEditorWidgetSetup(widget, config)
+
+                                field_idx = layer.layer.fields().indexOf(field.name)
+                                layer.layer.setEditorWidgetSetup(field_idx, setup)
         for layer in self.layers:
             if layer.layer.type() == QgsMapLayer.LayerType.VectorLayer:
                 # even when a style will be loaded we create the form because not sure if the style contains form settngs

@@ -286,6 +286,12 @@ class DBConnector(QObject):
         """
         return {}
 
+    def get_model_content(self, model):
+        """
+        Returns content of the model
+        """
+        return {}
+
     def ili_version(self):
         """
         Returns the version of the ili2db application that was used to create the schema.
