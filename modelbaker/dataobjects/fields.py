@@ -36,17 +36,22 @@ class Field:
         self.default_value_expression = None
         self.enum_domain = None
         self.oid_domain = None
+        self.ili_name = None
 
     def dump(self) -> dict:
         definition = dict()
         if self.alias:
             definition["alias"] = self.alias
+        if self.ili_name:
+            definition["ili_name"] = self.ili_name
 
         return definition
 
     def load(self, definition: dict) -> None:
         if "alias" in definition:
             self.alias = definition["alias"]
+        if "ili_name" in definition:
+            self.ili_name = definition["ili_name"]
 
     def create(self, layer: Layer) -> None:
         field_idx = layer.layer.fields().indexOf(self.name)

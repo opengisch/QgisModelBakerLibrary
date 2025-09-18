@@ -1,0 +1,25 @@
+INTERLIS 2.3;
+
+/* Ortsplanung as national model */
+MODEL WheresTheAssoc_V1 (en) AT "https://modelbaker.ch" VERSION "2024-02-07" =
+
+  TOPIC Infrastruktur =
+    CLASS Item =
+		  Text : TEXT;
+    END Item;
+  END Infrastruktur;
+
+  TOPIC Unterhalt =
+    DEPENDS ON WheresTheAssoc_V1.Infrastruktur;
+
+    CLASS Instandsetzung =
+		  Text : TEXT;
+    END Instandsetzung;
+
+    ASSOCIATION InstandsetzungItemAssoc =
+      Item (EXTERNAL) -- {0..*} WheresTheAssoc_V1.Infrastruktur.Item;
+      Instandsetzung -- {0..*} Instandsetzung;
+    END InstandsetzungItemAssoc;
+
+  END Unterhalt;
+END WheresTheAssoc_V1.
