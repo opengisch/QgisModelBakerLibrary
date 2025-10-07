@@ -26,9 +26,18 @@ from qgis.testing import start_app, unittest
 
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
-from modelbaker.processing.ili2db_exporting import ExportingGPKGAlgorithm
-from modelbaker.processing.ili2db_importing import ImportingGPKGAlgorithm
-from modelbaker.processing.ili2db_validating import ValidatingGPKGAlgorithm
+from modelbaker.processing.ili2db_exporting import (
+    ExportingGPKGAlgorithm,
+    ExportingPGAlgorithm,
+)
+from modelbaker.processing.ili2db_importing import (
+    ImportingGPKGAlgorithm,
+    ImportingPGAlgorithm,
+)
+from modelbaker.processing.ili2db_validating import (
+    ValidatingGPKGAlgorithm,
+    ValidatingPGAlgorithm,
+)
 from tests.utils import iliimporter_config, testdata_path
 
 start_app()
@@ -63,7 +72,10 @@ class TestProcessingAlgorithms(unittest.TestCase):
         importer.configuration.inheritance = "smart2"
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
-        return importer.configuration.dbfile
+        if importer.run() == iliimporter.Importer.SUCCESS:
+            return importer.configuration.dbfile
+        else:
+            return None
 
     def pg_schema(self, basket_col):
         importer = iliimporter.Importer()
@@ -79,30 +91,61 @@ class TestProcessingAlgorithms(unittest.TestCase):
         importer.configuration.create_basket_col = basket_col
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
-        return importer.configuration.dbschema
+        if importer.run() == iliimporter.Importer.SUCCESS:
+            return importer.configuration.dbschema
+        else:
+            return None
 
-    def test_algs_gpkg_with_baskets(self):
-
+    def test_algs_gpkg(self):
+        conn_parameters_baskets = {}
+        conn_parameters_baskets["DBPATH"] = self.gpkg_file(True)
+        self._algs_with_baskets(
+            conn_parameters_baskets,
+            ImportingGPKGAlgorithm,
+            ValidatingGPKGAlgorithm,
+            ExportingGPKGAlgorithm,
+        )
         conn_parameters = {}
-        conn_parameters["DBPATH"] = self.gpkg_file(True)
+        conn_parameters["DBPATH"] = self.gpkg_file(False)
+        self._algs_without_baskets(
+            conn_parameters,
+            ImportingGPKGAlgorithm,
+            ValidatingGPKGAlgorithm,
+            ExportingGPKGAlgorithm,
+        )
 
-        # validate empty file without specific parameters
-        validation_parameters = {}
-        validation_parameters.update(conn_parameters)
-        alg = ValidatingGPKGAlgorithm()
-        alg.initAlgorithm()
-        context = QgsProcessingContext()
-        feedback = QgsProcessingFeedback()
-        output = alg.processAlgorithm(validation_parameters, context, feedback)
-        assert output["ISVALID"]
+    def test_algs_pg(self):
+        conn_parameters_baskets = self.iliimporter_pg_config_params()
+        conn_parameters_baskets["SCHEMA"] = self.pg_schema(True)
+        self._algs_with_baskets(
+            conn_parameters_baskets,
+            ImportingPGAlgorithm,
+            ValidatingPGAlgorithm,
+            ExportingPGAlgorithm,
+        )
+        conn_parameters = {}
+        conn_parameters["DBPATH"] = self.gpkg_file(False)
+        self._algs_without_baskets(
+            conn_parameters,
+            ImportingGPKGAlgorithm,
+            ValidatingGPKGAlgorithm,
+            ExportingGPKGAlgorithm,
+        )
 
+    def _algs_with_baskets(
+        self,
+        conn_parameters,
+        importing_algorithm,
+        validating_algorithm,
+        exporting_algorithm,
+    ):
         # import valid data now to a dataset called 'validdata'
         import_parameters = {
             "XTFFILEPATH": testdata_path("xtf/test_roads_simple.xtf"),
             "DATASET": "validdata",
         }
         import_parameters.update(conn_parameters)
-        alg = ImportingGPKGAlgorithm()
+        alg = importing_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
@@ -115,7 +158,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
             "DATASET": "invaliddata",
         }
         import_parameters.update(conn_parameters)
-        alg = ImportingGPKGAlgorithm()
+        alg = importing_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
@@ -131,7 +174,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
             "DISABLEVALIDATION": True,
         }
         import_parameters.update(conn_parameters)
-        alg = ImportingGPKGAlgorithm()
+        alg = importing_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
@@ -141,7 +184,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         # validate without specific parameters
         validation_parameters = {}
         validation_parameters.update(conn_parameters)
-        alg = ValidatingGPKGAlgorithm()
+        alg = validating_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
@@ -150,9 +193,9 @@ class TestProcessingAlgorithms(unittest.TestCase):
         assert not output["ISVALID"]
 
         # validate again only the dataset 'validdata'
-        validation_parameters = {"FILTER": "Dataset", "FILTERS": "validdata"}
+        validation_parameters = {"FILTERMODE": "Datasets", "FILTER": "validdata"}
         validation_parameters.update(conn_parameters)
-        alg = ValidatingGPKGAlgorithm()
+        alg = validating_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
@@ -160,12 +203,12 @@ class TestProcessingAlgorithms(unittest.TestCase):
         assert output["ISVALID"]
 
         valid_targetfile = os.path.join(self.basetestpath, "valid_export.xtf")
-        invalid_targetfile = os.path.join(self.basetestpath, "valid_export.xtf")
+        invalid_targetfile = os.path.join(self.basetestpath, "invalid_export.xtf")
 
         # let's export without specific parameters
         export_parameters = {"XTFFILEPATH": valid_targetfile}
         export_parameters.update(conn_parameters)
-        alg = ExportingGPKGAlgorithm()
+        alg = exporting_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
@@ -176,26 +219,25 @@ class TestProcessingAlgorithms(unittest.TestCase):
         # let's export again only the dataset 'validdata'
         export_parameters = {
             "XTFFILEPATH": valid_targetfile,
-            "FILTER": "Dataset",
-            "FILTERS": "validdata",
+            "FILTERMODE": "Datasets",
+            "FILTER": "validdata",
         }
         export_parameters.update(conn_parameters)
-        alg = ExportingGPKGAlgorithm()
+        alg = exporting_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
         output = alg.processAlgorithm(export_parameters, context, feedback)
-        # fails
-        assert not output["ISVALID"]
+        assert output["ISVALID"]
 
         # let's export the invalid dataset 'invaliddata'
         export_parameters = {
             "XTFFILEPATH": invalid_targetfile,
-            "FILTER": "Dataset",
-            "FILTERS": "invaliddata",
+            "FILTERMODE": "Datasets",
+            "FILTER": "invaliddata",
         }
         export_parameters.update(conn_parameters)
-        alg = ExportingGPKGAlgorithm()
+        alg = exporting_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
@@ -206,12 +248,12 @@ class TestProcessingAlgorithms(unittest.TestCase):
         # let's export the invalid dataset 'invaliddata' and disable validation
         export_parameters = {
             "XTFFILEPATH": invalid_targetfile,
-            "FILTER": "Dataset",
-            "FILTERS": "invaliddata",
+            "FILTERMODE": "Datasets",
+            "FILTER": "invaliddata",
             "DISABLEVALIDATION": True,
         }
         export_parameters.update(conn_parameters)
-        alg = ExportingGPKGAlgorithm()
+        alg = exporting_algorithm()
         alg.initAlgorithm()
         context = QgsProcessingContext()
         feedback = QgsProcessingFeedback()
@@ -221,9 +263,98 @@ class TestProcessingAlgorithms(unittest.TestCase):
         assert os.path.isfile(valid_targetfile)
         assert os.path.isfile(invalid_targetfile)
 
-    def test_validating_alg_pg(self):
-        parameters = self.iliimporter_pg_config_params()
-        parameters["SCHEMA"] = self.pg_schema(False)
+    def _algs_without_baskets(
+        self,
+        conn_parameters,
+        importing_algorithm,
+        validating_algorithm,
+        exporting_algorithm,
+    ):
+        # import valid data now
+        import_parameters = {"XTFFILEPATH": testdata_path("xtf/test_roads_simple.xtf")}
+        import_parameters.update(conn_parameters)
+        alg = importing_algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(import_parameters, context, feedback)
+        assert output["ISVALID"]
+
+        # validate without specific parameters
+        validation_parameters = {}
+        validation_parameters.update(conn_parameters)
+        alg = validating_algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(validation_parameters, context, feedback)
+        assert output["ISVALID"]
+
+        # import invalid data now
+        import_parameters = {
+            "XTFFILEPATH": testdata_path("xtf/test_roads_simple_invalid.xtf")
+        }
+        import_parameters.update(conn_parameters)
+        alg = importing_algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(import_parameters, context, feedback)
+        # fails
+        assert not output["ISVALID"]
+
+        # import invalid data again
+        # this time we disable the validation
+        import_parameters = {
+            "XTFFILEPATH": testdata_path("xtf/test_roads_simple_invalid.xtf"),
+            "DISABLEVALIDATION": True,
+        }
+        import_parameters.update(conn_parameters)
+        alg = importing_algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(import_parameters, context, feedback)
+        assert output["ISVALID"]
+
+        # validate without specific parameters
+        validation_parameters = {}
+        validation_parameters.update(conn_parameters)
+        alg = validating_algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(validation_parameters, context, feedback)
+        # fails
+        assert not output["ISVALID"]
+
+        invalid_targetfile = os.path.join(self.basetestpath, "invalid_export.xtf")
+
+        # let's export without specific parameters
+        export_parameters = {"XTFFILEPATH": invalid_targetfile}
+        export_parameters.update(conn_parameters)
+        alg = exporting_algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(export_parameters, context, feedback)
+        # fails
+        assert not output["ISVALID"]
+
+        # let's export and disable validation
+        export_parameters = {
+            "XTFFILEPATH": invalid_targetfile,
+            "DISABLEVALIDATION": True,
+        }
+        export_parameters.update(conn_parameters)
+        alg = exporting_algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(export_parameters, context, feedback)
+        assert output["ISVALID"]
+
+        assert os.path.isfile(invalid_targetfile)
 
     def print_info(self, text):
         logging.info(text)

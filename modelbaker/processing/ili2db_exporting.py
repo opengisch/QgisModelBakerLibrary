@@ -165,7 +165,7 @@ class ProcessExporter(QObject):
                 feedback.pushInfo(self.tr("... export succeeded"))
             else:
                 feedback.pushWarning(self.tr("... export failed"))
-            isvalid = bool(result == iliexporter.Validator.SUCCESS)
+            isvalid = bool(result == iliexporter.Exporter.SUCCESS)
         except JavaNotFoundError as e:
             raise QgsProcessingException(
                 self.tr("Java not found error:").format(e.error_string)
@@ -286,15 +286,33 @@ class ExportingPGAlgorithm(Ili2pgAlgorithm):
 
     def shortDescription(self) -> str:
         """
-        Returns a short description string for the algorithm.
+        Returns the tooltip text when hovering the algorithm
         """
-        return self.tr("Exports data from a PostgreSQL schema with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Exports data from PostgreSQL schema with ili2pg.</p>
+            <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
+            <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
+            <p>Additionally, you can define an export model to specify the format in which you want to export the data (e.g. the base model of your extended model).</p>
+        </body></html>
+        """
+        )
 
     def shortHelpString(self) -> str:
         """
-        Returns a short helper string for the algorithm.
+        Returns the help text on the right.
         """
-        return self.tr("Exports data from a PostgreSQL schema with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Exports data from PostgreSQL schema with ili2pg.</p>
+            <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
+            <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
+            <p>Additionally, you can define an export model to specify the format in which you want to export the data (e.g. the base model of your extended model).</p>
+        </body></html>
+        """
+        )
 
     def initAlgorithm(self, config: Optional[dict[str, Any]] = None):
         self.exporter.initParameters()
@@ -365,15 +383,33 @@ class ExportingGPKGAlgorithm(Ili2gpkgAlgorithm):
 
     def shortDescription(self) -> str:
         """
-        Returns a short description string for the algorithm.
+        Returns the tooltip text when hovering the algorithm
         """
-        return self.tr("Exports data from a GeoPackage file with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Exports data from GeoPackage file with ili2gpkg.</p>
+            <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
+            <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
+            <p>Additionally, you can define an export model to specify the format in which you want to export the data (e.g. the base model of your extended model).</p>
+        </body></html>
+        """
+        )
 
     def shortHelpString(self) -> str:
         """
-        Returns a short helper string for the algorithm.
+        Returns the help text on the right.
         """
-        return self.tr("Exports data from a GeoPackage file with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Exports data from GeoPackage file with ili2gpkg.</p>
+            <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
+            <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
+            <p>Additionally, you can define an export model to specify the format in which you want to export the data (e.g. the base model of your extended model).</p>
+        </body></html>
+        """
+        )
 
     def initAlgorithm(self, config: Optional[dict[str, Any]] = None):
         self.exporter.initParameters()

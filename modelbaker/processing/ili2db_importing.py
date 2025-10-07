@@ -144,7 +144,7 @@ class ProcessImporter(QObject):
                 feedback.pushInfo(self.tr("... import succeeded"))
             else:
                 feedback.pushWarning(self.tr("... import failed"))
-            isvalid = bool(result == iliimporter.Validator.SUCCESS)
+            isvalid = bool(result == iliimporter.Importer.SUCCESS)
         except JavaNotFoundError as e:
             raise QgsProcessingException(
                 self.tr("Java not found error:").format(e.error_string)
@@ -173,6 +173,9 @@ class ProcessImporter(QObject):
         configuration.with_importtid = self._get_tid_handling(configuration)
 
         # get settings from the input
+        configuration.dataset = self.parent.parameterAsString(
+            parameters, self.DATASET, context
+        )
         configuration.disable_validation = self.parent.parameterAsBool(
             parameters, self.DISABLEVALIDATION, context
         )
@@ -262,15 +265,35 @@ class ImportingPGAlgorithm(Ili2pgAlgorithm):
 
     def shortDescription(self) -> str:
         """
-        Returns a short description string for the algorithm.
+        Returns the tooltip text when hovering the algorithm
         """
-        return self.tr("Imports data to a PostgreSQL schema with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Imports data to PostgreSQL schema with ili2pg.</p>
+            <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
+            <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
+            <p>Additionally, you need to define a dataset name for the import on such databases.</p>
+            <p>On a database where no basket column has been created, the command will be <code>--import</code> (and <code>--deleteData</code> when you choose to delete data previously).</p>
+        </body></html>
+        """
+        )
 
     def shortHelpString(self) -> str:
         """
-        Returns a short helper string for the algorithm.
+        Returns the help text on the right.
         """
-        return self.tr("Imports data to a PostgreSQL schema with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Imports data to PostgreSQL schema with ili2pg.</p>
+            <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
+            <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
+            <p>Additionally, you need to define a dataset name for the import on such databases.</p>
+            <p>On a database where no basket column has been created, the command will be <code>--import</code> (and <code>--deleteData</code> when you choose to delete data previously).</p>
+        </body></html>
+        """
+        )
 
     def initAlgorithm(self, config: Optional[dict[str, Any]] = None):
         self.importer.initParameters()
@@ -285,7 +308,7 @@ class ImportingPGAlgorithm(Ili2pgAlgorithm):
         Here is where the processing itself takes place.
         """
         output_map = {}
-        configuration = self.exporter.get_configuration_from_input(
+        configuration = self.importer.get_configuration_from_input(
             parameters, context, DbIliMode.pg
         )
         if not configuration:
@@ -341,15 +364,35 @@ class ImportingGPKGAlgorithm(Ili2gpkgAlgorithm):
 
     def shortDescription(self) -> str:
         """
-        Returns a short description string for the algorithm.
+        Returns the tooltip text when hovering the algorithm
         """
-        return self.tr("Imports data to a GeoPackage file with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Imports data to GeoPackage file with ili2gpkg.</p>
+            <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
+            <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
+            <p>Additionally, you need to define a dataset name for the import on such databases.</p>
+            <p>On a database where no basket column has been created, the command will be <code>--import</code> (and <code>--deleteData</code> when you choose to delete data previously).</p>
+        </body></html>
+        """
+        )
 
     def shortHelpString(self) -> str:
         """
-        Returns a short helper string for the algorithm.
+        Returns the help text on the right.
         """
-        return self.tr("Imports data to a GeoPackage file with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Imports data to GeoPackage file with ili2gpkg.</p>
+            <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
+            <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
+            <p>Additionally, you need to define a dataset name for the import on such databases.</p>
+            <p>On a database where no basket column has been created, the command will be <code>--import</code> (and <code>--deleteData</code> when you choose to delete data previously).</p>
+        </body></html>
+        """
+        )
 
     def initAlgorithm(self, config: Optional[dict[str, Any]] = None):
         self.importer.initParameters()
