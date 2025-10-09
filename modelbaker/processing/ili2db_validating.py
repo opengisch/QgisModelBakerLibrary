@@ -316,15 +316,37 @@ class ValidatingPGAlgorithm(Ili2pgAlgorithm):
 
     def shortDescription(self) -> str:
         """
-        Returns a short description string for the algorithm.
+        Returns the tooltip text when hovering the algorithm
         """
-        return self.tr("Validates data in a PostgreSQL schema with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Validates data in PostgreSQL schema with ili2pg.</p>
+            <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin Validator.</p>
+            <p>General Model Baker settings like custom model directories and db parameters are concerned.</p>
+            <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
+            <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
+            <p>Skip Geometry Errors ignores geometry errors (<code>--skipGeometryErrors</code>) and AREA topology validation (<code>--disableAreaValidation</code>) and the verbose mode provides you more information in the log output.</p>
+            <p>Additionally, you can define an export model to specify the format in which you want to validate the data (e.g. the base model of your extended model). Also You can add a validator config file to control the validation.</p>
+        </body></html>
+        """
+        )
 
     def shortHelpString(self) -> str:
         """
-        Returns a short helper string for the algorithm.
+        Returns the help text on the right.
         """
-        return self.tr("Validates data in a PostgreSQL schema with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Validates data in PostgreSQL schema with ili2pg.</p>
+            <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin Validator.</p>
+            <p>General Model Baker settings like custom model directories and db parameters are concerned.</p>
+            <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
+            <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
+            <p>Skip Geometry Errors ignores geometry errors (<code>--skipGeometryErrors</code>) and AREA topology validation (<code>--disableAreaValidation</code>) and the verbose mode provides you more information in the log output.</p>
+            <p>Additionally, you can define an export model to specify the format in which you want to validate the data (e.g. the base model of your extended model). Also You can add a validator config file to control the validation.</p>
+        </body></html>
+        """
+        )
 
     def initAlgorithm(self, config: Optional[dict[str, Any]] = None):
         self.validator.initParameters()
@@ -394,15 +416,37 @@ class ValidatingGPKGAlgorithm(Ili2gpkgAlgorithm):
 
     def shortDescription(self) -> str:
         """
-        Returns a short description string for the algorithm.
+        Returns the tooltip text when hovering the algorithm
         """
-        return self.tr("Validates data in a GeoPackage file with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Validates data in GeoPackage file with ili2gpkg.</p>
+            <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin Validator.</p>
+            <p>General Model Baker settings like custom model directories and db parameters are concerned.</p>
+            <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
+            <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
+            <p>Skip Geometry Errors ignores geometry errors (<code>--skipGeometryErrors</code>) and AREA topology validation (<code>--disableAreaValidation</code>) and the verbose mode provides you more information in the log output.</p>
+            <p>Additionally, you can define an export model to specify the format in which you want to validate the data (e.g. the base model of your extended model). Also You can add a validator config file to control the validation.</p>
+        </body></html>
+        """
+        )
 
     def shortHelpString(self) -> str:
         """
-        Returns a short helper string for the algorithm.
+        Returns the help text on the right.
         """
-        return self.tr("Validates data in a GeoPackage file with ili2db.")
+        return self.tr(
+            """<html><head/><body>
+            <p>Validates data in GeoPackage file with ili2gpkg.</p>
+            <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin Validator.</p>
+            <p>General Model Baker settings like custom model directories and db parameters are concerned.</p>
+            <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
+            <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
+            <p>Skip Geometry Errors ignores geometry errors (<code>--skipGeometryErrors</code>) and AREA topology validation (<code>--disableAreaValidation</code>) and the verbose mode provides you more information in the log output.</p>
+            <p>Additionally, you can define an export model to specify the format in which you want to validate the data (e.g. the base model of your extended model). Also You can add a validator config file to control the validation.</p>
+        </body></html>
+        """
+        )
 
     def initAlgorithm(self, config: Optional[dict[str, Any]] = None):
         self.validator.initParameters()

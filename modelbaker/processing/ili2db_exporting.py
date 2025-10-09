@@ -292,6 +292,7 @@ class ExportingPGAlgorithm(Ili2pgAlgorithm):
             """<html><head/><body>
             <p>Exports data from PostgreSQL schema with ili2pg.</p>
             <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>General Model Baker settings like custom model directories or db parameters are concerned.</p>
             <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
             <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
             <p>Additionally, you can define an export model to specify the format in which you want to export the data (e.g. the base model of your extended model).</p>
@@ -307,6 +308,7 @@ class ExportingPGAlgorithm(Ili2pgAlgorithm):
             """<html><head/><body>
             <p>Exports data from PostgreSQL schema with ili2pg.</p>
             <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>General Model Baker settings like custom model directories or db parameters are concerned.</p>
             <p>The parameter passed to ili2db by default is <code>--exportTid</code>.</p>
             <p>In a database where you have created basket columns, you will have the possibility to filter by baskets or datasets.</p>
             <p>Additionally, you can define an export model to specify the format in which you want to export the data (e.g. the base model of your extended model).</p>

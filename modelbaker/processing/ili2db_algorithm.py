@@ -3,10 +3,12 @@ from abc import abstractmethod
 
 from qgis.core import (
     QgsProcessingAlgorithm,
+    QgsProcessingOutputBoolean,
     QgsProcessingOutputFile,
     QgsProcessingOutputNumber,
     QgsProcessingOutputString,
     QgsProcessingParameterAuthConfig,
+    QgsProcessingParameterBoolean,
     QgsProcessingParameterEnum,
     QgsProcessingParameterFile,
     QgsProcessingParameterNumber,
@@ -76,19 +78,11 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
     PASSWORD = "PASSWORD"
     SCHEMA = "SCHEMA"
     SSLMODE = "SSLMODE"
+    USESUPERUSER = "USESUPERUSER"
     AUTHCFG = "AUTHCFG"
 
     def __init__(self):
         super().__init__()
-
-    def group(self):
-        return self.tr("ili2db")
-
-    def groupId(self):
-        return "ili2db"
-
-    def icon(self):
-        return QIcon(os.path.join(os.path.dirname(__file__), "../images/interlis.png"))
 
     def connection_input_params(self):
         params = []
@@ -171,6 +165,16 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
         password_param.setHelp(self.tr("The password of the user."))
         params.append(password_param)
 
+        usesuperuser_param = QgsProcessingParameterBoolean(
+            self.USESUPERUSER,
+            self.tr("Use superuser login from the settings"),
+            defaultValue=False,
+        )
+        usesuperuser_param.setHelp(
+            self.tr("Excecute the task with the super user login from the settings")
+        )
+        params.append(usesuperuser_param)
+
         authcfg_param = QgsProcessingParameterAuthConfig(
             self.AUTHCFG,
             self.tr("Authentification"),
@@ -199,9 +203,11 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
         params.append(QgsProcessingOutputString(self.SCHEMA, self.tr("Schema")))
         params.append(QgsProcessingOutputString(self.SSLMODE, self.tr("SSL Mode")))
         params.append(
+            QgsProcessingOutputBoolean(self.USESUPERUSER, self.tr("Use Superuser"))
+        )
+        params.append(
             QgsProcessingOutputString(self.AUTHCFG, self.tr("Authentication"))
         )
-
         return params
 
     def get_db_configuration_from_input(self, parameters, context, configuration):
@@ -241,6 +247,9 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
             parameters, self.SCHEMA, context
         )
         configuration.sslmode = self.parameterAsEnum(parameters, self.SSLMODE, context)
+        configuration.db_use_super_login = self.parameterAsBoolean(
+            parameters, self.USESUPERUSER, context
+        )
         valid = bool(
             configuration.dbhost and configuration.database and configuration.dbschema
         )
@@ -260,6 +269,7 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
             self.PASSWORD: configuration.dbpwd,
             self.SCHEMA: configuration.dbschema,
             self.SSLMODE: configuration.sslmode,
+            self.USESUPERUSER: configuration.db_use_super_login,
             self.AUTHCFG: configuration.dbauthid,
         }
         return output_map
@@ -271,15 +281,6 @@ class Ili2gpkgAlgorithm(Ili2dbAlgorithm):
 
     def __init__(self):
         super().__init__()
-
-    def group(self):
-        return self.tr("ili2db")
-
-    def groupId(self):
-        return "ili2db"
-
-    def icon(self):
-        return QIcon(os.path.join(os.path.dirname(__file__), "../images/interlis.png"))
 
     def connection_input_params(self):
         params = []

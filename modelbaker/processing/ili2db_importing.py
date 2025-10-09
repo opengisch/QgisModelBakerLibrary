@@ -271,6 +271,7 @@ class ImportingPGAlgorithm(Ili2pgAlgorithm):
             """<html><head/><body>
             <p>Imports data to PostgreSQL schema with ili2pg.</p>
             <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>General Model Baker settings like custom model directories or db parameters are concerned.</p>
             <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
             <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
             <p>Additionally, you need to define a dataset name for the import on such databases.</p>
@@ -287,6 +288,7 @@ class ImportingPGAlgorithm(Ili2pgAlgorithm):
             """<html><head/><body>
             <p>Imports data to PostgreSQL schema with ili2pg.</p>
             <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>General Model Baker settings like custom model directories or db parameters are concerned.</p>
             <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
             <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
             <p>Additionally, you need to define a dataset name for the import on such databases.</p>
@@ -370,6 +372,7 @@ class ImportingGPKGAlgorithm(Ili2gpkgAlgorithm):
             """<html><head/><body>
             <p>Imports data to GeoPackage file with ili2gpkg.</p>
             <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>General Model Baker settings like custom model directories concerned.</p>
             <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
             <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
             <p>Additionally, you need to define a dataset name for the import on such databases.</p>
@@ -386,6 +389,7 @@ class ImportingGPKGAlgorithm(Ili2gpkgAlgorithm):
             """<html><head/><body>
             <p>Imports data to GeoPackage file with ili2gpkg.</p>
             <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin.</p>
+            <p>General Model Baker settings like custom model directories concerned.</p>
             <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
             <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
             <p>Additionally, you need to define a dataset name for the import on such databases.</p>
