@@ -263,6 +263,12 @@ class TestTranslations(unittest.TestCase):
         # ... and the language of the translated model only
         assert {'fr'} == set(db_connector.get_available_languages([],["PlansDAffectation_V1_2"]))
 
+        # --- and nonsense use case for the validation, get only of an english model
+        assert {'en'} == set(db_connector.get_available_languages([],["AdministrativeUnits_V1"]))
+
+        # ... as well as ignoring the translated models and alowing it again and the english one
+        assert {'de','en'} == set(db_connector.get_available_languages(["PlansDAffectation_V1_2"]))
+
     def test_translated_db_objects_pg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
@@ -295,6 +301,12 @@ class TestTranslations(unittest.TestCase):
         # ... and the language of the translated model only
         assert {'fr'} == set(db_connector.get_available_languages([],["PlansDAffectation_V1_2"]))
 
+        # --- and nonsense use case for the validation, get only of an english model
+        assert {'en'} == set(db_connector.get_available_languages([],["AdministrativeUnits_V1"]))
+        
+        # ... as well as ignoring the translated models and alowing it again and the english one
+        assert {'de','en'} == set(db_connector.get_available_languages(["PlansDAffectation_V1_2"]))
+        
     def print_info(self, text):
         logging.info(text)
 

@@ -1290,7 +1290,16 @@ WHERE TABLE_SCHEMA='{schema}'
                         [f"'{modelname}'" for modelname in relevant_models]
                     ),
                 )
-
+            black_list_restriction = ''
+            if len(irrelevant_models) > 0:
+                black_list_restriction = """
+                AND
+                ilielement NOT IN ({irrelevant_model_list})
+                """.format(
+                    irrelevant_model_list=",".join(
+                        [f"'{modelname}'" for modelname in irrelevant_models]
+                    ),
+                )
             cur = self.conn.cursor()
             cur.execute(
                 """
@@ -1299,15 +1308,12 @@ WHERE TABLE_SCHEMA='{schema}'
                 FROM {schema}.t_ili2db_meta_attrs
                 WHERE
                 attr_name = 'ili2db.ili.lang'
-                AND
-                ilielement NOT IN ({irrelevant_model_list})
+                {black_list_restriction}
                 {white_list_restriction}
                 """
             ).format(
                 schema=self.schema,
-                irrelevant_model_list=",".join(
-                    [f"'{modelname}'" for modelname in irrelevant_models]
-                ),
+                black_list_restriction=black_list_restriction,
                 white_list_restriction=white_list_restriction,
             )
             return [row.attr_value for row in cur.fetchall()]

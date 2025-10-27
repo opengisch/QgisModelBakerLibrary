@@ -1295,7 +1295,16 @@ class GPKGConnector(DBConnector):
                     [f"'{modelname}'" for modelname in relevant_models]
                 ),
             )
-
+        black_list_restriction = ''
+        if len(irrelevant_models) > 0:
+            black_list_restriction = """
+            AND
+            ilielement NOT IN ({irrelevant_model_list})
+            """.format(
+                irrelevant_model_list=",".join(
+                    [f"'{modelname}'" for modelname in irrelevant_models]
+                ),
+            )
         cursor = self.conn.cursor()
         cursor.execute(
             """SELECT DISTINCT
@@ -1303,15 +1312,12 @@ class GPKGConnector(DBConnector):
             FROM "{t_ili2db_meta_attrs}"
             WHERE 
             attr_name = 'ili2db.ili.lang'
-            AND 
-            ilielement NOT IN ({irrelevant_model_list})
+            {black_list_restriction}
             {white_list_restriction}
             ;
             """.format(
                 t_ili2db_meta_attrs=GPKG_METAATTRS_TABLE,
-                irrelevant_model_list=",".join(
-                    [f"'{modelname}'" for modelname in irrelevant_models]
-                ),
+                black_list_restriction=black_list_restriction,
                 white_list_restriction=white_list_restriction,
             )
         )
