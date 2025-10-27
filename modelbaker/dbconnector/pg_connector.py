@@ -1397,18 +1397,18 @@ class PGConnector(DBConnector):
         return self._table_exists(PG_NLS_TABLE) and self._lang != "", self._lang
 
     def get_available_languages(self, irrelevant_models=[]):
-        if self.schema and self._table_exists(PG_NLS_TABLE):
+        if self.schema and self._table_exists(PG_METAATTRS_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 sql.SQL(
                     """
                     SELECT DISTINCT
-                    lang
-                    FROM {schema}.t_ili2db_nls
+                    attr_value
+                    FROM {schema}.t_ili2db_meta_attrs
                     WHERE
-                    lang IS NOT NULL
+                    attr_name = 'ili2db.ili.lang'
                     AND
-                    split_part(iliElement,'.',1) NOT IN ({model_list})
+                    ilielement NOT IN ({model_list})
                     """
                 ).format(
                     schema=sql.Identifier(self.schema),

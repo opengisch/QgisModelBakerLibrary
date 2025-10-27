@@ -1261,17 +1261,17 @@ WHERE TABLE_SCHEMA='{schema}'
         return self._table_exists(NLS_TABLE) and self._lang != "", self._lang
 
     def get_available_languages(self, irrelevant_models=[]):
-        if self.schema and self._table_exists(NLS_TABLE):
+        if self.schema and self._table_exists(METAATTRS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
                 """
                 SELECT DISTINCT
-                lang
-                FROM {schema}.t_ili2db_nls
+                attr_value
+                FROM {schema}.t_ili2db_meta_attrs
                 WHERE
-                lang IS NOT NULL
+                attr_name = 'ili2db.ili.lang'
                 AND
-                left(iliElement, charindex('.', iliElement)-1) NOT IN ({model_list})
+                ilielement NOT IN ({model_list})
                 """
             ).format(
                 schema=self.schema,

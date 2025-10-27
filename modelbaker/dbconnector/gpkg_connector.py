@@ -1261,21 +1261,21 @@ class GPKGConnector(DBConnector):
         return self._table_exists(GPKG_NLS_TABLE) and self._lang != "", self._lang
 
     def get_available_languages(self, irrelevant_models=[]):
-        if not self._table_exists(GPKG_NLS_TABLE):
+        if not self._table_exists(GPKG_METAATTRS_TABLE):
             return []
 
         cursor = self.conn.cursor()
         cursor.execute(
             """SELECT DISTINCT
-            lang
-            FROM "{t_ili2db_nls}"
-            WHERE
-            lang IS NOT NULL
-            AND
-            substr(iliElement, 0, instr(iliElement, '.')) NOT IN ({model_list})
+            attr_value
+            FROM "{t_ili2db_meta_attrs}"
+            WHERE 
+            attr_name = 'ili2db.ili.lang'
+            AND 
+            ilielement NOT IN ({model_list})
             ;
             """.format(
-                t_ili2db_nls=GPKG_NLS_TABLE,
+                t_ili2db_meta_attrs=GPKG_METAATTRS_TABLE,
                 model_list=",".join(
                     [f"'{modelname}'" for modelname in irrelevant_models]
                 ),
