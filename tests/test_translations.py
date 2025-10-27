@@ -27,6 +27,7 @@ import tempfile
 from qgis.core import QgsProject
 from qgis.testing import start_app, unittest
 
+import modelbaker.utils.db_utils as db_utils
 from modelbaker.dataobjects.project import Project
 from modelbaker.db_factory.gpkg_command_config_manager import GpkgCommandConfigManager
 from modelbaker.generator.generator import Generator
@@ -229,6 +230,70 @@ class TestTranslations(unittest.TestCase):
             rels[0].name()
             == "Geometrie_Document_(Geometrie)_AffectationPrimaire_SurfaceDeZones_(t_id)"
         )
+
+    def test_available_langs_gpkg(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilimodels = "PlansDAffectation_V1_2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath, "tmp_translated_gpkg.gpkg"
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        db_connector = db_utils.get_db_connector(importer.configuration)
+
+        # Translation handling is active
+        assert db_connector.get_translation_handling()
+
+        # Get the translated models 
+        assert {"PlansDAffectation_V1_2"} == set(db_connector.get_translation_models())
+
+        # Get all languages
+        assert {'en','de','fr'} == set(db_connector.get_available_languages())
+
+        # ... without irrelevant models 
+        irrelevants = ["AdministrativeUnits_V1","AdministrativeUnitsCH_V1","Dictionaries_V1","DictionariesCH_V1"]
+        assert {'de','fr'} == set(db_connector.get_available_languages(irrelevants))
+
+        # ... and the language of the translated model only
+        assert {'fr'} == set(db_connector.get_available_languages([],["PlansDAffectation_V1_2"]))
+
+    def test_translated_db_objects_pg(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilimodels = "PlansDAffectation_V1_2"
+        importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        db_connector = db_utils.get_db_connector(importer.configuration)
+
+        # Translation handling is active
+        assert db_connector.get_translation_handling()
+
+        # Get the translated models 
+        assert {"PlansDAffectation_V1_2"} == set(db_connector.get_translation_models())
+
+        # Get all languages
+        assert {'en','de','fr'} == set(db_connector.get_available_languages())
+
+        # ... without irrelevant models 
+        irrelevants = ["AdministrativeUnits_V1","AdministrativeUnitsCH_V1","Dictionaries_V1","DictionariesCH_V1"]
+        assert {'de','fr'} == set(db_connector.get_available_languages(irrelevants))
+
+        # ... and the language of the translated model only
+        assert {'fr'} == set(db_connector.get_available_languages([],["PlansDAffectation_V1_2"]))
 
     def print_info(self, text):
         logging.info(text)

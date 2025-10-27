@@ -1396,8 +1396,40 @@ class PGConnector(DBConnector):
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(PG_NLS_TABLE) and self._lang != "", self._lang
 
-    def get_available_languages(self, irrelevant_models=[]):
+    def get_translation_models(self):
         if self.schema and self._table_exists(PG_METAATTRS_TABLE):
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                sql.SQL(
+                    """
+                    SELECT DISTINCT
+                    ilielement
+                    FROM {schema}.t_ili2db_meta_attrs
+                    WHERE 
+                    attr_name = 'ili2db.ili.translationOf'
+                    """
+                ).format(
+                    schema=sql.Identifier(self.schema),
+                )
+            )
+            return [row["ilielement"] for row in cur.fetchall()]
+        return []
+
+
+    def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
+        if self.schema and self._table_exists(PG_METAATTRS_TABLE):
+            
+            white_list_restriction = ''
+            if len(relevant_models) > 0:
+                white_list_restriction = """
+                AND
+                ilielement IN ({relevant_model_list})
+                """.format(
+                    relevant_model_list=",".join(
+                        [f"'{modelname}'" for modelname in relevant_models]
+                    ),
+                )
+
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 sql.SQL(
@@ -1408,17 +1440,18 @@ class PGConnector(DBConnector):
                     WHERE
                     attr_name = 'ili2db.ili.lang'
                     AND
-                    ilielement NOT IN ({model_list})
+                    ilielement NOT IN ({irrelevant_model_list})
+                    {white_list_restriction}
                     """
                 ).format(
                     schema=sql.Identifier(self.schema),
-                    model_list=sql.SQL(", ").join(
+                    irrelevant_model_list=sql.SQL(", ").join(
                         sql.Placeholder() * len(irrelevant_models)
                     ),
-                ),
-                irrelevant_models,
+                    white_list_restriction=white_list_restriction,
+                )
             )
-            return [row["lang"] for row in cur.fetchall()]
+            return [row["attr_value"] for row in cur.fetchall()]
         return []
 
     def get_domain_dispnames(self, tablename):

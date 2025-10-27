@@ -1260,9 +1260,41 @@ class GPKGConnector(DBConnector):
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(GPKG_NLS_TABLE) and self._lang != "", self._lang
 
-    def get_available_languages(self, irrelevant_models=[]):
+    def get_translation_models(self):
         if not self._table_exists(GPKG_METAATTRS_TABLE):
             return []
+
+        cursor = self.conn.cursor()
+        cursor.execute(
+            """
+            SELECT DISTINCT
+            ilielement
+            FROM "{t_ili2db_meta_attrs}"
+            WHERE 
+            attr_name = 'ili2db.ili.translationOf'
+            ;
+            """.format(
+                t_ili2db_meta_attrs=GPKG_METAATTRS_TABLE,
+            )
+        )
+        records = cursor.fetchall()
+        cursor.close()
+        return [record["ilielement"] for record in records]
+
+    def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
+        if not self._table_exists(GPKG_METAATTRS_TABLE):
+            return []
+
+        white_list_restriction = ''
+        if len(relevant_models) > 0:
+            white_list_restriction = """
+            AND
+            ilielement IN ({relevant_model_list})
+            """.format(
+                relevant_model_list=",".join(
+                    [f"'{modelname}'" for modelname in relevant_models]
+                ),
+            )
 
         cursor = self.conn.cursor()
         cursor.execute(
@@ -1272,18 +1304,20 @@ class GPKGConnector(DBConnector):
             WHERE 
             attr_name = 'ili2db.ili.lang'
             AND 
-            ilielement NOT IN ({model_list})
+            ilielement NOT IN ({irrelevant_model_list})
+            {white_list_restriction}
             ;
             """.format(
                 t_ili2db_meta_attrs=GPKG_METAATTRS_TABLE,
-                model_list=",".join(
+                irrelevant_model_list=",".join(
                     [f"'{modelname}'" for modelname in irrelevant_models]
                 ),
+                white_list_restriction=white_list_restriction,
             )
         )
         records = cursor.fetchall()
         cursor.close()
-        return [record["lang"] for record in records]
+        return [record["attr_value"] for record in records]
 
     def get_domain_dispnames(self, tablename):
         if (
