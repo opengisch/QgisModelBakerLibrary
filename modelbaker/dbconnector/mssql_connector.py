@@ -1260,25 +1260,61 @@ WHERE TABLE_SCHEMA='{schema}'
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(NLS_TABLE) and self._lang != "", self._lang
 
-    def get_available_languages(self, irrelevant_models=[]):
-        if self.schema and self._table_exists(NLS_TABLE):
+    def get_translation_models(self):
+        if self.schema and self._table_exists(METAATTRS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
                 """
                 SELECT DISTINCT
-                lang
-                FROM {schema}.t_ili2db_nls
-                WHERE
-                lang IS NOT NULL
-                AND
-                left(iliElement, charindex('.', iliElement)-1) NOT IN ({model_list})
+                ilielement
+                FROM {schema}.t_ili2db_meta_attrs
+                WHERE 
+                attr_name = 'ili2db.ili.translationOf'
                 """
             ).format(
                 schema=self.schema,
-                model_list=",".join(
-                    [f"'{modelname}'" for modelname in irrelevant_models]
-                ),
             )
+            return [row.ilielement for row in cur.fetchall()]
+        return []
 
-            return [row.lang for row in cur.fetchall()]
+    def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
+        if self.schema and self._table_exists(METAATTRS_TABLE):
+
+            white_list_restriction = ''
+            if len(relevant_models) > 0:
+                white_list_restriction = """
+                AND
+                ilielement IN ({relevant_model_list})
+                """.format(
+                    relevant_model_list=",".join(
+                        [f"'{modelname}'" for modelname in relevant_models]
+                    ),
+                )
+            black_list_restriction = ''
+            if len(irrelevant_models) > 0:
+                black_list_restriction = """
+                AND
+                ilielement NOT IN ({irrelevant_model_list})
+                """.format(
+                    irrelevant_model_list=",".join(
+                        [f"'{modelname}'" for modelname in irrelevant_models]
+                    ),
+                )
+            cur = self.conn.cursor()
+            cur.execute(
+                """
+                SELECT DISTINCT
+                attr_value
+                FROM {schema}.t_ili2db_meta_attrs
+                WHERE
+                attr_name = 'ili2db.ili.lang'
+                {black_list_restriction}
+                {white_list_restriction}
+                """
+            ).format(
+                schema=self.schema,
+                black_list_restriction=black_list_restriction,
+                white_list_restriction=white_list_restriction,
+            )
+            return [row.attr_value for row in cur.fetchall()]
         return []
