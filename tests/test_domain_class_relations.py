@@ -2501,6 +2501,38 @@ class TestDomainClassRelation(unittest.TestCase):
                 "t_id",
                 "dispname",
             ],
+            [
+                "belasteter_standort_geo_lage_polygon",
+                "belasteter_standort_parzellenverweis",
+                "0..*",
+                "parzellenidentifikation",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "belasteter_standort_geo_lage_polygon",
+                "belasteter_standort_egrid",
+                "0..*",
+                "egrid_",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "belasteter_standort_geo_lage_punkt",
+                "belasteter_standort_parzellenverweis",
+                "0..*",
+                "parzellenidentifikation",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "belasteter_standort_geo_lage_punkt",
+                "belasteter_standort_egrid",
+                "0..*",
+                "egrid_",
+                "t_id",
+                "dispname",
+            ],
         ]
 
         count = 0
@@ -2521,7 +2553,7 @@ class TestDomainClassRelation(unittest.TestCase):
                     value_field,
                 ] in expected_bags_of_enum
 
-        assert count == 4
+        assert count == len(expected_bags_of_enum)
 
     def test_ili2db3_domain_structure_relations_KbS_LV95_V1_3_postgis(self):
         # Schema Import

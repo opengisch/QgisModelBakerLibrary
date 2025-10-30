@@ -2103,6 +2103,102 @@ class TestProjectGen(unittest.TestCase):
             ["catarrays_None", "catbag_1", "1..*", "refitemitem", "t_id", "dispname"],
             ["catarrays_None", "catlist_0", "0..*", "refitemitem", "t_id", "dispname"],
             ["catarrays_None", "catlist_1", "1..*", "refitemitem", "t_id", "dispname"],
+            [
+                "catarrays_None",
+                "catarrays_catlistnoarray_1",
+                "1..*",
+                "refitem",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "catarrays_None",
+                "catarrays_catlistnoarray_0",
+                "0..*",
+                "refitem",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "catarrays_None",
+                "catarrays_catbagnoarray_0",
+                "0..*",
+                "refitem",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "catarrays_None",
+                "catarrays_catbagnoarray_1",
+                "1..*",
+                "refitem",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "enumarrays_None",
+                "enumarrays_enumlistnoarray_1",
+                "1..*",
+                "ei_typ",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "enumarrays_None",
+                "enumarrays_enumlistnoarray_0",
+                "0..*",
+                "ei_typ",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "enumarrays_None",
+                "enumarrays_enumbagnoarray_1",
+                "1..*",
+                "ei_typ",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "enumarrays_None",
+                "enumarrays_enumbagnoarray_0",
+                "0..*",
+                "ei_typ",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "textarrays_None",
+                "textarrays_textbagnoarray_1",
+                "1..*",
+                "structtext",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "textarrays_None",
+                "textarrays_textbagnoarray_0",
+                "0..*",
+                "structtext",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "textarrays_None",
+                "textarrays_textlistnoarray_0",
+                "0..*",
+                "structtext",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "textarrays_None",
+                "textarrays_textlistnoarray_1",
+                "1..*",
+                "structtext",
+                "t_id",
+                "dispname",
+            ],
         ]
 
         count = 0
@@ -2123,7 +2219,7 @@ class TestProjectGen(unittest.TestCase):
                     value_field,
                 ] in expected_bags_of_enum
 
-        assert count == 8
+        assert count == len(expected_bags_of_enum)
 
         # Test widget type and constraints
         count = 0
