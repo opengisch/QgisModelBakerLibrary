@@ -2750,22 +2750,6 @@ class TestDomainClassRelation(unittest.TestCase):
         # Test BAGs OF ENUM
         expected_bags_of_enum = [
             [
-                "belasteter_standort_geo_lage_punkt",
-                "deponietyp",
-                "0..*",
-                "deponietyp",
-                "T_Id",
-                "dispName",
-            ],
-            [
-                "belasteter_standort_geo_lage_punkt",
-                "untersuchungsmassnahmen",
-                "1..*",
-                "untersmassn",
-                "T_Id",
-                "dispName",
-            ],
-            [
                 "belasteter_standort_geo_lage_polygon",
                 "deponietyp",
                 "0..*",
@@ -2778,6 +2762,22 @@ class TestDomainClassRelation(unittest.TestCase):
                 "untersuchungsmassnahmen",
                 "1..*",
                 "untersmassn",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "belasteter_standort_geo_lage_polygon",
+                "belasteter_standort_parzellenverweis",
+                "0..*",
+                "parzellenidentifikation",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "belasteter_standort_geo_lage_polygon",
+                "belasteter_standort_egrid",
+                "0..*",
+                "egrid_",
                 "T_Id",
                 "dispName",
             ],
@@ -2801,7 +2801,7 @@ class TestDomainClassRelation(unittest.TestCase):
                     value_field,
                 ] in expected_bags_of_enum
 
-        assert count == 2
+        assert count == len(expected_bags_of_enum)
 
     def test_ili2db3_domain_structure_relations_KbS_LV95_V1_3_geopackage(self):
         # Schema Import
@@ -2875,22 +2875,6 @@ class TestDomainClassRelation(unittest.TestCase):
         # Test BAGs OF ENUM
         expected_bags_of_enum = [
             [
-                "belasteter_standort_geo_lage_punkt",
-                "deponietyp",
-                "0..*",
-                "deponietyp",
-                "iliCode",
-                "dispName",
-            ],
-            [
-                "belasteter_standort_geo_lage_punkt",
-                "untersuchungsmassnahmen",
-                "1..*",
-                "untersmassn",
-                "iliCode",
-                "dispName",
-            ],
-            [
                 "belasteter_standort_geo_lage_polygon",
                 "deponietyp",
                 "0..*",
@@ -2926,7 +2910,7 @@ class TestDomainClassRelation(unittest.TestCase):
                     value_field,
                 ] in expected_bags_of_enum
 
-        assert count == 2
+        assert count == len(expected_bags_of_enum)
 
     def test_domain_class_relations_Hazard_Mapping_V1_2_postgis(self):
         # Test and ili file with lots of comments inside.

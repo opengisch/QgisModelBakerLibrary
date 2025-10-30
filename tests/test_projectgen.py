@@ -2379,6 +2379,102 @@ class TestProjectGen(unittest.TestCase):
             ["catarrays_None", "catbag_1", "1..*", "refitemitem", "T_Id", "dispName"],
             ["catarrays_None", "catlist_0", "0..*", "refitemitem", "T_Id", "dispName"],
             ["catarrays_None", "catlist_1", "1..*", "refitemitem", "T_Id", "dispName"],
+            [
+                "catarrays_None",
+                "catarrays_catlistnoarray_1",
+                "1..*",
+                "refitem",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "catarrays_None",
+                "catarrays_catlistnoarray_0",
+                "0..*",
+                "refitem",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "catarrays_None",
+                "catarrays_catbagnoarray_0",
+                "0..*",
+                "refitem",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "catarrays_None",
+                "catarrays_catbagnoarray_1",
+                "1..*",
+                "refitem",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "enumarrays_None",
+                "enumarrays_enumlistnoarray_1",
+                "1..*",
+                "ei_typ",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "enumarrays_None",
+                "enumarrays_enumlistnoarray_0",
+                "0..*",
+                "ei_typ",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "enumarrays_None",
+                "enumarrays_enumbagnoarray_1",
+                "1..*",
+                "ei_typ",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "enumarrays_None",
+                "enumarrays_enumbagnoarray_0",
+                "0..*",
+                "ei_typ",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "textarrays_None",
+                "textarrays_textbagnoarray_1",
+                "1..*",
+                "structtext",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "textarrays_None",
+                "textarrays_textbagnoarray_0",
+                "0..*",
+                "structtext",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "textarrays_None",
+                "textarrays_textlistnoarray_0",
+                "0..*",
+                "structtext",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "textarrays_None",
+                "textarrays_textlistnoarray_1",
+                "1..*",
+                "structtext",
+                "T_Id",
+                "dispName",
+            ],
         ]
 
         count = 0
@@ -2399,7 +2495,7 @@ class TestProjectGen(unittest.TestCase):
                     value_field,
                 ] in expected_bags_of_enum
 
-        assert count == 8
+        assert count == len(expected_bags_of_enum)
 
         # Test widget type and constraints
         count = 0
@@ -4884,7 +4980,7 @@ class TestProjectGen(unittest.TestCase):
         assert layer_count_before == layer_count_after
         assert relation_count_before == relation_count_after
 
-    def test_catalogue_reference_layer_bag_of_postgis_no_mapping(self):
+    def test_catalogue_reference_layer_bag_of_no_mapping_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
@@ -4910,6 +5006,47 @@ class TestProjectGen(unittest.TestCase):
             importer.configuration.inheritance,
             importer.configuration.dbschema,
         )
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that no reference layer and therefore, no relation, has been removed
+        assert layer_count_before == layer_count_after
+        assert relation_count_before == relation_count_after
+
+    def test_catalogue_reference_layer_bag_of_no_mapping_geopackage(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/BagOfNoMappingMetaAttr.ili"
+        )
+        importer.configuration.ilimodels = "NoArrayMapping"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_catalogue_ref_bag_of_no_mapping_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(DbIliMode.ili2gpkg, uri, "smart2")
 
         available_layers = generator.layers()
         relations, bags_of = generator.relations(available_layers)

@@ -206,6 +206,7 @@ class DBConnector(QObject):
                 target_layer_name
                 cardinality_max
                 cardinality_min
+                mapping_type
         """
         return []
 
