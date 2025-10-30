@@ -4884,6 +4884,50 @@ class TestProjectGen(unittest.TestCase):
         assert layer_count_before == layer_count_after
         assert relation_count_before == relation_count_after
 
+    def test_catalogue_reference_layer_bag_of_postgis_no_mapping(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/BagOfNoMappingMetaAttr.ili"
+        )
+        importer.configuration.ilimodels = "NoArrayMapping"
+        importer.configuration.dbschema = (
+            "catalogue_ref_bag_of_no_mapping_{:%Y%m%d%H%M%S%f}".format(
+                datetime.datetime.now()
+            )
+        )
+
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that no reference layer and therefore, no relation, has been removed
+        assert layer_count_before == layer_count_after
+        assert relation_count_before == relation_count_after
+
     def test_catalogue_reference_layer_no_bag_of_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
