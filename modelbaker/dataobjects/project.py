@@ -280,6 +280,10 @@ class Project(QObject):
         for layer_name, bag_of_enum in self.bags_of_enum.items():
             current_layer = None
             for attribute, bag_of_enum_info in bag_of_enum.items():
+                mapping_type = bag_of_enum_info[5]
+                if mapping_type.lower() != "array":
+                    continue
+
                 layer_obj = bag_of_enum_info[0]
                 cardinality = bag_of_enum_info[1]
                 domain_table = bag_of_enum_info[2]
