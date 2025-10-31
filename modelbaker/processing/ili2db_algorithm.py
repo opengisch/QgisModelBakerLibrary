@@ -69,12 +69,11 @@ class Ili2dbAlgorithm(QgsProcessingAlgorithm):
 
 
 class Ili2pgAlgorithm(Ili2dbAlgorithm):
-
     SERVICE = "SERVICE"
     HOST = "HOST"
     DBNAME = "DBNAME"
     PORT = "PORT"
-    USERNAME = "USERNAME"
+    USER = "USER"
     PASSWORD = "PASSWORD"
     SCHEMA = "SCHEMA"
     SSLMODE = "SSLMODE"
@@ -147,14 +146,14 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
         )
         sslmode_param.setHelp(self.tr("The SSL mode if needed."))
         params.append(sslmode_param)
-        username_param = QgsProcessingParameterString(
-            self.USERNAME,
-            self.tr("Username"),
+        user_param = QgsProcessingParameterString(
+            self.USER,
+            self.tr("User"),
             defaultValue=None,
             optional=True,
         )
-        username_param.setHelp(self.tr("The username to access the database."))
-        params.append(username_param)
+        user_param.setHelp(self.tr("The user to access the database."))
+        params.append(user_param)
 
         password_param = QgsProcessingParameterString(
             self.PASSWORD,
@@ -183,7 +182,7 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
         )
         authcfg_param.setHelp(
             self.tr(
-                "When choosing a QGIS Autentification you don't need username and password."
+                "When choosing a QGIS Autentification you don't need user and password."
             )
         )
         params.append(authcfg_param)
@@ -196,9 +195,9 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
         # outputs for pass through
         params.append(QgsProcessingOutputString(self.SERVICE, self.tr("Service")))
         params.append(QgsProcessingOutputString(self.HOST, self.tr("Host")))
-        params.append(QgsProcessingOutputString(self.DBNAME, self.tr("Database Name")))
-        params.append(QgsProcessingOutputNumber(self.PORT, self.tr("Port Number")))
-        params.append(QgsProcessingOutputString(self.USERNAME, self.tr("Username")))
+        params.append(QgsProcessingOutputString(self.DBNAME, self.tr("Database")))
+        params.append(QgsProcessingOutputNumber(self.PORT, self.tr("Port")))
+        params.append(QgsProcessingOutputString(self.USER, self.tr("User")))
         params.append(QgsProcessingOutputString(self.PASSWORD, self.tr("Password")))
         params.append(QgsProcessingOutputString(self.SCHEMA, self.tr("Schema")))
         params.append(QgsProcessingOutputString(self.SSLMODE, self.tr("SSL Mode")))
@@ -229,7 +228,7 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
             configuration.dbpwd = authconfig_map.get("password")
         else:
             configuration.dbusr = self.parameterAsString(
-                parameters, self.USERNAME, context
+                parameters, self.USER, context
             ) or service_map.get("user")
             configuration.dbpwd = self.parameterAsString(
                 parameters, self.PASSWORD, context
@@ -265,7 +264,7 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
             self.HOST: configuration.dbhost,
             self.DBNAME: configuration.database,
             self.PORT: configuration.dbport,
-            self.USERNAME: configuration.dbusr,
+            self.USER: configuration.dbusr,
             self.PASSWORD: configuration.dbpwd,
             self.SCHEMA: configuration.dbschema,
             self.SSLMODE: configuration.sslmode,
@@ -287,7 +286,7 @@ class Ili2gpkgAlgorithm(Ili2dbAlgorithm):
 
         dbpath_param = QgsProcessingParameterFile(
             self.DBPATH,
-            self.tr("Database File"),
+            self.tr("Databasefile Path"),
             defaultValue=None,
             optional=True,
         )
