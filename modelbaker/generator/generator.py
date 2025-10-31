@@ -650,6 +650,7 @@ class Generator(QObject):
                             layer_map[record["target_layer_name"]][0],
                             self._db_connector.tid,
                             self._db_connector.dispName,
+                            record["mapping_type"],
                         ]
                         unique_current_layer_name = "{}_{}".format(
                             record["current_layer_name"], layer.geometry_column
