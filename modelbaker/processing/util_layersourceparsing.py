@@ -78,14 +78,28 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
         """
         Returns a short description string for the algorithm.
         """
-        return self.tr("Receives connection parameters from layer source.")
-
+        return self.tr(
+            """<html><head/><body>
+            <p>Receives connection parameters from the layer source.</p>
+            <p>Parses the GeoPackage or PostgreSQL source of a layer.</p>
+            <p>Provides the parameters to be used in the Model Baker ili2db algorithms.</p>
+        </body></html>
+        """
+        )
+    
     def shortHelpString(self) -> str:
         """
         Returns a short helper string for the algorithm.
         """
-        return self.tr("Receives connection parameters from layer source.")
-
+        return self.tr(
+            """<html><head/><body>
+            <p>Receives connection parameters from the layer source.</p>
+            <p>Parses the GeoPackage or PostgreSQL source of a layer.</p>
+            <p>Provides the parameters to be used in the Model Baker ili2db algorithms.</p>
+        </body></html>
+        """
+        )
+    
     def initAlgorithm(self, config: Optional[dict[str, Any]] = None):
 
         sourcelayer_param = QgsProcessingParameterVectorLayer(
