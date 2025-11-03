@@ -1396,29 +1396,72 @@ class PGConnector(DBConnector):
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(PG_NLS_TABLE) and self._lang != "", self._lang
 
-    def get_available_languages(self, irrelevant_models=[]):
-        if self.schema and self._table_exists(PG_NLS_TABLE):
+    def get_translation_models(self):
+        if self.schema and self._table_exists(PG_METAATTRS_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
                 sql.SQL(
                     """
                     SELECT DISTINCT
-                    lang
-                    FROM {schema}.t_ili2db_nls
-                    WHERE
-                    lang IS NOT NULL
-                    AND
-                    split_part(iliElement,'.',1) NOT IN ({model_list})
+                    ilielement
+                    FROM {schema}.t_ili2db_meta_attrs
+                    WHERE 
+                    attr_name = 'ili2db.ili.translationOf'
                     """
                 ).format(
                     schema=sql.Identifier(self.schema),
-                    model_list=sql.SQL(", ").join(
-                        sql.Placeholder() * len(irrelevant_models)
-                    ),
-                ),
-                irrelevant_models,
+                )
             )
-            return [row["lang"] for row in cur.fetchall()]
+            return [row["ilielement"] for row in cur.fetchall()]
+        return []
+
+
+    def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
+        if self.schema and self._table_exists(PG_METAATTRS_TABLE):
+            
+            white_list_placeholders = sql.SQL('')
+            if len(relevant_models) > 0:
+                white_list_placeholders = sql.SQL("""
+                AND
+                ilielement IN ({relevant_model_list})
+                """
+                ).format(
+                    relevant_model_list=sql.SQL(", ").join(
+                        sql.Placeholder() * len(relevant_models)
+                    ),
+                )
+            black_list_placeholders = sql.SQL('')
+            if len(irrelevant_models) > 0:
+                black_list_placeholders = sql.SQL("""
+                AND
+                ilielement NOT IN ({irrelevant_model_list})
+                """
+                ).format(
+                    irrelevant_model_list=sql.SQL(", ").join(
+                        sql.Placeholder() * len(irrelevant_models)
+                    )
+                )
+
+            cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
+            cur.execute(
+                sql.SQL(
+                    """
+                    SELECT DISTINCT
+                    attr_value
+                    FROM {schema}.t_ili2db_meta_attrs
+                    WHERE
+                    attr_name = 'ili2db.ili.lang'
+                    {white_list_placeholders}
+                    {black_list_placeholders}
+                    """
+                ).format(
+                    schema=sql.Identifier(self.schema),
+                    white_list_placeholders=white_list_placeholders,
+                    black_list_placeholders=black_list_placeholders,
+                ),
+                relevant_models+irrelevant_models
+            )
+            return [row["attr_value"] for row in cur.fetchall()]
         return []
 
     def get_domain_dispnames(self, tablename):

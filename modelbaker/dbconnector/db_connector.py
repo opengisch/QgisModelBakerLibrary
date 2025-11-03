@@ -449,9 +449,16 @@ class DBConnector(QObject):
         """
         return False, ""
 
-    def get_available_languages(self, irrelevant_models: list[str]) -> list[str]:
+    def get_translation_models(self) -> list[str]:
         """
-        Returns a list of available languages in the t_ili2db_nls table and ignores the values for the irrelevant models
+        Returns a list of models that are a TRANSLATION OF another model.
+        """
+        return []
+        
+    def get_available_languages(self, irrelevant_models: list[str], relevant_models: list[str]) -> list[str]:
+        """
+        Returns a list of available languages in the t_ili2db_nls table and ignores the values for the irrelevant models. 
+        If a list for relevant models is passed, only those are considered (otherwise all the others)
         """
         return []
 
