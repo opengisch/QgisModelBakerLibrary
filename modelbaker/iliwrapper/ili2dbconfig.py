@@ -252,6 +252,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.stroke_arcs = True
         self.pre_script = ""
         self.post_script = ""
+        self.name_lang = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         """
@@ -338,6 +339,11 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--createNlsTab"])
+
+        if self.name_lang:
+            self.append_args(args, ["--nameLang", self.name_lang])
+        elif self.db_ili_version is None or self.db_ili_version > 3:
+            self.append_args(args, ["--nameLang", "NULL"])
 
         self.append_args(
             args, Ili2DbCommandConfiguration.to_ili2db_args(self), force_append=True
