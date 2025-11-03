@@ -52,7 +52,9 @@ class TestTranslations(unittest.TestCase):
         importer.configuration = iliimporter_config(importer.tool)
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
-            self.basetestpath, "tmp_translated_gpkg.gpkg"
+            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
@@ -231,13 +233,15 @@ class TestTranslations(unittest.TestCase):
             == "Geometrie_Document_(Geometrie)_AffectationPrimaire_SurfaceDeZones_(t_id)"
         )
 
-    def test_available_langs_gpkg(self):
+    def test_translated_available_langs_gpkg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
-            self.basetestpath, "tmp_translated_gpkg.gpkg"
+            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
@@ -269,7 +273,7 @@ class TestTranslations(unittest.TestCase):
         # ... as well as ignoring the translated models and alowing it again and the english one
         assert {'de','en'} == set(db_connector.get_available_languages(["PlansDAffectation_V1_2"]))
 
-    def test_available_langs_pg(self):
+    def test_translated_available_langs_pg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
@@ -307,14 +311,16 @@ class TestTranslations(unittest.TestCase):
         # ... as well as ignoring the translated models and alowing it again and the english one
         assert {'de','en'} == set(db_connector.get_available_languages(["PlansDAffectation_V1_2"]))
 
-    def test_namelang_gpkg(self):
+    def test_translated_namelang_gpkg(self):
         # same as translated_db_objects but this time is the schema in French (namelang) and the preferred language German.
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
-            self.basetestpath, "tmp_translated_gpkg.gpkg"
+            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            )
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
@@ -404,7 +410,7 @@ class TestTranslations(unittest.TestCase):
             == "Geometrie_Dokument_(Geometrie)_Grundnutzung_Zonenflaeche_(T_Id)"
         )
 
-    def test_namelang_pg(self):
+    def test_translated_namelang_pg(self):
         # same as translated_db_objects but this time is the schema in French (namelang) and the preferred language German.
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
