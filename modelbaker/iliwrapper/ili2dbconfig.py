@@ -470,6 +470,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.skip_geometry_errors = False
         self.valid_config = ""
         self.xtffile = ""
+        self.plugins_dir = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         args = list()
@@ -515,6 +516,9 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
         if self.db_ili_version == 3:
             self.append_args(args, [self.xtffile])
+
+        if self.plugins_dir:
+            self.append_args(args, ["--plugins", self.plugins_dir])
 
         self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
 
