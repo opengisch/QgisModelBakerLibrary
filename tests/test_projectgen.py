@@ -4996,11 +4996,9 @@ class TestProjectGen(unittest.TestCase):
         layer_count_after = len(available_layers)
         relation_count_after = len(relations)
 
-        # Test that one reference layer and one relation have been removed
-        # BAG {0..1} OF gets implemented as a direct relation to item table,
-        # that is, no structure reference table is needed as link table.
-        assert layer_count_before == layer_count_after + 1
-        assert relation_count_before == relation_count_after + 1
+        # Test that no reference layer, and therefore no relation, has been removed.
+        assert layer_count_before == layer_count_after
+        assert relation_count_before == relation_count_after
 
     def test_catalogue_reference_layer_list_of_postgis(self):
         importer = iliimporter.Importer()

@@ -42,7 +42,7 @@ VERSION "2023-01-19" =
         Flaeche : 0.00 .. 99999.99;
         Geschosse : 0 .. 999;
         Zivilschutzraum : MANDATORY BOOLEAN;
-        Heizung3 : BAG {0..1} OF  Gebaeudeinventar_Bag_Of_No_Mapping_V1_6.Katalog.Heizungstyp_Ref;
+        Heizung3 : BAG {0..5} OF  Gebaeudeinventar_Bag_Of_No_Mapping_V1_6.Katalog.Heizungstyp_Ref;
         Datum_Heizung : INTERLIS.XMLDate;
 
         UNIQUE EGID;
