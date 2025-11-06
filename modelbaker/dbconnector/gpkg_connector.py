@@ -636,31 +636,7 @@ class GPKGConnector(DBConnector):
                             ON LOWER(meta_attrs_cardinality_min.ilielement) = LOWER(cname.iliname||'.'||cprop.columnname) AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
                             LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
                             ON LOWER(meta_attrs_cardinality_max.ilielement) = LOWER(cname.iliname||'.'||cprop.columnname) AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
-                            WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey' AND meta_attrs_array.attr_value = 'ARRAY'
-
-                    UNION ALL
-
-                    -- Select BAGs OF with no mapping
-                    SELECT cprop.setting as current_layer_name
-                           , cprop.columnname as attribute
-                           , cprop.tablename as target_layer_name
-                           , meta_attrs_cardinality_min.attr_value as cardinality_min
-                           , meta_attrs_cardinality_max.attr_value as cardinality_max
-                           , '' as mapping_type
-                    FROM T_ILI2DB_COLUMN_PROP as cprop
-                    -- Get only structures (therefore, no LEFT JOIN here)
-                    JOIN T_ILI2DB_TABLE_PROP as tprop
-                      ON tprop.tag = 'ch.ehi.ili2db.tableKind' and tprop.setting = 'STRUCTURE' and tprop.tablename = cprop.tablename
-                    -- Get target table
-                    LEFT JOIN T_ILI2DB_ATTRNAME as aname
-                      ON aname.target = cprop.setting and colowner = cprop.tablename and cprop.columnname = aname.sqlname
-                    -- Get cardinalities
-                    LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
-                      ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
-                    LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_min
-                      ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
-                    -- Only FKs, only :M relations (therefore, BAGs OF)
-                    WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey' and meta_attrs_cardinality_max.attr_value not in ('0','1')
+                            WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
                     """
             )
             bags_of_info = cursor.fetchall()

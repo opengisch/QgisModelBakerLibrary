@@ -644,9 +644,9 @@ class Generator(QObject):
                     if record["current_layer_name"] == layer.name:
                         new_item_list = [
                             layer,
-                            record["cardinality_min"]
-                            + ".."
-                            + record["cardinality_max"],
+                            record["cardinality_min"] + ".." + record["cardinality_max"]
+                            if record["cardinality_min"] and record["cardinality_max"]
+                            else "",
                             layer_map[record["target_layer_name"]][0],
                             self._db_connector.tid,
                             self._db_connector.dispName,
@@ -688,7 +688,7 @@ class Generator(QObject):
 
         # Remove reference layer if they are not BAG OF
         for item in catalogue_items:
-            is_bag_of = False
+            ref_required = False
 
             # First get the ref pointing to the item
             ref_to_item_iliname, ref_to_item = "", ""
@@ -705,12 +705,14 @@ class Generator(QObject):
             for bag_of_layer_k, bag_of_layer_v in bags_of_enum.items():
                 for bag_of_attr_k, bag_of_data in bag_of_layer_v.items():
                     if (
-                        item["name"] == bag_of_data[2].name  # mapping=ARRAY
-                        or ref_to_item == bag_of_data[2].name  # no mapping
-                    ):  # BAG OF's target_layer_name
-                        is_bag_of = True
+                        ref_to_item
+                        == bag_of_data[0].name  # Ref as origin of a relation
+                        and item["name"]
+                        != bag_of_data[2].name  # that does not point to the item
+                    ):  # So ref must be pointing to a layer
+                        ref_required = True
 
-            if is_bag_of:
+            if ref_required:
                 # It's a BAG OF, leave it, cause users will need it to add data
                 continue
 

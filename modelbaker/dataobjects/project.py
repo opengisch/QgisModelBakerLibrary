@@ -281,7 +281,7 @@ class Project(QObject):
             current_layer = None
             for attribute, bag_of_enum_info in bag_of_enum.items():
                 mapping_type = bag_of_enum_info[5]
-                if mapping_type.lower() != "array":
+                if mapping_type is None or mapping_type.lower() != "array":
                     continue
 
                 layer_obj = bag_of_enum_info[0]
