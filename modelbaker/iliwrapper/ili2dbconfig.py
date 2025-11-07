@@ -270,7 +270,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         On all default parameter we consider the metaconfiguration if available.
         On those controlled by configuration (like create_basket_col) we don't consider the metaconfiguration (and always set or unset them - even when null).
-        On technical parameters, we always force-add to the command — even if the metaconfig_params_only setting is enabled.
+        On technical parameters, we always force-add to the command — even if the metaconfig_params_only setting is enabled. Special case here are the SQL scripts. They are considered as technical and forced.
         """
         args = list()
 
