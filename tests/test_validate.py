@@ -344,17 +344,17 @@ class TestExport(unittest.TestCase):
             "value 1314393.469 is out of range in attribute Geometry",
             "Attribute Name requires a value",
             "Object should associate 1 to 1 target objects (instead of 0)",
-            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true."
+            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true.",
         }
 
-        errors = set() 
+        errors = set()
         for i in range(4):
             errors.add(
                 result_model.index(i, 0).data(
                     int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
                 )
             )
-        
+
         assert errors == expected_errors
 
         # Skip geometry errors
@@ -369,17 +369,17 @@ class TestExport(unittest.TestCase):
         expected_errors_no_geom = {
             "Attribute Name requires a value",
             "Object should associate 1 to 1 target objects (instead of 0)",
-            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true."
+            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true.",
         }
 
-        errors = set() 
+        errors = set()
         for i in range(3):
             errors.add(
                 result_model.index(i, 0).data(
                     int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
                 )
             )
-        
+
         assert errors == expected_errors_no_geom
 
         # Multiplicity off
@@ -395,17 +395,17 @@ class TestExport(unittest.TestCase):
         assert result_model.rowCount() == 2
         expected_errors_no_multi = {
             "value 1314393.469 is out of range in attribute Geometry",
-            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true."
+            "Set Constraint Brutalism.Buildings.Resident.Constraint1 is not true.",
         }
 
-        errors = set() 
+        errors = set()
         for i in range(2):
             errors.add(
                 result_model.index(i, 0).data(
                     int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
                 )
             )
-        
+
         assert errors == expected_errors_no_multi
 
         # Constraint off
@@ -425,14 +425,14 @@ class TestExport(unittest.TestCase):
             "Object should associate 1 to 1 target objects (instead of 0)",
         }
 
-        errors = set() 
+        errors = set()
         for i in range(3):
             errors.add(
                 result_model.index(i, 0).data(
                     int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
                 )
             )
-        
+
         assert errors == expected_errors_no_const
 
     def test_validate_exportmodels_gpkg(self):
@@ -496,21 +496,21 @@ class TestExport(unittest.TestCase):
         result_model.configuration = validator.configuration
         result_model.reload()
         assert result_model.rowCount() == 3
-        
+
         expected_errors = {
             "Needs an ethical evaluation (EthischeBeurteilung)",
             "Beschreibung and/or Referenzcode must be defined.",
-            "Beschreibung needed when top secret."
+            "Beschreibung needed when top secret.",
         }
 
-        errors = set() 
+        errors = set()
         for i in range(3):
             errors.add(
                 result_model.index(i, 0).data(
                     int(ilivalidator.ValidationResultModel.Roles.MESSAGE)
                 )
             )
-        
+
         assert errors == expected_errors
 
         # Validate at cantonal level (setting --exportModels KantonaleOrtsplanung_V1_1)

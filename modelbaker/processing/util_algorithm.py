@@ -1,7 +1,4 @@
-import os
-
 from qgis.core import QgsProcessingAlgorithm
-from qgis.PyQt.QtGui import QIcon
 
 
 class UtilAlgorithm(QgsProcessingAlgorithm):
