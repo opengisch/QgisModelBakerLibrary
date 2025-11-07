@@ -1,0 +1,34 @@
+INTERLIS 2.3;
+
+MODEL NoArrayMapping (en)
+AT "https://signedav.github.io/usabilitydave/models"
+VERSION "2020-06-22" =
+  IMPORTS CatalogueObjects_V1;
+
+    TOPIC JSON_Arr =
+
+        CLASS CatItem
+        EXTENDS CatalogueObjects_V1.Catalogues.Item =
+            Name : TEXT*25;
+        END CatItem;
+
+        STRUCTURE RefCat
+        EXTENDS CatalogueObjects_V1.Catalogues.CatalogueReference =
+            Reference (EXTENDED) : MANDATORY REFERENCE TO (EXTERNAL) CatItem;
+        END RefCat;
+
+        CLASS SimpleItem =
+            Name : TEXT*25;
+        END SimpleItem;
+
+        STRUCTURE RefSimple =
+            Reference: MANDATORY REFERENCE TO (EXTERNAL) SimpleItem;
+        END RefSimple;
+
+        CLASS TheClass =
+            BagofCatItem: BAG {0..*} OF RefCat;
+            BagofSimpleItem: BAG {0..*} OF RefSimple;
+        END TheClass;
+    END JSON_Arr; !! of TOPIC
+
+END NoArrayMapping. !! of MODEL

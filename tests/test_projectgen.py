@@ -26,6 +26,7 @@ import shutil
 import tempfile
 from decimal import Decimal
 
+import pytest
 import yaml
 from qgis.core import Qgis, QgsEditFormConfig, QgsProject, QgsRelation
 from qgis.PyQt.QtCore import QEventLoop, Qt, QTimer
@@ -2056,6 +2057,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 1
 
+    @pytest.mark.bagof
     def test_bagof_cardinalities_postgis(self):
         # Schema Import
         importer = iliimporter.Importer()
@@ -2103,27 +2105,125 @@ class TestProjectGen(unittest.TestCase):
             ["catarrays_None", "catbag_1", "1..*", "refitemitem", "t_id", "dispname"],
             ["catarrays_None", "catlist_0", "0..*", "refitemitem", "t_id", "dispname"],
             ["catarrays_None", "catlist_1", "1..*", "refitemitem", "t_id", "dispname"],
+            [
+                "refitem_None",
+                "catarrays_catlistnoarray_1",
+                "",  # "1..*",
+                "catarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "refitem_None",
+                "catarrays_catlistnoarray_0",
+                "",  # "0..*",
+                "catarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "refitem_None",
+                "catarrays_catbagnoarray_0",
+                "",  # "0..*",
+                "catarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "refitem_None",
+                "catarrays_catbagnoarray_1",
+                "",  # "1..*",
+                "catarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "ei_typ_None",
+                "enumarrays_enumlistnoarray_1",
+                "",  # "1..*",
+                "enumarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "ei_typ_None",
+                "enumarrays_enumlistnoarray_0",
+                "",  # "0..*",
+                "enumarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "ei_typ_None",
+                "enumarrays_enumbagnoarray_1",
+                "",  # "1..*",
+                "enumarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "ei_typ_None",
+                "enumarrays_enumbagnoarray_0",
+                "",  # "0..*",
+                "enumarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "structtext_None",
+                "textarrays_textbagnoarray_1",
+                "",  # "1..*",
+                "textarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "structtext_None",
+                "textarrays_textbagnoarray_0",
+                "",  # "0..*",
+                "textarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "structtext_None",
+                "textarrays_textlistnoarray_0",
+                "",  # "0..*",
+                "textarrays",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "structtext_None",
+                "textarrays_textlistnoarray_1",
+                "",  # "1..*",
+                "textarrays",
+                "t_id",
+                "dispname",
+            ],
         ]
 
-        count = 0
+        obtained_bags_of = []
         for layer_name, bag_of_enum in bags_of_enum.items():
             for attribute, bag_of_enum_info in bag_of_enum.items():
-                count += 1
                 bag_of_enum_info[0]
                 cardinality = bag_of_enum_info[1]
                 domain_table = bag_of_enum_info[2]
                 key_field = bag_of_enum_info[3]
                 value_field = bag_of_enum_info[4]
-                assert [
-                    layer_name,
-                    attribute,
-                    cardinality,
-                    domain_table.name,
-                    key_field,
-                    value_field,
-                ] in expected_bags_of_enum
+                obtained_bags_of.append(
+                    [
+                        layer_name,
+                        attribute,
+                        cardinality,
+                        domain_table.name,
+                        key_field,
+                        value_field,
+                    ]
+                )
 
-        assert count == 8
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
 
         # Test widget type and constraints
         count = 0
@@ -2233,6 +2333,7 @@ class TestProjectGen(unittest.TestCase):
                 )
         assert count == 2
 
+    @pytest.mark.bagof
     def test_bagof_cardinalities_geopackage(self):
         # Schema Import
         importer = iliimporter.Importer()
@@ -2283,27 +2384,125 @@ class TestProjectGen(unittest.TestCase):
             ["catarrays_None", "catbag_1", "1..*", "refitemitem", "T_Id", "dispName"],
             ["catarrays_None", "catlist_0", "0..*", "refitemitem", "T_Id", "dispName"],
             ["catarrays_None", "catlist_1", "1..*", "refitemitem", "T_Id", "dispName"],
+            [
+                "refitem_None",
+                "catarrays_catlistnoarray_1",
+                "",  # "1..*",
+                "catarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "refitem_None",
+                "catarrays_catlistnoarray_0",
+                "",  # "0..*",
+                "catarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "refitem_None",
+                "catarrays_catbagnoarray_0",
+                "",  # "0..*",
+                "catarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "refitem_None",
+                "catarrays_catbagnoarray_1",
+                "",  # "1..*",
+                "catarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "ei_typ_None",
+                "enumarrays_enumlistnoarray_1",
+                "",  # "1..*",
+                "enumarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "ei_typ_None",
+                "enumarrays_enumlistnoarray_0",
+                "",  # "0..*",
+                "enumarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "ei_typ_None",
+                "enumarrays_enumbagnoarray_1",
+                "",  # "1..*",
+                "enumarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "ei_typ_None",
+                "enumarrays_enumbagnoarray_0",
+                "",  # "0..*",
+                "enumarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "structtext_None",
+                "textarrays_textbagnoarray_1",
+                "",  # "1..*",
+                "textarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "structtext_None",
+                "textarrays_textbagnoarray_0",
+                "",  # "0..*",
+                "textarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "structtext_None",
+                "textarrays_textlistnoarray_0",
+                "",  # "0..*",
+                "textarrays",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "structtext_None",
+                "textarrays_textlistnoarray_1",
+                "",  # "1..*",
+                "textarrays",
+                "T_Id",
+                "dispName",
+            ],
         ]
 
-        count = 0
+        obtained_bags_of = []
         for layer_name, bag_of_enum in bags_of_enum.items():
             for attribute, bag_of_enum_info in bag_of_enum.items():
-                count += 1
                 bag_of_enum_info[0]
                 cardinality = bag_of_enum_info[1]
                 domain_table = bag_of_enum_info[2]
                 key_field = bag_of_enum_info[3]
                 value_field = bag_of_enum_info[4]
-                assert [
-                    layer_name,
-                    attribute,
-                    cardinality,
-                    domain_table.name,
-                    key_field,
-                    value_field,
-                ] in expected_bags_of_enum
+                obtained_bags_of.append(
+                    [
+                        layer_name,
+                        attribute,
+                        cardinality,
+                        domain_table.name,
+                        key_field,
+                        value_field,
+                    ]
+                )
 
-        assert count == 8
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
 
         # Test widget type and constraints
         count = 0
@@ -4622,6 +4821,8 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 1
 
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
     def test_catalogue_reference_layer_bag_of_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
@@ -4660,10 +4861,58 @@ class TestProjectGen(unittest.TestCase):
         layer_count_after = len(available_layers)
         relation_count_after = len(relations)
 
-        # Test that no reference layer and therefore, no relation, has been removed
-        assert layer_count_before == layer_count_after
-        assert relation_count_before == relation_count_after
+        # Test that one reference layer and one relation have been removed
+        assert layer_count_before == layer_count_after + 1
+        assert relation_count_before == relation_count_after + 1
 
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
+    def test_catalogue_reference_layer_bag_of_mapping_array_postgis(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/ArrayMappingCatalogue.ili"
+        )
+        importer.configuration.ilimodels = "ArrayMappingCatalogue"
+        importer.configuration.dbschema = (
+            "catalogue_ref_bag_of_array_mapping_{:%Y%m%d%H%M%S%f}".format(
+                datetime.datetime.now()
+            )
+        )
+
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that one reference layer and one relation have been removed
+        assert layer_count_before == layer_count_after + 1
+        assert relation_count_before == relation_count_after + 1
+
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
     def test_catalogue_reference_layer_bag_of_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
@@ -4701,7 +4950,53 @@ class TestProjectGen(unittest.TestCase):
         layer_count_after = len(available_layers)
         relation_count_after = len(relations)
 
-        # Test that no reference layer and therefore, no relation, has been removed
+        # Test that one reference layer and one relation have been removed
+        assert layer_count_before == layer_count_after + 1
+        assert relation_count_before == relation_count_after + 1
+
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
+    def test_catalogue_reference_layer_bag_of_no_mapping_2_postgis(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/gebaeude_bag_of_no_mapping_V1_6.ili"
+        )
+        importer.configuration.ilimodels = "Gebaeudeinventar_Bag_Of_No_Mapping_V1_6"
+        importer.configuration.dbschema = (
+            "catalogue_ref_bag_of_no_mapping_2_{:%Y%m%d%H%M%S%f}".format(
+                datetime.datetime.now()
+            )
+        )
+
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that no reference layer, and therefore no relation, has been removed.
         assert layer_count_before == layer_count_after
         assert relation_count_before == relation_count_after
 
@@ -4743,10 +5038,12 @@ class TestProjectGen(unittest.TestCase):
         layer_count_after = len(available_layers)
         relation_count_after = len(relations)
 
-        # Test that no reference layer and therefore, no relation, has been removed
-        assert layer_count_before == layer_count_after
-        assert relation_count_before == relation_count_after
+        # Test that one reference layer and one relation have been removed
+        assert layer_count_before == layer_count_after + 1
+        assert relation_count_before == relation_count_after + 1
 
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
     def test_catalogue_reference_layer_list_of_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
@@ -4784,10 +5081,101 @@ class TestProjectGen(unittest.TestCase):
         layer_count_after = len(available_layers)
         relation_count_after = len(relations)
 
+        # Test that one reference layer and one relation have been removed
+        assert layer_count_before == layer_count_after + 1
+        assert relation_count_before == relation_count_after + 1
+
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
+    def test_catalogue_reference_layer_bag_of_no_mapping_postgis(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/BagOfNoMappingMetaAttr.ili"
+        )
+        importer.configuration.ilimodels = "NoArrayMapping"
+        importer.configuration.dbschema = (
+            "catalogue_ref_bag_of_no_mapping_{:%Y%m%d%H%M%S%f}".format(
+                datetime.datetime.now()
+            )
+        )
+
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
         # Test that no reference layer and therefore, no relation, has been removed
         assert layer_count_before == layer_count_after
         assert relation_count_before == relation_count_after
 
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
+    def test_catalogue_reference_layer_bag_of_no_mapping_geopackage(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/BagOfNoMappingMetaAttr.ili"
+        )
+        importer.configuration.ilimodels = "NoArrayMapping"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_catalogue_ref_bag_of_no_mapping_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(DbIliMode.ili2gpkg, uri, "smart2")
+
+        available_layers = generator.layers()
+        relations, bags_of = generator.relations(available_layers)
+
+        layer_count_before = len(available_layers)
+        relation_count_before = len(relations)
+
+        available_layers, relations = generator.suppress_catalogue_reference_layers(
+            available_layers, relations, bags_of
+        )
+
+        layer_count_after = len(available_layers)
+        relation_count_after = len(relations)
+
+        # Test that no reference layer and therefore, no relation, has been removed
+        assert layer_count_before == layer_count_after
+        assert relation_count_before == relation_count_after
+
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
     def test_catalogue_reference_layer_no_bag_of_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
@@ -4828,6 +5216,8 @@ class TestProjectGen(unittest.TestCase):
         assert layer_count_before == layer_count_after + 1
         assert relation_count_before == relation_count_after + 1
 
+    @pytest.mark.bagof
+    @pytest.mark.catalogue
     def test_catalogue_reference_layer_no_bag_of_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg

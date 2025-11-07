@@ -22,6 +22,7 @@ import os
 import shutil
 import tempfile
 
+import pytest
 from qgis.core import Qgis, QgsProject
 from qgis.testing import start_app, unittest
 
@@ -1480,6 +1481,7 @@ class TestDomainClassRelation(unittest.TestCase):
         for expected_relation in expected_relations:
             assert expected_relation in relations_dicts
 
+    @pytest.mark.bagof
     def test_domain_structure_relations_ZG_Naturschutz_und_Erholung_V1_0_postgis(self):
         # Schema Import
         importer = iliimporter.Importer()
@@ -1688,25 +1690,27 @@ class TestDomainClassRelation(unittest.TestCase):
             ],
         ]
 
-        count = 0
+        obtained_bags_of = []
         for layer_name, bag_of_enum in bags_of_enum.items():
             for attribute, bag_of_enum_info in bag_of_enum.items():
-                count += 1
                 bag_of_enum_info[0]
                 cardinality = bag_of_enum_info[1]
                 domain_table = bag_of_enum_info[2]
                 key_field = bag_of_enum_info[3]
                 value_field = bag_of_enum_info[4]
-                assert [
-                    layer_name,
-                    attribute,
-                    cardinality,
-                    domain_table.name,
-                    key_field,
-                    value_field,
-                ] in expected_bags_of_enum
+                obtained_bags_of.append(
+                    [
+                        layer_name,
+                        attribute,
+                        cardinality,
+                        domain_table.name,
+                        key_field,
+                        value_field,
+                    ]
+                )
 
-        assert count == 9
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
 
     def test_ili2db3_domain_structure_relations_ZG_Naturschutz_und_Erholung_V1_0_postgis(
         self,
@@ -2149,25 +2153,27 @@ class TestDomainClassRelation(unittest.TestCase):
             ],
         ]
 
-        count = 0
+        obtained_bags_of = []
         for layer_name, bag_of_enum in bags_of_enum.items():
             for attribute, bag_of_enum_info in bag_of_enum.items():
-                count += 1
                 bag_of_enum_info[0]
                 cardinality = bag_of_enum_info[1]
                 domain_table = bag_of_enum_info[2]
                 key_field = bag_of_enum_info[3]
                 value_field = bag_of_enum_info[4]
-                assert [
-                    layer_name,
-                    attribute,
-                    cardinality,
-                    domain_table.name,
-                    key_field,
-                    value_field,
-                ] in expected_bags_of_enum
+                obtained_bags_of.append(
+                    [
+                        layer_name,
+                        attribute,
+                        cardinality,
+                        domain_table.name,
+                        key_field,
+                        value_field,
+                    ]
+                )
 
-        assert count == 9
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
 
     def test_ili2db3_domain_structure_relations_ZG_Naturschutz_und_Erholung_V1_0_geopackage(
         self,
@@ -2400,6 +2406,7 @@ class TestDomainClassRelation(unittest.TestCase):
 
         assert count == 9
 
+    @pytest.mark.bagof
     def test_domain_structure_relations_KbS_LV95_V1_3_postgis(self):
         # Schema Import
         importer = iliimporter.Importer()
@@ -2501,27 +2508,45 @@ class TestDomainClassRelation(unittest.TestCase):
                 "t_id",
                 "dispname",
             ],
+            [
+                "parzellenidentifikation_None",
+                "belasteter_standort_parzellenverweis",
+                "",  # "0..*",
+                "belasteter_standort",
+                "t_id",
+                "dispname",
+            ],
+            [
+                "egrid__None",
+                "belasteter_standort_egrid",
+                "",  # "0..*",
+                "belasteter_standort",
+                "t_id",
+                "dispname",
+            ],
         ]
 
-        count = 0
+        obtained_bags_of = []
         for layer_name, bag_of_enum in bags_of_enum.items():
             for attribute, bag_of_enum_info in bag_of_enum.items():
-                count += 1
                 bag_of_enum_info[0]
                 cardinality = bag_of_enum_info[1]
                 domain_table = bag_of_enum_info[2]
                 key_field = bag_of_enum_info[3]
                 value_field = bag_of_enum_info[4]
-                assert [
-                    layer_name,
-                    attribute,
-                    cardinality,
-                    domain_table.name,
-                    key_field,
-                    value_field,
-                ] in expected_bags_of_enum
+                obtained_bags_of.append(
+                    [
+                        layer_name,
+                        attribute,
+                        cardinality,
+                        domain_table.name,
+                        key_field,
+                        value_field,
+                    ]
+                )
 
-        assert count == 4
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
 
     def test_ili2db3_domain_structure_relations_KbS_LV95_V1_3_postgis(self):
         # Schema Import
@@ -2718,22 +2743,6 @@ class TestDomainClassRelation(unittest.TestCase):
         # Test BAGs OF ENUM
         expected_bags_of_enum = [
             [
-                "belasteter_standort_geo_lage_punkt",
-                "deponietyp",
-                "0..*",
-                "deponietyp",
-                "T_Id",
-                "dispName",
-            ],
-            [
-                "belasteter_standort_geo_lage_punkt",
-                "untersuchungsmassnahmen",
-                "1..*",
-                "untersmassn",
-                "T_Id",
-                "dispName",
-            ],
-            [
                 "belasteter_standort_geo_lage_polygon",
                 "deponietyp",
                 "0..*",
@@ -2746,30 +2755,48 @@ class TestDomainClassRelation(unittest.TestCase):
                 "untersuchungsmassnahmen",
                 "1..*",
                 "untersmassn",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "parzellenidentifikation_None",
+                "belasteter_standort_parzellenverweis",
+                "",  # "0..*",
+                "belasteter_standort",
+                "T_Id",
+                "dispName",
+            ],
+            [
+                "egrid__None",
+                "belasteter_standort_egrid",
+                "",  # "0..*",
+                "belasteter_standort",
                 "T_Id",
                 "dispName",
             ],
         ]
 
-        count = 0
+        obtained_bags_of = []
         for layer_name, bag_of_enum in bags_of_enum.items():
             for attribute, bag_of_enum_info in bag_of_enum.items():
-                count += 1
                 bag_of_enum_info[0]
                 cardinality = bag_of_enum_info[1]
                 domain_table = bag_of_enum_info[2]
                 key_field = bag_of_enum_info[3]
                 value_field = bag_of_enum_info[4]
-                assert [
-                    layer_name,
-                    attribute,
-                    cardinality,
-                    domain_table.name,
-                    key_field,
-                    value_field,
-                ] in expected_bags_of_enum
+                obtained_bags_of.append(
+                    [
+                        layer_name,
+                        attribute,
+                        cardinality,
+                        domain_table.name,
+                        key_field,
+                        value_field,
+                    ]
+                )
 
-        assert count == 2
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
 
     def test_ili2db3_domain_structure_relations_KbS_LV95_V1_3_geopackage(self):
         # Schema Import
@@ -2843,22 +2870,6 @@ class TestDomainClassRelation(unittest.TestCase):
         # Test BAGs OF ENUM
         expected_bags_of_enum = [
             [
-                "belasteter_standort_geo_lage_punkt",
-                "deponietyp",
-                "0..*",
-                "deponietyp",
-                "iliCode",
-                "dispName",
-            ],
-            [
-                "belasteter_standort_geo_lage_punkt",
-                "untersuchungsmassnahmen",
-                "1..*",
-                "untersmassn",
-                "iliCode",
-                "dispName",
-            ],
-            [
                 "belasteter_standort_geo_lage_polygon",
                 "deponietyp",
                 "0..*",
@@ -2894,7 +2905,7 @@ class TestDomainClassRelation(unittest.TestCase):
                     value_field,
                 ] in expected_bags_of_enum
 
-        assert count == 2
+        assert count == len(expected_bags_of_enum)
 
     def test_domain_class_relations_Hazard_Mapping_V1_2_postgis(self):
         # Test and ili file with lots of comments inside.

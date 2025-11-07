@@ -644,12 +644,13 @@ class Generator(QObject):
                     if record["current_layer_name"] == layer.name:
                         new_item_list = [
                             layer,
-                            record["cardinality_min"]
-                            + ".."
-                            + record["cardinality_max"],
+                            record["cardinality_min"] + ".." + record["cardinality_max"]
+                            if record["cardinality_min"] and record["cardinality_max"]
+                            else "",
                             layer_map[record["target_layer_name"]][0],
                             self._db_connector.tid,
                             self._db_connector.dispName,
+                            record["mapping_type"],
                         ]
                         unique_current_layer_name = "{}_{}".format(
                             record["current_layer_name"], layer.geometry_column
@@ -687,29 +688,37 @@ class Generator(QObject):
 
         # Remove reference layer if they are not BAG OF
         for item in catalogue_items:
-            is_bag_of = False
-            for bag_of_layer_k, bag_of_layer_v in bags_of_enum.items():
-                for bag_of_attr_k, bag_of_data in bag_of_layer_v.items():
-                    if (
-                        item["name"] == bag_of_data[2].name
-                    ):  # BAG OF's target_layer_name
-                        is_bag_of = True
-
-            if is_bag_of:
-                # It's a BAG OF, leave it, cause users will need it to add data
-                continue
-
-            # The ref has no BAG OF pointing to the item, therefore,
-            # we'll suppress the ref cause users won't need it to add data.
+            ref_required = False
 
             # First get the ref pointing to the item
+            ref_to_item_iliname, ref_to_item = "", ""
             for relation in relations:
                 if relation.referenced_layer.ili_name == item["ili_name"]:
                     for ref in catalogue_refs:
                         if relation.referencing_layer.ili_name == ref["ili_name"]:
                             # We've found the corresponding ref structure
-                            layers_to_remove.append(ref["ili_name"])
+                            ref_to_item_iliname = ref["ili_name"]
+                            ref_to_item = ref["name"]
                             break
+
+            # Check if there is a BAG OF pointing to the item or to the ref
+            for bag_of_layer_k, bag_of_layer_v in bags_of_enum.items():
+                for bag_of_attr_k, bag_of_data in bag_of_layer_v.items():
+                    if (
+                        ref_to_item
+                        == bag_of_data[0].name  # Ref as origin of a relation
+                        and item["name"]
+                        != bag_of_data[2].name  # that does not point to the item
+                    ):  # So ref must be pointing to a layer
+                        ref_required = True
+
+            if ref_required:
+                # It's a BAG OF, leave it, cause users will need it to add data
+                continue
+
+            # The ref has no BAG OF pointing to the item, therefore,
+            # we'll suppress the ref cause users won't need it to add data.
+            layers_to_remove.append(ref_to_item_iliname)
 
         # Finally, remove the ref layers that we've found are not BAGS OF from the list,
         # as well as the relations where they are involved (i.e., referenced/referencing)
