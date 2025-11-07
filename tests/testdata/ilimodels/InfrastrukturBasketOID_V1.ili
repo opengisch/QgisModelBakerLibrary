@@ -1,0 +1,20 @@
+INTERLIS 2.3;
+
+/* Ortsplanung as national model */
+MODEL Infrastruktur_V1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+  IMPORTS GeometryCHLV95_V1;
+
+  DOMAIN
+    CHLine = POLYLINE WITH (STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2;
+    CHSurface = SURFACE WITH (STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS > 0.001;
+
+  TOPIC Strassen =
+    BASKET OID AS INTERLIS.UUIDOID;
+    OID AS INTERLIS.UUIDOID;
+    CLASS Strasse =
+        Name : MANDATORY TEXT*99;
+        Geometrie : MANDATORY Infrastruktur_V1.CHLine;
+    END Strasse;
+  END Strassen;
+
+END Infrastruktur_V1.

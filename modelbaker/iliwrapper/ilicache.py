@@ -245,6 +245,9 @@ class IliCache(QObject):
                     model["version"] = self.get_element_text(
                         model_metadata.find("ili23:Version", self.ns)
                     )
+                    model["file"] = self.get_element_text(
+                        model_metadata.find("ili23:File", self.ns)
+                    )
                     model["repository"] = netloc
                     repo_models.append(model)
 
@@ -261,6 +264,9 @@ class IliCache(QObject):
                 if model["name"]:
                     model["version"] = self.get_element_text(
                         model_metadata.find("ili23:Version", self.ns)
+                    )
+                    model["file"] = self.get_element_text(
+                        model_metadata.find("ili23:File", self.ns)
                     )
                     model["repository"] = netloc
                     repo_models.append(model)
@@ -375,6 +381,7 @@ class IliModelItemModel(QStandardItemModel):
     class Roles(Enum):
         ILIREPO = Qt.ItemDataRole.UserRole + 1
         VERSION = Qt.ItemDataRole.UserRole + 2
+        FILE = Qt.ItemDataRole.UserRole + 3
 
         def __int__(self):
             return self.value
@@ -400,6 +407,7 @@ class IliModelItemModel(QStandardItemModel):
                 )  # considered in completer
                 item.setData(model["repository"], int(IliModelItemModel.Roles.ILIREPO))
                 item.setData(model["version"], int(IliModelItemModel.Roles.VERSION))
+                item.setData(model["file"], int(IliModelItemModel.Roles.FILE))
 
                 names.append(model["name"])
                 self.appendRow(item)
@@ -890,31 +898,34 @@ class IliToppingFileCache(IliDataCache):
         # collect local files
         netloc = "local_files"
         repo_files = list()
-        for file_path_id in [
-            file_id for file_id in self.file_ids if file_id[0:5] == "file:"
-        ]:
-            toppingfile = dict()
-            toppingfile["id"] = file_path_id
-            toppingfile["version"] = None
-            toppingfile["owner"] = None
-            toppingfile["repository"] = netloc
-            toppingfile["url"] = None
-            toppingfile["relative_file_path"] = file_path_id[5:]
-            toppingfile["local_file_path"] = (
-                file_path_id[5:]
-                if os.path.isabs(file_path_id[5:])
-                else os.path.join(self.tool_dir, file_path_id[5:])
-            )
-            if os.path.exists(toppingfile["local_file_path"]):
-                self.file_download_succeeded.emit(
-                    file_path_id, toppingfile["local_file_path"]
+        if self.file_ids:
+            for file_path_id in [
+                file_id for file_id in self.file_ids if file_id[0:5] == "file:"
+            ]:
+                toppingfile = dict()
+                toppingfile["id"] = file_path_id
+                toppingfile["version"] = None
+                toppingfile["owner"] = None
+                toppingfile["repository"] = netloc
+                toppingfile["url"] = None
+                toppingfile["relative_file_path"] = file_path_id[5:]
+                toppingfile["local_file_path"] = (
+                    file_path_id[5:]
+                    if os.path.isabs(file_path_id[5:])
+                    else os.path.join(self.tool_dir, file_path_id[5:])
                 )
-            else:
-                self.file_download_failed.emit(
-                    file_path_id,
-                    self.tr("Could not find local file  {}").format(file_path_id[5:]),
-                )
-            repo_files.append(toppingfile)
+                if os.path.exists(toppingfile["local_file_path"]):
+                    self.file_download_succeeded.emit(
+                        file_path_id, toppingfile["local_file_path"]
+                    )
+                else:
+                    self.file_download_failed.emit(
+                        file_path_id,
+                        self.tr("Could not find local file  {}").format(
+                            file_path_id[5:]
+                        ),
+                    )
+                repo_files.append(toppingfile)
 
         self.repositories[netloc] = repo_files
         self.set_repositories_to_model()
@@ -1050,3 +1061,64 @@ class IliToppingFileItemModel(QStandardItemModel):
 
                 ids.append(toppingfile["id"])
                 self.appendRow(item)
+
+
+class IliModelFileCache(IliToppingFileCache):
+
+    CACHE_PATH = os.path.expanduser("~/.ilimodelsfilescache")
+
+    def __init__(self, configuration, model_name_list=None):
+        IliToppingFileCache.__init__(self, configuration, model_name_list)
+        self.information_file = "ilimodels.xml"
+        self.model_name_list = model_name_list
+        self.ilifilelist = []
+
+    def _process_informationfile(self, file, netloc, url):
+        """
+        Parses ilimodels.xml provided in ``file`` and updates the local repositories cache.
+        """
+
+        try:
+            root = ET.parse(file).getroot()
+        except ET.ParseError as e:
+            QgsMessageLog.logMessage(
+                self.tr(
+                    "Could not parse ilimodels file `{file}` ({exception})".format(
+                        file=file, exception=str(e)
+                    )
+                ),
+                self.tr("modelbaker"),
+            )
+            return
+
+        for repo in root.iter(
+            "{http://www.interlis.ch/INTERLIS2.3}IliRepository09.RepositoryIndex"
+        ):
+            for model_metadata in repo.findall(
+                "ili23:IliRepository09.RepositoryIndex.ModelMetadata", self.ns
+            ):
+                name = self.get_element_text(
+                    element=model_metadata.find("ili23:Name", self.ns)
+                )
+                if name in self.model_name_list:
+                    file = self.get_element_text(
+                        element=model_metadata.find("ili23:File", self.ns)
+                    )
+
+                    self.ilifilelist.append(self.download_file(netloc, url, file, name))
+
+        for repo in root.iter(
+            "{http://www.interlis.ch/INTERLIS2.3}IliRepository20.RepositoryIndex"
+        ):
+            for model_metadata in repo.findall(
+                "ili23:IliRepository20.RepositoryIndex.ModelMetadata", self.ns
+            ):
+                name = self.get_element_text(
+                    element=model_metadata.find("ili23:Name", self.ns)
+                )
+                if name in self.model_name_list:
+                    file = self.get_element_text(
+                        element=model_metadata.find("ili23:File", self.ns)
+                    )
+
+                    self.ilifilelist.append(self.download_file(netloc, url, file, name))
