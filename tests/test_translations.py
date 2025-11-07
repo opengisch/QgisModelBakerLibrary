@@ -52,7 +52,9 @@ class TestTranslations(unittest.TestCase):
         importer.configuration = iliimporter_config(importer.tool)
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
-            self.basetestpath, "tmp_translated_gpkg.gpkg"
+            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
@@ -231,13 +233,15 @@ class TestTranslations(unittest.TestCase):
             == "Geometrie_Document_(Geometrie)_AffectationPrimaire_SurfaceDeZones_(t_id)"
         )
 
-    def test_available_langs_gpkg(self):
+    def test_translated_available_langs_gpkg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
         importer.configuration = iliimporter_config(importer.tool)
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
-            self.basetestpath, "tmp_translated_gpkg.gpkg"
+            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
@@ -269,7 +273,7 @@ class TestTranslations(unittest.TestCase):
         # ... as well as ignoring the translated models and alowing it again and the english one
         assert {'de','en'} == set(db_connector.get_available_languages(["PlansDAffectation_V1_2"]))
 
-    def test_translated_db_objects_pg(self):
+    def test_translated_available_langs_pg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
         importer.configuration = iliimporter_config(importer.tool)
@@ -306,7 +310,200 @@ class TestTranslations(unittest.TestCase):
         
         # ... as well as ignoring the translated models and alowing it again and the english one
         assert {'de','en'} == set(db_connector.get_available_languages(["PlansDAffectation_V1_2"]))
-        
+
+    def test_translated_namelang_gpkg(self):
+        # same as translated_db_objects but this time is the schema in French (namelang) and the preferred language German.
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilimodels = "PlansDAffectation_V1_2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            )
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.configuration.name_lang = 'fr'
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg,
+            uri,
+            importer.configuration.inheritance,
+            consider_basket_handling=True,
+            preferred_language="de",
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        fr_layer = None
+        for layer in available_layers:
+            if layer.name == "affectationprimaire_surfacedezones":
+                assert layer.alias == "Grundnutzung_Zonenflaeche"
+                de_layer = layer.layer
+                count += 1
+                fields = de_layer.fields()
+                field_idx = fields.lookupField("publiedepuis")
+                assert field_idx != -1
+                field = fields.field(field_idx)
+                assert field.name() == "publiedepuis"
+                assert field.alias() == "publiziertAb"
+
+                edit_form_config = de_layer.editFormConfig()
+                tabs = edit_form_config.tabs()
+                tab_list = [tab.name() for tab in tabs]
+                expected_tab_list = [
+                    "General",
+                    "Dokument",
+                    "Objektbezogene_Festlegung",
+                    "Ueberlagernde_Festlegung",
+                    "Linienbezogene_Festlegung",
+                ]
+                assert len(tab_list) == len(expected_tab_list)
+                assert set(tab_list) == set(expected_tab_list)
+
+            # check domain table and translated domains
+            if layer.name == "statutjuridique":
+                count += 1
+                assert layer.alias == "RechtsStatus"
+                assert layer.layer.displayExpression() == "\n".join(
+                    [
+                        "CASE",
+                        "WHEN iliCode = 'AenderungOhneVorwirkung' THEN 'AenderungOhneVorwirkung'",
+                        "WHEN iliCode = 'inKraft' THEN 'inKraft'",
+                        "WHEN iliCode = 'AenderungMitVorwirkung' THEN 'AenderungMitVorwirkung'",
+                        "END",
+                    ]
+                )
+
+        # check if the layers have been considered
+        assert count == 2
+        assert de_layer
+
+        # Check translated relation
+        rels = qgis_project.relationManager().referencedRelations(de_layer)
+        assert len(rels) == 1
+        assert (
+            rels[0].id()
+            == "geometrie_document_geometrie_affectationprimaire_surfacedezones_affectationprimaire_surfacedezones_T_Id"
+        )
+        assert (
+            rels[0].name()
+            == "Geometrie_Dokument_(Geometrie)_Grundnutzung_Zonenflaeche_(T_Id)"
+        )
+
+    def test_translated_namelang_pg(self):
+        # same as translated_db_objects but this time is the schema in French (namelang) and the preferred language German.
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilimodels = "PlansDAffectation_V1_2"
+        importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.configuration.name_lang = 'fr'
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+            consider_basket_handling=True,
+            preferred_language="de",
+        )
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        fr_layer = None
+        for layer in available_layers:
+            if layer.name == "affectationprimaire_surfacedezones":
+                assert layer.alias == "Grundnutzung_Zonenflaeche"
+                de_layer = layer.layer
+                count += 1
+                fields = de_layer.fields()
+                field_idx = fields.lookupField("publiedepuis")
+                assert field_idx != -1
+                field = fields.field(field_idx)
+                assert field.name() == "publiedepuis"
+                assert field.alias() == "publiziertAb"
+
+                edit_form_config = de_layer.editFormConfig()
+                tabs = edit_form_config.tabs()
+                tab_list = [tab.name() for tab in tabs]
+                expected_tab_list = [
+                    "General",
+                    "Dokument",
+                    "Objektbezogene_Festlegung",
+                    "Ueberlagernde_Festlegung",
+                    "Linienbezogene_Festlegung",
+                ]
+                assert len(tab_list) == len(expected_tab_list)
+                assert set(tab_list) == set(expected_tab_list)
+
+            # check domain table and translated domains
+            if layer.name == "statutjuridique":
+                count += 1
+                assert layer.alias == "RechtsStatus"
+                assert layer.layer.displayExpression() == "\n".join(
+                    [
+                        "CASE",
+                        "WHEN iliCode = 'AenderungMitVorwirkung' THEN 'AenderungMitVorwirkung'",
+                        "WHEN iliCode = 'AenderungOhneVorwirkung' THEN 'AenderungOhneVorwirkung'",
+                        "WHEN iliCode = 'inKraft' THEN 'inKraft'",
+                        "END",
+                    ]
+                )
+
+        # check if the layers have been considered
+        assert count == 2
+        assert de_layer
+
+        # Check translated relation
+        rels = qgis_project.relationManager().referencedRelations(de_layer)
+        assert len(rels) == 1
+        assert (
+            rels[0].id()
+            == "geometrie_document_geomtr_ffcttnrmr_srfcdznes_fkey"
+        )
+        assert (
+            rels[0].name()
+            == "Geometrie_Dokument_(Geometrie)_Grundnutzung_Zonenflaeche_(t_id)"
+        )
+
     def print_info(self, text):
         logging.info(text)
 

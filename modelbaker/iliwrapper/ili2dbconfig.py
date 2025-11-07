@@ -146,19 +146,28 @@ class Ili2DbCommandConfiguration:
             self.__dict__ = other.__dict__.copy()
 
     def append_args(self, args, values, consider_metaconfig=False, force_append=False):
-
-        if not force_append and self.metaconfig_id and values:
-            if self.metaconfig_params_only:
-                return
-            if (
-                consider_metaconfig
-                and self.metaconfig
-                and "ch.ehi.ili2db" in self.metaconfig.sections()
-            ):
-                metaconfig_ili2db_params = self.metaconfig["ch.ehi.ili2db"]
-                if values[0][2:] in metaconfig_ili2db_params.keys():
-                    # if the value is set in the metaconfig, then we do consider it instead
+        """
+        Usually, there's no metaconfig, so we just add the value to the command's arguments.
+        But if there is a metaconfig and the parameter isn't forced (i.e., it's not a technical parameter), we check:
+        - Is metaconfig_params_only enabled?
+            - If yes, we don't add the argument—even if the parameter isn't in the metaconfig (meaning the parameter remains disabled).
+            - If no, we check whether we want to consider the metaconfig for this specific parameter.
+                - If yes, we don't add the argument if it's already in the metaconfig.
+                - If no, we add the argument.
+        """
+        if self.metaconfig_id:
+            if not force_append:
+                if self.metaconfig_params_only:
                     return
+                if (
+                    consider_metaconfig
+                    and self.metaconfig
+                    and "ch.ehi.ili2db" in self.metaconfig.sections()
+                ):
+                    metaconfig_ili2db_params = self.metaconfig["ch.ehi.ili2db"]
+                    if values[0][2:] in metaconfig_ili2db_params.keys():
+                        # if the value is set in the metaconfig, then we do consider it instead
+                        return
         args += values
 
     def to_ili2db_args(self):
@@ -252,11 +261,16 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.stroke_arcs = True
         self.pre_script = ""
         self.post_script = ""
+        self.name_lang = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
         """
         Create an ili2db argument array, with the password masked with ****** and optionally with the ``action``
-        argument (--schemaimport) removed
+        argument (--schemaimport) removed.
+
+        On all default parameter we consider the metaconfiguration if available.
+        On those controlled by configuration (like create_basket_col) we don't consider the metaconfiguration (and always set or unset them - even when null).
+        On technical parameters, we always force-add to the command — even if the metaconfig_params_only setting is enabled. Special case here are the SQL scripts. They are considered as technical and forced.
         """
         args = list()
 
@@ -309,7 +323,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.tool and (self.tool & DbIliMode.gpkg):
             if self.create_gpkg_multigeom:
-                self.append_args(args, ["--gpkgMultiGeomPerTable"], True)
+                self.append_args(args, ["--gpkgMultiGeomPerTable"])
             elif self.db_ili_version is None or self.db_ili_version > 3:
                 self.append_args(args, ["--gpkgMultiGeomPerTable=False"])
 
@@ -338,6 +352,11 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--createNlsTab"])
+
+        if self.name_lang:
+            self.append_args(args, ["--nameLang", self.name_lang])
+        elif self.db_ili_version is None or self.db_ili_version > 3:
+            self.append_args(args, ["--nameLang", "NULL"])
 
         self.append_args(
             args, Ili2DbCommandConfiguration.to_ili2db_args(self), force_append=True
