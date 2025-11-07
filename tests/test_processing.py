@@ -54,7 +54,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         params = {
             "HOST": configuration.dbhost,
             "DBNAME": configuration.database,
-            "USERNAME": configuration.dbusr,
+            "USER": configuration.dbusr,
             "PASSWORD": configuration.dbpwd,
         }
         return params
@@ -123,13 +123,13 @@ class TestProcessingAlgorithms(unittest.TestCase):
             ValidatingPGAlgorithm,
             ExportingPGAlgorithm,
         )
-        conn_parameters = {}
-        conn_parameters["DBPATH"] = self.gpkg_file(False)
+        conn_parameters = self.iliimporter_pg_config_params()
+        conn_parameters["SCHEMA"] = self.pg_schema(True)
         self._algs_without_baskets(
             conn_parameters,
-            ImportingGPKGAlgorithm,
-            ValidatingGPKGAlgorithm,
-            ExportingGPKGAlgorithm,
+            ImportingPGAlgorithm,
+            ValidatingPGAlgorithm,
+            ExportingPGAlgorithm,
         )
 
     def _algs_with_baskets(

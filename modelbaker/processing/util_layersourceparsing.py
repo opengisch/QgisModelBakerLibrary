@@ -22,10 +22,8 @@ from qgis.core import (
 )
 from qgis.PyQt.QtCore import QCoreApplication
 
+from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 from ..utils.db_utils import get_configuration_from_sourceprovider
-from ..iliwrapper.ili2dbconfig import (
-    Ili2DbCommandConfiguration,
-)
 from .util_algorithm import UtilAlgorithm
 
 
@@ -46,7 +44,7 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
     HOST = "HOST"
     DBNAME = "DBNAME"
     PORT = "PORT"
-    USERNAME = "USERNAME"
+    USER = "USER"
     PASSWORD = "PASSWORD"
     SCHEMA = "SCHEMA"
     SSLMODE = "SSLMODE"
@@ -86,7 +84,7 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
         </body></html>
         """
         )
-    
+
     def shortHelpString(self) -> str:
         """
         Returns a short helper string for the algorithm.
@@ -99,7 +97,7 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
         </body></html>
         """
         )
-    
+
     def initAlgorithm(self, config: Optional[dict[str, Any]] = None):
 
         sourcelayer_param = QgsProcessingParameterVectorLayer(
@@ -120,10 +118,10 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
         self.addOutput(QgsProcessingOutputString(self.HOST, self.tr("Host")))
         self.addOutput(QgsProcessingOutputString(self.DBNAME, self.tr("Database")))
         self.addOutput(QgsProcessingOutputNumber(self.PORT, self.tr("Port")))
-        self.addOutput(QgsProcessingOutputString(self.USERNAME, self.tr("User")))
+        self.addOutput(QgsProcessingOutputString(self.USER, self.tr("User")))
         self.addOutput(QgsProcessingOutputString(self.PASSWORD, self.tr("Password")))
         self.addOutput(QgsProcessingOutputString(self.SCHEMA, self.tr("Schema")))
-        self.addOutput(QgsProcessingOutputString(self.SSLMODE, self.tr('SSL Mode')))
+        self.addOutput(QgsProcessingOutputString(self.SSLMODE, self.tr("SSL Mode")))
         self.addOutput(
             QgsProcessingOutputString(self.AUTHCFG, self.tr("Authentication"))
         )
@@ -143,9 +141,7 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
         """
         configuration = Ili2DbCommandConfiguration()
 
-        sourcelayer = self.parameterAsVectorLayer(
-            parameters, self.LAYER, context
-        )
+        sourcelayer = self.parameterAsVectorLayer(parameters, self.LAYER, context)
         if not sourcelayer:
             raise QgsProcessingException(
                 self.invalidSourceError(parameters, self.LAYER)
@@ -169,7 +165,7 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
             self.HOST: configuration.dbhost,
             self.DBNAME: configuration.database,
             self.PORT: configuration.dbport,
-            self.USERNAME: configuration.dbusr,
+            self.USER: configuration.dbusr,
             self.PASSWORD: configuration.dbpwd,
             self.SCHEMA: configuration.dbschema,
             self.SSLMODE: configuration.sslmode,
