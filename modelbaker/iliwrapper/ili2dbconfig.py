@@ -587,3 +587,33 @@ class ExportMetaConfigConfiguration(Ili2DbCommandConfiguration):
         self.append_args(args, Ili2DbCommandConfiguration.to_ili2db_args(self))
 
         return args
+
+
+class Ili2CCommandConfiguration:
+    def __init__(self, other=None):
+        if not isinstance(other, Ili2CCommandConfiguration):
+            self.base_configuration = BaseConfiguration()
+
+            self.oIMD16 = True
+            self.imdfile = ""
+            self.ilifile = ""
+        else:
+            # We got an 'other' object from which we'll get parameters
+            self.__dict__ = other.__dict__.copy()
+
+    def append_args(self, args, values):
+        args += values
+
+    def to_ili2c_args(self):
+
+        args = self.base_configuration.to_ili2db_args(False, False)
+
+        if self.oIMD16:
+            self.append_args(args, ["-oIMD16"])
+
+        if self.imdfile:
+            self.append_args(args, ["--out", self.imdfile])
+
+        if self.ilifile:
+            self.append_args(args, [self.ilifile])
+        return args
