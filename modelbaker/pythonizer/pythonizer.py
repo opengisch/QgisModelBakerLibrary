@@ -1,15 +1,15 @@
 import datetime
 import os
 
+from ili2py.mappers.helpers import Index
+from ili2py.readers.interlis_24.ilismeta16.xsdata import Imd16Reader
+from ili2py.writers.py.python_structure import Library
 from qgis.core import Qgis
 from qgis.PyQt.QtCore import QFile, QObject, QStandardPaths
 
-from ..iliwrapper import iliexecutable
 from ..iliwrapper.ili2dbconfig import Ili2CCommandConfiguration
 from ..iliwrapper.ili2dbutils import JavaNotFoundError
-from ..libs.ili2py.mappers.helpers import Index
-from ..libs.ili2py.readers.interlis_24.ilismeta16.xsdata import Imd16Reader
-from ..libs.ili2py.writers.py.python_structure import Library
+from ..iliwrapper.ilicompiler import IliCompiler
 from ..utils import db_utils
 from ..utils.globals import default_log_function
 from ..utils.qt_utils import NetworkError, download_file
@@ -37,7 +37,7 @@ class Pythonizer(QObject):
         return index, library
 
     def compile(self, base_configuration, ili_file):
-        compiler = iliexecutable.IliCompiler()
+        compiler = IliCompiler()
 
         configuration = Ili2CCommandConfiguration()
         configuration.base_configuration = base_configuration

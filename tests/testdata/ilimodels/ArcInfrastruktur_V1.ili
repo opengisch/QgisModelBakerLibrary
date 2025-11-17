@@ -1,0 +1,36 @@
+INTERLIS 2.3;
+
+MODEL ArcInfrastruktur_V1 (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+  IMPORTS GeometryCHLV95_V1;
+
+  DOMAIN
+    Line = POLYLINE WITH (STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2;
+    Surface = SURFACE WITH (STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS > 0.001;
+    LineArcs = POLYLINE WITH (STRAIGHTS, ARCS) VERTEX GeometryCHLV95_V1.Coord2;
+    SurfaceArcs = SURFACE WITH (STRAIGHTS, ARCS) VERTEX GeometryCHLV95_V1.Coord2 WITHOUT OVERLAPS > 0.001;
+
+  TOPIC StrassenEtc =
+    CLASS Strasse =
+        Name : MANDATORY TEXT*99;
+        Geometrie : MANDATORY ArcInfrastruktur_V1.Line;
+    END Strasse;
+
+    CLASS Haus =
+        Name : MANDATORY TEXT*99;
+        Geometrie : MANDATORY ArcInfrastruktur_V1.SurfaceArcs;
+    END Haus;
+  END StrassenEtc;
+
+  TOPIC Natur =
+    CLASS Pfad =
+        Name : MANDATORY TEXT*99;
+        Geometrie : MANDATORY ArcInfrastruktur_V1.LineArcs;
+    END Pfad;
+
+    CLASS Park =
+        Name : MANDATORY TEXT*99;
+        Geometrie : MANDATORY ArcInfrastruktur_V1.Surface;
+    END Park;
+  END Natur;
+
+END ArcInfrastruktur_V1.

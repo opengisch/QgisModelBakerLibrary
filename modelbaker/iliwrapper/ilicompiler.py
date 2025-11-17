@@ -30,11 +30,12 @@ class IliCompiler(IliExecutable):
         :return: ili2c configuration"""
         return Ili2CCommandConfiguration()
 
-    def _args(self):
+    def _args(self, param):
         """Gets the list of ili2c arguments from configuration.
         :return: ili2c arguments list.
         :rtype: list
         """
+        # todo care about param (it should not be considered)
         return self.configuration.to_ili2c_args()
 
     def _ili2_jar_arg(self):
