@@ -55,3 +55,13 @@ def get_tool_url(tool, db_ili_version):
         )
 
     return ""
+
+
+def get_ili2c_tool_version():
+    return "5.6.6"
+
+
+def get_ili2c_tool_url():
+    return "https://downloads.interlis.ch/ili2c/ili2c-{version}.zip".format(
+        version=get_ili2c_tool_version()
+    )
