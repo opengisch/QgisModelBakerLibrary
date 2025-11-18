@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-    begin                :    04/10/17
-    git sha              :    :%H$
-    copyright            :    (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-                              (C) 2016 by OPENGIS.ch
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-10-04
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 import logging
 import re
 
@@ -1406,7 +1401,7 @@ class PGConnector(DBConnector):
                     SELECT DISTINCT
                     ilielement
                     FROM {schema}.t_ili2db_meta_attrs
-                    WHERE 
+                    WHERE
                     attr_name = 'ili2db.ili.translationOf'
                     """
                 ).format(
@@ -1416,13 +1411,13 @@ class PGConnector(DBConnector):
             return [row["ilielement"] for row in cur.fetchall()]
         return []
 
-
     def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
         if self.schema and self._table_exists(PG_METAATTRS_TABLE):
-            
-            white_list_placeholders = sql.SQL('')
+
+            white_list_placeholders = sql.SQL("")
             if len(relevant_models) > 0:
-                white_list_placeholders = sql.SQL("""
+                white_list_placeholders = sql.SQL(
+                    """
                 AND
                 ilielement IN ({relevant_model_list})
                 """
@@ -1431,9 +1426,10 @@ class PGConnector(DBConnector):
                         sql.Placeholder() * len(relevant_models)
                     ),
                 )
-            black_list_placeholders = sql.SQL('')
+            black_list_placeholders = sql.SQL("")
             if len(irrelevant_models) > 0:
-                black_list_placeholders = sql.SQL("""
+                black_list_placeholders = sql.SQL(
+                    """
                 AND
                 ilielement NOT IN ({irrelevant_model_list})
                 """
@@ -1460,7 +1456,7 @@ class PGConnector(DBConnector):
                     white_list_placeholders=white_list_placeholders,
                     black_list_placeholders=black_list_placeholders,
                 ),
-                relevant_models+irrelevant_models
+                relevant_models + irrelevant_models,
             )
             return [row["attr_value"] for row in cur.fetchall()]
         return []
