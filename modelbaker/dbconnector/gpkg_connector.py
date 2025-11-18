@@ -1,20 +1,16 @@
 """
-/***************************************************************************
-    begin                :    04/10/17
-    git sha              :    :%H$
-    copyright            :    (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-10-04
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 import errno
 import os
 import re
@@ -1271,7 +1267,7 @@ class GPKGConnector(DBConnector):
             SELECT DISTINCT
             ilielement
             FROM "{t_ili2db_meta_attrs}"
-            WHERE 
+            WHERE
             attr_name = 'ili2db.ili.translationOf'
             ;
             """.format(
@@ -1286,7 +1282,7 @@ class GPKGConnector(DBConnector):
         if not self._table_exists(GPKG_METAATTRS_TABLE):
             return []
 
-        white_list_restriction = ''
+        white_list_restriction = ""
         if len(relevant_models) > 0:
             white_list_restriction = """
             AND
@@ -1296,7 +1292,7 @@ class GPKGConnector(DBConnector):
                     [f"'{modelname}'" for modelname in relevant_models]
                 ),
             )
-        black_list_restriction = ''
+        black_list_restriction = ""
         if len(irrelevant_models) > 0:
             black_list_restriction = """
             AND
@@ -1311,7 +1307,7 @@ class GPKGConnector(DBConnector):
             """SELECT DISTINCT
             attr_value
             FROM "{t_ili2db_meta_attrs}"
-            WHERE 
+            WHERE
             attr_name = 'ili2db.ili.lang'
             {black_list_restriction}
             {white_list_restriction}

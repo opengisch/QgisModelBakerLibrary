@@ -1,19 +1,14 @@
 """
-/***************************************************************************
-    begin                :    01/02/19
-    git sha              :    :%H$
-    copyright            :    (C) 2019 by Yesid Polanía (BSF-Swissphoto)
-    email                :    yesidpol.3@gmail.com
- ***************************************************************************/
+Metadata:
+    Creation Date: 2019-02-01
+    Copyright: (C) 2019 by Yesid Polanía (BSF-Swissphoto)
+    Contact: yesidpol.3@gmail.com
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 import numbers
@@ -1268,7 +1263,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 SELECT DISTINCT
                 ilielement
                 FROM {schema}.t_ili2db_meta_attrs
-                WHERE 
+                WHERE
                 attr_name = 'ili2db.ili.translationOf'
                 """
             ).format(
@@ -1280,7 +1275,7 @@ WHERE TABLE_SCHEMA='{schema}'
     def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
         if self.schema and self._table_exists(METAATTRS_TABLE):
 
-            white_list_restriction = ''
+            white_list_restriction = ""
             if len(relevant_models) > 0:
                 white_list_restriction = """
                 AND
@@ -1290,7 +1285,7 @@ WHERE TABLE_SCHEMA='{schema}'
                         [f"'{modelname}'" for modelname in relevant_models]
                     ),
                 )
-            black_list_restriction = ''
+            black_list_restriction = ""
             if len(irrelevant_models) > 0:
                 black_list_restriction = """
                 AND

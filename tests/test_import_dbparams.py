@@ -1,21 +1,15 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 06/27/2025
-        git sha              : :%H$
-        copyright            : (C) 2025 by Dave Signer @ OPENGIS.ch
-        email                : david@opengis.ch
- ***************************************************************************/
+Metadata:
+    Copyright: (C) 2025 by Dave Signer @ OPENGIS.ch
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import datetime
 import logging

@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 27.09.2024
-        git sha              : :%H$
-        copyright            : (C) 2024 by Germán Carrillo
-        email                : german at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2024-09-27
+    Copyright: (C) 2024 by Germán Carrillo
+    Contact: german@opengisch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from qgis.testing import start_app, unittest
 
 from modelbaker.iliwrapper.ili2dbconfig import (
