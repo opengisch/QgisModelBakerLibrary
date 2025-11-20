@@ -1,20 +1,15 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2016
-        copyright            : (C) 2016 by OPENGIS.ch
-        email                : info@opengis.ch
- ***************************************************************************/
+Metadata:
+    Copyright: (C) 2016 by OPENGIS.ch
+    Contact: info@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import functools
 import re
@@ -37,6 +32,19 @@ from qgis.PyQt.QtWidgets import QApplication, QFileDialog
 
 
 def selectFileName(line_edit_widget, title, file_filter, parent):
+    """
+    Description to do
+
+    Args:
+        line_edit_widget (TYPE): Description to do.
+        title (TYPE): Description to do.
+        file_filter (TYPE): Description to do.
+        parent (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     filename, matched_filter = QFileDialog.getOpenFileName(
         parent, title, line_edit_widget.text(), file_filter
     )
@@ -49,6 +57,19 @@ def make_file_selector(
     file_filter=QCoreApplication.translate("modelbaker", "Any file (*)"),
     parent=None,
 ):
+    """
+    Description to do
+
+    Args:
+        widget (TYPE): Description to do.
+        title (TYPE): Description to do.
+        file_filter (TYPE): Description to do.
+        parent (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     return partial(
         selectFileName,
         line_edit_widget=widget,
@@ -67,6 +88,22 @@ def selectFileNameToSave(
     extensions,
     dont_confirm_overwrite,
 ):
+    """
+    Description to do
+
+    Args:
+        line_edit_widget (TYPE): Description to do.
+        title (TYPE): Description to do.
+        file_filter (TYPE): Description to do.
+        parent (TYPE): Description to do.
+        extension (TYPE): Description to do.
+        extensions (TYPE): Description to do.
+        dont_confirm_overwrite (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     filename, matched_filter = QFileDialog.getSaveFileName(
         parent,
         title,
@@ -99,6 +136,22 @@ def make_save_file_selector(
     extensions=None,
     dont_confirm_overwrite=False,
 ):
+    """
+    Description to do
+
+    Args:
+        widget (TYPE): Description to do.
+        title (TYPE): Description to do.
+        file_filter (TYPE): Description to do.
+        parent (TYPE): Description to do.
+        extension (TYPE): Description to do.
+        extensions (TYPE): Description to do.
+        dont_confirm_overwrite (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     return partial(
         selectFileNameToSave,
         line_edit_widget=widget,
@@ -112,6 +165,18 @@ def make_save_file_selector(
 
 
 def selectFolder(line_edit_widget, title, parent):
+    """
+    Description to do
+
+    Args:
+        line_edit_widget (TYPE): Description to do.
+        title (TYPE): Description to do.
+        parent (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     foldername = QFileDialog.getExistingDirectory(
         parent, title, line_edit_widget.text()
     )
@@ -123,10 +188,32 @@ def make_folder_selector(
     title=QCoreApplication.translate("modelbaker", "Open Folder"),
     parent=None,
 ):
+    """
+    Description to do
+
+    Args:
+        widget (TYPE): Description to do.
+        title (TYPE): Description to do.
+        parent (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     return partial(selectFolder, line_edit_widget=widget, title=title, parent=parent)
 
 
 def slugify(text: str) -> str:
+    """
+    Description to do
+
+    Args:
+        text (str): Description to do.
+
+    Returns:
+        str: Description to do.
+    """
+
     if not text:
         return text
     slug = unicodedata.normalize("NFKD", text)
@@ -138,6 +225,17 @@ def slugify(text: str) -> str:
 
 class NetworkError(RuntimeError):
     def __init__(self, error_code, msg):
+        """
+        Description to do
+
+        Args:
+            error_code (TYPE): Description to do.
+            msg (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.msg = msg
         self.error_code = error_code
 
@@ -173,9 +271,34 @@ def download_file(
     reply = network_access_manager.get(req)
 
     def on_download_progress(bytes_received, bytes_total):
+        """
+        Description to do
+
+        Args:
+            bytes_received (TYPE): Description to do.
+            bytes_total (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         on_progress(bytes_received, bytes_total)
 
     def finished(filename, reply, on_error, on_success, on_finished):
+        """
+        Description to do
+
+        Args:
+            filename (TYPE): Description to do.
+            reply (TYPE): Description to do.
+            on_error (TYPE): Description to do.
+            on_success (TYPE): Description to do.
+            on_finished (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         file = QFile(filename)
         file.open(QIODevice.OpenModeFlag.WriteOnly)
         file.write(reply.readAll())
@@ -214,12 +337,41 @@ def download_file(
 
 class OverrideCursor:
     def __init__(self, cursor):
+        """
+        Description to do
+
+        Args:
+            cursor (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.cursor = cursor
 
     def __enter__(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         QApplication.setOverrideCursor(self.cursor)
 
     def __exit__(self, exc_type, exc_val, exc_tb):
+        """
+        Description to do
+
+        Args:
+            exc_type (TYPE): Description to do.
+            exc_val (TYPE): Description to do.
+            exc_tb (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         QApplication.restoreOverrideCursor()
 
 

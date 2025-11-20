@@ -1,20 +1,16 @@
 """
-/***************************************************************************
-    begin                :    30/04/19
-    git sha              :    :%H$
-    copyright            :    (C) 2019 by Yesid Polania
-    email                :    yesidpol.3@gmail.com
- ***************************************************************************/
+Metadata:
+    Creation Date: 2019-04-30
+    Copyright: (C) 2019 by Yesid Polania
+    Contact: yesidpol.3@gmail.com
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from .layer_uri import LayerUri
 
 
@@ -27,11 +23,31 @@ class PgLayerUri(LayerUri):
     """
 
     def __init__(self, uri: str) -> None:
+        """
+        Description to do
+
+        Args:
+            uri (str): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         LayerUri.__init__(self, uri)
         self.pg_estimated_metadata = False
         self.provider = "postgres"
 
     def get_data_source_uri(self, record: dict) -> str:
+        """
+        Description to do
+
+        Args:
+            record (dict): Description to do.
+
+        Returns:
+            str: Description to do.
+        """
+
         if record["geometry_column"]:
             str_pg_estimated_metadata = (
                 "true" if self.pg_estimated_metadata else "false"

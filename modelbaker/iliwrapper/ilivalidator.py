@@ -1,20 +1,14 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 11/11/21
-        git sha              : :%H$
-        copyright            : (C) 2021 by Dave Signer
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2021-11-11
+    Copyright: (C) 2021 by Dave Signer
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 import xml.etree.ElementTree as CET
@@ -29,16 +23,50 @@ from .iliexecutable import IliExecutable
 
 class Validator(IliExecutable):
     def __init__(self, parent=None):
+        """
+        Description to do
+
+        Args:
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(parent)
         self.version = 4
 
     def _create_config(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return ValidateConfiguration()
 
     def _get_ili2db_version(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self.version
 
     def _args(self, hide_password):
+        """
+        Description to do
+
+        Args:
+            hide_password (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         args = super()._args(hide_password)
 
         if self.version == 3 and "--export3" in args:
@@ -70,19 +98,50 @@ class ValidationResultModel(QStandardItemModel):
         FIXED = Qt.ItemDataRole.UserRole + 14
 
         def __int__(self):
+            """
+            Description to do
+
+            Returns:
+                TYPE: Description to do.
+            """
+
             return self.value
 
     def __init__(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__()
         self.configuration = ValidateConfiguration()
         self.valid = False
 
     def get_element_text(self, element):
+        """
+        Description to do
+
+        Args:
+            element (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if element is not None:
             return element.text
         return None
 
     def reload(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.beginResetModel()
         if self.configuration.xtflog:
             try:

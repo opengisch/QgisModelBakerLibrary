@@ -1,20 +1,16 @@
 """
-/***************************************************************************
-    begin                :    08/04/19
-    git sha              :    :%H$
-    copyright            :    (C) 2019 by Yesid Polania
-    email                :    yesidpol.3@gmail.com
- ***************************************************************************/
+Metadata:
+    Creation Date: 2019-04-08
+    Copyright: (C) 2019 by Yesid Polania
+    Contact: yesidpol.3@gmail.com
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from __future__ import annotations
 
 from typing import Optional
@@ -30,27 +26,86 @@ class GpkgFactory(DbFactory):
     """Creates an entire set of objects so that QgisMmodelbakerodelBaker supports Geopackage database."""
 
     def get_db_connector(self, uri: str, schema: Optional[str]) -> GPKGConnector:
+        """
+        Description to do
+
+        Args:
+            uri (str): Description to do.
+            schema (Optional[str]): Description to do.
+
+        Returns:
+            GPKGConnector: Description to do.
+        """
+
         return GPKGConnector(uri, None)
 
     def get_db_command_config_manager(
         self, configuration: Ili2DbCommandConfiguration
     ) -> GpkgCommandConfigManager:
+        """
+        Description to do
+
+        Args:
+            configuration (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            GpkgCommandConfigManager: Description to do.
+        """
+
         return GpkgCommandConfigManager(configuration)
 
     def get_layer_uri(self, uri: str) -> GpkgLayerUri:
+        """
+        Description to do
+
+        Args:
+            uri (str): Description to do.
+
+        Returns:
+            GpkgLayerUri: Description to do.
+        """
+
         return GpkgLayerUri(uri)
 
     def pre_generate_project(
         self, configuration: Ili2DbCommandConfiguration
     ) -> tuple[bool, str]:
+        """
+        Description to do
+
+        Args:
+            configuration (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            tuple[bool, str]: Description to do.
+        """
+
         return True, ""
 
     def post_generate_project_validations(
         self, configuration: Ili2DbCommandConfiguration, fallback_user: str = None
     ) -> tuple[bool, str]:
+        """
+        Description to do
+
+        Args:
+            configuration (Ili2DbCommandConfiguration): Description to do.
+            fallback_user (str): Description to do.
+
+        Returns:
+            tuple[bool, str]: Description to do.
+        """
+
         return True, ""
 
     def get_specific_messages(self) -> dict[str, str]:
+        """
+        Description to do
+
+        Returns:
+            dict[str, str]: Description to do.
+        """
+
         messages = {"db_or_schema": "database", "layers_source": "GeoPackage"}
 
         return messages

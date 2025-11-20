@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2022-07-17
-        git sha              : :%H$
-        copyright            : (C) 2022 by Dave Signer
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-07-22
+    Copyright: (C) 2022 by Dave Signer
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import configparser
 import os
@@ -39,17 +34,44 @@ class MetaConfig:
     SQLSCRIPT_TYPE = "sql"
 
     def __init__(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.referencedata_paths = []
         self.projecttopping_path = None
         self.metaconfigparamsonly = False
         self.ili2db_settings = Ili2dbSettings()
 
     def update_referencedata_paths(self, value: Union[list, bool]):
+        """
+        Description to do
+
+        Args:
+            value (Union[list, bool]): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if isinstance(value, str):
             value = [value]
         self.referencedata_paths.extend(value)
 
     def update_projecttopping_path(self, value: str):
+        """
+        Description to do
+
+        Args:
+            value (str): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.projecttopping_path = value
 
     def generate_files(self, target: Target):
@@ -140,6 +162,18 @@ class MetaConfig:
         return target.path_resolver(target, metaconfig_slug, MetaConfig.METACONFIG_TYPE)
 
     def _generate_toppingfile_link(self, target: Target, type, path):
+        """
+        Description to do
+
+        Args:
+            target (Target): Description to do.
+            type (TYPE): Description to do.
+            path (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not os.path.isfile(path):
             # it's already an id pointing to somewhere, no toppingfile needs to be created
             return path

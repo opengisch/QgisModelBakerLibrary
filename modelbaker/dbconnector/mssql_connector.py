@@ -1,19 +1,14 @@
 """
-/***************************************************************************
-    begin                :    01/02/19
-    git sha              :    :%H$
-    copyright            :    (C) 2019 by Yesid Polanía (BSF-Swissphoto)
-    email                :    yesidpol.3@gmail.com
- ***************************************************************************/
+Metadata:
+    Creation Date: 2019-02-01
+    Copyright: (C) 2019 by Yesid Polanía (BSF-Swissphoto)
+    Contact: yesidpol.3@gmail.com
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 import numbers
@@ -34,6 +29,17 @@ NLS_TABLE = "t_ili2db_nls"
 
 class MssqlConnector(DBConnector):
     def __init__(self, uri, schema):
+        """
+        Description to do
+
+        Args:
+            uri (TYPE): Description to do.
+            schema (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         DBConnector.__init__(self, uri, schema)
 
         try:
@@ -58,6 +64,16 @@ class MssqlConnector(DBConnector):
         self.dataset_table_name = DATASET_TABLE
 
     def map_data_types(self, data_type):
+        """
+        Description to do
+
+        Args:
+            data_type (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = data_type.lower()
         if "timestamp" in data_type:
             result = self.QGIS_DATE_TIME_TYPE
@@ -69,6 +85,13 @@ class MssqlConnector(DBConnector):
         return result
 
     def db_or_schema_exists(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema:
             cur = self.conn.cursor()
             cur.execute(
@@ -86,12 +109,36 @@ class MssqlConnector(DBConnector):
         return False
 
     def metadata_exists(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._bMetadataTable
 
     def _metadata_exists(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._table_exists(METADATA_TABLE)
 
     def _table_exists(self, tablename):
+        """
+        Description to do
+
+        Args:
+            tablename (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema:
             cur = self.conn.cursor()
             cur.execute(
@@ -111,6 +158,13 @@ class MssqlConnector(DBConnector):
         return False
 
     def get_tables_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         res = []
 
         if self.schema:
@@ -372,6 +426,16 @@ class MssqlConnector(DBConnector):
         return res
 
     def _def_cursor(self, query):
+        """
+        Description to do
+
+        Args:
+            query (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         cursor = """
             DECLARE @schemaname VARCHAR(1000)
             DECLARE @tablename VARCHAR(1000)
@@ -439,6 +503,13 @@ class MssqlConnector(DBConnector):
         return cursor
 
     def get_meta_attrs_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._table_exists(METAATTRS_TABLE):
             return []
 
@@ -461,6 +532,16 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_meta_attrs(self, ili_name):
+        """
+        Description to do
+
+        Args:
+            ili_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._table_exists(METAATTRS_TABLE):
             return []
 
@@ -487,6 +568,16 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_fields_info(self, table_name):
+        """
+        Description to do
+
+        Args:
+            table_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         res = []
         # Get all fields for this table
         if self.schema:
@@ -574,6 +665,16 @@ class MssqlConnector(DBConnector):
         return res
 
     def get_min_max_info(self, table_name):
+        """
+        Description to do
+
+        Args:
+            table_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         # Get all 'c'heck constraints for this table
         if self.schema:
@@ -617,6 +718,16 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_t_type_map_info(self, table_name):
+        """
+        Description to do
+
+        Args:
+            table_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor()
             cur.execute(
@@ -639,6 +750,16 @@ class MssqlConnector(DBConnector):
         return {}
 
     def get_relations_info(self, filter_layer_list=[]):
+        """
+        Description to do
+
+        Args:
+            filter_layer_list (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = []
 
         if self.schema:
@@ -768,6 +889,13 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_models(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._table_exists("t_ili2db_trafo"):
             return {}
 
@@ -815,6 +943,17 @@ class MssqlConnector(DBConnector):
         return {}
 
     def get_classili_classdb_mapping(self, models_info, extended_classes):
+        """
+        Description to do
+
+        Args:
+            models_info (TYPE): Description to do.
+            extended_classes (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         if self.schema:
             cur = self.conn.cursor()
@@ -835,6 +974,16 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_attrili_attrdb_mapping(self, attrs_list):
+        """
+        Description to do
+
+        Args:
+            attrs_list (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         if self.schema:
             cur = self.conn.cursor()
@@ -852,6 +1001,16 @@ class MssqlConnector(DBConnector):
         return result
 
     def get_attrili_attrdb_mapping_by_owner(self, owners):
+        """
+        Description to do
+
+        Args:
+            owners (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         if self.schema:
             cur = self.conn.cursor()
@@ -868,6 +1027,16 @@ class MssqlConnector(DBConnector):
         return result
 
     def _get_dict_result(self, cur):
+        """
+        Description to do
+
+        Args:
+            cur (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         columns = [column[0] for column in cur.description]
 
         res = []
@@ -878,6 +1047,13 @@ class MssqlConnector(DBConnector):
         return res
 
     def ili_version(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         cur = self.conn.cursor()
         cur.execute(
             """SELECT count(COLUMN_NAME)
@@ -900,6 +1076,13 @@ WHERE TABLE_SCHEMA='{schema}'
             return 4
 
     def get_basket_handling(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema and self._table_exists(SETTINGS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -917,6 +1100,13 @@ WHERE TABLE_SCHEMA='{schema}'
         return False
 
     def get_baskets_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
@@ -939,6 +1129,13 @@ WHERE TABLE_SCHEMA='{schema}'
         return result
 
     def get_datasets_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         if self.schema and self._table_exists(DATASET_TABLE):
             cur = self.conn.cursor()
@@ -953,6 +1150,16 @@ WHERE TABLE_SCHEMA='{schema}'
         return result
 
     def create_dataset(self, datasetname):
+        """
+        Description to do
+
+        Args:
+            datasetname (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema and self._table_exists(DATASET_TABLE):
             cur = self.conn.cursor()
             try:
@@ -977,6 +1184,17 @@ WHERE TABLE_SCHEMA='{schema}'
         return False, self.tr('Could not create dataset "{}".').format(datasetname)
 
     def rename_dataset(self, tid, datasetname):
+        """
+        Description to do
+
+        Args:
+            tid (TYPE): Description to do.
+            datasetname (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema and self._table_exists(DATASET_TABLE):
             cur = self.conn.cursor()
             try:
@@ -1002,6 +1220,13 @@ WHERE TABLE_SCHEMA='{schema}'
         return False, self.tr('Could not create dataset "{}".').format(datasetname)
 
     def get_topics_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         if (
             self.schema
@@ -1028,6 +1253,13 @@ WHERE TABLE_SCHEMA='{schema}'
         return result
 
     def get_classes_relevance(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = []
         if self.schema and self._table_exists("t_ili2db_classname"):
             cur = self.conn.cursor()
@@ -1094,6 +1326,19 @@ WHERE TABLE_SCHEMA='{schema}'
     def create_basket(
         self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
     ):
+        """
+        Description to do
+
+        Args:
+            dataset_tid (TYPE): Description to do.
+            topic (TYPE): Description to do.
+            tilitid_value (TYPE): Description to do.
+            attachment_key (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1145,6 +1390,16 @@ WHERE TABLE_SCHEMA='{schema}'
         return False, self.tr('Could not create basket for topic "{}".').format(topic)
 
     def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        """
+        Description to do
+
+        Args:
+            basket_config (dict): Description to do.
+
+        Returns:
+            tuple[bool, str]: Description to do.
+        """
+
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
             try:
@@ -1185,6 +1440,13 @@ WHERE TABLE_SCHEMA='{schema}'
         ).format(basket_config["topic"], basket_config["datasetname"])
 
     def get_tid_handling(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema and self._table_exists(SETTINGS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1202,6 +1464,13 @@ WHERE TABLE_SCHEMA='{schema}'
         return False
 
     def get_ili2db_settings(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         if self._table_exists(SETTINGS_TABLE):
             cur = self.conn.cursor()
@@ -1217,9 +1486,23 @@ WHERE TABLE_SCHEMA='{schema}'
 
     def get_ili2db_sequence_value(self):
         # not implemented, return the next one
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self.get_next_ili2db_sequence_value()
 
     def get_next_ili2db_sequence_value(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema:
             cur = self.conn.cursor()
             cur.execute(
@@ -1235,6 +1518,16 @@ WHERE TABLE_SCHEMA='{schema}'
         return None
 
     def set_ili2db_sequence_value(self, value):
+        """
+        Description to do
+
+        Args:
+            value (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema:
             cur = self.conn.cursor()
             try:
@@ -1258,9 +1551,23 @@ WHERE TABLE_SCHEMA='{schema}'
         return False, self.tr("Could not reset sequence")
 
     def get_translation_handling(self) -> tuple[bool, str]:
+        """
+        Description to do
+
+        Returns:
+            tuple[bool, str]: Description to do.
+        """
+
         return self._table_exists(NLS_TABLE) and self._lang != "", self._lang
 
     def get_translation_models(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema and self._table_exists(METAATTRS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1268,7 +1575,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 SELECT DISTINCT
                 ilielement
                 FROM {schema}.t_ili2db_meta_attrs
-                WHERE 
+                WHERE
                 attr_name = 'ili2db.ili.translationOf'
                 """
             ).format(
@@ -1278,9 +1585,20 @@ WHERE TABLE_SCHEMA='{schema}'
         return []
 
     def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
+        """
+        Description to do
+
+        Args:
+            irrelevant_models (TYPE): Description to do.
+            relevant_models (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.schema and self._table_exists(METAATTRS_TABLE):
 
-            white_list_restriction = ''
+            white_list_restriction = ""
             if len(relevant_models) > 0:
                 white_list_restriction = """
                 AND
@@ -1290,7 +1608,7 @@ WHERE TABLE_SCHEMA='{schema}'
                         [f"'{modelname}'" for modelname in relevant_models]
                     ),
                 )
-            black_list_restriction = ''
+            black_list_restriction = ""
             if len(irrelevant_models) > 0:
                 black_list_restriction = """
                 AND

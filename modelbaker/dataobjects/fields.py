@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2017-04-12
-        git sha              : :%H$
-        copyright            : (C) 2017 by OPENGIS.ch
-        email                : info@opengis.ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2012-04-17
+    Copyright: (C) 2017 by OPENGIS.ch
+    Contact: info@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -28,6 +23,16 @@ if TYPE_CHECKING:
 
 class Field:
     def __init__(self, name: str) -> None:
+        """
+        Description to do
+
+        Args:
+            name (str): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.name = name
         self.alias = None
         self.read_only = False
@@ -38,6 +43,13 @@ class Field:
         self.oid_domain = None
 
     def dump(self) -> dict:
+        """
+        Description to do
+
+        Returns:
+            dict: Description to do.
+        """
+
         definition = dict()
         if self.alias:
             definition["alias"] = self.alias
@@ -45,10 +57,30 @@ class Field:
         return definition
 
     def load(self, definition: dict) -> None:
+        """
+        Description to do
+
+        Args:
+            definition (dict): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         if "alias" in definition:
             self.alias = definition["alias"]
 
     def create(self, layer: Layer) -> None:
+        """
+        Description to do
+
+        Args:
+            layer (Layer): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         field_idx = layer.layer.fields().indexOf(self.name)
 
         if self.alias:

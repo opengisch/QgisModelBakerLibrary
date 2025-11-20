@@ -1,20 +1,16 @@
 """
-/***************************************************************************
-    begin                :    05/03/18
-    git sha              :    :%H$
-    copyright            :    (C) 2018 by Germán Carrillo (BSF-Swissphoto)
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2018-03-05
+    Copyright: (C) 2018 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 from qgis.core import (
     Qgis,
@@ -123,6 +119,17 @@ def get_layer_type(layer):
 
 
 def get_group_non_recursive(group, group_name):
+    """
+    Description to do
+
+    Args:
+        group (TYPE): Description to do.
+        group_name (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     groups = (
         group.findGroups(False)
         if Qgis.QGIS_VERSION_INT >= 31800
@@ -137,6 +144,16 @@ def get_group_non_recursive(group, group_name):
 
 class QgisProjectUtils:
     def __init__(self, project: QgsProject = None):
+        """
+        Description to do
+
+        Args:
+            project (QgsProject): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.project = project
 
     def get_oid_settings(self):
@@ -217,6 +234,16 @@ class QgisProjectUtils:
         return oid_settings
 
     def set_oid_settings(self, oid_settings):
+        """
+        Description to do
+
+        Args:
+            oid_settings (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         for layer_name in oid_settings.keys():
             layers = self.project.mapLayersByName(layer_name)
             if layers:

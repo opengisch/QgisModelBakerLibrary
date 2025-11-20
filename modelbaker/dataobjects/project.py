@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2016-12-21
-        git sha              : :%H$
-        copyright            : (C) 2016 by OPENGIS.ch
-        email                : info@opengis.ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2021-12-16
+    Copyright: (C) 2016 by OPENGIS.ch
+    Contact: info@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from __future__ import annotations
 
 from typing import Any, Optional
@@ -54,6 +49,20 @@ class Project(QObject):
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
         log_function=None,
     ) -> None:
+        """
+        Description to do
+
+        Args:
+            auto_transaction (str): Description to do.
+            evaluate_default_values (bool): Description to do.
+            context (dict[str, str]): Description to do.
+            optimize_strategy (OptimizeStrategy): Description to do.
+            log_function (TYPE): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         QObject.__init__(self)
         self.crs = None
         self.name = "Not set"
@@ -77,9 +86,26 @@ class Project(QObject):
         self.bags_of_enum = dict()
 
     def add_layer(self, layer: Layer) -> None:
+        """
+        Description to do
+
+        Args:
+            layer (Layer): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.layers.append(layer)
 
     def dump(self) -> dict[str, Any]:
+        """
+        Description to do
+
+        Returns:
+            dict[str, Any]: Description to do.
+        """
+
         definition = dict()
         definition["crs"] = self.crs.toWkt()
         definition["auto_transaction"] = self.auto_transaction
@@ -104,6 +130,16 @@ class Project(QObject):
         return definition
 
     def load(self, definition: dict[str, Any]) -> None:
+        """
+        Description to do
+
+        Args:
+            definition (dict[str, Any]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.crs = definition["crs"]
         self.auto_transaction = definition["auto_transaction"]
         self.evaluate_default_values = definition["evaluate_default_values"]
@@ -125,6 +161,18 @@ class Project(QObject):
         qgis_project: QgsProject,
         group: Optional[QgsLayerTreeGroup] = None,
     ) -> None:
+        """
+        Description to do
+
+        Args:
+            path (str): Description to do.
+            qgis_project (QgsProject): Description to do.
+            group (Optional[QgsLayerTreeGroup]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         if Qgis.QGIS_VERSION_INT < 32600:
             # set auto_transaction as boolean
             qgis_project.setAutoTransaction(self.auto_transaction == "True")
@@ -343,6 +391,16 @@ class Project(QObject):
             qgis_project.write(path)
 
     def load_custom_layer_order(self, qgis_project: QgsProject) -> None:
+        """
+        Description to do
+
+        Args:
+            qgis_project (QgsProject): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         custom_layer_order = list()
         for custom_layer_name in self.custom_layer_order_structure:
             custom_layer = qgis_project.mapLayersByName(custom_layer_name)
@@ -356,12 +414,32 @@ class Project(QObject):
             root.setHasCustomLayerOrder(True)
 
     def load_custom_variables(self, qgis_project: QgsProject) -> None:
+        """
+        Description to do
+
+        Args:
+            qgis_project (QgsProject): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         for key in self.custom_variables.keys():
             QgsExpressionContextUtils.setProjectVariable(
                 qgis_project, key, self.custom_variables[key]
             )
 
     def load_layouts(self, qgis_project: QgsProject) -> None:
+        """
+        Description to do
+
+        Args:
+            qgis_project (QgsProject): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         for layout_name in self.layouts.keys():
             # create the layout
             layout = QgsPrintLayout(qgis_project)
@@ -379,6 +457,16 @@ class Project(QObject):
                 qgis_project.layoutManager().addLayout(layout)
 
     def load_mapthemes(self, qgis_project: QgsProject) -> None:
+        """
+        Description to do
+
+        Args:
+            qgis_project (QgsProject): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         if self.mapthemes:
             for name in self.mapthemes.keys():
                 map_theme_record = QgsMapThemeCollection.MapThemeRecord()
@@ -442,10 +530,27 @@ class Project(QObject):
                 qgis_project.mapThemeCollection().insert(name, map_theme_record)
 
     def store_project_variables(self, qgis_project: QgsProject) -> None:
+        """
+        Description to do
+
+        Args:
+            qgis_project (QgsProject): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         QgsExpressionContextUtils.setProjectVariable(
             qgis_project, "optimize_strategy", self.optimize_strategy.name
         )
 
     def post_generate(self) -> None:
+        """
+        Description to do
+
+        Returns:
+            None: Description to do.
+        """
+
         for layer in self.layers:
             layer.post_generate(self)

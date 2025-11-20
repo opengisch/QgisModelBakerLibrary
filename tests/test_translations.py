@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 31.10.2024
-        git sha              : :%H$
-        copyright            : (C) 2024 by Germán Carrillo
-        email                : german at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2024-10-31
+    Copyright: (C) 2024 by Germán Carrillo
+    Contact: german@opengisch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import datetime
 import logging
@@ -52,9 +47,8 @@ class TestTranslations(unittest.TestCase):
         importer.configuration = iliimporter_config(importer.tool)
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
-            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
-                datetime.datetime.now()
-            ),
+            self.basetestpath,
+            "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
@@ -239,9 +233,8 @@ class TestTranslations(unittest.TestCase):
         importer.configuration = iliimporter_config(importer.tool)
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
-            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
-                datetime.datetime.now()
-            ),
+            self.basetestpath,
+            "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
@@ -254,24 +247,35 @@ class TestTranslations(unittest.TestCase):
         # Translation handling is active
         assert db_connector.get_translation_handling()
 
-        # Get the translated models 
+        # Get the translated models
         assert {"PlansDAffectation_V1_2"} == set(db_connector.get_translation_models())
 
         # Get all languages
-        assert {'en','de','fr'} == set(db_connector.get_available_languages())
+        assert {"en", "de", "fr"} == set(db_connector.get_available_languages())
 
-        # ... without irrelevant models 
-        irrelevants = ["AdministrativeUnits_V1","AdministrativeUnitsCH_V1","Dictionaries_V1","DictionariesCH_V1"]
-        assert {'de','fr'} == set(db_connector.get_available_languages(irrelevants))
+        # ... without irrelevant models
+        irrelevants = [
+            "AdministrativeUnits_V1",
+            "AdministrativeUnitsCH_V1",
+            "Dictionaries_V1",
+            "DictionariesCH_V1",
+        ]
+        assert {"de", "fr"} == set(db_connector.get_available_languages(irrelevants))
 
         # ... and the language of the translated model only
-        assert {'fr'} == set(db_connector.get_available_languages([],["PlansDAffectation_V1_2"]))
+        assert {"fr"} == set(
+            db_connector.get_available_languages([], ["PlansDAffectation_V1_2"])
+        )
 
         # --- and nonsense use case for the validation, get only of an english model
-        assert {'en'} == set(db_connector.get_available_languages([],["AdministrativeUnits_V1"]))
+        assert {"en"} == set(
+            db_connector.get_available_languages([], ["AdministrativeUnits_V1"])
+        )
 
         # ... as well as ignoring the translated models and alowing it again and the english one
-        assert {'de','en'} == set(db_connector.get_available_languages(["PlansDAffectation_V1_2"]))
+        assert {"de", "en"} == set(
+            db_connector.get_available_languages(["PlansDAffectation_V1_2"])
+        )
 
     def test_translated_available_langs_pg(self):
         importer = iliimporter.Importer()
@@ -292,24 +296,35 @@ class TestTranslations(unittest.TestCase):
         # Translation handling is active
         assert db_connector.get_translation_handling()
 
-        # Get the translated models 
+        # Get the translated models
         assert {"PlansDAffectation_V1_2"} == set(db_connector.get_translation_models())
 
         # Get all languages
-        assert {'en','de','fr'} == set(db_connector.get_available_languages())
+        assert {"en", "de", "fr"} == set(db_connector.get_available_languages())
 
-        # ... without irrelevant models 
-        irrelevants = ["AdministrativeUnits_V1","AdministrativeUnitsCH_V1","Dictionaries_V1","DictionariesCH_V1"]
-        assert {'de','fr'} == set(db_connector.get_available_languages(irrelevants))
+        # ... without irrelevant models
+        irrelevants = [
+            "AdministrativeUnits_V1",
+            "AdministrativeUnitsCH_V1",
+            "Dictionaries_V1",
+            "DictionariesCH_V1",
+        ]
+        assert {"de", "fr"} == set(db_connector.get_available_languages(irrelevants))
 
         # ... and the language of the translated model only
-        assert {'fr'} == set(db_connector.get_available_languages([],["PlansDAffectation_V1_2"]))
+        assert {"fr"} == set(
+            db_connector.get_available_languages([], ["PlansDAffectation_V1_2"])
+        )
 
         # --- and nonsense use case for the validation, get only of an english model
-        assert {'en'} == set(db_connector.get_available_languages([],["AdministrativeUnits_V1"]))
-        
+        assert {"en"} == set(
+            db_connector.get_available_languages([], ["AdministrativeUnits_V1"])
+        )
+
         # ... as well as ignoring the translated models and alowing it again and the english one
-        assert {'de','en'} == set(db_connector.get_available_languages(["PlansDAffectation_V1_2"]))
+        assert {"de", "en"} == set(
+            db_connector.get_available_languages(["PlansDAffectation_V1_2"])
+        )
 
     def test_translated_namelang_gpkg(self):
         # same as translated_db_objects but this time is the schema in French (namelang) and the preferred language German.
@@ -318,13 +333,12 @@ class TestTranslations(unittest.TestCase):
         importer.configuration = iliimporter_config(importer.tool)
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
-            self.basetestpath, "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(
-                datetime.datetime.now()
-            )
+            self.basetestpath,
+            "tmp_translated_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
-        importer.configuration.name_lang = 'fr'
+        importer.configuration.name_lang = "fr"
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -354,7 +368,6 @@ class TestTranslations(unittest.TestCase):
         project.create(None, qgis_project)
 
         count = 0
-        fr_layer = None
         for layer in available_layers:
             if layer.name == "affectationprimaire_surfacedezones":
                 assert layer.alias == "Grundnutzung_Zonenflaeche"
@@ -421,7 +434,7 @@ class TestTranslations(unittest.TestCase):
         )
         importer.configuration.inheritance = "smart2"
         importer.configuration.create_basket_col = True
-        importer.configuration.name_lang = 'fr'
+        importer.configuration.name_lang = "fr"
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
@@ -448,7 +461,6 @@ class TestTranslations(unittest.TestCase):
         project.create(None, qgis_project)
 
         count = 0
-        fr_layer = None
         for layer in available_layers:
             if layer.name == "affectationprimaire_surfacedezones":
                 assert layer.alias == "Grundnutzung_Zonenflaeche"
@@ -495,10 +507,7 @@ class TestTranslations(unittest.TestCase):
         # Check translated relation
         rels = qgis_project.relationManager().referencedRelations(de_layer)
         assert len(rels) == 1
-        assert (
-            rels[0].id()
-            == "geometrie_document_geomtr_ffcttnrmr_srfcdznes_fkey"
-        )
+        assert rels[0].id() == "geometrie_document_geomtr_ffcttnrmr_srfcdznes_fkey"
         assert (
             rels[0].name()
             == "Geometrie_Dokument_(Geometrie)_Grundnutzung_Zonenflaeche_(t_id)"

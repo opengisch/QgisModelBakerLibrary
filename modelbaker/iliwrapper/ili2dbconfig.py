@@ -1,20 +1,14 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 23/03/17
-        git sha              : :%H$
-        copyright            : (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-        email                : gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-03-23
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 from qgis.core import QgsNetworkAccessManager
@@ -26,6 +20,13 @@ from .ili2dbutils import get_all_modeldir_in_path
 
 class BaseConfiguration:
     def __init__(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.super_pg_user = "postgres"
         self.super_pg_password = "postgres"
         self.dbparam_map = {}
@@ -38,6 +39,16 @@ class BaseConfiguration:
         self.debugging_enabled = False
 
     def save(self, settings):
+        """
+        Description to do
+
+        Args:
+            settings (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         settings.setValue("SuperUser", self.super_pg_user)
         settings.setValue("SuperPassword", self.super_pg_password)
         settings.setValue("CustomDbParameters", self.dbparam_map)
@@ -50,6 +61,16 @@ class BaseConfiguration:
         settings.setValue("DebuggingEnabled", self.debugging_enabled)
 
     def restore(self, settings):
+        """
+        Description to do
+
+        Args:
+            settings (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.super_pg_user = settings.value("SuperUser", "postgres", str)
         self.super_pg_password = settings.value("SuperPassword", "postgres", str)
         self.dbparam_map = settings.value("CustomDbParameters", {}, dict)
@@ -92,6 +113,13 @@ class BaseConfiguration:
 
     @property
     def model_directories(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         dirs = list()
         if self.custom_model_directories_enabled and self.custom_model_directories:
             dirs = self.custom_model_directories.split(";")
@@ -106,6 +134,13 @@ class BaseConfiguration:
 
     @property
     def ilidata_directories(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         dirs = list()
         if self.custom_model_directories_enabled and self.custom_model_directories:
             dirs = self.custom_model_directories.split(";")
@@ -116,6 +151,16 @@ class BaseConfiguration:
 
 class Ili2DbCommandConfiguration:
     def __init__(self, other=None):
+        """
+        Description to do
+
+        Args:
+            other (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not isinstance(other, Ili2DbCommandConfiguration):
             self.base_configuration = BaseConfiguration()
 
@@ -173,6 +218,13 @@ class Ili2DbCommandConfiguration:
     def to_ili2db_args(self):
 
         # Valid ili file, don't pass --modeldir (it can cause ili2db errors)
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         with_modeldir = not self.ilifile
 
         args = self.base_configuration.to_ili2db_args(
@@ -208,6 +260,16 @@ class Ili2DbCommandConfiguration:
 
 class ExportConfiguration(Ili2DbCommandConfiguration):
     def __init__(self, other: Ili2DbCommandConfiguration = None):
+        """
+        Description to do
+
+        Args:
+            other (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(other)
         self.xtffile = ""
         self.with_exporttid = False
@@ -216,6 +278,17 @@ class ExportConfiguration(Ili2DbCommandConfiguration):
         self.baskets = list()
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
+        """
+        Description to do
+
+        Args:
+            extra_args (TYPE): Description to do.
+            with_action (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         args = list()
 
         self.append_args(args, extra_args)
@@ -251,6 +324,16 @@ class ExportConfiguration(Ili2DbCommandConfiguration):
 
 class SchemaImportConfiguration(Ili2DbCommandConfiguration):
     def __init__(self, other: Ili2DbCommandConfiguration = None):
+        """
+        Description to do
+
+        Args:
+            other (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(other)
         self.inheritance = "smart1"
         self.create_basket_col = False
@@ -370,6 +453,16 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
 class ImportDataConfiguration(SchemaImportConfiguration):
     def __init__(self, other: Ili2DbCommandConfiguration = None):
+        """
+        Description to do
+
+        Args:
+            other (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(other)
         self.xtffile = ""
         self.delete_data = False
@@ -382,6 +475,17 @@ class ImportDataConfiguration(SchemaImportConfiguration):
         self.skip_reference_errors = False
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
+        """
+        Description to do
+
+        Args:
+            extra_args (TYPE): Description to do.
+            with_action (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         args = list()
 
         if with_action:
@@ -433,6 +537,16 @@ class ImportDataConfiguration(SchemaImportConfiguration):
 
 class UpdateDataConfiguration(Ili2DbCommandConfiguration):
     def __init__(self, other: Ili2DbCommandConfiguration = None):
+        """
+        Description to do
+
+        Args:
+            other (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(other)
         self.xtffile = ""
         self.dataset = ""
@@ -443,6 +557,17 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
         self.skip_reference_errors = False
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
+        """
+        Description to do
+
+        Args:
+            extra_args (TYPE): Description to do.
+            with_action (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         args = list()
 
         if with_action:
@@ -477,6 +602,16 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
 
 class ValidateConfiguration(Ili2DbCommandConfiguration):
     def __init__(self, other: Ili2DbCommandConfiguration = None):
+        """
+        Description to do
+
+        Args:
+            other (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(other)
         self.ilimodels = ""
         self.topics = ""
@@ -492,6 +627,17 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.plugins_dir = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
+        """
+        Description to do
+
+        Args:
+            extra_args (TYPE): Description to do.
+            with_action (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         args = list()
 
         if with_action:
@@ -546,11 +692,32 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
 class DeleteConfiguration(Ili2DbCommandConfiguration):
     def __init__(self, other: Ili2DbCommandConfiguration = None):
+        """
+        Description to do
+
+        Args:
+            other (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(other)
         self.dataset = ""
         self.baskets = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
+        """
+        Description to do
+
+        Args:
+            extra_args (TYPE): Description to do.
+            with_action (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         args = list()
 
         if with_action:
@@ -571,10 +738,31 @@ class DeleteConfiguration(Ili2DbCommandConfiguration):
 
 class ExportMetaConfigConfiguration(Ili2DbCommandConfiguration):
     def __init__(self, other: Ili2DbCommandConfiguration = None):
+        """
+        Description to do
+
+        Args:
+            other (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(other)
         self.metaconfigoutputfile = ""
 
     def to_ili2db_args(self, extra_args=[], with_action=True):
+        """
+        Description to do
+
+        Args:
+            extra_args (TYPE): Description to do.
+            with_action (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         args = list()
 
         if with_action:

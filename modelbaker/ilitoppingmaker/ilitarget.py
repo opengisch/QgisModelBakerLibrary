@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2022-07-17
-        git sha              : :%H$
-        copyright            : (C) 2022 by Dave Signer
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-07-22
+    Copyright: (C) 2022 by Dave Signer
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import datetime
 import os
@@ -41,6 +36,22 @@ class IliTarget(Target):
         publishing_date=None,
         version=None,
     ):
+        """
+        Description to do
+
+        Args:
+            projectname (str): Description to do.
+            main_dir (str): Description to do.
+            sub_dir (str): Description to do.
+            path_resolver (TYPE): Description to do.
+            owner (TYPE): Description to do.
+            publishing_date (TYPE): Description to do.
+            version (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not path_resolver:
             path_resolver = self.ilidata_path_resolver
         super().__init__(projectname, main_dir, sub_dir, path_resolver)
@@ -73,6 +84,17 @@ class IliTarget(Target):
 
     @staticmethod
     def unique_id_in_target_scope(target, id):
+        """
+        Description to do
+
+        Args:
+            target (TYPE): Description to do.
+            id (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         for toppingfileinfo in target.toppingfileinfo_list:
             if "id" in toppingfileinfo and toppingfileinfo["id"] == id:
                 iterator = int(id[-3:])

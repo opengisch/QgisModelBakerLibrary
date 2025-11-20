@@ -1,20 +1,14 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2022-07-17
-        git sha              : :%H$
-        copyright            : (C) 2022 by Dave Signer
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-07-22
+    Copyright: (C) 2022 by Dave Signer
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 
@@ -46,6 +40,18 @@ class IliProjectTopping(ProjectTopping):
         metaconfig=MetaConfig(),
     ):
         # While ProjectTopping does not hold objects like target and export_settings (and those are passed by the function) the IliProjectTopping keeps it to set up the whole IliProjectTopping before create anything.
+        """
+        Description to do
+
+        Args:
+            target (TYPE): Description to do.
+            export_settings (ExportSettings): Description to do.
+            metaconfig (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__()
         self.target = target
         self.export_settings = export_settings
@@ -54,18 +60,52 @@ class IliProjectTopping(ProjectTopping):
 
     @property
     def models(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self.metaconfig.ili2db_settings.models
 
     @property
     def referencedata_paths(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self.metaconfig.referencedata_paths
 
     @models.setter
     def models(self, models: list):
+        """
+        Description to do
+
+        Args:
+            models (list): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.metaconfig.ili2db_settings.models = models
 
     @referencedata_paths.setter
     def referencedata_paths(self, paths: list):
+        """
+        Description to do
+
+        Args:
+            paths (list): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.metaconfig.referencedata_paths = paths
 
     def makeit(self, project: QgsProject = None):
@@ -113,6 +153,16 @@ class IliProjectTopping(ProjectTopping):
 
     def append_iliproperties(self, project):
         # append ilispecific properties like the optimize_strategy to the properties object
+        """
+        Description to do
+
+        Args:
+            project (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         optimize_strategy = QgsExpressionContextUtils.projectScope(project).variable(
             "optimize_strategy"
         )

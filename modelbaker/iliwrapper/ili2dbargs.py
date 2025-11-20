@@ -1,20 +1,14 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 07.03.2022
-        git sha              : :%H$
-        copyright            : (C) 2022 by Dave Signer / (C) 2021 Germán Carrillo
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2022-03-07
+    Copyright: (C) 2022 by Dave Signer / (C) 2021 Germán Carrillo
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 import logging
@@ -42,6 +36,17 @@ def get_ili2db_args(configuration, hide_password=False):
 
 
 def _get_db_args(configuration, hide_password=False):
+    """
+    Description to do
+
+    Args:
+        configuration (TYPE): Description to do.
+        hide_password (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     su = configuration.db_use_super_login  # Boolean
     db_args = list()
 
@@ -139,6 +144,16 @@ def _get_db_args(configuration, hide_password=False):
 
 
 def _get_schema_import_args(tool):
+    """
+    Description to do
+
+    Args:
+        tool (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     args = list()
     if tool == DbIliMode.ili2pg:
         args += ["--setupPgExt"]

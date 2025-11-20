@@ -1,20 +1,16 @@
 """
-/***************************************************************************
-    begin                :    04/10/17
-    git sha              :    :%H$
-    copyright            :    (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-10-04
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 import fnmatch
 
 from qgis.PyQt.QtCore import QObject, pyqtSignal
@@ -29,6 +25,18 @@ class DBConnector(QObject):
     new_message = pyqtSignal(int, str)
 
     def __init__(self, uri, schema, parent=None):
+        """
+        Description to do
+
+        Args:
+            uri (TYPE): Description to do.
+            schema (TYPE): Description to do.
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         QObject.__init__(self, parent)
         self.QGIS_DATE_TYPE = "date"
         self.QGIS_TIME_TYPE = "time"
@@ -455,10 +463,12 @@ class DBConnector(QObject):
         Returns a list of models that are a TRANSLATION OF another model.
         """
         return []
-        
-    def get_available_languages(self, irrelevant_models: list[str], relevant_models: list[str]) -> list[str]:
+
+    def get_available_languages(
+        self, irrelevant_models: list[str], relevant_models: list[str]
+    ) -> list[str]:
         """
-        Returns a list of available languages in the t_ili2db_nls table and ignores the values for the irrelevant models. 
+        Returns a list of available languages in the t_ili2db_nls table and ignores the values for the irrelevant models.
         If a list for relevant models is passed, only those are considered (otherwise all the others)
         """
         return []
@@ -470,6 +480,16 @@ class DBConnector(QObject):
         return []
 
     def get_schemas(self, ignore_system_schemas=True):
+        """
+        Description to do
+
+        Args:
+            ignore_system_schemas (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = []
         all_schemas = self.get_all_schemas()
 
@@ -501,5 +521,16 @@ class DBConnectorError(Exception):
     """
 
     def __init__(self, message, base_exception=None):
+        """
+        Description to do
+
+        Args:
+            message (TYPE): Description to do.
+            base_exception (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(message)
         self.base_exception = base_exception

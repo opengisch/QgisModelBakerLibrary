@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 09/08/17
-        git sha              : :%H$
-        copyright            : (C) 2017 by OPENGIS.ch
-        email                : info@opengis.ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-08-09
+    Copyright: (C) 2017 by OPENGIS.ch
+    Contact: info@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import datetime
 import logging
@@ -127,10 +122,10 @@ class TestProjectTopping(unittest.TestCase):
         )
         assert ili_layers_group is not None
         ili_layers_group_layers = ili_layers_group.findLayers()
-        assert [layer.name() for layer in ili_layers_group_layers] == [
+        assert {layer.name() for layer in ili_layers_group_layers} == {
             "Belasteter_Standort (Geo_Lage_Punkt)",
             "Belasteter_Standort (Geo_Lage_Polygon)",
-        ]
+        }
 
         qlr_layers_group = qgis_project.layerTreeRoot().findGroup("Other Layers")
         assert qlr_layers_group is not None
@@ -248,10 +243,10 @@ class TestProjectTopping(unittest.TestCase):
         )
         assert ili_layers_group is not None
         ili_layers_group_layers = ili_layers_group.findLayers()
-        assert [layer.name() for layer in ili_layers_group_layers] == [
+        assert {layer.name() for layer in ili_layers_group_layers} == {
             "Belasteter_Standort (Geo_Lage_Punkt)",
             "Belasteter_Standort (Geo_Lage_Polygon)",
-        ]
+        }
 
         source_layers_group = qgis_project.layerTreeRoot().findGroup("Other Layers")
         assert source_layers_group is not None

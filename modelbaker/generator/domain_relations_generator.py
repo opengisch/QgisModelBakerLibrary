@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-    begin                :    04/10/17
-    git sha              :    :%H$
-    copyright            :    (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-                              (C) 2016 by OPENGIS.ch
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-10-04
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 import re
 
 from ..dataobjects.relations import Relation
@@ -25,11 +20,32 @@ class DomainRelationGenerator:
     """Used for ili2db version 3 relation creation"""
 
     def __init__(self, db_connector, inheritance):
+        """
+        Description to do
+
+        Args:
+            db_connector (TYPE): Description to do.
+            inheritance (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self._db_connector = db_connector
         self.inheritance = inheritance
         self.debug = False
 
     def get_domain_relations_info(self, layers):
+        """
+        Description to do
+
+        Args:
+            layers (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         domains = [layer.name for layer in layers if layer.is_domain]
         if self.debug:
             print("domains:", domains)
@@ -323,6 +339,17 @@ class DomainRelationGenerator:
         return (relations, bags_of_enum)
 
     def parse_model(self, model_content, domains):
+        """
+        Description to do
+
+        Args:
+            model_content (TYPE): Description to do.
+            domains (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         re_comment = re.compile(r"\s*/\*")  # /* comment
         re_end_comment = re.compile(r"\s*\*/")  # comment */
         re_oneline_comment = re.compile(r"\s*/\*.*\*/")  # /* comment */
@@ -904,6 +931,20 @@ class DomainRelationGenerator:
     def make_full_qualified(
         self, name, level, current_model, current_topic, current_class=None
     ):
+        """
+        Description to do
+
+        Args:
+            name (TYPE): Description to do.
+            level (TYPE): Description to do.
+            current_model (TYPE): Description to do.
+            current_topic (TYPE): Description to do.
+            current_class (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         parents = [current_model, current_topic, current_class]
         len_parents = len(parents)
         name_parts = name.split(".")
@@ -914,6 +955,19 @@ class DomainRelationGenerator:
         return ".".join(name_parts)
 
     def get_ext_dom_attrs(self, iliclass, models_info, extended_classes, inheritance):
+        """
+        Description to do
+
+        Args:
+            iliclass (TYPE): Description to do.
+            models_info (TYPE): Description to do.
+            extended_classes (TYPE): Description to do.
+            inheritance (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if inheritance == "smart1":
             # Use smart 2 first to get domain attributes from parents (we
             # really need them) and only then use smart 1
@@ -1001,21 +1055,79 @@ class DomainRelationGenerator:
         return all_attrs
 
     def _get_iliname_dbname_mapping(self, sqlnames):
+        """
+        Description to do
+
+        Args:
+            sqlnames (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._db_connector.get_iliname_dbname_mapping(sqlnames)
 
     def _get_models(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._db_connector.get_models()
 
     def _get_meta_attrs(self, ilielement):
+        """
+        Description to do
+
+        Args:
+            ilielement (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._db_connector.get_meta_attrs(ilielement)
 
     def _get_classili_classdb_mapping(self, models_info, extended_classes):
+        """
+        Description to do
+
+        Args:
+            models_info (TYPE): Description to do.
+            extended_classes (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._db_connector.get_classili_classdb_mapping(
             models_info, extended_classes
         )
 
     def _get_attrili_attrdb_mapping(self, models_info_with_ext):
+        """
+        Description to do
+
+        Args:
+            models_info_with_ext (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._db_connector.get_attrili_attrdb_mapping(models_info_with_ext)
 
     def _get_attrili_attrdb_mapping_by_owner(self, owners):
+        """
+        Description to do
+
+        Args:
+            owners (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._db_connector.get_attrili_attrdb_mapping_by_owner(owners)

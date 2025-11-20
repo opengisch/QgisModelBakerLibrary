@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2022-07-17
-        git sha              : :%H$
-        copyright            : (C) 2022 by Dave Signer
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-07-22
+    Copyright: (C) 2022 by Dave Signer
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import mimetypes
 import os
@@ -43,6 +38,24 @@ class DatasetMetadata:
         linking_models: list = [],
         preferred_datasource: str = None,
     ):
+        """
+        Description to do
+
+        Args:
+            dataset_version (str): Description to do.
+            publishing_date (str): Description to do.
+            owner (str): Description to do.
+            project_name (str): Description to do.
+            id (str): Description to do.
+            file_type (str): Description to do.
+            file_path (str): Description to do.
+            linking_models (list): Description to do.
+            preferred_datasource (str): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.id = id
         self.file_type = file_type
         self.file_path = file_path
@@ -60,6 +73,16 @@ class DatasetMetadata:
         self.file_mimetype = self._file_mime_type(self.file_path)
 
     def _file_mime_type(self, file_path: str = None) -> str:
+        """
+        Description to do
+
+        Args:
+            file_path (str): Description to do.
+
+        Returns:
+            str: Description to do.
+        """
+
         mimetype = mimetypes.guess_type(file_path)
         if mimetype[0] is None:
             # ugly fallback
@@ -135,7 +158,12 @@ class IliData:
     """
 
     def __init__(self):
-        pass
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
 
     def generate_file(
         self,

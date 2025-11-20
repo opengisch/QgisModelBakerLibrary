@@ -1,29 +1,45 @@
 """
-/***************************************************************************
-    begin                :    09/05/19
-    git sha              :    :%H$
-    copyright            :    (C) 2019 by Yesid Polania (BSF Swissphoto)
-    email                :    yesidpol.3@gmail.com
- ***************************************************************************/
+Metadata:
+    Creation Date: 2019-05-09
+    Copyright: (C) 2019 by Yesid Polania (BSF Swissphoto)
+    Contact: yesidpol.3@gmail.com
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from .layer_uri import LayerUri
 
 
 class MssqlLayerUri(LayerUri):
     def __init__(self, uri: str) -> None:
+        """
+        Description to do
+
+        Args:
+            uri (str): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         LayerUri.__init__(self, uri)
         self.provider = "mssql"
 
     def get_data_source_uri(self, record: dict) -> str:
+        """
+        Description to do
+
+        Args:
+            record (dict): Description to do.
+
+        Returns:
+            str: Description to do.
+        """
+
         if record["geometry_column"]:
             data_source_uri = '{uri} key={primary_key} estimatedmetadata=true srid={srid} type={type} table="{schema}"."{table}" ({geometry_column}) sql='.format(
                 uri=self._get_layer_uri_common(),
@@ -45,6 +61,13 @@ class MssqlLayerUri(LayerUri):
         return data_source_uri
 
     def _get_layer_uri_common(self) -> str:
+        """
+        Description to do
+
+        Returns:
+            str: Description to do.
+        """
+
         param_db = dict()
         lst_item = self.uri.split(";")
         for item in lst_item:
