@@ -26,6 +26,19 @@ from .ili2dbtools import get_tool_url, get_tool_version
 
 
 def get_ili2db_bin(tool, db_ili_version, stdout, stderr):
+    """
+    Description to do
+
+    Args:
+        tool (TYPE): Description to do.
+        db_ili_version (TYPE): Description to do.
+        stdout (TYPE): Description to do.
+        stderr (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     if tool not in DbIliMode or tool == DbIliMode.ili:
         raise RuntimeError("Tool {} not found".format(tool))
 
@@ -120,6 +133,17 @@ def get_ili2db_bin(tool, db_ili_version, stdout, stderr):
 
 
 def get_all_modeldir_in_path(path, lambdafunction=None):
+    """
+    Description to do
+
+    Args:
+        path (TYPE): Description to do.
+        lambdafunction (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     all_subdirs = [path[0] for path in os.walk(path)]  # include path
     # Make sure path is included, it can be a special string like `%XTF_DIR`
     modeldirs = [path]
@@ -145,10 +169,30 @@ def get_java_path(base_configuration):
     """
 
     def is_exe(fpath):
+        """
+        Description to do
+
+        Args:
+            fpath (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return os.path.isfile(fpath) and os.access(fpath, os.X_OK)
 
     # This function is like the linux which command
     def which(program):
+
+        """
+        Description to do
+
+        Args:
+            program (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
 
         fpath, fname = os.path.split(program)
         if fpath:
@@ -168,6 +212,17 @@ def get_java_path(base_configuration):
     # the win32 libraries appear not to be part of the standard python install, but they are included in the
     # python version that comes with QGIS
     def getenv_system(varname, default=""):
+        """
+        Description to do
+
+        Args:
+            varname (TYPE): Description to do.
+            default (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         import winreg
 
         v = default
@@ -307,6 +362,16 @@ class JavaNotFoundError(FileNotFoundError):
     PLUGIN_CONFIGURATION_URL = "https://opengisch.github.io/QgisModelBaker/user_guide/plugin_configuration/#interlis-settings"
 
     def __init__(self, java_version=None):
+        """
+        Description to do
+
+        Args:
+            java_version (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__()
 
         if java_version:
@@ -316,6 +381,13 @@ class JavaNotFoundError(FileNotFoundError):
 
     @property
     def html_java_version(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.java_version:
             return "<br/>".join(self.java_version.splitlines())
         else:
@@ -323,6 +395,13 @@ class JavaNotFoundError(FileNotFoundError):
 
     @property
     def error_string(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.java_version:
             return QCoreApplication.translate(
                 "ili2dbutils",

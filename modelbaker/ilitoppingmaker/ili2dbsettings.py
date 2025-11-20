@@ -24,6 +24,13 @@ class Ili2dbSettings(dict):
     """
 
     def __init__(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.parameters = {}
         self.metaattr_path = None
         self.postscript_path = None
@@ -31,6 +38,16 @@ class Ili2dbSettings(dict):
         self.models = []
 
     def parse_parameters_from_ini_file(self, ini_file: str) -> bool:
+        """
+        Description to do
+
+        Args:
+            ini_file (str): Description to do.
+
+        Returns:
+            bool: Description to do.
+        """
+
         p = Path(ini_file)
         if p.exists():
             config = configparser.ConfigParser()
@@ -40,6 +57,16 @@ class Ili2dbSettings(dict):
                 return False
 
             def parse_boolean(v):
+                """
+                Description to do
+
+                Args:
+                    v (TYPE): Description to do.
+
+                Returns:
+                    TYPE: Description to do.
+                """
+
                 return True if v == "true" else (False if v == "false" else v)
 
             params = dict(config["ch.ehi.ili2db"])

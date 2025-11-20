@@ -24,11 +24,33 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
     _settings_base_path = "ili2mssql/"
 
     def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
+        """
+        Description to do
+
+        Args:
+            configuration (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         DbCommandConfigManager.__init__(self, configuration)
 
     def get_uri(
         self, su: bool = False, qgis: bool = False, fallback_user: str = None
     ) -> str:
+        """
+        Description to do
+
+        Args:
+            su (bool): Description to do.
+            qgis (bool): Description to do.
+            fallback_user (str): Description to do.
+
+        Returns:
+            str: Description to do.
+        """
+
         separator = ";"
         uri = []
         uri += ["DRIVER={{{}}}".format(self.configuration.db_odbc_driver)]
@@ -46,6 +68,17 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
         return separator.join(uri)
 
     def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
+        """
+        Description to do
+
+        Args:
+            hide_password (bool): Description to do.
+            su (bool): Description to do.
+
+        Returns:
+            list[str]: Description to do.
+        """
+
         db_args = list()
         db_args += ["--dbhost", self.configuration.dbhost]
         if self.configuration.dbport:
@@ -67,6 +100,13 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
         return db_args
 
     def save_config_in_qsettings(self) -> None:
+        """
+        Description to do
+
+        Returns:
+            None: Description to do.
+        """
+
         settings = QSettings()
 
         settings.setValue(self._settings_base_path + "host", self.configuration.dbhost)
@@ -89,6 +129,13 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
         )
 
     def load_config_from_qsettings(self) -> None:
+        """
+        Description to do
+
+        Returns:
+            None: Description to do.
+        """
+
         settings = QSettings()
 
         self.configuration.dbhost = settings.value(

@@ -16,7 +16,24 @@ from .iliexecutable import IliExecutable
 
 class Deleter(IliExecutable):
     def __init__(self, parent=None):
+        """
+        Description to do
+
+        Args:
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(parent)
 
     def _create_config(self) -> Ili2DbCommandConfiguration:
+        """
+        Description to do
+
+        Returns:
+            Ili2DbCommandConfiguration: Description to do.
+        """
+
         return DeleteConfiguration()

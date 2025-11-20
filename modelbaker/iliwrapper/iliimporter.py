@@ -20,10 +20,28 @@ from .iliexecutable import IliExecutable
 
 class Importer(IliExecutable):
     def __init__(self, dataImport=False, parent=None):
+        """
+        Description to do
+
+        Args:
+            dataImport (TYPE): Description to do.
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.__data_import = dataImport
         super().__init__(parent)
 
     def _create_config(self) -> Ili2DbCommandConfiguration:
+        """
+        Description to do
+
+        Returns:
+            Ili2DbCommandConfiguration: Description to do.
+        """
+
         if self.__data_import:
             configuration = ImportDataConfiguration()
         else:

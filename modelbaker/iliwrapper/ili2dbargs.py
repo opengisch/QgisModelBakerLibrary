@@ -36,6 +36,17 @@ def get_ili2db_args(configuration, hide_password=False):
 
 
 def _get_db_args(configuration, hide_password=False):
+    """
+    Description to do
+
+    Args:
+        configuration (TYPE): Description to do.
+        hide_password (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     su = configuration.db_use_super_login  # Boolean
     db_args = list()
 
@@ -133,6 +144,16 @@ def _get_db_args(configuration, hide_password=False):
 
 
 def _get_schema_import_args(tool):
+    """
+    Description to do
+
+    Args:
+        tool (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     args = list()
     if tool == DbIliMode.ili2pg:
         args += ["--setupPgExt"]

@@ -23,11 +23,31 @@ class PgLayerUri(LayerUri):
     """
 
     def __init__(self, uri: str) -> None:
+        """
+        Description to do
+
+        Args:
+            uri (str): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         LayerUri.__init__(self, uri)
         self.pg_estimated_metadata = False
         self.provider = "postgres"
 
     def get_data_source_uri(self, record: dict) -> str:
+        """
+        Description to do
+
+        Args:
+            record (dict): Description to do.
+
+        Returns:
+            str: Description to do.
+        """
+
         if record["geometry_column"]:
             str_pg_estimated_metadata = (
                 "true" if self.pg_estimated_metadata else "false"

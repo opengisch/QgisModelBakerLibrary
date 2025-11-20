@@ -43,6 +43,17 @@ class IliCache(QObject):
     CACHE_PATH = os.path.expanduser("~/.ilicache")
 
     def __init__(self, configuration, single_ili_file=None):
+        """
+        Description to do
+
+        Args:
+            configuration (TYPE): Description to do.
+            single_ili_file (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         QObject.__init__(self)
         self.information_file = "ilimodels.xml"
         self.repositories = dict()
@@ -65,9 +76,23 @@ class IliCache(QObject):
 
     def set_repositories_to_model(self):
         # hold refresh back
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.modelReposTimer.start(500)
 
     def refresh(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self.directories is None:
             for directory in self.directories:
                 self.process_model_directory(directory)
@@ -77,6 +102,16 @@ class IliCache(QObject):
                 self.process_single_ili_file()
 
     def process_model_directory(self, path):
+        """
+        Description to do
+
+        Args:
+            path (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if path[0] == "%":
             pass
         else:
@@ -88,6 +123,13 @@ class IliCache(QObject):
                 get_all_modeldir_in_path(path, self.process_local_ili_folder)
 
     def process_single_ili_file(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         models = self.process_ili_file(self.single_ili_file)
         self.repositories["no_repo"] = sorted(
             models, key=lambda m: m["version"], reverse=True
@@ -95,6 +137,17 @@ class IliCache(QObject):
         self.set_repositories_to_model()
 
     def file_url(self, url, file):
+        """
+        Description to do
+
+        Args:
+            url (TYPE): Description to do.
+            file (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if url is None:
             return file
         elif os.path.isdir(url):
@@ -103,6 +156,18 @@ class IliCache(QObject):
             return urllib.parse.urljoin(url + "/", file)
 
     def file_path(self, netloc, url, file):
+        """
+        Description to do
+
+        Args:
+            netloc (TYPE): Description to do.
+            url (TYPE): Description to do.
+            file (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if url is None:
             return file
         elif os.path.isdir(url):
@@ -171,6 +236,13 @@ class IliCache(QObject):
 
     @classmethod
     def clear_cache(cls):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not QDir().exists(cls.CACHE_PATH):
             return
 
@@ -284,6 +356,16 @@ class IliCache(QObject):
         self.set_repositories_to_model()
 
     def process_ili_file(self, ilifile):
+        """
+        Description to do
+
+        Args:
+            ilifile (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         fileModels = list()
         try:
             fileModels = self.parse_ili_file(ilifile, "utf-8")
@@ -353,6 +435,13 @@ class IliCache(QObject):
 
     @property
     def model_names(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         names = list()
         for repo in self.repositories.values():
             for model in repo:
@@ -360,6 +449,16 @@ class IliCache(QObject):
         return names
 
     def get_element_text(self, element):
+        """
+        Description to do
+
+        Args:
+            element (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if element is not None:
             return element.text
         return None
@@ -371,12 +470,39 @@ class IliModelItemModel(QStandardItemModel):
         VERSION = Qt.ItemDataRole.UserRole + 2
 
         def __int__(self):
+            """
+            Description to do
+
+            Returns:
+                TYPE: Description to do.
+            """
+
             return self.value
 
     def __init__(self, parent=None):
+        """
+        Description to do
+
+        Args:
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(0, 1, parent)
 
     def set_repositories(self, repositories):
+        """
+        Description to do
+
+        Args:
+            repositories (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.clear()
         names = list()
 
@@ -406,6 +532,13 @@ class ModelCompleterDelegate(QItemDelegate):
     """
 
     def __init__(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__()
         self.widget = QWidget()
         self.widget.setLayout(QGridLayout())
@@ -418,10 +551,35 @@ class ModelCompleterDelegate(QItemDelegate):
         self.widget.layout().addWidget(self.repository_label, 0, 1)
 
     def paint(self, painter, option, index):
+        """
+        Description to do
+
+        Args:
+            painter (TYPE): Description to do.
+            option (TYPE): Description to do.
+            index (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         option.index = index
         super().paint(painter, option, index)
 
     def drawDisplay(self, painter, option, rect, text):
+        """
+        Description to do
+
+        Args:
+            painter (TYPE): Description to do.
+            option (TYPE): Description to do.
+            rect (TYPE): Description to do.
+            text (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         repository = option.index.data(int(IliModelItemModel.Roles.ILIREPO))
         option.index.data(int(IliModelItemModel.Roles.VERSION))
         self.repository_label.setText(
@@ -455,6 +613,19 @@ class IliDataCache(IliCache):
     CACHE_PATH = os.path.expanduser("~/.ilidatacache")
 
     def __init__(self, configuration, type="metaconfig", models=None, datasources=[]):
+        """
+        Description to do
+
+        Args:
+            configuration (TYPE): Description to do.
+            type (TYPE): Description to do.
+            models (TYPE): Description to do.
+            datasources (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         IliCache.__init__(self, configuration)
         self.information_file = "ilidata.xml"
 
@@ -475,6 +646,16 @@ class IliDataCache(IliCache):
 
     def process_model_directory(self, path):
         # download remote and local repositories
+        """
+        Description to do
+
+        Args:
+            path (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.download_repository(path)
 
     def _process_informationfile(self, file, netloc, url):
@@ -737,12 +918,39 @@ class IliDataItemModel(QStandardItemModel):
         SHORT_DESCRIPTION = Qt.ItemDataRole.UserRole + 10
 
         def __int__(self):
+            """
+            Description to do
+
+            Returns:
+                TYPE: Description to do.
+            """
+
             return self.value
 
     def __init__(self, parent=None):
+        """
+        Description to do
+
+        Args:
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(0, 1, parent)
 
     def set_repositories(self, repositories):
+        """
+        Description to do
+
+        Args:
+            repositories (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.beginResetModel()
         self.clear()
         ids = list()
@@ -803,6 +1011,13 @@ class IliDataFileCompleterDelegate(QItemDelegate):
     """
 
     def __init__(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__()
         self.widget = QWidget()
         self.widget.setLayout(QGridLayout())
@@ -815,10 +1030,35 @@ class IliDataFileCompleterDelegate(QItemDelegate):
         self.widget.layout().addWidget(self.repository_label, 0, 1)
 
     def paint(self, painter, option, index):
+        """
+        Description to do
+
+        Args:
+            painter (TYPE): Description to do.
+            option (TYPE): Description to do.
+            index (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         option.index = index
         super().paint(painter, option, index)
 
     def drawDisplay(self, painter, option, rect, text):
+        """
+        Description to do
+
+        Args:
+            painter (TYPE): Description to do.
+            option (TYPE): Description to do.
+            rect (TYPE): Description to do.
+            text (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         repository = option.index.data(int(IliDataItemModel.Roles.ILIREPO))
         display_text = option.index.data(int(Qt.ItemDataRole.DisplayRole))
 
@@ -857,6 +1097,18 @@ class IliToppingFileCache(IliDataCache):
     CACHE_PATH = os.path.expanduser("~/.ilitoppingfilescache")
 
     def __init__(self, configuration, file_ids=None, tool_dir=None):
+        """
+        Description to do
+
+        Args:
+            configuration (TYPE): Description to do.
+            file_ids (TYPE): Description to do.
+            tool_dir (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         IliDataCache.__init__(self, configuration)
         self.model = IliToppingFileItemModel()
         self.sorted_model.setSourceModel(self.model)
@@ -877,6 +1129,13 @@ class IliToppingFileCache(IliDataCache):
         self.model.rowsInserted.connect(lambda: self.on_download_status(None))
 
     def refresh(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self.directories is None:
             for directory in self.directories:
                 self.process_model_directory(directory)
@@ -915,6 +1174,16 @@ class IliToppingFileCache(IliDataCache):
 
     def on_download_status(self, dataset_id):
         # here we could add some more logic
+        """
+        Description to do
+
+        Args:
+            dataset_id (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if dataset_id is not None:
             self.downloaded_files.append(dataset_id)
         # ensure all the files are downloaded and contained in the model
@@ -1005,12 +1274,39 @@ class IliToppingFileItemModel(QStandardItemModel):
         URL = Qt.ItemDataRole.UserRole + 6
 
         def __int__(self):
+            """
+            Description to do
+
+            Returns:
+                TYPE: Description to do.
+            """
+
             return self.value
 
     def __init__(self, parent=None):
+        """
+        Description to do
+
+        Args:
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(0, 1, parent)
 
     def set_repositories(self, repositories):
+        """
+        Description to do
+
+        Args:
+            repositories (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self.clear()
         ids = list()
 

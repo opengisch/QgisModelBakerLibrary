@@ -27,6 +27,16 @@ from .qt_utils import slugify
 
 
 def get_schema_identificator_from_sourceprovider(provider):
+    """
+    Description to do
+
+    Args:
+        provider (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     if provider.name() == "postgres" or provider.name() == "mssql":
         layer_source = QgsDataSourceUri(provider.dataSourceUri())
         return slugify(
@@ -38,6 +48,16 @@ def get_schema_identificator_from_sourceprovider(provider):
 
 
 def get_schema_identificator_from_configuration(configuration):
+    """
+    Description to do
+
+    Args:
+        configuration (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     if configuration.tool == DbIliMode.pg or configuration.tool == DbIliMode.mssql:
         return slugify(
             f"{configuration.dbhost}_{configuration.database}_{configuration.dbschema}"
@@ -49,6 +69,16 @@ def get_schema_identificator_from_configuration(configuration):
 
 def get_authconfig_map(authconfigid):
     # to get username and password from the authconfig
+    """
+    Description to do
+
+    Args:
+        authconfigid (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     auth_mgr = QgsApplication.authManager()
     auth_cfg = QgsAuthMethodConfig()
     auth_mgr.loadAuthenticationConfig(authconfigid, auth_cfg, True)
@@ -109,6 +139,16 @@ def get_configuration_from_sourceprovider(provider, configuration):
 
 
 def get_db_connector(configuration):
+    """
+    Description to do
+
+    Args:
+        configuration (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     db_simple_factory = DbSimpleFactory()
     schema = configuration.dbschema
 

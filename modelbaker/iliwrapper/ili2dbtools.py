@@ -15,6 +15,17 @@ from .globals import DbIliMode
 
 
 def get_tool_version(tool, db_ili_version):
+    """
+    Description to do
+
+    Args:
+        tool (TYPE): Description to do.
+        db_ili_version (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     if tool == DbIliMode.ili2gpkg:
         if db_ili_version == 3:
             return "3.11.3"
@@ -35,6 +46,17 @@ def get_tool_version(tool, db_ili_version):
 
 
 def get_tool_url(tool, db_ili_version):
+    """
+    Description to do
+
+    Args:
+        tool (TYPE): Description to do.
+        db_ili_version (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     if tool == DbIliMode.ili2gpkg:
         return "https://downloads.interlis.ch/ili2gpkg/ili2gpkg-{version}.zip".format(
             version=get_tool_version(tool, db_ili_version)

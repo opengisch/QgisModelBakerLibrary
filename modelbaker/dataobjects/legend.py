@@ -34,6 +34,19 @@ class LegendGroup:
         ignore_node_names: bool = None,
         static_sorting: bool = False,
     ) -> None:
+        """
+        Description to do
+
+        Args:
+            name (str): Description to do.
+            expanded (bool): Description to do.
+            ignore_node_names (bool): Description to do.
+            static_sorting (bool): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.name = name
         self.items = list()
         self.expanded = expanded
@@ -49,15 +62,42 @@ class LegendGroup:
         self.ignore_node_names = ignore_node_names
 
     def dump(self) -> list[dict[str, Any]]:
+        """
+        Description to do
+
+        Returns:
+            list[dict[str, Any]]: Description to do.
+        """
+
         definition = list()
         for item in self.items:
             definition.append(item.dump())
         return definition
 
     def append(self, item: Union[LegendGroup, Layer]) -> None:
+        """
+        Description to do
+
+        Args:
+            item (Union[LegendGroup, Layer]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.items.append(item)
 
     def __getitem__(self, item: str) -> Union[LegendGroup, Layer]:
+        """
+        Description to do
+
+        Args:
+            item (str): Description to do.
+
+        Returns:
+            Union[LegendGroup, Layer]: Description to do.
+        """
+
         for i in self.items:
             try:
                 if i.name == item:
@@ -69,11 +109,32 @@ class LegendGroup:
         raise KeyError(item)
 
     def load(self, definition: list[Union[LegendGroup, Layer]]) -> None:
+        """
+        Description to do
+
+        Args:
+            definition (list[Union[LegendGroup, Layer]]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.items = definition
 
     def create(
         self, qgis_project: QgsProject, group: Optional[QgsLayerTreeGroup] = None
     ) -> None:
+        """
+        Description to do
+
+        Args:
+            qgis_project (QgsProject): Description to do.
+            group (Optional[QgsLayerTreeGroup]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         if not group:
             group = qgis_project.layerTreeRoot()
 
@@ -123,4 +184,11 @@ class LegendGroup:
             static_index += 1
 
     def is_empty(self) -> bool:
+        """
+        Description to do
+
+        Returns:
+            bool: Description to do.
+        """
+
         return not bool(self.items)

@@ -36,6 +36,22 @@ class IliTarget(Target):
         publishing_date=None,
         version=None,
     ):
+        """
+        Description to do
+
+        Args:
+            projectname (str): Description to do.
+            main_dir (str): Description to do.
+            sub_dir (str): Description to do.
+            path_resolver (TYPE): Description to do.
+            owner (TYPE): Description to do.
+            publishing_date (TYPE): Description to do.
+            version (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not path_resolver:
             path_resolver = self.ilidata_path_resolver
         super().__init__(projectname, main_dir, sub_dir, path_resolver)
@@ -68,6 +84,17 @@ class IliTarget(Target):
 
     @staticmethod
     def unique_id_in_target_scope(target, id):
+        """
+        Description to do
+
+        Args:
+            target (TYPE): Description to do.
+            id (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         for toppingfileinfo in target.toppingfileinfo_list:
             if "id" in toppingfileinfo and toppingfileinfo["id"] == id:
                 iterator = int(id[-3:])

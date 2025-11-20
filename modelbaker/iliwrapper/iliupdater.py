@@ -20,7 +20,24 @@ class Updater(IliExecutable):
     """Executes an update operation on ili2db."""
 
     def __init__(self, parent=None):
+        """
+        Description to do
+
+        Args:
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(parent)
 
     def _create_config(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return UpdateDataConfiguration()

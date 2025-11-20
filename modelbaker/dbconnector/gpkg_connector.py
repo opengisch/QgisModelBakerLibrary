@@ -33,6 +33,17 @@ GPKG_NLS_TABLE = "T_ILI2DB_NLS"
 
 class GPKGConnector(DBConnector):
     def __init__(self, uri, schema):
+        """
+        Description to do
+
+        Args:
+            uri (TYPE): Description to do.
+            schema (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         DBConnector.__init__(self, uri, schema)
 
         if not os.path.isfile(uri):
@@ -60,6 +71,13 @@ class GPKGConnector(DBConnector):
         return data_type.lower()
 
     def db_or_schema_exists(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return os.path.isfile(self.uri)
 
     def create_db_or_schema(self, usr):
@@ -67,9 +85,23 @@ class GPKGConnector(DBConnector):
         raise NotImplementedError
 
     def metadata_exists(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self._bMetadataTable
 
     def _metadata_exists(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         cursor = self.conn.cursor()
         cursor.execute(
             """SELECT count(name)
@@ -82,6 +114,16 @@ class GPKGConnector(DBConnector):
         return result
 
     def _table_exists(self, tablename):
+        """
+        Description to do
+
+        Args:
+            tablename (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         cursor = self.conn.cursor()
         cursor.execute(
             """SELECT count(name)
@@ -94,11 +136,25 @@ class GPKGConnector(DBConnector):
         return result
 
     def get_tables_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._tables_info:
             self._tables_info = self._get_tables_info()
         return self._tables_info
 
     def _get_tables_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         cursor = self.conn.cursor()
         interlis_fields = ""
         interlis_joins = ""
@@ -307,6 +363,13 @@ class GPKGConnector(DBConnector):
         return complete_records
 
     def get_meta_attrs_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._table_exists(GPKG_METAATTRS_TABLE):
             return []
 
@@ -323,6 +386,16 @@ class GPKGConnector(DBConnector):
         return records
 
     def get_meta_attrs(self, ili_name):
+        """
+        Description to do
+
+        Args:
+            ili_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._table_exists(GPKG_METAATTRS_TABLE):
             return []
 
@@ -343,6 +416,16 @@ class GPKGConnector(DBConnector):
         return records
 
     def get_fields_info(self, table_name):
+        """
+        Description to do
+
+        Args:
+            table_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         cursor = self.conn.cursor()
         cursor.execute("""PRAGMA table_info("{}");""".format(table_name))
         columns_info = cursor.fetchall()
@@ -470,6 +553,16 @@ class GPKGConnector(DBConnector):
         return complete_records
 
     def get_min_max_info(self, table_name):
+        """
+        Description to do
+
+        Args:
+            table_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         constraint_mapping = dict()
         cursor = self.conn.cursor()
         cursor.execute(
@@ -494,6 +587,16 @@ class GPKGConnector(DBConnector):
         return constraint_mapping
 
     def get_t_type_map_info(self, table_name):
+        """
+        Description to do
+
+        Args:
+            table_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self.metadata_exists():
             cursor = self.conn.cursor()
             cursor.execute(
@@ -516,6 +619,16 @@ class GPKGConnector(DBConnector):
     def get_relations_info(self, filter_layer_list=[]):
         # We need to get the PK for each table, so first get tables_info
         # and then build something more searchable
+        """
+        Description to do
+
+        Args:
+            filter_layer_list (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         tables_info_dict = dict()
         for table_info in self._tables_info:
             tables_info_dict[table_info["tablename"]] = table_info
@@ -616,6 +729,13 @@ class GPKGConnector(DBConnector):
         return complete_records
 
     def get_bags_of_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         bags_of_info = {}
         if self.metadata_exists():
             cursor = self.conn.cursor()
@@ -715,6 +835,13 @@ class GPKGConnector(DBConnector):
         return cursor
 
     def get_models(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._table_exists("T_ILI2DB_TRAFO"):
             return {}
 
@@ -757,6 +884,13 @@ class GPKGConnector(DBConnector):
         return list_result
 
     def ili_version(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         cursor = self.conn.cursor()
         cursor.execute("""PRAGMA table_info(T_ILI2DB_ATTRNAME)""")
         table_info = cursor.fetchall()
@@ -780,6 +914,13 @@ class GPKGConnector(DBConnector):
             return 4
 
     def get_basket_handling(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists(GPKG_SETTINGS_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -798,6 +939,13 @@ class GPKGConnector(DBConnector):
         return False
 
     def get_baskets_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -819,6 +967,13 @@ class GPKGConnector(DBConnector):
         return {}
 
     def get_datasets_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists(GPKG_DATASET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -834,6 +989,16 @@ class GPKGConnector(DBConnector):
         return {}
 
     def create_dataset(self, datasetname):
+        """
+        Description to do
+
+        Args:
+            datasetname (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists(GPKG_DATASET_TABLE):
             cursor = self.conn.cursor()
             try:
@@ -870,6 +1035,17 @@ class GPKGConnector(DBConnector):
         return False, self.tr('Could not create dataset "{}".').format(datasetname)
 
     def rename_dataset(self, tid, datasetname):
+        """
+        Description to do
+
+        Args:
+            tid (TYPE): Description to do.
+            datasetname (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists(GPKG_DATASET_TABLE):
             cursor = self.conn.cursor()
             try:
@@ -895,6 +1071,13 @@ class GPKGConnector(DBConnector):
         return False, self.tr('Could not rename dataset to "{}".').format(datasetname)
 
     def get_topics_info(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists("T_ILI2DB_CLASSNAME") and self._table_exists(
             GPKG_METAATTRS_TABLE
         ):
@@ -932,6 +1115,13 @@ class GPKGConnector(DBConnector):
         return {}
 
     def get_classes_relevance(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists("T_ILI2DB_CLASSNAME"):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -984,6 +1174,13 @@ class GPKGConnector(DBConnector):
         return []
 
     def multiple_geometry_tables(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         tables = []
         if self._table_exists("gpkg_geometry_columns"):
             cursor = self.conn.cursor()
@@ -1005,6 +1202,19 @@ class GPKGConnector(DBConnector):
     def create_basket(
         self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
     ):
+        """
+        Description to do
+
+        Args:
+            dataset_tid (TYPE): Description to do.
+            topic (TYPE): Description to do.
+            tilitid_value (TYPE): Description to do.
+            attachment_key (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -1064,6 +1274,16 @@ class GPKGConnector(DBConnector):
         return False, self.tr('Could not create basket for topic "{}".').format(topic)
 
     def edit_basket(self, basket_config: dict) -> tuple[bool, str]:
+        """
+        Description to do
+
+        Args:
+            basket_config (dict): Description to do.
+
+        Returns:
+            tuple[bool, str]: Description to do.
+        """
+
         if self._table_exists(GPKG_BASKET_TABLE):
             cursor = self.conn.cursor()
             try:
@@ -1105,6 +1325,13 @@ class GPKGConnector(DBConnector):
         ).format(basket_config["topic"], basket_config["datasetname"])
 
     def get_tid_handling(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists(GPKG_SETTINGS_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -1123,6 +1350,13 @@ class GPKGConnector(DBConnector):
         return False
 
     def get_ili2db_settings(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = {}
         if self._table_exists(GPKG_SETTINGS_TABLE):
             cursor = self.conn.cursor()
@@ -1138,6 +1372,16 @@ class GPKGConnector(DBConnector):
         return result
 
     def _fetch_and_increment_key_object(self, field_name):
+        """
+        Description to do
+
+        Args:
+            field_name (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         next_id = 0
         if self._table_exists("T_KEY_OBJECT"):
             # fetch last unique id of field_name
@@ -1194,6 +1438,13 @@ class GPKGConnector(DBConnector):
         )
 
     def get_ili2db_sequence_value(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists("T_KEY_OBJECT"):
             cursor = self.conn.cursor()
             cursor.execute(
@@ -1210,6 +1461,13 @@ class GPKGConnector(DBConnector):
         return None
 
     def get_next_ili2db_sequence_value(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         (
             status,
             next_id,
@@ -1218,6 +1476,16 @@ class GPKGConnector(DBConnector):
         return next_id
 
     def set_ili2db_sequence_value(self, value):
+        """
+        Description to do
+
+        Args:
+            value (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if self._table_exists("T_KEY_OBJECT"):
             try:
                 cursor = self.conn.cursor()
@@ -1255,9 +1523,23 @@ class GPKGConnector(DBConnector):
         return False, self.tr("Could not reset T_LastUniqueId")
 
     def get_translation_handling(self) -> tuple[bool, str]:
+        """
+        Description to do
+
+        Returns:
+            tuple[bool, str]: Description to do.
+        """
+
         return self._table_exists(GPKG_NLS_TABLE) and self._lang != "", self._lang
 
     def get_translation_models(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._table_exists(GPKG_METAATTRS_TABLE):
             return []
 
@@ -1279,6 +1561,17 @@ class GPKGConnector(DBConnector):
         return [record["ilielement"] for record in records]
 
     def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
+        """
+        Description to do
+
+        Args:
+            irrelevant_models (TYPE): Description to do.
+            relevant_models (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not self._table_exists(GPKG_METAATTRS_TABLE):
             return []
 
@@ -1323,6 +1616,16 @@ class GPKGConnector(DBConnector):
         return [record["attr_value"] for record in records]
 
     def get_domain_dispnames(self, tablename):
+        """
+        Description to do
+
+        Args:
+            tablename (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if (
             not self._table_exists
             or not self._table_exists(GPKG_NLS_TABLE)

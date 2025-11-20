@@ -25,6 +25,18 @@ class DBConnector(QObject):
     new_message = pyqtSignal(int, str)
 
     def __init__(self, uri, schema, parent=None):
+        """
+        Description to do
+
+        Args:
+            uri (TYPE): Description to do.
+            schema (TYPE): Description to do.
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         QObject.__init__(self, parent)
         self.QGIS_DATE_TYPE = "date"
         self.QGIS_TIME_TYPE = "time"
@@ -468,6 +480,16 @@ class DBConnector(QObject):
         return []
 
     def get_schemas(self, ignore_system_schemas=True):
+        """
+        Description to do
+
+        Args:
+            ignore_system_schemas (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         result = []
         all_schemas = self.get_all_schemas()
 
@@ -499,5 +521,16 @@ class DBConnectorError(Exception):
     """
 
     def __init__(self, message, base_exception=None):
+        """
+        Description to do
+
+        Args:
+            message (TYPE): Description to do.
+            base_exception (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         super().__init__(message)
         self.base_exception = base_exception

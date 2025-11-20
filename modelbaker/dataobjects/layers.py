@@ -73,6 +73,40 @@ class Layer:
             str, str
         ] = {},  # provider specific column names (e.g. T_Id vs t_id)
     ) -> None:
+        """
+        Description to do
+
+        Args:
+            provider (str): Description to do.
+            uri (str): Description to do.
+            name (str): Description to do.
+            srid (Optional[int]): Description to do.
+            extent (Optional[str]): Description to do.
+            geometry_column (str): Description to do.
+            wkb_type (QgsWkbTypes): Description to do.
+            alias (Optional[str]): Description to do.
+            is_domain (bool): Description to do.
+            is_structure (bool): Description to do.
+            is_nmrel (bool): Description to do.
+            display_expression (str): Description to do.
+            coordinate_precision (Optional[float]): Description to do.
+            is_basket_table (bool): Description to do.
+            is_dataset_table (bool): Description to do.
+            ili_name (Optional[str]): Description to do.
+            is_relevant (bool): Description to do.
+            all_topics (list[str]): Description to do.
+            relevant_topics (list[str]): Description to do.
+            definitionfile (Optional[str]): Description to do.
+            qmlstylefile (Optional[str]): Description to do.
+            styles (dict[str, dict[str, str]]): Description to do.
+            is_enum (bool): Description to do.
+            base_class (str): Description to do.
+            provider_names_map (dict[str, str]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.provider = provider
         self.uri = uri
         self.name = name
@@ -126,6 +160,13 @@ class Layer:
         self.featurecount = False
 
     def dump(self) -> dict:
+        """
+        Description to do
+
+        Returns:
+            dict: Description to do.
+        """
+
         definition = dict()
         definition["provider"] = self.provider
         definition["uri"] = self.uri
@@ -149,6 +190,16 @@ class Layer:
         return definition
 
     def load(self, definition: dict) -> None:
+        """
+        Description to do
+
+        Args:
+            definition (dict): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.provider = definition["provider"]
         self.uri = definition["uri"]
         self.is_domain = definition["isdomain"]
@@ -170,6 +221,13 @@ class Layer:
         self.base_class = definition["base_class"]
 
     def create(self) -> Union[QgsRasterLayer, QgsVectorLayer]:
+        """
+        Description to do
+
+        Returns:
+            Union[QgsRasterLayer, QgsVectorLayer]: Description to do.
+        """
+
         if self.definitionfile:
             if self.__layer is None:
                 layers = QgsLayerDefinition.loadLayerDefinitionLayers(
@@ -215,10 +273,27 @@ class Layer:
         return self.__layer
 
     def create_form(self, project: Project) -> None:
+        """
+        Description to do
+
+        Args:
+            project (Project): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         edit_form = self.__form.create(self, self.__layer, project)
         self.__layer.setEditFormConfig(edit_form)
 
     def load_styles(self) -> None:
+        """
+        Description to do
+
+        Returns:
+            None: Description to do.
+        """
+
         if self.qmlstylefile:
             self.__layer.loadNamedStyle(self.qmlstylefile)
         if self.styles:
@@ -253,6 +328,18 @@ class Layer:
     def _create_layer(
         self, uri: str, layer_name: str, provider: str
     ) -> Union[QgsRasterLayer, QgsVectorLayer]:
+        """
+        Description to do
+
+        Args:
+            uri (str): Description to do.
+            layer_name (str): Description to do.
+            provider (str): Description to do.
+
+        Returns:
+            Union[QgsRasterLayer, QgsVectorLayer]: Description to do.
+        """
+
         if provider and provider.lower() == "wms":
             return QgsRasterLayer(uri, layer_name, provider)
         # return QgsVectorLayer even when it's an invalid layer with no provider
@@ -349,10 +436,24 @@ class Layer:
                     self.__form.add_element(widget)
 
     def source(self) -> QgsDataSourceUri:
+        """
+        Description to do
+
+        Returns:
+            QgsDataSourceUri: Description to do.
+        """
+
         return QgsDataSourceUri(self.uri)
 
     @property
     def layer(self) -> Union[QgsRasterLayer, QgsVectorLayer]:
+        """
+        Description to do
+
+        Returns:
+            Union[QgsRasterLayer, QgsVectorLayer]: Description to do.
+        """
+
         return self.__layer
 
     @property
@@ -367,6 +468,13 @@ class Layer:
 
     @property
     def oid_domain(self) -> Optional[str]:
+        """
+        Description to do
+
+        Returns:
+            Optional[str]: Description to do.
+        """
+
         t_ili_tid_field = self.t_ili_tid_field
         if t_ili_tid_field:
             return t_ili_tid_field.oid_domain
@@ -374,6 +482,13 @@ class Layer:
 
     @property
     def t_ili_tid_field(self) -> Optional[Field]:
+        """
+        Description to do
+
+        Returns:
+            Optional[Field]: Description to do.
+        """
+
         for field in self.fields:
             if field.name.lower() == "t_ili_tid":
                 return field

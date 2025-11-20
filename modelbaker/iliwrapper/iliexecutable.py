@@ -39,6 +39,16 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     __result = None
 
     def __init__(self, parent=None):
+        """
+        Description to do
+
+        Args:
+            parent (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         QObject.__init__(self, parent)
         self.filename = None
         self.tool = None
@@ -61,6 +71,13 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         :return: ili2db configuration"""
 
     def _get_ili2db_version(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         return self.configuration.db_ili_version
 
     def _args(self, hide_password):
@@ -75,6 +92,13 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         return get_ili2db_args(self.configuration, hide_password)
 
     def _ili2db_jar_arg(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         ili2db_bin = get_ili2db_bin(
             self.tool, self._get_ili2db_version(), self.stdout, self.stderr
         )
@@ -83,6 +107,16 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         return ["-jar", ili2db_bin]
 
     def _escaped_arg(self, argument):
+        """
+        Description to do
+
+        Args:
+            argument (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if '"' in argument:
             argument = argument.replace('"', '"""')
         if " " in argument:
@@ -90,6 +124,16 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         return argument
 
     def command(self, hide_password):
+        """
+        Description to do
+
+        Args:
+            hide_password (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         ili2db_jar_arg = self._ili2db_jar_arg()
         if ili2db_jar_arg == self.ILI2DB_NOT_FOUND:
             return "ili2db tool not found!"
@@ -109,6 +153,16 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         return command
 
     def command_with_password(self, edited_command):
+        """
+        Description to do
+
+        Args:
+            edited_command (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if "--dbpwd ******" in edited_command:
             args = self._args(False)
             i = args.index("--dbpwd")
@@ -118,6 +172,16 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         return edited_command
 
     def command_without_password(self, edited_command=None):
+        """
+        Description to do
+
+        Args:
+            edited_command (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         if not edited_command:
             return self.command(True)
         regex = re.compile("--dbpwd [^ ]*")
@@ -127,6 +191,16 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         return edited_command
 
     def run(self, edited_command=None):
+        """
+        Description to do
+
+        Args:
+            edited_command (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         proc = QProcess()
         self.cancel_process.connect(proc.terminate)
         proc.readyReadStandardError.connect(
@@ -164,6 +238,16 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         return self.__result
 
     def stderr_ready(self, proc):
+        """
+        Description to do
+
+        Args:
+            proc (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         text = bytes(proc.readAllStandardError()).decode(self.encoding)
 
         if self.__done_pattern.search(text):
@@ -172,5 +256,15 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         self.stderr.emit(text)
 
     def stdout_ready(self, proc):
+        """
+        Description to do
+
+        Args:
+            proc (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         text = bytes(proc.readAllStandardOutput()).decode(self.encoding)
         self.stdout.emit(text)

@@ -40,6 +40,18 @@ class LogLevel(IntEnum):
 
 
 def default_log_function(text, level=LogLevel.INFO, silent=False):
+    """
+    Description to do
+
+    Args:
+        text (TYPE): Description to do.
+        level (TYPE): Description to do.
+        silent (TYPE): Description to do.
+
+    Returns:
+        TYPE: Description to do.
+    """
+
     if silent:
         return
     if level == LogLevel.INFO:

@@ -35,6 +35,13 @@ class Ili2DbUtils(QObject):
     log_on_error = pyqtSignal(str)
 
     def __init__(self):
+        """
+        Description to do
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         QObject.__init__(self)
 
         self._log = ""
@@ -145,6 +152,16 @@ class Ili2DbUtils(QObject):
         return res, msg
 
     def _connect_ili_executable_signals(self, ili_executable):
+        """
+        Description to do
+
+        Args:
+            ili_executable (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         ili_executable.process_started.connect(self.process_started)
         ili_executable.stderr.connect(self.stderr)
         ili_executable.stdout.connect(self.stdout)
@@ -154,6 +171,16 @@ class Ili2DbUtils(QObject):
         ili_executable.stderr.connect(self._log_on_stderr)
 
     def _disconnect_ili_executable_signals(self, ili_executable):
+        """
+        Description to do
+
+        Args:
+            ili_executable (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         ili_executable.process_started.disconnect(self.process_started)
         ili_executable.stderr.disconnect(self.stderr)
         ili_executable.stdout.disconnect(self.stdout)
@@ -163,7 +190,27 @@ class Ili2DbUtils(QObject):
         ili_executable.stderr.disconnect(self._log_on_stderr)
 
     def _log_on_process_started(self, command):
+        """
+        Description to do
+
+        Args:
+            command (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self._log += command + "\n"
 
     def _log_on_stderr(self, text):
+        """
+        Description to do
+
+        Args:
+            text (TYPE): Description to do.
+
+        Returns:
+            TYPE: Description to do.
+        """
+
         self._log += text

@@ -31,22 +31,69 @@ class GpkgCommandConfigManager(DbCommandConfigManager):
     _settings_base_path = "ili2gpkg/"
 
     def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
+        """
+        Description to do
+
+        Args:
+            configuration (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         DbCommandConfigManager.__init__(self, configuration)
 
     def get_uri(
         self, su: bool = False, qgis: bool = False, fallback_user: str = None
     ) -> str:
+        """
+        Description to do
+
+        Args:
+            su (bool): Description to do.
+            qgis (bool): Description to do.
+            fallback_user (str): Description to do.
+
+        Returns:
+            str: Description to do.
+        """
+
         return self.configuration.dbfile
 
     def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
+        """
+        Description to do
+
+        Args:
+            hide_password (bool): Description to do.
+            su (bool): Description to do.
+
+        Returns:
+            list[str]: Description to do.
+        """
+
         return ["--dbfile", self.configuration.dbfile]
 
     def save_config_in_qsettings(self) -> None:
+        """
+        Description to do
+
+        Returns:
+            None: Description to do.
+        """
+
         settings = QSettings()
         settings.setValue(
             self._settings_base_path + "dbfile", self.configuration.dbfile
         )
 
     def load_config_from_qsettings(self) -> None:
+        """
+        Description to do
+
+        Returns:
+            None: Description to do.
+        """
+
         settings = QSettings()
         self.configuration.dbfile = settings.value(self._settings_base_path + "dbfile")

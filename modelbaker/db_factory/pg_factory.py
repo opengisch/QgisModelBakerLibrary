@@ -29,19 +29,60 @@ class PgFactory(DbFactory):
     """Creates an entire set of objects so that modelbaker supports Postgres/Postgis database."""
 
     def get_db_connector(self, uri: str, schema: Optional[str]) -> PGConnector:
+        """
+        Description to do
+
+        Args:
+            uri (str): Description to do.
+            schema (Optional[str]): Description to do.
+
+        Returns:
+            PGConnector: Description to do.
+        """
+
         return PGConnector(uri, schema)
 
     def get_db_command_config_manager(
         self, configuration: Ili2DbCommandConfiguration
     ) -> PgCommandConfigManager:
+        """
+        Description to do
+
+        Args:
+            configuration (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            PgCommandConfigManager: Description to do.
+        """
+
         return PgCommandConfigManager(configuration)
 
     def get_layer_uri(self, uri: str) -> PgLayerUri:
+        """
+        Description to do
+
+        Args:
+            uri (str): Description to do.
+
+        Returns:
+            PgLayerUri: Description to do.
+        """
+
         return PgLayerUri(uri)
 
     def pre_generate_project(
         self, configuration: Ili2DbCommandConfiguration
     ) -> tuple[bool, str]:
+        """
+        Description to do
+
+        Args:
+            configuration (Ili2DbCommandConfiguration): Description to do.
+
+        Returns:
+            tuple[bool, str]: Description to do.
+        """
+
         result = not configuration.db_use_super_login
         message = ""
 
@@ -69,6 +110,17 @@ class PgFactory(DbFactory):
     def post_generate_project_validations(
         self, configuration: Ili2DbCommandConfiguration, fallback_user: str = None
     ) -> tuple[bool, str]:
+        """
+        Description to do
+
+        Args:
+            configuration (Ili2DbCommandConfiguration): Description to do.
+            fallback_user (str): Description to do.
+
+        Returns:
+            tuple[bool, str]: Description to do.
+        """
+
         result = False
         message = ""
 

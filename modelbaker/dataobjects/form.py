@@ -33,12 +33,34 @@ if TYPE_CHECKING:
 
 class FormFieldWidget:
     def __init__(self, name: str, field_name: str) -> None:
+        """
+        Description to do
+
+        Args:
+            name (str): Description to do.
+            field_name (str): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.name = name if name else field_name
         self.field_name = field_name
 
     def create(
         self, parent: QgsAttributeEditorElement, layer: QgsVectorLayer
     ) -> QgsAttributeEditorField:
+        """
+        Description to do
+
+        Args:
+            parent (QgsAttributeEditorElement): Description to do.
+            layer (QgsVectorLayer): Description to do.
+
+        Returns:
+            QgsAttributeEditorField: Description to do.
+        """
+
         index = layer.fields().indexOf(self.field_name)
         widget = QgsAttributeEditorField(self.field_name, index, parent)
         return widget
@@ -48,12 +70,34 @@ class FormRelationWidget:
     def __init__(
         self, relation: Relation, nm_relation: Optional[Relation] = None
     ) -> None:
+        """
+        Description to do
+
+        Args:
+            relation (Relation): Description to do.
+            nm_relation (Optional[Relation]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.relation = relation
         self.nm_relation = nm_relation
 
     def create(
         self, parent: QgsAttributeEditorElement, _layer
     ) -> QgsAttributeEditorRelation:
+        """
+        Description to do
+
+        Args:
+            parent (QgsAttributeEditorElement): Description to do.
+            _layer (TYPE): Description to do.
+
+        Returns:
+            QgsAttributeEditorRelation: Description to do.
+        """
+
         try:
             widget = QgsAttributeEditorRelation(self.relation.id, parent)
         except TypeError:
@@ -77,16 +121,48 @@ class FormRelationWidget:
 
 class FormTab:
     def __init__(self, name: str, columns: int = 1) -> None:
+        """
+        Description to do
+
+        Args:
+            name (str): Description to do.
+            columns (int): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.name = name
         self.children = list()
         self.columns = columns
 
     def addChild(self, child: Union[FormFieldWidget, FormRelationWidget]) -> None:
+        """
+        Description to do
+
+        Args:
+            child (Union[FormFieldWidget, FormRelationWidget]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.children.append(child)
 
     def create(
         self, parent: QgsAttributeEditorElement, layer: QgsVectorLayer
     ) -> QgsAttributeEditorContainer:
+        """
+        Description to do
+
+        Args:
+            parent (QgsAttributeEditorElement): Description to do.
+            layer (QgsVectorLayer): Description to do.
+
+        Returns:
+            QgsAttributeEditorContainer: Description to do.
+        """
+
         container = QgsAttributeEditorContainer(self.name, parent)
         container.setIsGroupBox(False)
         container.setColumnCount(self.columns)
@@ -98,14 +174,40 @@ class FormTab:
 
 class Form:
     def __init__(self) -> None:
+        """
+        Description to do
+
+        Returns:
+            None: Description to do.
+        """
+
         self.__elements = list()
 
     def elements(self) -> list[Union[FormFieldWidget, FormRelationWidget]]:
+        """
+        Description to do
+
+        Returns:
+            list[Union[FormFieldWidget, FormRelationWidget]]: Description to do.
+        """
+
         return self.__elements
 
     def create(
         self, layer: Layer, qgis_layer: QgsVectorLayer, project: Project
     ) -> QgsEditFormConfig:
+        """
+        Description to do
+
+        Args:
+            layer (Layer): Description to do.
+            qgis_layer (QgsVectorLayer): Description to do.
+            project (Project): Description to do.
+
+        Returns:
+            QgsEditFormConfig: Description to do.
+        """
+
         edit_form_config = qgis_layer.editFormConfig()
         root_container = edit_form_config.invisibleRootContainer()
         root_container.clear()
@@ -131,19 +233,61 @@ class Form:
         return edit_form_config
 
     def add_element(self, element: Union[FormTab, FormFieldWidget]) -> None:
+        """
+        Description to do
+
+        Args:
+            element (Union[FormTab, FormFieldWidget]): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.__elements.append(element)
 
 
 class FormGroupBox:
     def __init__(self, name: str, columns: int = 1) -> None:
+        """
+        Description to do
+
+        Args:
+            name (str): Description to do.
+            columns (int): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.name = name
         self.children = list()
         self.columns = columns
 
     def addChild(self, child) -> None:
+        """
+        Description to do
+
+        Args:
+            child (TYPE): Description to do.
+
+        Returns:
+            None: Description to do.
+        """
+
         self.children.append(child)
 
     def create(self, _parent, layer) -> QgsAttributeEditorContainer:
+        """
+        Description to do
+
+        Args:
+            _parent (TYPE): Description to do.
+            layer (TYPE): Description to do.
+
+        Returns:
+            QgsAttributeEditorContainer: Description to do.
+        """
+
         container = QgsAttributeEditorContainer(self.name)
         container.setIsGroupBox(True)
         container.setColumnCount(self.columns)
