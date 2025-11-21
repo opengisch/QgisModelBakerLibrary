@@ -24,18 +24,17 @@ from qgis.core import (
     QgsProcessingParameterFile,
     QgsProcessingParameterString,
 )
-from qgis.PyQt.QtCore import QCoreApplication, QObject, QStandardPaths
+from qgis.PyQt.QtCore import QStandardPaths
 
 from ..iliwrapper import ilivalidator
 from ..iliwrapper.globals import DbIliMode
 from ..iliwrapper.ili2dbconfig import ValidateConfiguration
 from ..iliwrapper.ili2dbutils import JavaNotFoundError
-from ..utils.db_utils import get_db_connector
-from ..utils.globals import MODELS_BLACKLIST
 from .ili2db_algorithm import Ili2gpkgAlgorithm, Ili2pgAlgorithm
+from .ili2db_operating import ProcessOperatorBase
 
 
-class ProcessValidator(QObject):
+class ProcessValidator(ProcessOperatorBase):
 
     # Filters
     FILTERMODE = "FILTERMODE"  # none, models, baskets or datasets
@@ -52,7 +51,7 @@ class ProcessValidator(QObject):
     XTFLOGPATH = "XTFLOGPATH"
 
     def __init__(self, parent):
-        super().__init__()
+        super().__init__(parent)
         self.parent = parent
 
     def validation_input_params(self):
@@ -244,31 +243,6 @@ class ProcessValidator(QObject):
             configuration.valid_config = validatorconfigfile
 
         return configuration
-
-    def _get_tid_handling(self, configuration):
-        db_connector = get_db_connector(configuration)
-        if db_connector:
-            return db_connector.get_tid_handling()
-        return False
-
-    def _get_model_names(self, configuration):
-        modelnames = []
-
-        db_connector = get_db_connector(configuration)
-        if (
-            db_connector
-            and db_connector.db_or_schema_exists()
-            and db_connector.metadata_exists()
-        ):
-            db_models = db_connector.get_models()
-            for db_model in db_models:
-                name = db_model["modelname"]
-                if name and name not in modelnames and name not in MODELS_BLACKLIST:
-                    modelnames.append(name)
-        return modelnames
-
-    def tr(self, string):
-        return QCoreApplication.translate("Processing", string)
 
 
 class ValidatingPGAlgorithm(Ili2pgAlgorithm):

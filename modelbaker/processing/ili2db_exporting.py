@@ -22,18 +22,16 @@ from qgis.core import (
     QgsProcessingParameterFileDestination,
     QgsProcessingParameterString,
 )
-from qgis.PyQt.QtCore import QCoreApplication, QObject
 
 from ..iliwrapper import iliexporter
 from ..iliwrapper.globals import DbIliMode
 from ..iliwrapper.ili2dbconfig import ExportConfiguration
 from ..iliwrapper.ili2dbutils import JavaNotFoundError
-from ..utils.db_utils import get_db_connector
-from ..utils.globals import MODELS_BLACKLIST
 from .ili2db_algorithm import Ili2gpkgAlgorithm, Ili2pgAlgorithm
+from .ili2db_operating import ProcessOperatorBase
 
 
-class ProcessExporter(QObject):
+class ProcessExporter(ProcessOperatorBase):
 
     # Filters
     FILTERMODE = "FILTERMODE"  # none, models, baskets or datasets
@@ -49,7 +47,7 @@ class ProcessExporter(QObject):
     ISVALID = "ISVALID"
 
     def __init__(self, parent):
-        super().__init__()
+        super().__init__(parent)
         self.parent = parent
 
     def export_input_params(self):
@@ -214,31 +212,6 @@ class ProcessExporter(QObject):
         )
 
         return configuration
-
-    def _get_tid_handling(self, configuration):
-        db_connector = get_db_connector(configuration)
-        if db_connector:
-            return db_connector.get_tid_handling()
-        return False
-
-    def _get_model_names(self, configuration):
-        modelnames = []
-
-        db_connector = get_db_connector(configuration)
-        if (
-            db_connector
-            and db_connector.db_or_schema_exists()
-            and db_connector.metadata_exists()
-        ):
-            db_models = db_connector.get_models()
-            for db_model in db_models:
-                name = db_model["modelname"]
-                if name and name not in modelnames and name not in MODELS_BLACKLIST:
-                    modelnames.append(name)
-        return modelnames
-
-    def tr(self, string):
-        return QCoreApplication.translate("Processing", string)
 
 
 class ExportingPGAlgorithm(Ili2pgAlgorithm):
