@@ -176,13 +176,13 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
 
         authcfg_param = QgsProcessingParameterAuthConfig(
             self.AUTHCFG,
-            self.tr("Authentification"),
+            self.tr("Authentication"),
             defaultValue=None,
             optional=True,
         )
         authcfg_param.setHelp(
             self.tr(
-                "When choosing a QGIS Autentification you don't need user and password."
+                "When choosing a QGIS Authentication you don't need user and password."
             )
         )
         params.append(authcfg_param)
@@ -286,11 +286,11 @@ class Ili2gpkgAlgorithm(Ili2dbAlgorithm):
 
         dbpath_param = QgsProcessingParameterFile(
             self.DBPATH,
-            self.tr("Databasefile Path"),
+            self.tr("Database File Path"),
             defaultValue=None,
             optional=True,
         )
-        dbpath_param.setHelp(self.tr("todo"))
+        dbpath_param.setHelp(self.tr("The database file path (*.gpkg)."))
         params.append(dbpath_param)
 
         return params
@@ -299,7 +299,7 @@ class Ili2gpkgAlgorithm(Ili2dbAlgorithm):
         params = []
 
         params.append(
-            QgsProcessingOutputFile(self.DBPATH, self.tr("Databasefile Path"))
+            QgsProcessingOutputFile(self.DBPATH, self.tr("Database File Path"))
         )
 
         return params

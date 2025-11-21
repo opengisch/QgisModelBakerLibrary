@@ -124,7 +124,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
             ExportingPGAlgorithm,
         )
         conn_parameters = self.iliimporter_pg_config_params()
-        conn_parameters["SCHEMA"] = self.pg_schema(True)
+        conn_parameters["SCHEMA"] = self.pg_schema(False)
         self._algs_without_baskets(
             conn_parameters,
             ImportingPGAlgorithm,

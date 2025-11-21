@@ -10,7 +10,6 @@
 """
 
 import os
-import re
 from datetime import datetime
 from typing import Any, Optional
 
@@ -262,12 +261,10 @@ class ProcessValidator(QObject):
             and db_connector.metadata_exists()
         ):
             db_models = db_connector.get_models()
-            regex = re.compile(r"(?:\{[^\}]*\}|\s)")
             for db_model in db_models:
-                for modelname in regex.split(db_model["modelname"]):
-                    name = modelname.strip()
-                    if name and name not in modelnames and name not in MODELS_BLACKLIST:
-                        modelnames.append(name)
+                name = db_model["modelname"]
+                if name and name not in modelnames and name not in MODELS_BLACKLIST:
+                    modelnames.append(name)
         return modelnames
 
     def tr(self, string):

@@ -127,7 +127,7 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
         )
 
         self.addOutput(
-            QgsProcessingOutputString(self.DBPATH, self.tr("Databasefile Path"))
+            QgsProcessingOutputString(self.DBPATH, self.tr("Database File Path"))
         )
 
     def processAlgorithm(

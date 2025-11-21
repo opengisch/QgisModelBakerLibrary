@@ -9,7 +9,6 @@
 ***************************************************************************
 """
 
-import re
 from typing import Any, Optional
 
 from qgis.core import (
@@ -58,8 +57,8 @@ class ProcessExporter(QObject):
 
         xtffile_param = QgsProcessingParameterFileDestination(
             self.XTFFILEPATH,
-            self.tr("Target Transferfile (XTF)"),
-            self.tr("INTERLIS Transferfile (*.xtf *.xml)"),
+            self.tr("Target Transfer File (XTF)"),
+            self.tr("INTERLIS Transfer File (*.xtf *.xml)"),
             defaultValue=None,
             optional=False,
         )
@@ -128,7 +127,7 @@ class ProcessExporter(QObject):
             QgsProcessingOutputBoolean(self.ISVALID, self.tr("Export Result"))
         )
         params.append(
-            QgsProcessingOutputFile(self.XTFFILEPATH, self.tr("Transferfile Path"))
+            QgsProcessingOutputFile(self.XTFFILEPATH, self.tr("Transfer File Path"))
         )
 
         return params
@@ -232,12 +231,10 @@ class ProcessExporter(QObject):
             and db_connector.metadata_exists()
         ):
             db_models = db_connector.get_models()
-            regex = re.compile(r"(?:\{[^\}]*\}|\s)")
             for db_model in db_models:
-                for modelname in regex.split(db_model["modelname"]):
-                    name = modelname.strip()
-                    if name and name not in modelnames and name not in MODELS_BLACKLIST:
-                        modelnames.append(name)
+                name = db_model["modelname"]
+                if name and name not in modelnames and name not in MODELS_BLACKLIST:
+                    modelnames.append(name)
         return modelnames
 
     def tr(self, string):
@@ -278,7 +275,8 @@ class ExportingPGAlgorithm(Ili2pgAlgorithm):
             "baker",
             "export",
             "transferfile",
-            "xtf" "ili2db",
+            "xtf",
+            "ili2db",
             "ili2pg",
             "Postgres",
             "PostGIS",
