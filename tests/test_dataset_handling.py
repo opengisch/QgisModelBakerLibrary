@@ -245,14 +245,14 @@ class TestDatasetHandling(unittest.TestCase):
     def check_dataset_mutations(self, db_connector):
         # Create new dataset
         assert {
-            record["datasetname"] for record in db_connector.get_datasets_info()
+            [record["datasetname"] for record in db_connector.get_datasets_info()]
         } == {"Winti", "Seuzach"}
         result = db_connector.create_dataset("Glarus Nord")
         assert result[0]
         assert len(db_connector.get_datasets_info()) == 3
         assert len(db_connector.get_baskets_info()) == 4
         assert {
-            record["datasetname"] for record in db_connector.get_datasets_info()
+            [record["datasetname"] for record in db_connector.get_datasets_info()]
         } == {"Winti", "Seuzach", "Glarus Nord"}
 
         # Get tid of 'Glarus Nord'
@@ -293,7 +293,7 @@ class TestDatasetHandling(unittest.TestCase):
         assert len(db_connector.get_datasets_info()) == 3
         assert len(db_connector.get_baskets_info()) == 6
         assert {
-            record["datasetname"] for record in db_connector.get_datasets_info()
+            [record["datasetname"] for record in db_connector.get_datasets_info()]
         } == {"Winti", "Seuzach", "Glarus West"}
 
         # Edit basket for topic PipeBasketTest.Infrastructure and dataset Glarus West

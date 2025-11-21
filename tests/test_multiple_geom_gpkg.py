@@ -136,11 +136,11 @@ class TestMultipleGeometriesPerTable(unittest.TestCase):
 
         if self._sufficient_gdal():
             assert {
-                layer.name() for layer in tree_layers
+                [layer.name() for layer in tree_layers]
             } == expected_layer_names_with_multigeometry
         else:
             assert {
-                layer.name() for layer in tree_layers
+                [layer.name() for layer in tree_layers]
             } == expected_layer_names_without_multigeometry
 
     def _sufficient_gdal(self):

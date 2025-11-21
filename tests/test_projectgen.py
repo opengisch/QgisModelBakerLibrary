@@ -405,7 +405,7 @@ class TestProjectGen(unittest.TestCase):
             "untersmassn_",
             "parzellenidentifikation",
             "belasteter_standort_geo_lage_punkt",
-        } == {layer.name for layer in available_layers}
+        } == {[layer.name for layer in available_layers]}
 
     def test_kbs_geopackage(self):
         importer = iliimporter.Importer()
@@ -509,7 +509,7 @@ class TestProjectGen(unittest.TestCase):
             "untersmassn_",
             "parzellenidentifikation",
             "belasteter_standort_geo_lage_punkt",
-        } == {layer.name for layer in available_layers}
+        } == {[layer.name for layer in available_layers]}
 
     def test_naturschutz_postgis(self):
         importer = iliimporter.Importer()
@@ -3416,7 +3416,7 @@ class TestProjectGen(unittest.TestCase):
         system_group = qgis_project.layerTreeRoot().findGroup("system")
         assert system_group is not None
         system_group_layers = system_group.findLayers()
-        assert {layer.name() for layer in system_group_layers} == {
+        assert {[layer.name() for layer in system_group_layers]} == {
             "t_ili2db_dataset",
             "t_ili2db_basket",
         }
@@ -3508,7 +3508,7 @@ class TestProjectGen(unittest.TestCase):
         system_group = qgis_project.layerTreeRoot().findGroup("system")
         assert system_group is not None
         system_group_layers = system_group.findLayers()
-        assert {layer.name() for layer in system_group_layers} == {
+        assert {[layer.name() for layer in system_group_layers]} == {
             "T_ILI2DB_DATASET",
             "T_ILI2DB_BASKET",
         }
@@ -3741,14 +3741,14 @@ class TestProjectGen(unittest.TestCase):
         )
         assert belasteter_standort_group is not None
         belasteter_standort_group_layer = belasteter_standort_group.findLayers()
-        assert {layer.name() for layer in belasteter_standort_group_layer} == {
+        assert {[layer.name() for layer in belasteter_standort_group_layer]} == {
             "Belasteter_Standort (Geo_Lage_Punkt)",
             "Belasteter_Standort (Geo_Lage_Polygon)",
         }
         informationen_group = qgis_project.layerTreeRoot().findGroup("Informationen")
         assert informationen_group is not None
         informationen_group_layers = informationen_group.findLayers()
-        assert {layer.name() for layer in informationen_group_layers} == {
+        assert {[layer.name() for layer in informationen_group_layers]} == {
             "EGRID_",
             "Deponietyp_",
             "ZustaendigkeitKataster",
@@ -3772,7 +3772,7 @@ class TestProjectGen(unittest.TestCase):
         text_infos_group = informationen_group.findGroup("Text Infos")
         assert text_infos_group is not None
         text_infos_group_layers = text_infos_group.findLayers()
-        assert {layer.name() for layer in text_infos_group_layers} == {
+        assert {[layer.name() for layer in text_infos_group_layers]} == {
             "MultilingualMText",
             "LocalisedMText",
             "MultilingualText",
@@ -3781,7 +3781,7 @@ class TestProjectGen(unittest.TestCase):
         other_infos_group = informationen_group.findGroup("Other Infos")
         self.assertIsNotNone(other_infos_group)
         other_infos_group_layers = other_infos_group.findLayers()
-        assert {layer.name() for layer in other_infos_group_layers} == {
+        assert {[layer.name() for layer in other_infos_group_layers]} == {
             "StatusAltlV",
             "Standorttyp",
             "UntersMassn",
@@ -3878,7 +3878,7 @@ class TestProjectGen(unittest.TestCase):
                     )
                     layer.layer.loadNamedStyle(style_file_path)
 
-        layer_names = {layer.name for layer in available_layers}
+        layer_names = {[layer.name for layer in available_layers]}
         assert layer_names == {
             "untersuchungsmassnahmen_definition",
             "statusaltlv_definition",
@@ -4133,7 +4133,7 @@ class TestProjectGen(unittest.TestCase):
         )
         assert belasteter_standort_group is not None
         belasteter_standort_group_layer = belasteter_standort_group.findLayers()
-        assert {layer.name() for layer in belasteter_standort_group_layer} == {
+        assert {[layer.name() for layer in belasteter_standort_group_layer]} == {
             "Belasteter_Standort (Geo_Lage_Punkt)",
             "Belasteter_Standort",
         }
@@ -4142,7 +4142,7 @@ class TestProjectGen(unittest.TestCase):
         assert informationen_group is not None
         informationen_group_layers = informationen_group.findLayers()
 
-        assert {layer.name() for layer in informationen_group_layers} == {
+        assert {[layer.name() for layer in informationen_group_layers]} == {
             "EGRID_",
             "Deponietyp_",
             "ZustaendigkeitKataster",
@@ -4166,7 +4166,7 @@ class TestProjectGen(unittest.TestCase):
         text_infos_group = informationen_group.findGroup("Text Infos")
         assert text_infos_group is not None
         text_infos_group_layers = text_infos_group.findLayers()
-        assert {layer.name() for layer in text_infos_group_layers} == {
+        assert {[layer.name() for layer in text_infos_group_layers]} == {
             "MultilingualMText",
             "LocalisedMText",
             "MultilingualText",
@@ -4175,7 +4175,7 @@ class TestProjectGen(unittest.TestCase):
         other_infos_group = informationen_group.findGroup("Other Infos")
         assert other_infos_group is not None
         other_infos_group_layers = other_infos_group.findLayers()
-        assert {layer.name() for layer in other_infos_group_layers} == {
+        assert {[layer.name() for layer in other_infos_group_layers]} == {
             "StatusAltlV",
             "Standorttyp",
             "UntersMassn",
@@ -4271,7 +4271,7 @@ class TestProjectGen(unittest.TestCase):
                     )
                     layer.layer.loadNamedStyle(style_file_path)
 
-        layer_names = {layer.name for layer in available_layers}
+        layer_names = {[layer.name for layer in available_layers]}
         assert layer_names == {
             "untersuchungsmassnahmen_definition",
             "statusaltlv_definition",

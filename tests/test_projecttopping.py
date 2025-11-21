@@ -127,7 +127,7 @@ class TestProjectTopping(unittest.TestCase):
         )
         assert ili_layers_group is not None
         ili_layers_group_layers = ili_layers_group.findLayers()
-        assert {layer.name() for layer in ili_layers_group_layers} == {
+        assert {[layer.name() for layer in ili_layers_group_layers]} == {
             "Belasteter_Standort (Geo_Lage_Punkt)",
             "Belasteter_Standort (Geo_Lage_Polygon)",
         }
@@ -153,7 +153,7 @@ class TestProjectTopping(unittest.TestCase):
             "RoadSign_Type",
             "The Road Signs",
         }
-        assert {layer.name() for layer in qlr_group_layers} == expected_qlr_layers
+        assert {[layer.name() for layer in qlr_group_layers]} == expected_qlr_layers
 
     def test_kbs_postgis_source_layers(self):
         """
@@ -248,7 +248,7 @@ class TestProjectTopping(unittest.TestCase):
         )
         assert ili_layers_group is not None
         ili_layers_group_layers = ili_layers_group.findLayers()
-        assert {layer.name() for layer in ili_layers_group_layers} == {
+        assert {[layer.name() for layer in ili_layers_group_layers]} == {
             "Belasteter_Standort (Geo_Lage_Punkt)",
             "Belasteter_Standort (Geo_Lage_Polygon)",
         }
@@ -266,7 +266,7 @@ class TestProjectTopping(unittest.TestCase):
             "Another invalid layer",
         }
         assert {
-            layer.name() for layer in source_layers_group_layers
+            [layer.name() for layer in source_layers_group_layers]
         } == expected_source_layers
 
         for layer in source_layers_group_layers:
@@ -1114,7 +1114,7 @@ class TestProjectTopping(unittest.TestCase):
             "RoadSign_Type",
             "The Road Signs",
         }
-        assert {layer.name() for layer in qlr_group_layers} == expected_qlr_layers
+        assert {[layer.name() for layer in qlr_group_layers]} == expected_qlr_layers
 
     def test_kbs_postgis_layouts_and_variables(self):
         """
