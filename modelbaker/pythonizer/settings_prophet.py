@@ -41,14 +41,7 @@ class SettingsProphet(QObject):
         Arcs in any classes of the model or imported models.
         """
         # get all the geometric attributes of the relevant classes
-        relevant_geometric_attributes = []
-        relevant_geometric_attributes_per_class = (
-            self._relevant_geometric_attributes_per_class()
-        )
-        for relevant_classname in relevant_geometric_attributes_per_class.keys():
-            relevant_geometric_attributes += relevant_geometric_attributes_per_class[
-                relevant_classname
-            ]
+        relevant_geometric_attributes = self._relevant_geometric_attributes()
 
         # get the line form of the relevant geometry attributes
         line_forms = self.index.geometric_attributes_line_form
@@ -62,7 +55,7 @@ class SettingsProphet(QObject):
             or "ARCS" in line_forms_of_interest
         )
 
-    def has_multiple_geometrie_columms(self):
+    def has_multiple_geometry_columns(self):
         """
         Multiple geometry columns in any classes of the model or imported models.
         """
@@ -76,11 +69,22 @@ class SettingsProphet(QObject):
             return True
         return False
 
-    def multi_geometry_structures_on_23(self):
+    def multi_geometry_structures_on_23(self) -> dict:
         """
         Multi geometry structures in INTERLIS 23..
         """
-        return False
+        set_of_relevant_geometric_attributes = set(
+            self._relevant_geometric_attributes()
+        )
+        set_of_multi_geometry_attributes = set(self.index.geometric_attributes_multi)
+
+        relevant_multi_geometry_attributes = list(
+            set_of_relevant_geometric_attributes & set_of_multi_geometry_attributes
+        )
+
+        # then it should get the type of the attributes (like KbS_V1_5.Belastete_Standorte.MultiPolygon)
+        # and then it should return KbS_V1_5.Belastete_Standorte.MultiPolygon : 'polygon' or 'surface' or something...
+        return {}
 
     def _relevant_classes(self):
         # get the relevant baskets of the models
@@ -100,7 +104,7 @@ class SettingsProphet(QObject):
                 relevant_classes += all_elements[element_basket]
         return relevant_classes
 
-    def _relevant_geometric_attributes_per_class(self):
+    def _relevant_geometric_attributes_per_class(self) -> dict:
         relevant_classes = self._relevant_classes()
         geometric_classes = self.index.geometric_classes
         relevant_geometric_attributes_per_class = {}
@@ -110,6 +114,17 @@ class SettingsProphet(QObject):
                     geometric_classname
                 ] = geometric_classes[geometric_classname]
         return relevant_geometric_attributes_per_class
+
+    def _relevant_geometric_attributes(self) -> list:
+        relevant_geometric_attributes = []
+        relevant_geometric_attributes_per_class = (
+            self._relevant_geometric_attributes_per_class()
+        )
+        for relevant_classname in relevant_geometric_attributes_per_class.keys():
+            relevant_geometric_attributes += relevant_geometric_attributes_per_class[
+                relevant_classname
+            ]
+        return relevant_geometric_attributes
 
     def is_translation(self):
         return False
