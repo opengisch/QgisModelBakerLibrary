@@ -104,7 +104,6 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
             get_java_path(self.configuration.base_configuration)
         )
         command_args = ili2db_jar_arg + args
-
         valid_args = []
         for command_arg in command_args:
             valid_args.append(self._escaped_arg(command_arg))

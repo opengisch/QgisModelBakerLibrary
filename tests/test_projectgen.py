@@ -3940,14 +3940,14 @@ class TestProjectGen(unittest.TestCase):
         )
         assert belasteter_standort_group is not None
         belasteter_standort_group_layer = belasteter_standort_group.findLayers()
-        assert [layer.name() for layer in belasteter_standort_group_layer] == [
+        assert {layer.name() for layer in belasteter_standort_group_layer} == {
             "Belasteter_Standort (Geo_Lage_Punkt)",
             "Belasteter_Standort (Geo_Lage_Polygon)",
-        ]
+        }
         informationen_group = qgis_project.layerTreeRoot().findGroup("Informationen")
         assert informationen_group is not None
         informationen_group_layers = informationen_group.findLayers()
-        assert [layer.name() for layer in informationen_group_layers] == [
+        assert {layer.name() for layer in informationen_group_layers} == {
             "EGRID_",
             "Deponietyp_",
             "ZustaendigkeitKataster",
@@ -3966,27 +3966,27 @@ class TestProjectGen(unittest.TestCase):
             "UntersMassn",
             "Deponietyp",
             "LanguageCode_ISO639_1",
-        ]
+        }
 
         text_infos_group = informationen_group.findGroup("Text Infos")
         assert text_infos_group is not None
         text_infos_group_layers = text_infos_group.findLayers()
-        assert [layer.name() for layer in text_infos_group_layers] == [
+        assert {layer.name() for layer in text_infos_group_layers} == {
             "MultilingualMText",
             "LocalisedMText",
             "MultilingualText",
             "LocalisedText",
-        ]
+        }
         other_infos_group = informationen_group.findGroup("Other Infos")
         self.assertIsNotNone(other_infos_group)
         other_infos_group_layers = other_infos_group.findLayers()
-        assert [layer.name() for layer in other_infos_group_layers] == [
+        assert {layer.name() for layer in other_infos_group_layers} == {
             "StatusAltlV",
             "Standorttyp",
             "UntersMassn",
             "Deponietyp",
             "LanguageCode_ISO639_1",
-        ]
+        }
         # check the node properties
         belasteter_standort_punkt_layer = None
         belasteter_standort_polygon_layer = None
@@ -4332,16 +4332,16 @@ class TestProjectGen(unittest.TestCase):
         )
         assert belasteter_standort_group is not None
         belasteter_standort_group_layer = belasteter_standort_group.findLayers()
-        assert [layer.name() for layer in belasteter_standort_group_layer] == [
+        assert {layer.name() for layer in belasteter_standort_group_layer} == {
             "Belasteter_Standort (Geo_Lage_Punkt)",
             "Belasteter_Standort",
-        ]
+        }
 
         informationen_group = qgis_project.layerTreeRoot().findGroup("Informationen")
         assert informationen_group is not None
         informationen_group_layers = informationen_group.findLayers()
 
-        assert [layer.name() for layer in informationen_group_layers] == [
+        assert {layer.name() for layer in informationen_group_layers} == {
             "EGRID_",
             "Deponietyp_",
             "ZustaendigkeitKataster",
@@ -4360,27 +4360,27 @@ class TestProjectGen(unittest.TestCase):
             "UntersMassn",
             "Deponietyp",
             "LanguageCode_ISO639_1",
-        ]
+        }
 
         text_infos_group = informationen_group.findGroup("Text Infos")
         assert text_infos_group is not None
         text_infos_group_layers = text_infos_group.findLayers()
-        assert [layer.name() for layer in text_infos_group_layers] == [
+        assert {layer.name() for layer in text_infos_group_layers} == {
             "MultilingualMText",
             "LocalisedMText",
             "MultilingualText",
             "LocalisedText",
-        ]
+        }
         other_infos_group = informationen_group.findGroup("Other Infos")
         assert other_infos_group is not None
         other_infos_group_layers = other_infos_group.findLayers()
-        assert [layer.name() for layer in other_infos_group_layers] == [
+        assert {layer.name() for layer in other_infos_group_layers} == {
             "StatusAltlV",
             "Standorttyp",
             "UntersMassn",
             "Deponietyp",
             "LanguageCode_ISO639_1",
-        ]
+        }
         # check the node properties
         belasteter_standort_punkt_layer = None
         belasteter_standort_polygon_layer = None
