@@ -248,18 +248,19 @@ def is_version_valid(
     module_tested="",
 ):
     """
-    Generic one, it helps us to validate whether a current version is greater or equal to a min_required_version or,
-    if exact_required_version, if a current version is exactly the required one.
+        Generic one, it helps us to validate whether a current version is greater or equal to a min_required_version or,
+        if exact_required_version, if a current version is exactly the required one.
 
-    Borrowed from 'Asistente LADM-COL'.
+        Borrowed from 'Asistente LADM-COL'.
 
-    :param current_version: String, in the form 2.9.5
-    :param min_required_version: String, in the form 2.9.5
-    :param exact_required_version: Boolean, if true, only the exact version is valid. If False, the min_required_version
-                                   or any greater version will be accepted.
-    :param module_tested: String, only for displaying a log with context
-    :return: Whether the current version is valid or not
-    """
+    Args:
+        current_version: String, in the form 2.9.5
+        exact_required_version: Boolean, if true, only the exact version is valid. If False, the min_required_version or any greater version will be accepted.
+        min_required_version: String, in the form 2.9.5
+        module_tested: String, only for displaying a log with context
+
+    Returns:
+        Whether the current version is valid or not"""
     if current_version is None:
         return False
 

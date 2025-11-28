@@ -17,10 +17,9 @@ from .layer_uri import LayerUri
 class GpkgLayerUri(LayerUri):
     """Provides layer uri based on database uri (connection string) and specific information of the data source.
 
-    This **layer uri** is used to create a Qgis layer.
+        This **layer uri** is used to create a Qgis layer.
 
-    :ivar str uri: Database uri.
-    """
+    str uri: Database uri."""
 
     def __init__(self, uri: str) -> None:
         LayerUri.__init__(self, uri)

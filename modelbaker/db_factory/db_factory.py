@@ -30,12 +30,12 @@ class DbFactory(ABC):
     def get_db_connector(self, uri: str, schema: Optional[str]) -> DBConnector:
         """Returns an instance of connector to database (:class:`DBConnector`).
 
-        :param str uri: Database connection string.
-        :param str schema: Database schema.
-        :return: A connector to specific database.
-        :rtype: :class:`DBConnector`
-        :raises :class:`DBConnectorError`: when the connection fails.
-        """
+        Args:
+            schema (str): Database schema.
+            uri (str): Database connection string.
+
+        Returns:
+            :class:`DBConnector`: A connector to specific database."""
 
     @abstractmethod
     def get_db_command_config_manager(
@@ -43,20 +43,21 @@ class DbFactory(ABC):
     ) -> DbCommandConfigManager:
         """Returns an instance of a database command config manager.
 
-        :param configuration: Configuration object that will be managed.
-        :type configuration: :class:`Ili2DbCommandConfiguration`
-        :return: Object that manages a configuration object to return specific information of some database.
-        :rtype :class:`DbCommandConfigManager`
-        """
+        Args:
+            configuration (:class:`Ili2DbCommandConfiguration`): Configuration object that will be managed.
+
+        Returns:
+            Object that manages a configuration object to return specific information of some database."""
 
     @abstractmethod
     def get_layer_uri(self, uri: str) -> LayerUri:
         """Returns an instance of a layer uri.
 
-        :param str uri: Database connection string.
-        :return: A object that provides layer uri.
-        :rtype :class:`LayerUri`
-        """
+        Args:
+            uri (str): Database connection string.
+
+        Returns:
+            A object that provides layer uri."""
 
     @abstractmethod
     def pre_generate_project(
@@ -64,10 +65,11 @@ class DbFactory(ABC):
     ) -> tuple[bool, str]:
         """This method will be called before an operation of generate project is executed.
 
-        :param configuration: Configuration parameters with which will be executed the operation of generate project.
-        :type configuration: :class:`Ili2DbCommandConfiguration`
-        :return: *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise.
-        """
+        Args:
+            configuration (:class:`Ili2DbCommandConfiguration`): Configuration parameters with which will be executed the operation of generate project.
+
+        Returns:
+            *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise."""
 
     @abstractmethod
     def post_generate_project_validations(
@@ -75,16 +77,15 @@ class DbFactory(ABC):
     ) -> tuple[bool, str]:
         """This method will be called after an operation of generate project is executed.
 
-        :param class:`Ili2DbCommandConfiguration` configuration: Configuration parameters with which were executed the operation of generate project.
-        :param str fallback_user: a username as fallback most possibly used when you want to pass your os account name to connect the database
-        :return: *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise.
-        """
+        Args:
+            class: `Ili2DbCommandConfiguration` configuration: Configuration parameters with which were executed the operation of generate project.
+            fallback_user (str): a username as fallback most possibly used when you want to pass your os account name to connect the database
+
+        Returns:
+            *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise."""
 
     def get_specific_messages(self) -> dict[str, str]:
-        """Returns specific words that will be used in warning and error messages.
-
-        :rtype dict
-        """
+        """Returns specific words that will be used in warning and error messages."""
         messages = {"db_or_schema": "schema", "layers_source": "schema"}
 
         return messages
@@ -92,10 +93,8 @@ class DbFactory(ABC):
     def customize_widget_editor(self, field: Field, data_type: str) -> None:
         """Allows customizing the way a field is shown in the widget editor.
 
-        For instance, a boolean field can be shown as a checkbox.
+                For instance, a boolean field can be shown as a checkbox.
 
-        :param field: The field that will be customized
-        :type field: :class:`Field`
-        :param data_type: The type of field
-        :return None
-        """
+        Args:
+            data_type: The type of field
+            field (:class:`Field`): The field that will be customized"""

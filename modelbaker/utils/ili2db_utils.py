@@ -43,10 +43,13 @@ class Ili2DbUtils(QObject):
         self, baskets: str, configuration: Ili2DbCommandConfiguration = None
     ):
         """
-        :param baskets: Semicolon-separated list of baskets to be deleted
-        :param configuration: Base Ili2DbCommandConfiguration object
-        :return: Tuple with boolean result and optional message
-        """
+
+        Args:
+            baskets: Semicolon-separated list of baskets to be deleted
+            configuration: Base Ili2DbCommandConfiguration object
+
+        Returns:
+            Tuple with boolean result and optional message"""
         deleter = ilideleter.Deleter()
         deleter.tool = configuration.tool
         deleter.configuration = DeleteConfiguration(configuration)
@@ -77,10 +80,13 @@ class Ili2DbUtils(QObject):
         self, dataset: str, configuration: Ili2DbCommandConfiguration = None
     ):
         """
-        :param dataset: Dataset id to be deleted
-        :param configuration: Base Ili2DbCommandConfiguration object
-        :return: Tuple with boolean result and optional message
-        """
+
+        Args:
+            configuration: Base Ili2DbCommandConfiguration object
+            dataset: Dataset id to be deleted
+
+        Returns:
+            Tuple with boolean result and optional message"""
         deleter = ilideleter.Deleter()
         deleter.tool = configuration.tool
         deleter.configuration = DeleteConfiguration(configuration)
@@ -111,10 +117,13 @@ class Ili2DbUtils(QObject):
         self, ini_file: str, configuration: Ili2DbCommandConfiguration = None
     ):
         """
-        :param ini_file: Output file
-        :param configuration: Base Ili2DbCommandConfiguration object
-        :return: Tuple with boolean result and optional message
-        """
+
+        Args:
+            configuration: Base Ili2DbCommandConfiguration object
+            ini_file: Output file
+
+        Returns:
+            Tuple with boolean result and optional message"""
         metaconfig_exporter = ilimetaconfigexporter.MetaConfigExporter()
         metaconfig_exporter.tool = configuration.tool
         metaconfig_exporter.configuration = ExportMetaConfigConfiguration(configuration)

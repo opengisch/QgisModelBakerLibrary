@@ -52,11 +52,11 @@ class Generator(QObject):
         raw_naming=False,
     ) -> None:
         """
-        Creates a new Generator objects.
-        :param uri: The uri that should be used in the resulting project. If authcfg is used, make sure the mgmt_uri is set as well.
-        :param mgmt_uri: The uri that should be used to create schemas, tables and query meta information. Does not support authcfg but a fallback username.
-        :consider_basket_handling: Makes the specific handling of basket tables depending if schema is created with createBasketCol.
-        """
+                Creates a new Generator objects.
+
+        Args:
+            mgmt_uri: The uri that should be used to create schemas, tables and query meta information. Does not support authcfg but a fallback username.
+            uri: The uri that should be used in the resulting project. If authcfg is used, make sure the mgmt_uri is set as well."""
         QObject.__init__(self, parent)
         self.tool = tool
         self.uri = uri

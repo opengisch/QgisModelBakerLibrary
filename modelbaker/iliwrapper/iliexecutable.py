@@ -58,7 +58,8 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     def _create_config(self) -> Ili2DbCommandConfiguration:
         """Creates the configuration that will be used by *run* method.
 
-        :return: ili2db configuration"""
+        Returns:
+            ili2db configuration"""
 
     def _get_ili2db_version(self):
         return self.configuration.db_ili_version
@@ -66,10 +67,11 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     def _args(self, hide_password):
         """Gets the list of ili2db arguments from configuration.
 
-        :param bool hide_password: *True* to mask the password, *False* otherwise.
-        :return: ili2db arguments list.
-        :rtype: list
-        """
+        Args:
+            hide_password (bool): *True* to mask the password, *False* otherwise.
+
+        Returns:
+            list: ili2db arguments list."""
         self.configuration.tool = self.tool
 
         return get_ili2db_args(self.configuration, hide_password)

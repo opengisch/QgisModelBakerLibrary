@@ -23,10 +23,11 @@ from .ili2dbconfig import SchemaImportConfiguration
 def get_ili2db_args(configuration, hide_password=False):
     """Gets a complete list of ili2db arguments in order to execute the app.
 
-    :param bool hide_password: *True* to mask the password, *False* otherwise.
-    :return: ili2db arguments list.
-    :rtype: list
-    """
+    Args:
+        hide_password (bool): *True* to mask the password, *False* otherwise.
+
+    Returns:
+        list: ili2db arguments list."""
     db_args = _get_db_args(configuration, hide_password)
 
     if type(configuration) is SchemaImportConfiguration:

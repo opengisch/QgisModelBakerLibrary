@@ -24,17 +24,16 @@ from ..iliwrapper.ili2dbconfig import (
 class DbCommandConfigManager(ABC):
     """Manages a configuration object to return specific information of some database. This is a abstract class.
 
-    Provides database uri, arguments to ili2db and a way to save and load configurations parameters
-    based on a object configuration.
+        Provides database uri, arguments to ili2db and a way to save and load configurations parameters
+        based on a object configuration.
 
-    :ivar configuration object that will be managed
-    """
+    configuration object that will be managed"""
 
     def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
         """
-        :param configuration: Configuration object that will be managed.
-        :type configuration: :class:`Ili2DbCommandConfiguration`
-        """
+
+        Args:
+            configuration (:class:`Ili2DbCommandConfiguration`): Configuration object that will be managed."""
         self.configuration = configuration
 
     @abstractmethod
@@ -43,38 +42,40 @@ class DbCommandConfigManager(ABC):
     ) -> str:
         """Gets database uri (connection string) for db connectors (:class:`DBConnector`).
 
-        :param bool su: *True* to use super user credentials, *False* otherwise.
-        :param bool qgis: *True* to use qgis specific credentials (e.g. authcfg), *False* otherwise.
-        :param str fallback_user: a username as fallback most possibly used when you want to pass your os account name to connect the database
-        :return: Database uri (connection string).
-        :rtype str
-        """
+        Args:
+            fallback_user (str): a username as fallback most possibly used when you want to pass your os account name to connect the database
+            qgis (bool): *True* to use qgis specific credentials (e.g. authcfg), *False* otherwise.
+            su (bool): *True* to use super user credentials, *False* otherwise.
+
+        Returns:
+            Database uri (connection string)."""
 
     @abstractmethod
     def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
         """Gets a list of ili2db arguments related to database.
 
-        :param bool hide_password: *True* to mask the password, *False* otherwise.
-        :param bool su: *True* to use super user password, *False* otherwise. Default is False.
-        :return: ili2db arguments list.
-        :rtype: list
-        """
+        Args:
+            hide_password (bool): *True* to mask the password, *False* otherwise.
+            su (bool): *True* to use super user password, *False* otherwise. Default is False.
+
+        Returns:
+            list: ili2db arguments list."""
 
     def get_schema_import_args(self) -> list[str]:
         """Gets a list of ili2db arguments to use in operation schema import.
 
-        :return: ili2db arguments list.
-        :rtype: list
-        """
+        Returns:
+            list: ili2db arguments list."""
         return list()
 
     def get_ili2db_args(self, hide_password: bool = False) -> list[str]:
         """Gets a complete list of ili2db arguments in order to execute the app.
 
-        :param bool hide_password: *True* to mask the password, *False* otherwise.
-        :return: ili2db arguments list.
-        :rtype: list
-        """
+        Args:
+            hide_password (bool): *True* to mask the password, *False* otherwise.
+
+        Returns:
+            list: ili2db arguments list."""
         db_args = self.get_db_args(hide_password, self.configuration.db_use_super_login)
 
         if type(self.configuration) is SchemaImportConfiguration:
@@ -88,12 +89,12 @@ class DbCommandConfigManager(ABC):
     def save_config_in_qsettings(self) -> None:
         """Saves configuration values related to database in QSettings.
 
-        :return: None
-        """
+        Returns:
+            None"""
 
     @abstractmethod
     def load_config_from_qsettings(self) -> None:
         """Loads configuration values related to database from Qsettings.
 
-        :return: None
-        """
+        Returns:
+            None"""
