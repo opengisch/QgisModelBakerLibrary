@@ -14,7 +14,6 @@ License:
 
 import configparser
 import os
-from typing import Union
 
 from ..libs.toppingmaker import ProjectTopping, Target
 from ..libs.toppingmaker.utils import slugify
@@ -39,15 +38,15 @@ class MetaConfig:
         self.metaconfigparamsonly = False
         self.ili2db_settings = Ili2dbSettings()
 
-    def update_referencedata_paths(self, value: Union[list, bool]):
+    def update_referencedata_paths(self, value: list | str | bool) -> None:
         if isinstance(value, str):
             value = [value]
         self.referencedata_paths.extend(value)
 
-    def update_projecttopping_path(self, value: str):
+    def update_projecttopping_path(self, value: str) -> None:
         self.projecttopping_path = value
 
-    def generate_files(self, target: Target):
+    def generate_files(self, target: Target) -> str:
         """
         Example content:
 
@@ -134,7 +133,7 @@ class MetaConfig:
 
         return target.path_resolver(target, metaconfig_slug, MetaConfig.METACONFIG_TYPE)
 
-    def _generate_toppingfile_link(self, target: Target, type, path):
+    def _generate_toppingfile_link(self, target: Target, type: str, path: str) -> str:
         if not os.path.isfile(path):
             # it's already an id pointing to somewhere, no toppingfile needs to be created
             return path

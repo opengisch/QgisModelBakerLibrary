@@ -14,6 +14,7 @@ License:
 from __future__ import annotations
 
 from abc import ABC, abstractmethod
+from typing import Optional
 
 from ..iliwrapper.ili2dbconfig import (
     Ili2DbCommandConfiguration,
@@ -38,7 +39,7 @@ class DbCommandConfigManager(ABC):
 
     @abstractmethod
     def get_uri(
-        self, su: bool = False, qgis: bool = False, fallback_user: str = None
+        self, su: bool = False, qgis: bool = False, fallback_user: Optional[str] = None
     ) -> str:
         """Gets database uri (connection string) for db connectors (:class:`DBConnector`).
 

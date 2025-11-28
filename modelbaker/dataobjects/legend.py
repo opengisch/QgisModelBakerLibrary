@@ -29,9 +29,9 @@ from .layers import Layer
 class LegendGroup:
     def __init__(
         self,
-        name: str = None,
+        name: Optional[str] = None,
         expanded: bool = True,
-        ignore_node_names: bool = None,
+        ignore_node_names: bool = False,
         static_sorting: bool = False,
     ) -> None:
         self.name = name

@@ -12,9 +12,14 @@ License:
 """
 
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from qgis.core import (
     QgsApplication,
     QgsAuthMethodConfig,
+    QgsDataProvider,
     QgsDataSourceUri,
     QgsMessageLog,
 )
@@ -25,8 +30,15 @@ from ..iliwrapper.globals import DbIliMode
 from ..libs import pgserviceparser
 from .qt_utils import slugify
 
+if TYPE_CHECKING:
+    # only needed for type checking to avoid circular imports
+    from ..dbconnector.gpkg_connector import GPKGConnector
+    from ..dbconnector.mssql_connector import MssqlConnector
+    from ..dbconnector.pg_connector import PGConnector
+    from ..iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
 
-def get_schema_identificator_from_sourceprovider(provider):
+
+def get_schema_identificator_from_sourceprovider(provider: QgsDataProvider) -> str:
     if provider.name() == "postgres" or provider.name() == "mssql":
         layer_source = QgsDataSourceUri(provider.dataSourceUri())
         return slugify(
@@ -37,7 +49,9 @@ def get_schema_identificator_from_sourceprovider(provider):
     return ""
 
 
-def get_schema_identificator_from_configuration(configuration):
+def get_schema_identificator_from_configuration(
+    configuration: Ili2DbCommandConfiguration,
+) -> str:
     if configuration.tool == DbIliMode.pg or configuration.tool == DbIliMode.mssql:
         return slugify(
             f"{configuration.dbhost}_{configuration.database}_{configuration.dbschema}"
@@ -47,7 +61,7 @@ def get_schema_identificator_from_configuration(configuration):
     return ""
 
 
-def get_authconfig_map(authconfigid):
+def get_authconfig_map(authconfigid: str) -> dict:
     # to get username and password from the authconfig
     auth_mgr = QgsApplication.authManager()
     auth_cfg = QgsAuthMethodConfig()
@@ -55,7 +69,9 @@ def get_authconfig_map(authconfigid):
     return auth_cfg.configMap()
 
 
-def get_configuration_from_sourceprovider(provider, configuration):
+def get_configuration_from_sourceprovider(
+    provider: QgsDataProvider, configuration: Ili2DbCommandConfiguration
+) -> tuple[bool, DbIliMode]:
     """
     Determines the connection parameters from a layer source provider.
     On service in postgres it preferences the static parameters over the ones in the service file if available.
@@ -109,7 +125,9 @@ def get_configuration_from_sourceprovider(provider, configuration):
     return valid, mode
 
 
-def get_db_connector(configuration):
+def get_db_connector(
+    configuration: Ili2DbCommandConfiguration,
+) -> GPKGConnector | PGConnector | MssqlConnector:
     db_simple_factory = DbSimpleFactory()
     schema = configuration.dbschema
 
@@ -140,7 +158,7 @@ def get_db_connector(configuration):
         return None
 
 
-def db_ili_version(configuration):
+def db_ili_version(configuration: Ili2DbCommandConfiguration) -> int:
     """
     Returns the ili2db version the database has been created with or None if the database
     could not be detected as a ili2db database
@@ -150,7 +168,7 @@ def db_ili_version(configuration):
         return db_connector.ili_version()
 
 
-def get_service_names():
+def get_service_names() -> tuple[list[str], str]:
     """
     Provides the names of the available services in the PostgreSQL connection service file.
     """
@@ -163,7 +181,7 @@ def get_service_names():
         )
 
 
-def get_service_config(servicename: str):
+def get_service_config(servicename: str) -> tuple[dict[str, str], str]:
     """
     Provides the service configuration of a given service from the PostgreSQL connection service file.
     """

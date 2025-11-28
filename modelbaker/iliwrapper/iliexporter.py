@@ -22,10 +22,10 @@ class Exporter(IliExecutable):
     def _create_config(self) -> Ili2DbCommandConfiguration:
         return ExportConfiguration()
 
-    def _get_ili2db_version(self):
+    def _get_ili2db_version(self) -> int:
         return self.version
 
-    def _args(self, hide_password):
+    def _args(self, hide_password: bool = False) -> list[str]:
         args = super()._args(hide_password)
 
         if self.version == 3 and "--export3" in args:

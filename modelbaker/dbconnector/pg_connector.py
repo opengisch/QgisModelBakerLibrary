@@ -13,6 +13,7 @@ License:
 
 import logging
 import re
+from typing import Optional
 
 import psycopg2
 import psycopg2.extras
@@ -50,7 +51,7 @@ class PGConnector(DBConnector):
         self.basket_table_name = PG_BASKET_TABLE
         self.dataset_table_name = PG_DATASET_TABLE
 
-    def map_data_types(self, data_type):
+    def map_data_types(self, data_type: str) -> str:
         if not data_type:
             data_type = ""
         data_type = data_type.lower()
@@ -76,7 +77,7 @@ class PGConnector(DBConnector):
 
         return bool(cur.fetchone()[0])
 
-    def db_or_schema_exists(self):
+    def db_or_schema_exists(self) -> bool:
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
@@ -90,7 +91,7 @@ class PGConnector(DBConnector):
 
         return False
 
-    def create_db_or_schema(self, usr):
+    def create_db_or_schema(self, usr: str) -> bool:
         cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
         if usr:
             authorization_string = sql.SQL("AUTHORIZATION") + sql.Identifier(usr)
@@ -650,7 +651,7 @@ class PGConnector(DBConnector):
 
     _ValueMapRegExp = re.compile(".*'(.*)'::.*")
 
-    def get_value_map_info(self, table_name):
+    def get_value_map_info(self, table_name) -> dict:
         if self.schema:
             constraints_cur = self.conn.cursor(
                 cursor_factory=psycopg2.extras.DictCursor
@@ -681,7 +682,7 @@ class PGConnector(DBConnector):
 
         return {}
 
-    def get_t_type_map_info(self, table_name):
+    def get_t_type_map_info(self, table_name: str) -> dict:
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
@@ -704,7 +705,7 @@ class PGConnector(DBConnector):
             return types_mapping
         return {}
 
-    def get_relations_info(self, filter_layer_list=[]):
+    def get_relations_info(self, filter_layer_list: list[str] = []) -> list[dict]:
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             schema_where1 = "AND KCU1.CONSTRAINT_SCHEMA = '{}'".format(self.schema)
@@ -793,7 +794,7 @@ class PGConnector(DBConnector):
 
         return []
 
-    def get_bags_of_info(self):
+    def get_bags_of_info(self) -> list[dict]:
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
@@ -820,7 +821,7 @@ class PGConnector(DBConnector):
             return cur
         return []
 
-    def get_iliname_dbname_mapping(self, sqlnames=list()):
+    def get_iliname_dbname_mapping(self, sqlnames: list[str] = []) -> dict:
         """Note: the parameter sqlnames is only used for ili2db version 3 relation creation"""
         # Map domain ili name with its correspondent pg name
         if self.schema and self.metadata_exists():
@@ -870,7 +871,7 @@ class PGConnector(DBConnector):
 
         return {}
 
-    def get_attrili_attrdb_mapping(self, attrs_list):
+    def get_attrili_attrdb_mapping(self, attrs_list: list[str]) -> dict:
         """Used for ili2db version 3 relation creation"""
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -892,7 +893,7 @@ class PGConnector(DBConnector):
 
         return {}
 
-    def get_attrili_attrdb_mapping_by_owner(self, owners):
+    def get_attrili_attrdb_mapping_by_owner(self, owners: list[str]) -> dict:
         """Used for ili2db version 3 relation creation"""
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -914,7 +915,7 @@ class PGConnector(DBConnector):
 
         return {}
 
-    def get_models(self):
+    def get_models(self) -> dict:
         if not self._table_exists("t_ili2db_trafo"):
             return {}
 
@@ -965,7 +966,7 @@ class PGConnector(DBConnector):
             return list_result
         return {}
 
-    def ili_version(self):
+    def ili_version(self) -> str:
         cur = self.conn.cursor()
         cur.execute(
             """
@@ -986,7 +987,7 @@ class PGConnector(DBConnector):
         else:
             return 4
 
-    def get_basket_handling(self):
+    def get_basket_handling(self) -> bool:
         if self.schema and self._table_exists(PG_SETTINGS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1006,7 +1007,7 @@ class PGConnector(DBConnector):
                 return content[0] == "readWrite"
         return False
 
-    def get_baskets_info(self):
+    def get_baskets_info(self) -> list[dict]:
         if self.schema and self._table_exists(PG_BASKET_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
@@ -1029,7 +1030,7 @@ class PGConnector(DBConnector):
             return cur.fetchall()
         return {}
 
-    def get_datasets_info(self):
+    def get_datasets_info(self) -> list[dict]:
         if self.schema and self._table_exists(PG_DATASET_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
@@ -1043,7 +1044,7 @@ class PGConnector(DBConnector):
             return cur.fetchall()
         return {}
 
-    def create_dataset(self, datasetname):
+    def create_dataset(self, datasetname: str) -> tuple[bool, str]:
         if self.schema and self._table_exists(PG_DATASET_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             try:
@@ -1092,7 +1093,7 @@ class PGConnector(DBConnector):
                 )
         return False, self.tr('Could not rename dataset "{}".').format(datasetname)
 
-    def get_topics_info(self):
+    def get_topics_info(self) -> dict:
         if (
             self.schema
             and self._table_exists("t_ili2db_classname")
@@ -1131,7 +1132,7 @@ class PGConnector(DBConnector):
 
         return {}
 
-    def get_classes_relevance(self):
+    def get_classes_relevance(self) -> list[dict]:
         if self.schema and self._table_exists("t_ili2db_classname"):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
@@ -1179,8 +1180,12 @@ class PGConnector(DBConnector):
         return []
 
     def create_basket(
-        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
-    ):
+        self,
+        dataset_tid: str,
+        topic: str,
+        tilitid_value: Optional[str] = None,
+        attachment_key: str = "modelbaker",
+    ) -> tuple[bool, str]:
         if self.schema and self._table_exists(PG_BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1277,7 +1282,7 @@ class PGConnector(DBConnector):
             'Could not edit basket for topic "{}" and dataset "{}"'
         ).format(basket_config["topic"], basket_config["datasetname"])
 
-    def get_tid_handling(self):
+    def get_tid_handling(self) -> dict:
         if self.schema and self._table_exists(PG_SETTINGS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1297,7 +1302,7 @@ class PGConnector(DBConnector):
                 return content[0] == "property"
         return False
 
-    def get_ili2db_settings(self):
+    def get_ili2db_settings(self) -> dict:
         result = {}
         if self._table_exists(PG_SETTINGS_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1312,7 +1317,7 @@ class PGConnector(DBConnector):
             result = cur.fetchall()
         return result
 
-    def get_ili2db_sequence_value(self):
+    def get_ili2db_sequence_value(self) -> str:
         if self.schema:
             cur = self.conn.cursor()
             cur.execute(
@@ -1327,7 +1332,7 @@ class PGConnector(DBConnector):
                 return content[0]
         return None
 
-    def get_next_ili2db_sequence_value(self):
+    def get_next_ili2db_sequence_value(self) -> str:
 
         if self.schema:
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
@@ -1344,7 +1349,7 @@ class PGConnector(DBConnector):
                 return content[0]
         return None
 
-    def set_ili2db_sequence_value(self, value):
+    def set_ili2db_sequence_value(self, value: str) -> tuple[bool, str]:
         if self.schema:
             cur = self.conn.cursor()
             try:
@@ -1370,7 +1375,7 @@ class PGConnector(DBConnector):
 
         return False, self.tr("Could not reset sequence")
 
-    def get_all_schemas(self):
+    def get_all_schemas(self) -> list[str]:
         cursor = self.conn.cursor()
         try:
             cursor.execute(
@@ -1392,7 +1397,7 @@ class PGConnector(DBConnector):
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(PG_NLS_TABLE) and self._lang != "", self._lang
 
-    def get_translation_models(self):
+    def get_translation_models(self) -> list[str]:
         if self.schema and self._table_exists(PG_METAATTRS_TABLE):
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
             cur.execute(
@@ -1411,7 +1416,9 @@ class PGConnector(DBConnector):
             return [row["ilielement"] for row in cur.fetchall()]
         return []
 
-    def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
+    def get_available_languages(
+        self, irrelevant_models: list[str] = [], relevant_models: list[str] = []
+    ) -> list[str]:
         if self.schema and self._table_exists(PG_METAATTRS_TABLE):
 
             white_list_placeholders = sql.SQL("")
@@ -1461,7 +1468,7 @@ class PGConnector(DBConnector):
             return [row["attr_value"] for row in cur.fetchall()]
         return []
 
-    def get_domain_dispnames(self, tablename):
+    def get_domain_dispnames(self, tablename: str) -> list[dict]:
         if (
             self.schema
             and self._table_exists

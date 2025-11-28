@@ -17,6 +17,7 @@ import os
 import uuid
 import xml.dom.minidom as minidom
 import xml.etree.ElementTree as ET
+from typing import Optional
 
 from .ilitarget import IliTarget
 
@@ -28,15 +29,15 @@ class DatasetMetadata:
 
     def __init__(
         self,
-        dataset_version: str = None,
-        publishing_date: str = None,
-        owner: str = None,
-        project_name: str = None,
-        id: str = None,
-        file_type: str = None,
-        file_path: str = None,
+        dataset_version: Optional[str] = None,
+        publishing_date: Optional[str] = None,
+        owner: Optional[str] = None,
+        project_name: Optional[str] = None,
+        id: Optional[str] = None,
+        file_type: Optional[str] = None,
+        file_path: Optional[str] = None,
         linking_models: list = [],
-        preferred_datasource: str = None,
+        preferred_datasource: Optional[str] = None,
     ):
         self.id = id
         self.file_type = file_type
@@ -54,14 +55,14 @@ class DatasetMetadata:
         self.short_description = f"QGIS {self.file_type} file for {self.project_name} - {os.path.splitext(os.path.basename(self.file_path))}"
         self.file_mimetype = self._file_mime_type(self.file_path)
 
-    def _file_mime_type(self, file_path: str = None) -> str:
+    def _file_mime_type(self, file_path: Optional[str] = None) -> str:
         mimetype = mimetypes.guess_type(file_path)
         if mimetype[0] is None:
             # ugly fallback
             return "text/plain"
         return mimetype[0]
 
-    def make_xml_element(self, element):
+    def make_xml_element(self, element: ET.Element) -> None:
         """
         Generates the content of an element of DatasetIdx16.DataIndex.DatasetMetadata.
         """
@@ -136,7 +137,7 @@ class IliData:
         self,
         target: IliTarget,
         linking_models: list = [],
-        preferred_datasource: str = None,
+        preferred_datasource: Optional[str] = None,
     ):
         """
         Generates the ilidata.xml file containing all the toppingfile listed in the targets toppingfileinfo_list and writes it to the targets folders.

@@ -108,7 +108,7 @@ class LogLevel(IntEnum):
     TOPPING = 4
 
 
-def default_log_function(text, level=LogLevel.INFO, silent=False):
+def default_log_function(text, level=LogLevel.INFO, silent: bool = False) -> None:
     if silent:
         return
     if level == LogLevel.INFO:

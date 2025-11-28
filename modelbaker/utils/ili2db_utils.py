@@ -11,6 +11,10 @@ License:
     (at your option) any later version.
 """
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from qgis.PyQt.QtCore import QObject, Qt, pyqtSignal
 
 from ..iliwrapper import ilideleter, ilimetaconfigexporter
@@ -21,6 +25,10 @@ from ..iliwrapper.ili2dbconfig import (
 )
 from ..iliwrapper.ili2dbutils import JavaNotFoundError
 from ..utils.qt_utils import OverrideCursor
+
+if TYPE_CHECKING:
+    # only needed for type checking to avoid circular imports
+    from ..iliwrapper.iliexecutable import IliExecutable
 
 
 class Ili2DbUtils(QObject):
@@ -41,7 +49,7 @@ class Ili2DbUtils(QObject):
 
     def delete_baskets(
         self, baskets: str, configuration: Ili2DbCommandConfiguration = None
-    ):
+    ) -> tuple[bool, str]:
         """
 
         Args:
@@ -78,7 +86,7 @@ class Ili2DbUtils(QObject):
 
     def delete_dataset(
         self, dataset: str, configuration: Ili2DbCommandConfiguration = None
-    ):
+    ) -> tuple[bool, str]:
         """
 
         Args:
@@ -115,7 +123,7 @@ class Ili2DbUtils(QObject):
 
     def export_metaconfig(
         self, ini_file: str, configuration: Ili2DbCommandConfiguration = None
-    ):
+    ) -> tuple[bool, str]:
         """
 
         Args:
@@ -153,7 +161,7 @@ class Ili2DbUtils(QObject):
 
         return res, msg
 
-    def _connect_ili_executable_signals(self, ili_executable):
+    def _connect_ili_executable_signals(self, ili_executable: IliExecutable) -> None:
         ili_executable.process_started.connect(self.process_started)
         ili_executable.stderr.connect(self.stderr)
         ili_executable.stdout.connect(self.stdout)
@@ -162,7 +170,7 @@ class Ili2DbUtils(QObject):
         ili_executable.process_started.connect(self._log_on_process_started)
         ili_executable.stderr.connect(self._log_on_stderr)
 
-    def _disconnect_ili_executable_signals(self, ili_executable):
+    def _disconnect_ili_executable_signals(self, ili_executable: IliExecutable) -> None:
         ili_executable.process_started.disconnect(self.process_started)
         ili_executable.stderr.disconnect(self.stderr)
         ili_executable.stdout.disconnect(self.stdout)
@@ -171,8 +179,8 @@ class Ili2DbUtils(QObject):
         ili_executable.process_started.disconnect(self._log_on_process_started)
         ili_executable.stderr.disconnect(self._log_on_stderr)
 
-    def _log_on_process_started(self, command):
+    def _log_on_process_started(self, command: str) -> None:
         self._log += command + "\n"
 
-    def _log_on_stderr(self, text):
+    def _log_on_stderr(self, text: str) -> None:
         self._log += text

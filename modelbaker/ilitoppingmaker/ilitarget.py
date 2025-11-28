@@ -15,6 +15,7 @@ License:
 import datetime
 import os
 import pathlib
+from typing import Optional
 
 from ..libs.toppingmaker import Target
 from ..libs.toppingmaker.utils import slugify
@@ -29,8 +30,8 @@ class IliTarget(Target):
     def __init__(
         self,
         projectname: str = "project",
-        main_dir: str = None,
-        sub_dir: str = None,
+        main_dir: Optional[str] = None,
+        sub_dir: Optional[str] = None,
         path_resolver=None,
         owner="owner",
         publishing_date=None,
@@ -46,7 +47,7 @@ class IliTarget(Target):
         self.default_version = version or datetime.datetime.now().strftime("%Y-%m-%d")
 
     @staticmethod
-    def ilidata_path_resolver(target, name, type):
+    def ilidata_path_resolver(target: Target, name: str, type: str) -> str:
         """
         A path_resolver adding an id to the toppingfile in the toppingfile_list.
 
@@ -67,7 +68,7 @@ class IliTarget(Target):
         return f"ilidata:{id}"
 
     @staticmethod
-    def unique_id_in_target_scope(target, id):
+    def unique_id_in_target_scope(target: Target, id: str) -> str:
         for toppingfileinfo in target.toppingfileinfo_list:
             if "id" in toppingfileinfo and toppingfileinfo["id"] == id:
                 iterator = int(id[-3:])

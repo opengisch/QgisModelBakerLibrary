@@ -67,7 +67,9 @@ class PgFactory(DbFactory):
         return result, message
 
     def post_generate_project_validations(
-        self, configuration: Ili2DbCommandConfiguration, fallback_user: str = None
+        self,
+        configuration: Ili2DbCommandConfiguration,
+        fallback_user: Optional[str] = None,
     ) -> tuple[bool, str]:
         result = False
         message = ""
