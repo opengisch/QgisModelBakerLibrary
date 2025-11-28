@@ -1,26 +1,22 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2016
-        copyright            : (C) 2016 by OPENGIS.ch
-        email                : info@opengis.ch
- ***************************************************************************/
+Metadata:
+    Copyright: (C) 2016 by OPENGIS.ch
+    Contact: info@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import functools
 import re
 import unicodedata
 from abc import ABCMeta
 from functools import partial
+from typing import Callable, Optional
 
 from qgis.core import QgsNetworkAccessManager
 from qgis.PyQt.QtCore import (
@@ -33,10 +29,12 @@ from qgis.PyQt.QtCore import (
     QUrl,
 )
 from qgis.PyQt.QtNetwork import QNetworkReply, QNetworkRequest
-from qgis.PyQt.QtWidgets import QApplication, QFileDialog
+from qgis.PyQt.QtWidgets import QApplication, QFileDialog, QLineEdit
 
 
-def selectFileName(line_edit_widget, title, file_filter, parent):
+def selectFileName(
+    line_edit_widget: QLineEdit, title: str, file_filter: str, parent
+) -> None:
     filename, matched_filter = QFileDialog.getOpenFileName(
         parent, title, line_edit_widget.text(), file_filter
     )
@@ -44,11 +42,11 @@ def selectFileName(line_edit_widget, title, file_filter, parent):
 
 
 def make_file_selector(
-    widget,
-    title=QCoreApplication.translate("modelbaker", "Open File"),
-    file_filter=QCoreApplication.translate("modelbaker", "Any file (*)"),
+    widget: QLineEdit,
+    title: str = QCoreApplication.translate("modelbaker", "Open File"),
+    file_filter: str = QCoreApplication.translate("modelbaker", "Any file (*)"),
     parent=None,
-):
+) -> Callable:
     return partial(
         selectFileName,
         line_edit_widget=widget,
@@ -59,14 +57,14 @@ def make_file_selector(
 
 
 def selectFileNameToSave(
-    line_edit_widget,
-    title,
-    file_filter,
+    line_edit_widget: QLineEdit,
+    title: str,
+    file_filter: str,
     parent,
-    extension,
-    extensions,
-    dont_confirm_overwrite,
-):
+    extension: str,
+    extensions: list[str],
+    dont_confirm_overwrite: bool,
+) -> None:
     filename, matched_filter = QFileDialog.getSaveFileName(
         parent,
         title,
@@ -91,14 +89,14 @@ def selectFileNameToSave(
 
 
 def make_save_file_selector(
-    widget,
-    title=QCoreApplication.translate("modelbaker", "Open File"),
-    file_filter=QCoreApplication.translate("modelbaker", "Any file(*)"),
+    widget: QLineEdit,
+    title: str = QCoreApplication.translate("modelbaker", "Open File"),
+    file_filter: str = QCoreApplication.translate("modelbaker", "Any file(*)"),
     parent=None,
-    extension="",
-    extensions=None,
-    dont_confirm_overwrite=False,
-):
+    extension: str = "",
+    extensions: list[str] = [],
+    dont_confirm_overwrite: bool = False,
+) -> Callable:
     return partial(
         selectFileNameToSave,
         line_edit_widget=widget,
@@ -111,7 +109,7 @@ def make_save_file_selector(
     )
 
 
-def selectFolder(line_edit_widget, title, parent):
+def selectFolder(line_edit_widget: QLineEdit, title: str, parent) -> None:
     foldername = QFileDialog.getExistingDirectory(
         parent, title, line_edit_widget.text()
     )
@@ -119,10 +117,10 @@ def selectFolder(line_edit_widget, title, parent):
 
 
 def make_folder_selector(
-    widget,
-    title=QCoreApplication.translate("modelbaker", "Open Folder"),
+    widget: QLineEdit,
+    title: str = QCoreApplication.translate("modelbaker", "Open Folder"),
     parent=None,
-):
+) -> Callable:
     return partial(selectFolder, line_edit_widget=widget, title=title, parent=parent)
 
 
@@ -146,8 +144,13 @@ replies = list()
 
 
 def download_file(
-    url, filename, on_progress=None, on_finished=None, on_error=None, on_success=None
-):
+    url: str,
+    filename: str,
+    on_progress: Optional[Callable[[int, int], None]] = None,
+    on_finished: Optional[Callable[[], None]] = None,
+    on_error: Optional[Callable[[str, str], None]] = None,
+    on_success: Optional[Callable[[], None]] = None,
+) -> str:
     """
     Will download the file from url to a local filename.
     The method will only return once it's finished.

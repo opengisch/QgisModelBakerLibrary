@@ -1,20 +1,16 @@
 """
-/***************************************************************************
-    begin                :    24/06/2022
-    git sha              :    :%H$
-    copyright            :    (C) 2022 by Dave Signer (took base from) Damiano Lombardi
-    email                :    david@opengis.ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2022-06-24
+    Copyright: (C) 2022 by Dave Signer (took base from) Damiano Lombardi
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 
 import datetime
 import logging

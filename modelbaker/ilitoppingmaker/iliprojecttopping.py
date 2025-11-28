@@ -1,22 +1,17 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2022-07-17
-        git sha              : :%H$
-        copyright            : (C) 2022 by Dave Signer
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-07-22
+    Copyright: (C) 2022 by Dave Signer
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
+from typing import Optional
 
 from qgis.core import Qgis, QgsExpressionContextUtils, QgsProject
 
@@ -53,22 +48,22 @@ class IliProjectTopping(ProjectTopping):
         self.preferred_datasource = None
 
     @property
-    def models(self):
+    def models(self) -> list:
         return self.metaconfig.ili2db_settings.models
 
     @property
-    def referencedata_paths(self):
+    def referencedata_paths(self) -> list:
         return self.metaconfig.referencedata_paths
 
     @models.setter
-    def models(self, models: list):
+    def models(self, models: list) -> None:
         self.metaconfig.ili2db_settings.models = models
 
     @referencedata_paths.setter
-    def referencedata_paths(self, paths: list):
+    def referencedata_paths(self, paths: list) -> None:
         self.metaconfig.referencedata_paths = paths
 
-    def makeit(self, project: QgsProject = None):
+    def makeit(self, project: Optional[QgsProject] = None) -> str:
         """
         Creates everything - generates all the files.
         Returns the path to the ilidata.xml file.
@@ -111,7 +106,7 @@ class IliProjectTopping(ProjectTopping):
 
         return ilidata_path
 
-    def append_iliproperties(self, project):
+    def append_iliproperties(self, project: QgsProject) -> None:
         # append ilispecific properties like the optimize_strategy to the properties object
         optimize_strategy = QgsExpressionContextUtils.projectScope(project).variable(
             "optimize_strategy"
