@@ -17,15 +17,18 @@ import re
 import subprocess
 import tempfile
 import zipfile
+from typing import Callable, Optional
 
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication, pyqtSignal
 
 from ..utils.qt_utils import NetworkError, download_file
 from .globals import DbIliMode
-from .ili2dbtools import get_tool_url, get_tool_version
+from .ili2dbtools import BaseConfiguration, get_tool_url, get_tool_version
 
 
-def get_ili2db_bin(tool, db_ili_version, stdout, stderr):
+def get_ili2db_bin(
+    tool: DbIliMode, db_ili_version: int, stdout: pyqtSignal, stderr: pyqtSignal
+) -> Optional[str]:
     if tool not in DbIliMode or tool == DbIliMode.ili:
         raise RuntimeError("Tool {} not found".format(tool))
 
@@ -119,7 +122,9 @@ def get_ili2db_bin(tool, db_ili_version, stdout, stderr):
     return ili2db_file
 
 
-def get_all_modeldir_in_path(path, lambdafunction=None):
+def get_all_modeldir_in_path(
+    path: str, lambdafunction: Optional[Callable[[str], None]] = None
+):
     all_subdirs = [path[0] for path in os.walk(path)]  # include path
     # Make sure path is included, it can be a special string like `%XTF_DIR`
     modeldirs = [path]
@@ -134,7 +139,7 @@ def get_all_modeldir_in_path(path, lambdafunction=None):
     return ";".join(modeldirs)
 
 
-def get_java_path(base_configuration):
+def get_java_path(base_configuration: BaseConfiguration) -> str:
     """
     Delivers the path to a Java 8 installation or raises a JavaNotFoundError
 
@@ -242,11 +247,11 @@ def get_java_path(base_configuration):
 
 
 def is_version_valid(
-    current_version,
-    min_required_version,
+    current_version: str,
+    min_required_version: str,
     exact_required_version=False,
-    module_tested="",
-):
+    module_tested: str = "",
+) -> bool:
     """
         Generic one, it helps us to validate whether a current version is greater or equal to a min_required_version or,
         if exact_required_version, if a current version is exactly the required one.
@@ -316,14 +321,14 @@ class JavaNotFoundError(FileNotFoundError):
             self.java_version = None
 
     @property
-    def html_java_version(self):
+    def html_java_version(self) -> str:
         if self.java_version:
             return "<br/>".join(self.java_version.splitlines())
         else:
             return ""
 
     @property
-    def error_string(self):
+    def error_string(self) -> str:
         if self.java_version:
             return QCoreApplication.translate(
                 "ili2dbutils",

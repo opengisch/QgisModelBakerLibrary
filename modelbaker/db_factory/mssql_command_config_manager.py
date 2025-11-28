@@ -27,7 +27,7 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
         DbCommandConfigManager.__init__(self, configuration)
 
     def get_uri(
-        self, su: bool = False, qgis: bool = False, fallback_user: str = None
+        self, su: bool = False, qgis: bool = False, fallback_user: Optional[str] = None
     ) -> str:
         separator = ";"
         uri = []

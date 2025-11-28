@@ -42,7 +42,9 @@ class GpkgFactory(DbFactory):
         return True, ""
 
     def post_generate_project_validations(
-        self, configuration: Ili2DbCommandConfiguration, fallback_user: str = None
+        self,
+        configuration: Ili2DbCommandConfiguration,
+        fallback_user: Optional[str] = None,
     ) -> tuple[bool, str]:
         return True, ""
 

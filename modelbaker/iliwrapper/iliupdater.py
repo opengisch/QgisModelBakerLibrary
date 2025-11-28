@@ -22,5 +22,5 @@ class Updater(IliExecutable):
     def __init__(self, parent=None):
         super().__init__(parent)
 
-    def _create_config(self):
+    def _create_config(self) -> UpdateDataConfiguration:
         return UpdateDataConfiguration()

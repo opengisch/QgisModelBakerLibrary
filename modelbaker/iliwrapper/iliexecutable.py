@@ -14,6 +14,7 @@ import functools
 import locale
 import re
 from abc import abstractmethod
+from typing import Optional
 
 from qgis.PyQt.QtCore import QEventLoop, QObject, QProcess, pyqtSignal
 
@@ -61,10 +62,10 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         Returns:
             ili2db configuration"""
 
-    def _get_ili2db_version(self):
+    def _get_ili2db_version(self) -> int:
         return self.configuration.db_ili_version
 
-    def _args(self, hide_password):
+    def _args(self, hide_password: bool) -> list:
         """Gets the list of ili2db arguments from configuration.
 
         Args:
@@ -76,7 +77,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
 
         return get_ili2db_args(self.configuration, hide_password)
 
-    def _ili2db_jar_arg(self):
+    def _ili2db_jar_arg(self) -> list:
         ili2db_bin = get_ili2db_bin(
             self.tool, self._get_ili2db_version(), self.stdout, self.stderr
         )
@@ -84,14 +85,14 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
             return self.ILI2DB_NOT_FOUND
         return ["-jar", ili2db_bin]
 
-    def _escaped_arg(self, argument):
+    def _escaped_arg(self, argument=str) -> str:
         if '"' in argument:
             argument = argument.replace('"', '"""')
         if " " in argument:
             argument = '"' + argument + '"'
         return argument
 
-    def command(self, hide_password):
+    def command(self, hide_password: bool = False) -> str:
         ili2db_jar_arg = self._ili2db_jar_arg()
         if ili2db_jar_arg == self.ILI2DB_NOT_FOUND:
             return "ili2db tool not found!"
@@ -109,7 +110,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
 
         return command
 
-    def command_with_password(self, edited_command):
+    def command_with_password(self, edited_command: str) -> str:
         if "--dbpwd ******" in edited_command:
             args = self._args(False)
             i = args.index("--dbpwd")
@@ -118,7 +119,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
             )
         return edited_command
 
-    def command_without_password(self, edited_command=None):
+    def command_without_password(self, edited_command: Optional[str] = None) -> str:
         if not edited_command:
             return self.command(True)
         regex = re.compile("--dbpwd [^ ]*")
@@ -127,7 +128,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
             edited_command = edited_command.replace(match.group(1), "--dbpwd ******")
         return edited_command
 
-    def run(self, edited_command=None):
+    def run(self, edited_command: Optional[str] = None) -> int:
         proc = QProcess()
         self.cancel_process.connect(proc.terminate)
         proc.readyReadStandardError.connect(
@@ -164,7 +165,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         self.process_finished.emit(proc.exitCode(), self.__result)
         return self.__result
 
-    def stderr_ready(self, proc):
+    def stderr_ready(self, proc: QProcess) -> None:
         text = bytes(proc.readAllStandardError()).decode(self.encoding)
 
         if self.__done_pattern.search(text):
@@ -172,6 +173,6 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
 
         self.stderr.emit(text)
 
-    def stdout_ready(self, proc):
+    def stdout_ready(self, proc: QProcess) -> None:
         text = bytes(proc.readAllStandardOutput()).decode(self.encoding)
         self.stdout.emit(text)

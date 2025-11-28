@@ -41,18 +41,18 @@ from .form import Form, FormFieldWidget, FormRelationWidget, FormTab
 class Layer:
     def __init__(
         self,
-        provider: str = None,
-        uri: str = None,
-        name: str = None,
+        provider: Optional[str] = None,
+        uri: Optional[str] = None,
+        name: Optional[str] = None,
         srid: Optional[int] = None,
         extent: Optional[str] = None,
-        geometry_column: str = None,
+        geometry_column: Optional[str] = None,
         wkb_type: QgsWkbTypes = QgsWkbTypes.Type.Unknown,
         alias: Optional[str] = None,
         is_domain: bool = False,  # is enumeration or catalogue
         is_structure: bool = False,
         is_nmrel: bool = False,
-        display_expression: str = None,
+        display_expression: Optional[str] = None,
         coordinate_precision: Optional[float] = None,
         is_basket_table: bool = False,
         is_dataset_table: bool = False,
@@ -68,7 +68,7 @@ class Layer:
         qmlstylefile: Optional[str] = None,
         styles: dict[str, dict[str, str]] = {},
         is_enum: bool = False,
-        base_class: str = None,
+        base_class: Optional[str] = None,
         provider_names_map: dict[
             str, str
         ] = {},  # provider specific column names (e.g. T_Id vs t_id)

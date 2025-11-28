@@ -14,7 +14,7 @@ License:
 from .globals import DbIliMode
 
 
-def get_tool_version(tool, db_ili_version):
+def get_tool_version(tool, db_ili_version: int) -> str:
     if tool == DbIliMode.ili2gpkg:
         if db_ili_version == 3:
             return "3.11.3"
@@ -34,7 +34,7 @@ def get_tool_version(tool, db_ili_version):
     return "0"
 
 
-def get_tool_url(tool, db_ili_version):
+def get_tool_url(tool: DbIliMode, db_ili_version: int) -> str:
     if tool == DbIliMode.ili2gpkg:
         return "https://downloads.interlis.ch/ili2gpkg/ili2gpkg-{version}.zip".format(
             version=get_tool_version(tool, db_ili_version)

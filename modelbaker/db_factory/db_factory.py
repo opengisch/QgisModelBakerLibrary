@@ -73,7 +73,9 @@ class DbFactory(ABC):
 
     @abstractmethod
     def post_generate_project_validations(
-        self, configuration: Ili2DbCommandConfiguration, fallback_user: str = None
+        self,
+        configuration: Ili2DbCommandConfiguration,
+        fallback_user: Optional[str] = None,
     ) -> tuple[bool, str]:
         """This method will be called after an operation of generate project is executed.
 
