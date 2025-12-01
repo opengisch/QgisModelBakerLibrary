@@ -31,7 +31,7 @@ class LegendGroup:
         self,
         name: Optional[str] = None,
         expanded: bool = True,
-        ignore_node_names: bool = False,
+        ignore_node_names: Optional[list[str]] = [],
         static_sorting: bool = False,
     ) -> None:
         self.name = name

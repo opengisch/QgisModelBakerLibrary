@@ -854,7 +854,7 @@ class Generator(QObject):
     def legend(
         self,
         layers: list[Layer],
-        ignore_node_names: bool = False,
+        ignore_node_names: list[str] = [],
         layertree_structure: bool = False,
         path_resolver: Callable[[str], str] = lambda path: path,
         hide_systemlayers: bool = False,
