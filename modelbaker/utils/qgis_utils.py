@@ -40,7 +40,7 @@ layer_order = [
 
 
 def get_first_index_for_layer_type(
-    layer_type: str, group: QgsLayerTreeGroup, ignore_node_names: list = [str]
+    layer_type: str, group: QgsLayerTreeGroup, ignore_node_names: list[str] = []
 ) -> int:
     """
     Finds the first index (from top to bottom) in the layer tree where a
