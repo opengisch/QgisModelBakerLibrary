@@ -1,23 +1,20 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 23/03/17
-        git sha              : :%H$
-        copyright            : (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-        email                : gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-03-23
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
+from typing import Optional
+
 from qgis.core import QgsNetworkAccessManager
+from qgis.PyQt.QtCore import QSettings
 from qgis.PyQt.QtNetwork import QNetworkProxy
 
 from .globals import DbIliMode
@@ -37,7 +34,7 @@ class BaseConfiguration:
 
         self.debugging_enabled = False
 
-    def save(self, settings):
+    def save(self, settings: QSettings) -> None:
         settings.setValue("SuperUser", self.super_pg_user)
         settings.setValue("SuperPassword", self.super_pg_password)
         settings.setValue("CustomDbParameters", self.dbparam_map)
@@ -49,7 +46,7 @@ class BaseConfiguration:
         settings.setValue("LogfilePath", self.logfile_path)
         settings.setValue("DebuggingEnabled", self.debugging_enabled)
 
-    def restore(self, settings):
+    def restore(self, settings: QSettings) -> None:
         self.super_pg_user = settings.value("SuperUser", "postgres", str)
         self.super_pg_password = settings.value("SuperPassword", "postgres", str)
         self.dbparam_map = settings.value("CustomDbParameters", {}, dict)
@@ -63,7 +60,9 @@ class BaseConfiguration:
         self.debugging_enabled = settings.value("DebuggingEnabled", False, bool)
         self.logfile_path = settings.value("LogfilePath", "", str)
 
-    def to_ili2db_args(self, with_modeldir=True, with_usabilityhub_repo=False):
+    def to_ili2db_args(
+        self, with_modeldir: bool = True, with_usabilityhub_repo: bool = False
+    ) -> list:
         """
         Create an ili2db command line argument string from this configuration
         """
@@ -91,7 +90,7 @@ class BaseConfiguration:
         return args
 
     @property
-    def model_directories(self):
+    def model_directories(self) -> list:
         dirs = list()
         if self.custom_model_directories_enabled and self.custom_model_directories:
             dirs = self.custom_model_directories.split(";")
@@ -105,7 +104,7 @@ class BaseConfiguration:
         return dirs
 
     @property
-    def ilidata_directories(self):
+    def ilidata_directories(self) -> list:
         dirs = list()
         if self.custom_model_directories_enabled and self.custom_model_directories:
             dirs = self.custom_model_directories.split(";")
@@ -145,7 +144,13 @@ class Ili2DbCommandConfiguration:
             # We got an 'other' object from which we'll get parameters
             self.__dict__ = other.__dict__.copy()
 
-    def append_args(self, args, values, consider_metaconfig=False, force_append=False):
+    def append_args(
+        self,
+        args: list[str],
+        values: list[str],
+        consider_metaconfig: bool = False,
+        force_append: bool = False,
+    ) -> None:
         """
         Usually, there's no metaconfig, so we just add the value to the command's arguments.
         But if there is a metaconfig and the parameter isn't forced (i.e., it's not a technical parameter), we check:
@@ -170,8 +175,7 @@ class Ili2DbCommandConfiguration:
                         return
         args += values
 
-    def to_ili2db_args(self):
-
+    def to_ili2db_args(self) -> list:
         # Valid ili file, don't pass --modeldir (it can cause ili2db errors)
         with_modeldir = not self.ilifile
 
@@ -207,7 +211,7 @@ class Ili2DbCommandConfiguration:
 
 
 class ExportConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self, other: Ili2DbCommandConfiguration = None):
+    def __init__(self, other: Optional[Ili2DbCommandConfiguration] = None):
         super().__init__(other)
         self.xtffile = ""
         self.with_exporttid = False
@@ -215,7 +219,9 @@ class ExportConfiguration(Ili2DbCommandConfiguration):
         self.dataset = ""
         self.baskets = list()
 
-    def to_ili2db_args(self, extra_args=[], with_action=True):
+    def to_ili2db_args(
+        self, extra_args: list[str] = [], with_action: bool = True
+    ) -> list:
         args = list()
 
         self.append_args(args, extra_args)
@@ -250,7 +256,7 @@ class ExportConfiguration(Ili2DbCommandConfiguration):
 
 
 class SchemaImportConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self, other: Ili2DbCommandConfiguration = None):
+    def __init__(self, other: Optional[Ili2DbCommandConfiguration] = None):
         super().__init__(other)
         self.inheritance = "smart1"
         self.create_basket_col = False
@@ -263,7 +269,9 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.post_script = ""
         self.name_lang = ""
 
-    def to_ili2db_args(self, extra_args=[], with_action=True):
+    def to_ili2db_args(
+        self, extra_args: list[str] = [], with_action: bool = True
+    ) -> list:
         """
         Create an ili2db argument array, with the password masked with ****** and optionally with the ``action``
         argument (--schemaimport) removed.
@@ -369,7 +377,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
 
 class ImportDataConfiguration(SchemaImportConfiguration):
-    def __init__(self, other: Ili2DbCommandConfiguration = None):
+    def __init__(self, other: Optional[Ili2DbCommandConfiguration] = None):
         super().__init__(other)
         self.xtffile = ""
         self.delete_data = False
@@ -381,7 +389,9 @@ class ImportDataConfiguration(SchemaImportConfiguration):
         # requires sqlEnableNull on schema:
         self.skip_reference_errors = False
 
-    def to_ili2db_args(self, extra_args=[], with_action=True):
+    def to_ili2db_args(
+        self, extra_args: list[str] = [], with_action: bool = True
+    ) -> list:
         args = list()
 
         if with_action:
@@ -432,7 +442,7 @@ class ImportDataConfiguration(SchemaImportConfiguration):
 
 
 class UpdateDataConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self, other: Ili2DbCommandConfiguration = None):
+    def __init__(self, other: Optional[Ili2DbCommandConfiguration] = None):
         super().__init__(other)
         self.xtffile = ""
         self.dataset = ""
@@ -442,7 +452,7 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
         # requires sqlEnableNull on schema:
         self.skip_reference_errors = False
 
-    def to_ili2db_args(self, extra_args=[], with_action=True):
+    def to_ili2db_args(self, extra_args: list[str] = [], with_action: bool = True):
         args = list()
 
         if with_action:
@@ -476,7 +486,7 @@ class UpdateDataConfiguration(Ili2DbCommandConfiguration):
 
 
 class ValidateConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self, other: Ili2DbCommandConfiguration = None):
+    def __init__(self, other: Optional[Ili2DbCommandConfiguration] = None):
         super().__init__(other)
         self.ilimodels = ""
         self.topics = ""
@@ -491,7 +501,7 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
         self.xtffile = ""
         self.plugins_dir = ""
 
-    def to_ili2db_args(self, extra_args=[], with_action=True):
+    def to_ili2db_args(self, extra_args: list[str] = [], with_action: bool = True):
         args = list()
 
         if with_action:
@@ -545,12 +555,12 @@ class ValidateConfiguration(Ili2DbCommandConfiguration):
 
 
 class DeleteConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self, other: Ili2DbCommandConfiguration = None):
+    def __init__(self, other: Optional[Ili2DbCommandConfiguration] = None):
         super().__init__(other)
         self.dataset = ""
         self.baskets = ""
 
-    def to_ili2db_args(self, extra_args=[], with_action=True):
+    def to_ili2db_args(self, extra_args: list[str] = [], with_action: bool = True):
         args = list()
 
         if with_action:
@@ -570,11 +580,11 @@ class DeleteConfiguration(Ili2DbCommandConfiguration):
 
 
 class ExportMetaConfigConfiguration(Ili2DbCommandConfiguration):
-    def __init__(self, other: Ili2DbCommandConfiguration = None):
+    def __init__(self, other: Optional[Ili2DbCommandConfiguration] = None):
         super().__init__(other)
         self.metaconfigoutputfile = ""
 
-    def to_ili2db_args(self, extra_args=[], with_action=True):
+    def to_ili2db_args(self, extra_args: list[str] = [], with_action: bool = True):
         args = list()
 
         if with_action:

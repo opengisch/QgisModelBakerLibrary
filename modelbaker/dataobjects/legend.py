@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 2016-12-21
-        git sha              : :%H$
-        copyright            : (C) 2016 by OPENGIS.ch
-        email                : info@opengis.ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2021-12-16
+    Copyright: (C) 2016 by OPENGIS.ch
+    Contact: info@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from __future__ import annotations
 
 from typing import Any, Optional, Union
@@ -34,9 +29,9 @@ from .layers import Layer
 class LegendGroup:
     def __init__(
         self,
-        name: str = None,
+        name: Optional[str] = None,
         expanded: bool = True,
-        ignore_node_names: bool = None,
+        ignore_node_names: Optional[list[str]] = [],
         static_sorting: bool = False,
     ) -> None:
         self.name = name

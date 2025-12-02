@@ -1,20 +1,16 @@
 """
-/***************************************************************************
-    begin                :    08/04/19
-    git sha              :    :%H$
-    copyright            :    (C) 2019 by Yesid Polania
-    email                :    yesidpol.3@gmail.com
- ***************************************************************************/
+Metadata:
+    Creation Date: 2019-04-08
+    Copyright: (C) 2019 by Yesid Polania
+    Contact: yesidpol.3@gmail.com
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from __future__ import annotations
 
 import logging
@@ -45,15 +41,16 @@ except ModuleNotFoundError:
 
 
 class DbSimpleFactory:
-    """Provides a single point (simple factory) to create a database factory (:class:`DbFactory`)."""
+    """Provides a single point (simple factory) to create a database factory (DbFactory)."""
 
     def create_factory(self, ili_mode: DbIliMode) -> Optional[DbFactory]:
-        """Creates an instance of :class:`DbFactory` based on ili_mode parameter.
+        """Creates an instance of DbFactory based on ili_mode parameter.
 
-        :param ili_mode: Value specifying which factory will be instantiated.
-        :type ili_mode: :class:`DbIliMode`
-        :return: A database factory
-        """
+        Args:
+            ili_mode (DbIliMode): Value specifying which factory will be instantiated.
+
+        Returns:
+            DbFactory: A database factory"""
         if not ili_mode:
             return None
 
@@ -73,13 +70,14 @@ class DbSimpleFactory:
     def get_db_list(self, is_schema_import: bool = False) -> list[DbIliMode]:
         """Gets a list containing the databases available in modelbaker.
 
-        This list can be used to show the available databases in GUI, for example, **QComboBox source**
-        in **Import Data Dialog**.
+                This list can be used to show the available databases in GUI, for example, **QComboBox source**
+                in **Import Data Dialog**.
 
-        :param bool is_schema_import: *True* to include interlis operation values, *False* otherwise.
-        :return: A list containing the databases available.
-        :rtype: list
-        """
+        Args:
+            is_schema_import (bool): *True* to include interlis operation values, *False* otherwise.
+
+        Returns:
+            list: A list containing the databases available."""
         ili = []
         result = available_database_factories.keys()
 
@@ -95,7 +93,6 @@ class DbSimpleFactory:
     def default_database(self) -> DbIliMode:
         """Gets a default database for modelbaker.
 
-        :return: Default database for modelbaker.
-        :rtype: :class:`DbIliMode`
-        """
+        Returns:
+            DbIliMode: Default database for modelbaker."""
         return list(available_database_factories.keys())[0]

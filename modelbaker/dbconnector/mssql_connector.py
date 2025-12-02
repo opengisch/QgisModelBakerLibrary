@@ -1,23 +1,19 @@
 """
-/***************************************************************************
-    begin                :    01/02/19
-    git sha              :    :%H$
-    copyright            :    (C) 2019 by Yesid Polanía (BSF-Swissphoto)
-    email                :    yesidpol.3@gmail.com
- ***************************************************************************/
+Metadata:
+    Creation Date: 2019-02-01
+    Copyright: (C) 2019 by Yesid Polanía (BSF-Swissphoto)
+    Contact: yesidpol.3@gmail.com
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 import numbers
 import re
+from typing import Optional
 
 import pyodbc
 from qgis.core import Qgis
@@ -57,7 +53,7 @@ class MssqlConnector(DBConnector):
         self.basket_table_name = BASKET_TABLE
         self.dataset_table_name = DATASET_TABLE
 
-    def map_data_types(self, data_type):
+    def map_data_types(self, data_type: str) -> str:
         result = data_type.lower()
         if "timestamp" in data_type:
             result = self.QGIS_DATE_TIME_TYPE
@@ -68,7 +64,7 @@ class MssqlConnector(DBConnector):
 
         return result
 
-    def db_or_schema_exists(self):
+    def db_or_schema_exists(self) -> bool:
         if self.schema:
             cur = self.conn.cursor()
             cur.execute(
@@ -616,7 +612,7 @@ class MssqlConnector(DBConnector):
 
         return result
 
-    def get_t_type_map_info(self, table_name):
+    def get_t_type_map_info(self, table_name: str) -> dict:
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor()
             cur.execute(
@@ -638,7 +634,7 @@ class MssqlConnector(DBConnector):
             return types_mapping
         return {}
 
-    def get_relations_info(self, filter_layer_list=[]):
+    def get_relations_info(self, filter_layer_list: list[str] = []) -> list[dict]:
         result = []
 
         if self.schema:
@@ -742,7 +738,7 @@ class MssqlConnector(DBConnector):
 
         return result
 
-    def get_iliname_dbname_mapping(self, sqlnames=list()):
+    def get_iliname_dbname_mapping(self, sqlnames: list[str] = []) -> dict:
         """Note: the parameter sqlnames is only used for ili2db version 3 relation creation"""
         result = {}
         # Map domain ili name with its correspondent mssql name
@@ -767,9 +763,9 @@ class MssqlConnector(DBConnector):
 
         return result
 
-    def get_models(self):
+    def get_models(self) -> list[dict]:
         if not self._table_exists("t_ili2db_trafo"):
-            return {}
+            return []
 
         # Get MODELS
         if self.schema:
@@ -812,7 +808,7 @@ class MssqlConnector(DBConnector):
                         list_result.append(result)
                         result = dict()
             return list_result
-        return {}
+        return []
 
     def get_classili_classdb_mapping(self, models_info, extended_classes):
         result = {}
@@ -834,7 +830,7 @@ class MssqlConnector(DBConnector):
             result = self._get_dict_result(cur)
         return result
 
-    def get_attrili_attrdb_mapping(self, attrs_list):
+    def get_attrili_attrdb_mapping(self, attrs_list: list[str]) -> dict:
         result = {}
         if self.schema:
             cur = self.conn.cursor()
@@ -851,7 +847,7 @@ class MssqlConnector(DBConnector):
             result = self._get_dict_result(cur)
         return result
 
-    def get_attrili_attrdb_mapping_by_owner(self, owners):
+    def get_attrili_attrdb_mapping_by_owner(self, owners: list[str]) -> dict:
         result = {}
         if self.schema:
             cur = self.conn.cursor()
@@ -877,7 +873,7 @@ class MssqlConnector(DBConnector):
 
         return res
 
-    def ili_version(self):
+    def ili_version(self) -> str:
         cur = self.conn.cursor()
         cur.execute(
             """SELECT count(COLUMN_NAME)
@@ -899,7 +895,7 @@ WHERE TABLE_SCHEMA='{schema}'
         else:
             return 4
 
-    def get_basket_handling(self):
+    def get_basket_handling(self) -> bool:
         if self.schema and self._table_exists(SETTINGS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -916,7 +912,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 return content[0] == "readWrite"
         return False
 
-    def get_baskets_info(self):
+    def get_baskets_info(self) -> list[dict]:
         result = {}
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
@@ -938,7 +934,7 @@ WHERE TABLE_SCHEMA='{schema}'
             result = self._get_dict_result(cur)
         return result
 
-    def get_datasets_info(self):
+    def get_datasets_info(self) -> list[dict]:
         result = {}
         if self.schema and self._table_exists(DATASET_TABLE):
             cur = self.conn.cursor()
@@ -952,7 +948,7 @@ WHERE TABLE_SCHEMA='{schema}'
             result = self._get_dict_result(cur)
         return result
 
-    def create_dataset(self, datasetname):
+    def create_dataset(self, datasetname: str) -> tuple[bool, str]:
         if self.schema and self._table_exists(DATASET_TABLE):
             cur = self.conn.cursor()
             try:
@@ -1001,7 +997,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 )
         return False, self.tr('Could not create dataset "{}".').format(datasetname)
 
-    def get_topics_info(self):
+    def get_topics_info(self) -> dict:
         result = {}
         if (
             self.schema
@@ -1027,7 +1023,7 @@ WHERE TABLE_SCHEMA='{schema}'
             result = self._get_dict_result(cur)
         return result
 
-    def get_classes_relevance(self):
+    def get_classes_relevance(self) -> list[dict]:
         result = []
         if self.schema and self._table_exists("t_ili2db_classname"):
             cur = self.conn.cursor()
@@ -1092,8 +1088,12 @@ WHERE TABLE_SCHEMA='{schema}'
         return result
 
     def create_basket(
-        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
-    ):
+        self,
+        dataset_tid: str,
+        topic: str,
+        tilitid_value: Optional[str] = None,
+        attachment_key: str = "modelbaker",
+    ) -> tuple[bool, str]:
         if self.schema and self._table_exists(BASKET_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1184,7 +1184,7 @@ WHERE TABLE_SCHEMA='{schema}'
             'Could not edit basket for topic "{}" and dataset "{}"'
         ).format(basket_config["topic"], basket_config["datasetname"])
 
-    def get_tid_handling(self):
+    def get_tid_handling(self) -> bool:
         if self.schema and self._table_exists(SETTINGS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1201,7 +1201,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 return content[0] == "property"
         return False
 
-    def get_ili2db_settings(self):
+    def get_ili2db_settings(self) -> dict:
         result = {}
         if self._table_exists(SETTINGS_TABLE):
             cur = self.conn.cursor()
@@ -1215,11 +1215,11 @@ WHERE TABLE_SCHEMA='{schema}'
             result = self._get_dict_result(cur)
         return result
 
-    def get_ili2db_sequence_value(self):
+    def get_ili2db_sequence_value(self) -> str:
         # not implemented, return the next one
         return self.get_next_ili2db_sequence_value()
 
-    def get_next_ili2db_sequence_value(self):
+    def get_next_ili2db_sequence_value(self) -> str:
         if self.schema:
             cur = self.conn.cursor()
             cur.execute(
@@ -1234,7 +1234,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 return content[0]
         return None
 
-    def set_ili2db_sequence_value(self, value):
+    def set_ili2db_sequence_value(self, value: str) -> tuple[bool, str]:
         if self.schema:
             cur = self.conn.cursor()
             try:
@@ -1260,7 +1260,7 @@ WHERE TABLE_SCHEMA='{schema}'
     def get_translation_handling(self) -> tuple[bool, str]:
         return self._table_exists(NLS_TABLE) and self._lang != "", self._lang
 
-    def get_translation_models(self):
+    def get_translation_models(self) -> list[str]:
         if self.schema and self._table_exists(METAATTRS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
@@ -1268,7 +1268,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 SELECT DISTINCT
                 ilielement
                 FROM {schema}.t_ili2db_meta_attrs
-                WHERE 
+                WHERE
                 attr_name = 'ili2db.ili.translationOf'
                 """
             ).format(
@@ -1277,10 +1277,12 @@ WHERE TABLE_SCHEMA='{schema}'
             return [row.ilielement for row in cur.fetchall()]
         return []
 
-    def get_available_languages(self, irrelevant_models=[], relevant_models=[]):
+    def get_available_languages(
+        self, irrelevant_models: list[str] = [], relevant_models: list[str] = []
+    ) -> list[str]:
         if self.schema and self._table_exists(METAATTRS_TABLE):
 
-            white_list_restriction = ''
+            white_list_restriction = ""
             if len(relevant_models) > 0:
                 white_list_restriction = """
                 AND
@@ -1290,7 +1292,7 @@ WHERE TABLE_SCHEMA='{schema}'
                         [f"'{modelname}'" for modelname in relevant_models]
                     ),
                 )
-            black_list_restriction = ''
+            black_list_restriction = ""
             if len(irrelevant_models) > 0:
                 black_list_restriction = """
                 AND

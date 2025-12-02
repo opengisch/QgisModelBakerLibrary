@@ -1,21 +1,17 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 14.9.17
-        git sha              : :%H$
-        copyright            : (C) 2017 by OPENGIS.ch
-        email                : info@opengis.ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-09-14
+    Copyright: (C) 2017 by OPENGIS.ch
+    Contact: info@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+from __future__ import annotations
+
 import glob
 import os
 import platform
@@ -23,15 +19,22 @@ import re
 import subprocess
 import tempfile
 import zipfile
+from typing import TYPE_CHECKING, Callable, Optional
 
-from qgis.PyQt.QtCore import QCoreApplication
+from qgis.PyQt.QtCore import QCoreApplication, pyqtSignal
 
 from ..utils.qt_utils import NetworkError, download_file
 from .globals import DbIliMode
 from .ili2dbtools import get_tool_url, get_tool_version
 
+if TYPE_CHECKING:
+    # only needed for type checking to avoid circular imports
+    from .ili2dbconfig import BaseConfiguration
 
-def get_ili2db_bin(tool, db_ili_version, stdout, stderr):
+
+def get_ili2db_bin(
+    tool: DbIliMode, db_ili_version: int, stdout: pyqtSignal, stderr: pyqtSignal
+) -> Optional[str]:
     if tool not in DbIliMode or tool == DbIliMode.ili:
         raise RuntimeError("Tool {} not found".format(tool))
 
@@ -125,7 +128,9 @@ def get_ili2db_bin(tool, db_ili_version, stdout, stderr):
     return ili2db_file
 
 
-def get_all_modeldir_in_path(path, lambdafunction=None):
+def get_all_modeldir_in_path(
+    path: str, lambdafunction: Optional[Callable[[str], None]] = None
+):
     all_subdirs = [path[0] for path in os.walk(path)]  # include path
     # Make sure path is included, it can be a special string like `%XTF_DIR`
     modeldirs = [path]
@@ -140,7 +145,7 @@ def get_all_modeldir_in_path(path, lambdafunction=None):
     return ";".join(modeldirs)
 
 
-def get_java_path(base_configuration):
+def get_java_path(base_configuration: BaseConfiguration) -> str:
     """
     Delivers the path to a Java 8 installation or raises a JavaNotFoundError
 
@@ -248,24 +253,25 @@ def get_java_path(base_configuration):
 
 
 def is_version_valid(
-    current_version,
-    min_required_version,
+    current_version: str,
+    min_required_version: str,
     exact_required_version=False,
-    module_tested="",
-):
+    module_tested: str = "",
+) -> bool:
     """
-    Generic one, it helps us to validate whether a current version is greater or equal to a min_required_version or,
-    if exact_required_version, if a current version is exactly the required one.
+        Generic one, it helps us to validate whether a current version is greater or equal to a min_required_version or,
+        if exact_required_version, if a current version is exactly the required one.
 
-    Borrowed from 'Asistente LADM-COL'.
+        Borrowed from 'Asistente LADM-COL'.
 
-    :param current_version: String, in the form 2.9.5
-    :param min_required_version: String, in the form 2.9.5
-    :param exact_required_version: Boolean, if true, only the exact version is valid. If False, the min_required_version
-                                   or any greater version will be accepted.
-    :param module_tested: String, only for displaying a log with context
-    :return: Whether the current version is valid or not
-    """
+    Args:
+        current_version: String, in the form 2.9.5
+        exact_required_version: Boolean, if true, only the exact version is valid. If False, the min_required_version or any greater version will be accepted.
+        min_required_version: String, in the form 2.9.5
+        module_tested: String, only for displaying a log with context
+
+    Returns:
+        bool: Whether the current version is valid or not"""
     if current_version is None:
         return False
 
@@ -321,14 +327,14 @@ class JavaNotFoundError(FileNotFoundError):
             self.java_version = None
 
     @property
-    def html_java_version(self):
+    def html_java_version(self) -> str:
         if self.java_version:
             return "<br/>".join(self.java_version.splitlines())
         else:
             return ""
 
     @property
-    def error_string(self):
+    def error_string(self) -> str:
         if self.java_version:
             return QCoreApplication.translate(
                 "ili2dbutils",

@@ -1,27 +1,22 @@
 """
-/***************************************************************************
-    begin                :    04/10/17
-    git sha              :    :%H$
-    copyright            :    (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-                              (C) 2016 by OPENGIS.ch
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-10-04
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from __future__ import annotations
 
 import re
-from typing import Optional
+from typing import Callable, Optional
 
-from qgis.core import QgsApplication, QgsRelation, QgsWkbTypes
+from qgis.core import Qgis, QgsApplication, QgsRelation, QgsWkbTypes
 from qgis.PyQt.QtCore import QCoreApplication, QLocale, QObject, pyqtSignal
 
 from ..dataobjects.fields import Field
@@ -49,7 +44,7 @@ class Generator(QObject):
         inheritance: str,
         schema: Optional[str] = None,
         pg_estimated_metadata: bool = False,
-        parent: QObject = None,
+        parent: Optional[QObject] = None,
         mgmt_uri: Optional[str] = None,
         consider_basket_handling: bool = False,
         optimize_strategy: OptimizeStrategy = OptimizeStrategy.NONE,
@@ -57,11 +52,11 @@ class Generator(QObject):
         raw_naming=False,
     ) -> None:
         """
-        Creates a new Generator objects.
-        :param uri: The uri that should be used in the resulting project. If authcfg is used, make sure the mgmt_uri is set as well.
-        :param mgmt_uri: The uri that should be used to create schemas, tables and query meta information. Does not support authcfg but a fallback username.
-        :consider_basket_handling: Makes the specific handling of basket tables depending if schema is created with createBasketCol.
-        """
+                Creates a new Generator objects.
+
+        Args:
+            mgmt_uri: The uri that should be used to create schemas, tables and query meta information. Does not support authcfg but a fallback username.
+            uri: The uri that should be used in the resulting project. If authcfg is used, make sure the mgmt_uri is set as well."""
         QObject.__init__(self, parent)
         self.tool = tool
         self.uri = uri
@@ -95,7 +90,7 @@ class Generator(QObject):
             self.new_message.emit(message["level"], message["text"])
         self.collected_print_messages.clear()
 
-    def append_print_message(self, level, text) -> None:
+    def append_print_message(self, level: Qgis.MessageLevel, text: str) -> None:
         message = {"level": level, "text": text}
 
         if message not in self.collected_print_messages:
@@ -514,7 +509,9 @@ class Generator(QObject):
 
         return layers
 
-    def _rename_ambiguous_layers(self, layers, second_pass=False):
+    def _rename_ambiguous_layers(
+        self, layers: list[Layer], second_pass: bool = False
+    ) -> None:
         # rename ambiguous layers with topic (on not second_pass) or model (on second_pass) prefix
         # on irrelevant layers only if we don't ride OptimizeStrategy.HIDE or we do but on smart1
         aliases = [
@@ -535,7 +532,9 @@ class Generator(QObject):
                             + layer.alias
                         )
 
-    def relations(self, layers, filter_layer_list=[]):
+    def relations(
+        self, layers, filter_layer_list: list[str] = []
+    ) -> tuple[list[Relation], dict]:
         relations_info = self.get_relations_info(filter_layer_list)
         layer_map = dict()
         for layer in layers:
@@ -666,7 +665,9 @@ class Generator(QObject):
         return (relations, bags_of_enum)
 
     @staticmethod
-    def suppress_catalogue_reference_layers(available_layers, relations, bags_of_enum):
+    def suppress_catalogue_reference_layers(
+        available_layers: list[Layer], relations: list[Relation], bags_of_enum: dict
+    ) -> tuple[list[Layer], list[Relation]]:
         # Check for catalogue items and reference layers
         catalogue_items = []  # List of dicts
         catalogue_refs = []  # List of dicts
@@ -735,7 +736,7 @@ class Generator(QObject):
 
         return available_layers, relations
 
-    def generate_node(self, layers, node_name, item_properties):
+    def generate_node(self, layers: list[Layer], node_name: str, item_properties: dict):
         if item_properties.get("group"):
             node = LegendGroup(
                 QCoreApplication.translate("LegendGroup", node_name),
@@ -746,7 +747,12 @@ class Generator(QObject):
             layers.append(node)
         return node
 
-    def full_node(self, layers, item, path_resolver=lambda path: path):
+    def full_node(
+        self,
+        layers: list[Layer],
+        item: dict,
+        path_resolver: Callable[[str], str] = lambda path: path,
+    ) -> Layer | LegendGroup:
         current_node = None
         if item and isinstance(item, dict):
             current_node_name = next(iter(item))
@@ -847,12 +853,12 @@ class Generator(QObject):
 
     def legend(
         self,
-        layers,
-        ignore_node_names=None,
-        layertree_structure=None,
-        path_resolver=lambda path: path,
-        hide_systemlayers=False,
-    ):
+        layers: list[Layer],
+        ignore_node_names: list[str] = [],
+        layertree_structure: bool = False,
+        path_resolver: Callable[[str], str] = lambda path: path,
+        hide_systemlayers: bool = False,
+    ) -> LegendGroup:
         legend = LegendGroup(
             QCoreApplication.translate("LegendGroup", "root"),
             ignore_node_names=ignore_node_names,
@@ -965,7 +971,11 @@ class Generator(QObject):
 
         return legend
 
-    def _separated_legend_layers(self, layers):
+    def _separated_legend_layers(
+        self, layers: list[Layer]
+    ) -> tuple[
+        list[Layer], list[Layer], list[Layer], list[Layer], list[Layer], list[Layer]
+    ]:
         domain_layers = []
         table_layers = []
         system_layers = []
@@ -1005,9 +1015,9 @@ class Generator(QObject):
 
     def resolved_layouts(
         self,
-        layouts={},
-        path_resolver=lambda path: path,
-    ):
+        layouts: dict = {},
+        path_resolver: Callable[[str], str] = lambda path: path,
+    ) -> dict:
         resolved_layouts = {}
         for layout_name in layouts.keys():
             resolved_layouts[layout_name] = {}
@@ -1016,34 +1026,36 @@ class Generator(QObject):
             )
         return resolved_layouts
 
-    def db_or_schema_exists(self):
+    def db_or_schema_exists(self) -> bool:
         return self._db_connector.db_or_schema_exists()
 
-    def metadata_exists(self):
+    def metadata_exists(self) -> bool:
         return self._db_connector.metadata_exists()
 
-    def set_additional_ignored_layers(self, layer_list):
+    def set_additional_ignored_layers(self, layer_list: list[str]) -> None:
         self._additional_ignored_layers = layer_list
 
-    def get_ignored_layers(self, ignore_basket_tables=True):
+    def get_ignored_layers(self, ignore_basket_tables: bool = True) -> list[str]:
         return (
             self._db_connector.get_ignored_layers(ignore_basket_tables)
             + self._additional_ignored_layers
         )
 
-    def get_tables_info(self):
+    def get_tables_info(self) -> list[dict]:
         return self._db_connector.get_tables_info()
 
-    def get_meta_attrs_info(self):
+    def get_meta_attrs_info(self) -> list[dict]:
         return self._db_connector.get_meta_attrs_info()
 
-    def get_meta_attrs(self, ili_name):
+    def get_meta_attrs(self, ili_name: str) -> list[dict]:
         return self._db_connector.get_meta_attrs(ili_name)
 
-    def get_fields_info(self, table_name):
+    def get_fields_info(self, table_name: str) -> list[dict]:
         return self._db_connector.get_fields_info(table_name)
 
-    def get_tables_info_without_ignored_tables(self, ignore_basket_tables=True):
+    def get_tables_info_without_ignored_tables(
+        self, ignore_basket_tables: bool = True
+    ) -> list[dict]:
         tables_info = self.get_tables_info()
         ignored_layers = self.get_ignored_layers(ignore_basket_tables)
         new_tables_info = []
@@ -1059,13 +1071,13 @@ class Generator(QObject):
 
         return new_tables_info
 
-    def get_min_max_info(self, table_name):
+    def get_min_max_info(self, table_name: str) -> dict:
         return self._db_connector.get_min_max_info(table_name)
 
-    def get_value_map_info(self, table_name):
+    def get_value_map_info(self, table_name: str) -> dict:
         return self._db_connector.get_value_map_info(table_name)
 
-    def get_tables_relevance(self):
+    def get_tables_relevance(self) -> dict:
         """
         Returns a dict with relevance info per sqlname of class.
         """
@@ -1078,20 +1090,20 @@ class Generator(QObject):
 
         return tables_relevance
 
-    def get_t_type_map_info(self, table_name):
+    def get_t_type_map_info(self, table_name: str) -> dict:
         return self._db_connector.get_t_type_map_info(table_name)
 
-    def get_relations_info(self, filter_layer_list=[]):
+    def get_relations_info(self, filter_layer_list: list[str] = []) -> list[dict]:
         return self._db_connector.get_relations_info(filter_layer_list)
 
-    def get_bags_of_info(self):
+    def get_bags_of_info(self) -> list[dict]:
         return self._db_connector.get_bags_of_info()
 
-    def get_iliname_dbname_mapping(self):
+    def get_iliname_dbname_mapping(self) -> list[dict]:
         return self._db_connector.get_iliname_dbname_mapping()
 
-    def get_basket_handling(self):
+    def get_basket_handling(self) -> bool:
         return self._db_connector.get_basket_handling()
 
-    def get_domain_dispnames(self, tablename):
+    def get_domain_dispnames(self, tablename: str) -> dict:
         return self._db_connector.get_domain_dispnames(tablename)

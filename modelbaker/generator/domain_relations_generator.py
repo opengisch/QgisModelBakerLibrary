@@ -1,22 +1,18 @@
 """
-/***************************************************************************
-    begin                :    04/10/17
-    git sha              :    :%H$
-    copyright            :    (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-                              (C) 2016 by OPENGIS.ch
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-10-04
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 import re
+from typing import Optional
 
 from ..dataobjects.relations import Relation
 
@@ -29,7 +25,7 @@ class DomainRelationGenerator:
         self.inheritance = inheritance
         self.debug = False
 
-    def get_domain_relations_info(self, layers):
+    def get_domain_relations_info(self, layers: list) -> tuple[list[Relation], dict]:
         domains = [layer.name for layer in layers if layer.is_domain]
         if self.debug:
             print("domains:", domains)
@@ -322,7 +318,9 @@ class DomainRelationGenerator:
 
         return (relations, bags_of_enum)
 
-    def parse_model(self, model_content, domains):
+    def parse_model(
+        self, model_content: str, domains: list[str]
+    ) -> tuple[dict, dict, dict]:
         re_comment = re.compile(r"\s*/\*")  # /* comment
         re_end_comment = re.compile(r"\s*\*/")  # comment */
         re_oneline_comment = re.compile(r"\s*/\*.*\*/")  # /* comment */
@@ -872,8 +870,8 @@ class DomainRelationGenerator:
         return [models_info, extended_classes, bags_of_enum]
 
     def extract_local_names_from_domains(
-        self, domains, current_model, current_topic=""
-    ):
+        self, domains: list[str], current_model: str, current_topic: str = ""
+    ) -> dict:
         """
         ili files may contain fully qualified domains assigned to attributes, but if
         domains are local (domain or topic-wise), domains might be assigned only
@@ -902,8 +900,13 @@ class DomainRelationGenerator:
         return local_names
 
     def make_full_qualified(
-        self, name, level, current_model, current_topic, current_class=None
-    ):
+        self,
+        name: str,
+        level: str,
+        current_model: str,
+        current_topic: str,
+        current_class: Optional[str] = None,
+    ) -> str:
         parents = [current_model, current_topic, current_class]
         len_parents = len(parents)
         name_parts = name.split(".")
@@ -913,7 +916,9 @@ class DomainRelationGenerator:
 
         return ".".join(name_parts)
 
-    def get_ext_dom_attrs(self, iliclass, models_info, extended_classes, inheritance):
+    def get_ext_dom_attrs(
+        self, iliclass: str, models_info: dict, extended_classes: dict, inheritance: str
+    ) -> dict:
         if inheritance == "smart1":
             # Use smart 2 first to get domain attributes from parents (we
             # really need them) and only then use smart 1
@@ -938,7 +943,9 @@ class DomainRelationGenerator:
         else:  # No smart inheritance?
             return {}
 
-    def get_ext_dom_attrs_smart1(self, iliclass, models_info, extended_classes):
+    def get_ext_dom_attrs_smart1(
+        self, iliclass: str, models_info: dict, extended_classes: dict
+    ) -> dict:
         """
         Returns a dict for input iliclass with its original attr:domain pairs
         plus all attr:domain pairs from children classes
@@ -969,7 +976,9 @@ class DomainRelationGenerator:
                 all_attrs[children_domain_attr] = domain
         return all_attrs
 
-    def get_ext_dom_attrs_smart2(self, iliclass, models_info, extended_classes):
+    def get_ext_dom_attrs_smart2(
+        self, iliclass: str, models_info: dict, extended_classes: dict
+    ) -> dict:
         """
         Returns a dict for input iliclass with its original attr:domain pairs
         plus all inherited attr:domain pairs
@@ -1000,22 +1009,24 @@ class DomainRelationGenerator:
 
         return all_attrs
 
-    def _get_iliname_dbname_mapping(self, sqlnames):
+    def _get_iliname_dbname_mapping(self, sqlnames: list) -> dict:
         return self._db_connector.get_iliname_dbname_mapping(sqlnames)
 
-    def _get_models(self):
+    def _get_models(self) -> list:
         return self._db_connector.get_models()
 
-    def _get_meta_attrs(self, ilielement):
+    def _get_meta_attrs(self, ilielement: str) -> dict:
         return self._db_connector.get_meta_attrs(ilielement)
 
-    def _get_classili_classdb_mapping(self, models_info, extended_classes):
+    def _get_classili_classdb_mapping(
+        self, models_info: dict, extended_classes: dict
+    ) -> dict:
         return self._db_connector.get_classili_classdb_mapping(
             models_info, extended_classes
         )
 
-    def _get_attrili_attrdb_mapping(self, models_info_with_ext):
+    def _get_attrili_attrdb_mapping(self, models_info_with_ext: dict) -> dict:
         return self._db_connector.get_attrili_attrdb_mapping(models_info_with_ext)
 
-    def _get_attrili_attrdb_mapping_by_owner(self, owners):
+    def _get_attrili_attrdb_mapping_by_owner(self, owners: list) -> dict:
         return self._db_connector.get_attrili_attrdb_mapping_by_owner(owners)

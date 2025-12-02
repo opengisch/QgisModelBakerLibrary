@@ -1,21 +1,16 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 07.03.2022
-        git sha              : :%H$
-        copyright            : (C) 2022 by Matthias Kuhn
-        email                : david@opengis.ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2022-03-07
+    Copyright: (C) 2022 by Matthias Kuhn
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from enum import Enum, IntEnum
 
 MODELS_BLACKLIST = [
@@ -113,7 +108,7 @@ class LogLevel(IntEnum):
     TOPPING = 4
 
 
-def default_log_function(text, level=LogLevel.INFO, silent=False):
+def default_log_function(text, level=LogLevel.INFO, silent: bool = False) -> None:
     if silent:
         return
     if level == LogLevel.INFO:

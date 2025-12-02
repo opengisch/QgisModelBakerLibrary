@@ -1,20 +1,14 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 07.03.2022
-        git sha              : :%H$
-        copyright            : (C) 2022 by Dave Signer / (C) 2021 Germán Carrillo
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2022-03-07
+    Copyright: (C) 2022 by Dave Signer / (C) 2021 Germán Carrillo
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 import logging
@@ -23,16 +17,19 @@ from qgis.PyQt.QtCore import QDir, QFile
 
 from ..utils.db_utils import get_authconfig_map
 from .globals import DbIliMode
-from .ili2dbconfig import SchemaImportConfiguration
+from .ili2dbconfig import Ili2DbCommandConfiguration, SchemaImportConfiguration
 
 
-def get_ili2db_args(configuration, hide_password=False):
+def get_ili2db_args(
+    configuration: Ili2DbCommandConfiguration, hide_password: bool = False
+) -> list:
     """Gets a complete list of ili2db arguments in order to execute the app.
 
-    :param bool hide_password: *True* to mask the password, *False* otherwise.
-    :return: ili2db arguments list.
-    :rtype: list
-    """
+    Args:
+        hide_password (bool): *True* to mask the password, *False* otherwise.
+
+    Returns:
+        list: ili2db arguments list."""
     db_args = _get_db_args(configuration, hide_password)
 
     if type(configuration) is SchemaImportConfiguration:
@@ -41,7 +38,9 @@ def get_ili2db_args(configuration, hide_password=False):
     return configuration.to_ili2db_args(db_args)
 
 
-def _get_db_args(configuration, hide_password=False):
+def _get_db_args(
+    configuration: Ili2DbCommandConfiguration, hide_password: bool = False
+) -> list:
     su = configuration.db_use_super_login  # Boolean
     db_args = list()
 
@@ -138,7 +137,7 @@ def _get_db_args(configuration, hide_password=False):
     return db_args
 
 
-def _get_schema_import_args(tool):
+def _get_schema_import_args(tool: DbIliMode) -> list:
     args = list()
     if tool == DbIliMode.ili2pg:
         args += ["--setupPgExt"]

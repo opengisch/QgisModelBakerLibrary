@@ -1,21 +1,18 @@
 """
-/***************************************************************************
-    begin                :    04/10/17
-    git sha              :    :%H$
-    copyright            :    (C) 2017 by Germán Carrillo (BSF-Swissphoto)
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-10-04
+    Copyright: (C) 2017 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 import fnmatch
+from typing import Optional
 
 from qgis.PyQt.QtCore import QObject, pyqtSignal
 
@@ -41,7 +38,7 @@ class DBConnector(QObject):
         self.dataset_table_name = ""  # For basket handling, specific for each DB
         self._lang = ""  # Preferred tr language for table/column info (2 characters)
 
-    def get_provider_specific_names(self):
+    def get_provider_specific_names(self) -> dict:
         """
         Returns a dictionary of the provider-specific names defined in the initialization of the derived classes.
         """
@@ -54,25 +51,25 @@ class DBConnector(QObject):
             "datasettable_name": self.dataset_table_name,
         }
 
-    def map_data_types(self, data_type):
+    def map_data_types(self, data_type: str) -> str:
         """Map provider date/time types to QGIS date/time types"""
         return None
 
-    def db_or_schema_exists(self):
+    def db_or_schema_exists(self) -> bool:
         """Whether the DB (for GPKG) or schema (for PG) exists or not."""
-        raise NotImplementedError
+        return False
 
-    def create_db_or_schema(self, usr):
+    def create_db_or_schema(self, usr: str) -> bool:
         """Create the DB (for GPKG) or schema (for PG)"""
-        raise NotImplementedError
+        return False
 
-    def metadata_exists(self):
+    def metadata_exists(self) -> bool:
         """Whether t_ili2db_table_prop table exists or not.
         In other words... Does the DB/Schema hold an INTERLIS model?
         """
         return False
 
-    def get_tables_info(self):
+    def get_tables_info(self) -> list[dict]:
         """
         Info about tables found in the database (or database schema).
 
@@ -96,7 +93,7 @@ class DBConnector(QObject):
         """
         return []
 
-    def get_meta_attrs_info(self):
+    def get_meta_attrs_info(self) -> list[dict]:
         """
         Info about meta attributes
 
@@ -108,9 +105,9 @@ class DBConnector(QObject):
                 attr_name
                 attr_value
         """
-        raise NotImplementedError
+        return []
 
-    def get_meta_attr(self, ili_name):
+    def get_meta_attrs(self, ili_name: str) -> list[dict]:
         """
         Info about meta attributes of a given ili element
 
@@ -123,7 +120,7 @@ class DBConnector(QObject):
         """
         return []
 
-    def get_fields_info(self, table_name):
+    def get_fields_info(self, table_name: str) -> list[dict]:
         """
         Info about fields of a given table in the database.
 
@@ -143,7 +140,7 @@ class DBConnector(QObject):
         """
         return []
 
-    def get_min_max_info(self, table_name):
+    def get_min_max_info(self, table_name: str) -> dict:
         """
         Info about range constraints found in a given table.
 
@@ -153,7 +150,7 @@ class DBConnector(QObject):
         """
         return {}
 
-    def get_value_map_info(self, table_name):
+    def get_value_map_info(self, table_name) -> dict:
         """
         Info about value map constraints found in a given table.
 
@@ -163,7 +160,7 @@ class DBConnector(QObject):
         """
         return {}
 
-    def get_t_type_map_info(self, table_name):
+    def get_t_type_map_info(self, table_name: str) -> dict:
         """
         Info about available types of a given smart1-inherited table.
 
@@ -173,7 +170,7 @@ class DBConnector(QObject):
         """
         return {}
 
-    def get_relations_info(self, filter_layer_list=[]):
+    def get_relations_info(self, filter_layer_list: list[str] = []) -> list[dict]:
         """
         Info about relations found in a database (or database schema).
 
@@ -193,7 +190,7 @@ class DBConnector(QObject):
         """
         return []
 
-    def get_bags_of_info(self):
+    def get_bags_of_info(self) -> list[dict]:
         """
         Info about bags_of found in a database (or database schema).
 
@@ -210,7 +207,7 @@ class DBConnector(QObject):
         """
         return []
 
-    def get_ignored_layers(self, ignore_basket_tables=True):
+    def get_ignored_layers(self, ignore_basket_tables=True) -> list[str]:
         """
         The ignored layers according to the ignored schemas and ignored tables and the ignored ili elements
         listed in the config.py.
@@ -265,42 +262,44 @@ class DBConnector(QObject):
         """Note: Checks if the table is a technical table used for spatial indexing"""
         return False
 
-    def get_iliname_dbname_mapping(self, sqlnames=list()):
+    def get_iliname_dbname_mapping(self, sqlnames: list[str] = []) -> dict:
         """Note: the parameter sqlnames is only used for ili2db version 3 relation creation"""
         return {}
 
-    def get_classili_classdb_mapping(self, models_info, extended_classes):
+    def get_classili_classdb_mapping(
+        self, models_info: dict, extended_classes: dict
+    ) -> dict:
         """Used for ili2db version 3"""
         return {}
 
-    def get_attrili_attrdb_mapping(self, attrs_list):
+    def get_attrili_attrdb_mapping(self, attrs_list: list[str]) -> dict:
         """Used for ili2db version 3"""
         return {}
 
-    def get_attrili_attrdb_mapping_by_owner(self, owners):
+    def get_attrili_attrdb_mapping_by_owner(self, owners: list[str]) -> dict:
         """Used for ili2db version 3"""
         return {}
 
-    def get_models(self):
+    def get_models(self) -> list[dict]:
         """
         Returns the models in use, the ili-file content and the direct parents of the model.
         """
-        return {}
+        return []
 
-    def ili_version(self):
+    def ili_version(self) -> str:
         """
         Returns the version of the ili2db application that was used to create the schema.
         """
         return None
 
-    def get_basket_handling(self):
+    def get_basket_handling(self) -> bool:
         """
         Returns `True` if a basket handling is enabled according to the settings table.
         Means when the database has been created with `--createBasketCol`.
         """
         return False
 
-    def get_baskets_info(self):
+    def get_baskets_info(self) -> list[dict]:
         """
         Info about baskets found in the basket table and the related datasetname
         Return:
@@ -316,7 +315,7 @@ class DBConnector(QObject):
         """
         return {}
 
-    def get_datasets_info(self):
+    def get_datasets_info(self) -> list[dict]:
         """
         Info about datasets found in the dataset table
         Return:
@@ -328,19 +327,19 @@ class DBConnector(QObject):
         """
         return {}
 
-    def create_dataset(self, datasetname):
+    def create_dataset(self, datasetname: str) -> tuple[bool, str]:
         """
         Returns the state and the errormessage
         """
         return False, None
 
-    def rename_dataset(self, tid, datasetname):
+    def rename_dataset(self, tid: str, datasetname: str) -> tuple[bool, str]:
         """
         Returns the state and the errormessage
         """
         return False, None
 
-    def get_topics_info(self):
+    def get_topics_info(self) -> dict:
         """
         Returns all the topics found in the table t_ili2db_classname as long as they contain tables found in t_ili2db_table_prop and are there not defined as ENUM.
         This avoids to get structures back, containing enumerations and not being in a topic, having the structure <modelname>.<structurename>.<enumerationname>.
@@ -355,7 +354,7 @@ class DBConnector(QObject):
         """
         return {}
 
-    def get_classes_relevance(self):
+    def get_classes_relevance(self) -> list[dict]:
         """
         Returns the ili classes and it's sqlname and relevance. Compared to tables_info it returns the classes (and the sqlnames of tables that might not be existing)
         and not the existing tables. This is mainly used, when smart1 has been selected.
@@ -366,7 +365,7 @@ class DBConnector(QObject):
         """
         return []
 
-    def multiple_geometry_tables(self):
+    def multiple_geometry_tables(self) -> list[str]:
         """
         Returns a list of tables having multiple geometry columns.
         It's only usefull on GeoPackage.
@@ -374,8 +373,12 @@ class DBConnector(QObject):
         return []
 
     def create_basket(
-        self, dataset_tid, topic, tilitid_value=None, attachment_key="modelbaker"
-    ):
+        self,
+        dataset_tid: str,
+        topic: str,
+        tilitid_value: Optional[str] = None,
+        attachment_key: str = "modelbaker",
+    ) -> tuple[bool, str]:
         """
         Returns the state and the errormessage
         """
@@ -396,32 +399,32 @@ class DBConnector(QObject):
         """
         return False, None
 
-    def get_tid_handling(self):
+    def get_tid_handling(self) -> bool:
         """
         Returns `True` if a tid handling is enabled according to the settings table (when the database has been created with `--createTidCol`).
         If t_ili_tids are used only because of a stable id definition in the model (with `OID as` in the topic or the class definition), this parameter is not set and this function will return `{}`.
         """
-        return {}
+        return False
 
-    def get_ili2db_settings(self):
+    def get_ili2db_settings(self) -> dict:
         """
         Returns the settings like they are without any name mapping etc.
         """
         return {}
 
-    def get_ili2db_sequence_value(self):
+    def get_ili2db_sequence_value(self) -> str:
         """
         Returns the current value of the sequence used for the t_id
         """
         return None
 
-    def get_next_ili2db_sequence_value(self):
+    def get_next_ili2db_sequence_value(self) -> str:
         """
         Increases and returns the value of the sequence used for the t_id
         """
         return None
 
-    def set_ili2db_sequence_value(self, value):
+    def set_ili2db_sequence_value(self, value: str) -> tuple[bool, str]:
         """
         Resets the current value of the sequence used for the t_id
         """
@@ -455,21 +458,23 @@ class DBConnector(QObject):
         Returns a list of models that are a TRANSLATION OF another model.
         """
         return []
-        
-    def get_available_languages(self, irrelevant_models: list[str], relevant_models: list[str]) -> list[str]:
+
+    def get_available_languages(
+        self, irrelevant_models: list[str] = [], relevant_models: list[str] = []
+    ) -> list[str]:
         """
-        Returns a list of available languages in the t_ili2db_nls table and ignores the values for the irrelevant models. 
+        Returns a list of available languages in the t_ili2db_nls table and ignores the values for the irrelevant models.
         If a list for relevant models is passed, only those are considered (otherwise all the others)
         """
         return []
 
-    def get_domain_dispnames(self, tablename):
+    def get_domain_dispnames(self, tablename: str) -> list[dict]:
         """
         Get the domain display names with consideration of the translation
         """
         return []
 
-    def get_schemas(self, ignore_system_schemas=True):
+    def get_schemas(self, ignore_system_schemas: bool = True) -> list[str]:
         result = []
         all_schemas = self.get_all_schemas()
 
@@ -487,7 +492,7 @@ class DBConnector(QObject):
                 result.append(schema)
         return result
 
-    def get_all_schemas(self):
+    def get_all_schemas(self) -> list[str]:
         """
         Get the schemas from PostgreSQL. Otherwise empty.
         """

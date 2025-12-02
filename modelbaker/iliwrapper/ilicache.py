@@ -1,21 +1,17 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 15/06/17
-        git sha              : :%H$
-        copyright            : (C) 2017 by OPENGIS.ch
-        email                : info@opengis.ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2017-06-15
+    Copyright: (C) 2017 by OPENGIS.ch
+    Contact: info@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+from __future__ import annotations
+
 import glob
 import logging
 import os
@@ -24,6 +20,7 @@ import shutil
 import urllib.parse
 import xml.etree.ElementTree as ET
 from enum import Enum
+from typing import TYPE_CHECKING, Optional
 
 from qgis.core import Qgis, QgsMessageLog
 from qgis.PyQt.QtCore import (
@@ -40,6 +37,10 @@ from qgis.PyQt.QtWidgets import QGridLayout, QItemDelegate, QLabel, QStyle, QWid
 from ..utils.qt_utils import download_file
 from .ili2dbutils import get_all_modeldir_in_path
 
+if TYPE_CHECKING:
+    # only needed for type checking to avoid circular imports
+    from .ili2dbconfig import BaseConfiguration
+
 
 class IliCache(QObject):
     ns = {"ili23": "http://www.interlis.ch/INTERLIS2.3"}
@@ -48,7 +49,9 @@ class IliCache(QObject):
 
     CACHE_PATH = os.path.expanduser("~/.ilicache")
 
-    def __init__(self, configuration, single_ili_file=None):
+    def __init__(
+        self, configuration: BaseConfiguration, single_ili_file: Optional[str] = None
+    ):
         QObject.__init__(self)
         self.information_file = "ilimodels.xml"
         self.repositories = dict()
@@ -69,11 +72,11 @@ class IliCache(QObject):
             lambda: self.model.set_repositories(self.repositories)
         )
 
-    def set_repositories_to_model(self):
+    def set_repositories_to_model(self) -> None:
         # hold refresh back
         self.modelReposTimer.start(500)
 
-    def refresh(self):
+    def refresh(self) -> None:
         if not self.directories is None:
             for directory in self.directories:
                 self.process_model_directory(directory)
@@ -82,7 +85,7 @@ class IliCache(QObject):
             if os.path.exists(self.single_ili_file):
                 self.process_single_ili_file()
 
-    def process_model_directory(self, path):
+    def process_model_directory(self, path: str) -> None:
         if path[0] == "%":
             pass
         else:
@@ -93,14 +96,14 @@ class IliCache(QObject):
                 # additional recursive search of paths containing ili files (without ilimodel.xml)
                 get_all_modeldir_in_path(path, self.process_local_ili_folder)
 
-    def process_single_ili_file(self):
+    def process_single_ili_file(self) -> None:
         models = self.process_ili_file(self.single_ili_file)
         self.repositories["no_repo"] = sorted(
             models, key=lambda m: m["version"], reverse=True
         )
         self.set_repositories_to_model()
 
-    def file_url(self, url, file):
+    def file_url(self, url: str, file: str) -> str:
         if url is None:
             return file
         elif os.path.isdir(url):
@@ -108,7 +111,7 @@ class IliCache(QObject):
         else:
             return urllib.parse.urljoin(url + "/", file)
 
-    def file_path(self, netloc, url, file):
+    def file_path(self, netloc: str, url: str, file: str) -> str:
         if url is None:
             return file
         elif os.path.isdir(url):
@@ -117,7 +120,7 @@ class IliCache(QObject):
             netloc = "" if netloc is None else netloc
             return os.path.join(self.CACHE_PATH, netloc, file)
 
-    def download_repository(self, url):
+    def download_repository(self, url: str) -> None:
         """
         Downloads the informationfile (default: ilimodels.xml) and ilisite.xml files from the provided url
         and updates the local cache.
@@ -176,13 +179,13 @@ class IliCache(QObject):
             )
 
     @classmethod
-    def clear_cache(cls):
+    def clear_cache(cls) -> None:
         if not QDir().exists(cls.CACHE_PATH):
             return
 
         shutil.rmtree(cls.CACHE_PATH, ignore_errors=False, onerror=None)
 
-    def _process_ilisite(self, file):
+    def _process_ilisite(self, file: str) -> None:
         """
         Parses the ilisite.xml provided in ``file`` and recursively downloads any subidiary sites.
         """
@@ -211,7 +214,7 @@ class IliCache(QObject):
                     if value:
                         self.download_repository(value)
 
-    def _process_informationfile(self, file, netloc, url):
+    def _process_informationfile(self, file: str, netloc: str, url: str) -> None:
         """
         Parses ilimodels.xml provided in ``file`` and updates the local repositories cache.
         """
@@ -273,7 +276,7 @@ class IliCache(QObject):
 
         self.set_repositories_to_model()
 
-    def process_local_ili_folder(self, path):
+    def process_local_ili_folder(self, path: str) -> None:
         """
         Parses all .ili files in the given ``path`` (non-recursively)
         """
@@ -289,7 +292,7 @@ class IliCache(QObject):
 
         self.set_repositories_to_model()
 
-    def process_ili_file(self, ilifile):
+    def process_ili_file(self, ilifile: str) -> list:
         fileModels = list()
         try:
             fileModels = self.parse_ili_file(ilifile, "utf-8")
@@ -325,7 +328,7 @@ class IliCache(QObject):
 
         return fileModels
 
-    def parse_ili_file(self, ilipath, encoding):
+    def parse_ili_file(self, ilipath: str, encoding: str) -> list:
         """
         Parses an ili file returning models and version data
         """
@@ -358,14 +361,14 @@ class IliCache(QObject):
         return models
 
     @property
-    def model_names(self):
+    def model_names(self) -> list:
         names = list()
         for repo in self.repositories.values():
             for model in repo:
                 names.append(model["name"])
         return names
 
-    def get_element_text(self, element):
+    def get_element_text(self, element: ET.Element) -> str:
         if element is not None:
             return element.text
         return None
@@ -382,7 +385,7 @@ class IliModelItemModel(QStandardItemModel):
     def __init__(self, parent=None):
         super().__init__(0, 1, parent)
 
-    def set_repositories(self, repositories):
+    def set_repositories(self, repositories: dict) -> None:
         self.clear()
         names = list()
 
@@ -460,7 +463,13 @@ class IliDataCache(IliCache):
 
     CACHE_PATH = os.path.expanduser("~/.ilidatacache")
 
-    def __init__(self, configuration, type="metaconfig", models=None, datasources=[]):
+    def __init__(
+        self,
+        configuration: BaseConfiguration,
+        type: str = "metaconfig",
+        models: Optional[str] = None,
+        datasources: list[str] = [],
+    ):
         IliCache.__init__(self, configuration)
         self.information_file = "ilidata.xml"
 
@@ -479,11 +488,11 @@ class IliDataCache(IliCache):
         )
         self.datasources = datasources
 
-    def process_model_directory(self, path):
+    def process_model_directory(self, path: str) -> None:
         # download remote and local repositories
         self.download_repository(path)
 
-    def _process_informationfile(self, file, netloc, url):
+    def _process_informationfile(self, file: str, netloc: str, url: str) -> None:
         """
         Parses ilidata.xml provided in ``file`` and updates the local repositories cache.
         """
@@ -689,7 +698,9 @@ class IliDataCache(IliCache):
 
         self.set_repositories_to_model()
 
-    def download_file(self, netloc, url, file, dataset_id=None):
+    def download_file(
+        self, netloc: str, url: str, file: str, dataset_id: Optional[str] = None
+    ) -> str:
         """
         Downloads the given file from the given url to the local cache.
         passes the local file path or the id (for information) to signals.
@@ -745,10 +756,10 @@ class IliDataItemModel(QStandardItemModel):
         def __int__(self):
             return self.value
 
-    def __init__(self, parent=None):
+    def __init__(self, parent=None) -> None:
         super().__init__(0, 1, parent)
 
-    def set_repositories(self, repositories):
+    def set_repositories(self, repositories: dict) -> None:
         self.beginResetModel()
         self.clear()
         ids = list()
@@ -862,7 +873,12 @@ class IliToppingFileCache(IliDataCache):
 
     CACHE_PATH = os.path.expanduser("~/.ilitoppingfilescache")
 
-    def __init__(self, configuration, file_ids=None, tool_dir=None):
+    def __init__(
+        self,
+        configuration: BaseConfiguration,
+        file_ids: list[str] = [],
+        tool_dir: Optional[str] = None,
+    ):
         IliDataCache.__init__(self, configuration)
         self.model = IliToppingFileItemModel()
         self.sorted_model.setSourceModel(self.model)
@@ -882,7 +898,7 @@ class IliToppingFileCache(IliDataCache):
         )
         self.model.rowsInserted.connect(lambda: self.on_download_status(None))
 
-    def refresh(self):
+    def refresh(self) -> None:
         if not self.directories is None:
             for directory in self.directories:
                 self.process_model_directory(directory)
@@ -919,7 +935,7 @@ class IliToppingFileCache(IliDataCache):
         self.repositories[netloc] = repo_files
         self.set_repositories_to_model()
 
-    def on_download_status(self, dataset_id):
+    def on_download_status(self, dataset_id: str) -> None:
         # here we could add some more logic
         if dataset_id is not None:
             self.downloaded_files.append(dataset_id)
@@ -927,7 +943,7 @@ class IliToppingFileCache(IliDataCache):
         if len(self.downloaded_files) == len(self.file_ids) == self.model.rowCount():
             self.download_finished_and_model_fresh.emit()
 
-    def _process_informationfile(self, file, netloc, url):
+    def _process_informationfile(self, file: str, netloc: str, url: str) -> None:
         """
         Parses ilidata.xml provided in ``file`` and updates the local repositories cache.
         """
@@ -1016,7 +1032,7 @@ class IliToppingFileItemModel(QStandardItemModel):
     def __init__(self, parent=None):
         super().__init__(0, 1, parent)
 
-    def set_repositories(self, repositories):
+    def set_repositories(self, repositories: dict) -> None:
         self.clear()
         ids = list()
 

@@ -1,20 +1,18 @@
 """
-/***************************************************************************
-    begin                :    05/03/18
-    git sha              :    :%H$
-    copyright            :    (C) 2018 by Germán Carrillo (BSF-Swissphoto)
-    email                :    gcarrillo@linuxmail.org
- ***************************************************************************/
+Metadata:
+    Creation Date: 2018-03-05
+    Copyright: (C) 2018 by Germán Carrillo (BSF-Swissphoto)
+    Contact: gcarrillo@linuxmail.org
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
+
+from typing import Optional
 
 from qgis.core import (
     Qgis,
@@ -23,6 +21,7 @@ from qgis.core import (
     QgsDefaultValue,
     QgsExpressionContextUtils,
     QgsFieldConstraints,
+    QgsLayerTreeGroup,
     QgsLayerTreeLayer,
     QgsLayerTreeNode,
     QgsMapLayer,
@@ -40,14 +39,13 @@ layer_order = [
 ]  # Anything else like geometry collections or plugin layers
 
 
-def get_first_index_for_layer_type(layer_type, group, ignore_node_names=None):
+def get_first_index_for_layer_type(
+    layer_type: str, group: QgsLayerTreeGroup, ignore_node_names: list[str] = []
+) -> int:
     """
     Finds the first index (from top to bottom) in the layer tree where a
     specific layer type is found. This function works only for the given group.
     """
-    if ignore_node_names is None:
-        ignore_node_names = []
-
     tree_nodes = group.children()
 
     for current, tree_node in enumerate(tree_nodes):
@@ -77,7 +75,9 @@ def get_first_index_for_layer_type(layer_type, group, ignore_node_names=None):
     return None
 
 
-def get_suggested_index_for_layer(layer, group, ignore_node_names=None):
+def get_suggested_index_for_layer(
+    layer: QgsMapLayer, group: QgsLayerTreeGroup, ignore_node_names: list[str] = []
+) -> int:
     """
     Returns the index where a layer can be inserted, taking other layer types
     into account. For instance, if a line layer is given, this function will
@@ -104,7 +104,7 @@ def get_suggested_index_for_layer(layer, group, ignore_node_names=None):
         return index
 
 
-def get_layer_type(layer):
+def get_layer_type(layer: QgsMapLayer) -> str:
     """
     To deal with all layer types, map their types to known values
     """
@@ -122,7 +122,9 @@ def get_layer_type(layer):
         return "unknown"
 
 
-def get_group_non_recursive(group, group_name):
+def get_group_non_recursive(
+    group: QgsLayerTreeGroup, group_name: str
+) -> QgsLayerTreeGroup:
     groups = (
         group.findGroups(False)
         if Qgis.QGIS_VERSION_INT >= 31800
@@ -136,7 +138,7 @@ def get_group_non_recursive(group, group_name):
 
 
 class QgisProjectUtils:
-    def __init__(self, project: QgsProject = None):
+    def __init__(self, project: Optional[QgsProject] = None):
         self.project = project
 
     def get_oid_settings(self):

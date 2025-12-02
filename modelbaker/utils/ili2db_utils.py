@@ -1,21 +1,20 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 27.09.2024
-        git sha              : :%H$
-        copyright            : (C) 2024 by Germán Carrillo
-        email                : german at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2024-09-27
+    Copyright: (C) 2024 by Germán Carrillo
+    Contact: german@opengisch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from qgis.PyQt.QtCore import QObject, Qt, pyqtSignal
 
 from ..iliwrapper import ilideleter, ilimetaconfigexporter
@@ -26,6 +25,10 @@ from ..iliwrapper.ili2dbconfig import (
 )
 from ..iliwrapper.ili2dbutils import JavaNotFoundError
 from ..utils.qt_utils import OverrideCursor
+
+if TYPE_CHECKING:
+    # only needed for type checking to avoid circular imports
+    from ..iliwrapper.iliexecutable import IliExecutable
 
 
 class Ili2DbUtils(QObject):
@@ -46,12 +49,15 @@ class Ili2DbUtils(QObject):
 
     def delete_baskets(
         self, baskets: str, configuration: Ili2DbCommandConfiguration = None
-    ):
+    ) -> tuple[bool, str]:
         """
-        :param baskets: Semicolon-separated list of baskets to be deleted
-        :param configuration: Base Ili2DbCommandConfiguration object
-        :return: Tuple with boolean result and optional message
-        """
+
+        Args:
+            baskets: Semicolon-separated list of baskets to be deleted
+            configuration: Base Ili2DbCommandConfiguration object
+
+        Returns:
+            tuple[bool, str]: Tuple with boolean result and optional message"""
         deleter = ilideleter.Deleter()
         deleter.tool = configuration.tool
         deleter.configuration = DeleteConfiguration(configuration)
@@ -80,12 +86,15 @@ class Ili2DbUtils(QObject):
 
     def delete_dataset(
         self, dataset: str, configuration: Ili2DbCommandConfiguration = None
-    ):
+    ) -> tuple[bool, str]:
         """
-        :param dataset: Dataset id to be deleted
-        :param configuration: Base Ili2DbCommandConfiguration object
-        :return: Tuple with boolean result and optional message
-        """
+
+        Args:
+            configuration: Base Ili2DbCommandConfiguration object
+            dataset: Dataset id to be deleted
+
+        Returns:
+            tuple[bool, str]: Tuple with boolean result and optional message"""
         deleter = ilideleter.Deleter()
         deleter.tool = configuration.tool
         deleter.configuration = DeleteConfiguration(configuration)
@@ -114,12 +123,15 @@ class Ili2DbUtils(QObject):
 
     def export_metaconfig(
         self, ini_file: str, configuration: Ili2DbCommandConfiguration = None
-    ):
+    ) -> tuple[bool, str]:
         """
-        :param ini_file: Output file
-        :param configuration: Base Ili2DbCommandConfiguration object
-        :return: Tuple with boolean result and optional message
-        """
+
+        Args:
+            configuration: Base Ili2DbCommandConfiguration object
+            ini_file: Output file
+
+        Returns:
+            tuple[bool, str]: Tuple with boolean result and optional message"""
         metaconfig_exporter = ilimetaconfigexporter.MetaConfigExporter()
         metaconfig_exporter.tool = configuration.tool
         metaconfig_exporter.configuration = ExportMetaConfigConfiguration(configuration)
@@ -149,7 +161,7 @@ class Ili2DbUtils(QObject):
 
         return res, msg
 
-    def _connect_ili_executable_signals(self, ili_executable):
+    def _connect_ili_executable_signals(self, ili_executable: IliExecutable) -> None:
         ili_executable.process_started.connect(self.process_started)
         ili_executable.stderr.connect(self.stderr)
         ili_executable.stdout.connect(self.stdout)
@@ -158,7 +170,7 @@ class Ili2DbUtils(QObject):
         ili_executable.process_started.connect(self._log_on_process_started)
         ili_executable.stderr.connect(self._log_on_stderr)
 
-    def _disconnect_ili_executable_signals(self, ili_executable):
+    def _disconnect_ili_executable_signals(self, ili_executable: IliExecutable) -> None:
         ili_executable.process_started.disconnect(self.process_started)
         ili_executable.stderr.disconnect(self.stderr)
         ili_executable.stdout.disconnect(self.stdout)
@@ -167,8 +179,8 @@ class Ili2DbUtils(QObject):
         ili_executable.process_started.disconnect(self._log_on_process_started)
         ili_executable.stderr.disconnect(self._log_on_stderr)
 
-    def _log_on_process_started(self, command):
+    def _log_on_process_started(self, command: str) -> None:
         self._log += command + "\n"
 
-    def _log_on_stderr(self, text):
+    def _log_on_stderr(self, text: str) -> None:
         self._log += text

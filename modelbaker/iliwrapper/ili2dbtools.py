@@ -1,26 +1,20 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 07.03.2022
-        git sha              : :%H$
-        copyright            : (C) 2022 by Dave Signer / (C) 2021 Germán Carrillo
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2022-03-07
+    Copyright: (C) 2022 by Dave Signer / (C) 2021 Germán Carrillo
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 from .globals import DbIliMode
 
 
-def get_tool_version(tool, db_ili_version):
+def get_tool_version(tool, db_ili_version: int) -> str:
     if tool == DbIliMode.ili2gpkg:
         if db_ili_version == 3:
             return "3.11.3"
@@ -40,7 +34,7 @@ def get_tool_version(tool, db_ili_version):
     return "0"
 
 
-def get_tool_url(tool, db_ili_version):
+def get_tool_url(tool: DbIliMode, db_ili_version: int) -> str:
     if tool == DbIliMode.ili2gpkg:
         return "https://downloads.interlis.ch/ili2gpkg/ili2gpkg-{version}.zip".format(
             version=get_tool_version(tool, db_ili_version)

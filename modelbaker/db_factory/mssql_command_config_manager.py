@@ -1,21 +1,19 @@
 """
-/***************************************************************************
-    begin                :    09/05/19
-    git sha              :    :%H$
-    copyright            :    (C) 2019 by Yesid Polania (BSF Swissphoto)
-    email                :    yesidpol.3@gmail.com
- ***************************************************************************/
+Metadata:
+    Creation Date: 2019-05-09
+    Copyright: (C) 2019 by Yesid Polania (BSF Swissphoto)
+    Contact: yesidpol.3@gmail.com
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
+
 from __future__ import annotations
+
+from typing import Optional
 
 from qgis.PyQt.QtCore import QSettings
 
@@ -31,7 +29,7 @@ class MssqlCommandConfigManager(DbCommandConfigManager):
         DbCommandConfigManager.__init__(self, configuration)
 
     def get_uri(
-        self, su: bool = False, qgis: bool = False, fallback_user: str = None
+        self, su: bool = False, qgis: bool = False, fallback_user: Optional[str] = None
     ) -> str:
         separator = ";"
         uri = []

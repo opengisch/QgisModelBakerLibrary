@@ -1,20 +1,14 @@
 """
-/***************************************************************************
-                              -------------------
-        begin                : 11/11/21
-        git sha              : :%H$
-        copyright            : (C) 2021 by Dave Signer
-        email                : david at opengis ch
- ***************************************************************************/
+Metadata:
+    Creation Date: 2021-11-11
+    Copyright: (C) 2021 by Dave Signer
+    Contact: david@opengis.ch
 
-/***************************************************************************
- *                                                                         *
- *   This program is free software; you can redistribute it and/or modify  *
- *   it under the terms of the GNU General Public License as published by  *
- *   the Free Software Foundation; either version 2 of the License, or     *
- *   (at your option) any later version.                                   *
- *                                                                         *
- ***************************************************************************/
+License:
+    This program is free software; you can redistribute it and/or modify
+    it under the terms of the **GNU General Public License** as published by
+    the Free Software Foundation; either version 2 of the License, or
+    (at your option) any later version.
 """
 
 import xml.etree.ElementTree as CET
@@ -32,13 +26,13 @@ class Validator(IliExecutable):
         super().__init__(parent)
         self.version = 4
 
-    def _create_config(self):
+    def _create_config(self) -> ValidateConfiguration:
         return ValidateConfiguration()
 
-    def _get_ili2db_version(self):
+    def _get_ili2db_version(self) -> int:
         return self.version
 
-    def _args(self, hide_password):
+    def _args(self, hide_password: bool = False) -> list[str]:
         args = super()._args(hide_password)
 
         if self.version == 3 and "--export3" in args:
@@ -77,12 +71,12 @@ class ValidationResultModel(QStandardItemModel):
         self.configuration = ValidateConfiguration()
         self.valid = False
 
-    def get_element_text(self, element):
+    def get_element_text(self, element: CET.Element) -> str:
         if element is not None:
             return element.text
         return None
 
-    def reload(self):
+    def reload(self) -> None:
         self.beginResetModel()
         if self.configuration.xtflog:
             try:
