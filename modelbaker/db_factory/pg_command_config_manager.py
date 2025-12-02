@@ -25,10 +25,8 @@ from .db_command_config_manager import DbCommandConfigManager
 class PgCommandConfigManager(DbCommandConfigManager):
     """Manages a configuration object to return specific information of Postgres/Postgis.
 
-        Provides database uri, arguments to ili2db and a way to save and load configurations parameters
-        based on a object configuration.
-
-    configuration object that will be managed"""
+    Provides database uri, arguments to ili2db and a way to save and load configurations parameters
+    based on a object configuration."""
 
     _settings_base_path = "ili2pg/"
 

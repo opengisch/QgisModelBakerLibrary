@@ -17,9 +17,8 @@ from .layer_uri import LayerUri
 class PgLayerUri(LayerUri):
     """Provides layer uri based on database uri (connection string) and specific information of the data source.
 
-        This **layer uri** is used to create a Qgis layer.
-
-    str uri: Database uri."""
+    This **layer uri** is used to create a Qgis layer.
+    """
 
     def __init__(self, uri: str) -> None:
         LayerUri.__init__(self, uri)

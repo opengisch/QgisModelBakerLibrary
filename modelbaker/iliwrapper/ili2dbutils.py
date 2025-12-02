@@ -271,7 +271,7 @@ def is_version_valid(
         module_tested: String, only for displaying a log with context
 
     Returns:
-        Whether the current version is valid or not"""
+        bool: Whether the current version is valid or not"""
     if current_version is None:
         return False
 

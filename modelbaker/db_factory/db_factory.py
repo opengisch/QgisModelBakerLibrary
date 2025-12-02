@@ -28,14 +28,14 @@ class DbFactory(ABC):
 
     @abstractmethod
     def get_db_connector(self, uri: str, schema: Optional[str]) -> DBConnector:
-        """Returns an instance of connector to database (:class:`DBConnector`).
+        """Returns an instance of connector to database (DBConnector).
 
         Args:
             schema (str): Database schema.
             uri (str): Database connection string.
 
         Returns:
-            :class:`DBConnector`: A connector to specific database."""
+            tuple[bool, str]: Connector (DBConnector): A connector to specific database."""
 
     @abstractmethod
     def get_db_command_config_manager(
@@ -44,10 +44,10 @@ class DbFactory(ABC):
         """Returns an instance of a database command config manager.
 
         Args:
-            configuration (:class:`Ili2DbCommandConfiguration`): Configuration object that will be managed.
+            configuration (Ili2DbCommandConfiguration): Configuration object that will be managed.
 
         Returns:
-            Object that manages a configuration object to return specific information of some database."""
+            tuple[bool, str]: Object that manages a configuration object to return specific information of some database."""
 
     @abstractmethod
     def get_layer_uri(self, uri: str) -> LayerUri:
@@ -57,7 +57,7 @@ class DbFactory(ABC):
             uri (str): Database connection string.
 
         Returns:
-            A object that provides layer uri."""
+            tuple[bool, str]: A object that provides layer uri."""
 
     @abstractmethod
     def pre_generate_project(
@@ -66,10 +66,10 @@ class DbFactory(ABC):
         """This method will be called before an operation of generate project is executed.
 
         Args:
-            configuration (:class:`Ili2DbCommandConfiguration`): Configuration parameters with which will be executed the operation of generate project.
+            configuration (Ili2DbCommandConfiguration): Configuration parameters with which will be executed the operation of generate project.
 
         Returns:
-            *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise."""
+            tuple[bool, str]: *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise."""
 
     @abstractmethod
     def post_generate_project_validations(
@@ -80,11 +80,11 @@ class DbFactory(ABC):
         """This method will be called after an operation of generate project is executed.
 
         Args:
-            class: `Ili2DbCommandConfiguration` configuration: Configuration parameters with which were executed the operation of generate project.
+            configuration (Ili2DbCommandConfiguration): Configuration parameters with which were executed the operation of generate project.
             fallback_user (str): a username as fallback most possibly used when you want to pass your os account name to connect the database
 
         Returns:
-            *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise."""
+            tuple[bool, str]: *True* and an empty message if the called method was succeeded, *False* and a warning message otherwise."""
 
     def get_specific_messages(self) -> dict[str, str]:
         """Returns specific words that will be used in warning and error messages."""
@@ -98,5 +98,6 @@ class DbFactory(ABC):
                 For instance, a boolean field can be shown as a checkbox.
 
         Args:
+            field (Field): The field that will be customized
             data_type: The type of field
-            field (:class:`Field`): The field that will be customized"""
+        """

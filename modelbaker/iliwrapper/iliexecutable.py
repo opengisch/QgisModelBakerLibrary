@@ -60,7 +60,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         """Creates the configuration that will be used by *run* method.
 
         Returns:
-            ili2db configuration"""
+            Ili2DbCommandConfiguration: configuration"""
 
     def _get_ili2db_version(self) -> int:
         return self.configuration.db_ili_version

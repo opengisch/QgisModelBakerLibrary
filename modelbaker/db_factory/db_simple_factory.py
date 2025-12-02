@@ -41,16 +41,16 @@ except ModuleNotFoundError:
 
 
 class DbSimpleFactory:
-    """Provides a single point (simple factory) to create a database factory (:class:`DbFactory`)."""
+    """Provides a single point (simple factory) to create a database factory (DbFactory)."""
 
     def create_factory(self, ili_mode: DbIliMode) -> Optional[DbFactory]:
-        """Creates an instance of :class:`DbFactory` based on ili_mode parameter.
+        """Creates an instance of DbFactory based on ili_mode parameter.
 
         Args:
-            ili_mode (:class:`DbIliMode`): Value specifying which factory will be instantiated.
+            ili_mode (DbIliMode): Value specifying which factory will be instantiated.
 
         Returns:
-            A database factory"""
+            DbFactory: A database factory"""
         if not ili_mode:
             return None
 
@@ -94,5 +94,5 @@ class DbSimpleFactory:
         """Gets a default database for modelbaker.
 
         Returns:
-            :class:`DbIliMode`: Default database for modelbaker."""
+            DbIliMode: Default database for modelbaker."""
         return list(available_database_factories.keys())[0]

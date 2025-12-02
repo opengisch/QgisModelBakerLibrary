@@ -25,31 +25,26 @@ from ..iliwrapper.ili2dbconfig import (
 class DbCommandConfigManager(ABC):
     """Manages a configuration object to return specific information of some database. This is a abstract class.
 
-        Provides database uri, arguments to ili2db and a way to save and load configurations parameters
-        based on a object configuration.
-
-    configuration object that will be managed"""
+    Provides database uri, arguments to ili2db and a way to save and load configurations parameters
+    based on a object configuration.
+    """
 
     def __init__(self, configuration: Ili2DbCommandConfiguration) -> None:
-        """
-
-        Args:
-            configuration (:class:`Ili2DbCommandConfiguration`): Configuration object that will be managed."""
         self.configuration = configuration
 
     @abstractmethod
     def get_uri(
         self, su: bool = False, qgis: bool = False, fallback_user: Optional[str] = None
     ) -> str:
-        """Gets database uri (connection string) for db connectors (:class:`DBConnector`).
+        """Gets database uri (connection string) for db connectors (DBConnector).
 
         Args:
-            fallback_user (str): a username as fallback most possibly used when you want to pass your os account name to connect the database
-            qgis (bool): *True* to use qgis specific credentials (e.g. authcfg), *False* otherwise.
             su (bool): *True* to use super user credentials, *False* otherwise.
+            qgis (bool): *True* to use qgis specific credentials (e.g. authcfg), *False* otherwise.
+            fallback_user (str): a username as fallback most possibly used when you want to pass your os account name to connect the database
 
         Returns:
-            Database uri (connection string)."""
+            str: Database uri (connection string)."""
 
     @abstractmethod
     def get_db_args(self, hide_password: bool = False, su: bool = False) -> list[str]:
@@ -88,14 +83,8 @@ class DbCommandConfigManager(ABC):
 
     @abstractmethod
     def save_config_in_qsettings(self) -> None:
-        """Saves configuration values related to database in QSettings.
-
-        Returns:
-            None"""
+        """Saves configuration values related to database in QSettings."""
 
     @abstractmethod
     def load_config_from_qsettings(self) -> None:
-        """Loads configuration values related to database from Qsettings.
-
-        Returns:
-            None"""
+        """Loads configuration values related to database from Qsettings."""

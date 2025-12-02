@@ -57,7 +57,7 @@ class Ili2DbUtils(QObject):
             configuration: Base Ili2DbCommandConfiguration object
 
         Returns:
-            Tuple with boolean result and optional message"""
+            tuple[bool, str]: Tuple with boolean result and optional message"""
         deleter = ilideleter.Deleter()
         deleter.tool = configuration.tool
         deleter.configuration = DeleteConfiguration(configuration)
@@ -94,7 +94,7 @@ class Ili2DbUtils(QObject):
             dataset: Dataset id to be deleted
 
         Returns:
-            Tuple with boolean result and optional message"""
+            tuple[bool, str]: Tuple with boolean result and optional message"""
         deleter = ilideleter.Deleter()
         deleter.tool = configuration.tool
         deleter.configuration = DeleteConfiguration(configuration)
@@ -131,7 +131,7 @@ class Ili2DbUtils(QObject):
             ini_file: Output file
 
         Returns:
-            Tuple with boolean result and optional message"""
+            tuple[bool, str]: Tuple with boolean result and optional message"""
         metaconfig_exporter = ilimetaconfigexporter.MetaConfigExporter()
         metaconfig_exporter.tool = configuration.tool
         metaconfig_exporter.configuration = ExportMetaConfigConfiguration(configuration)

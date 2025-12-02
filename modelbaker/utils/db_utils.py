@@ -75,10 +75,9 @@ def get_configuration_from_sourceprovider(
     """
     Determines the connection parameters from a layer source provider.
     On service in postgres it preferences the static parameters over the ones in the service file if available.
+    Gets a configuration (Ili2DbCommandConfiguration) with the determined parameters
     Returns:
-        valid (boolean): if the needed database connection parameters are determined
-        mode (DbIliMode): Kind of database like pg, gpkg or mssql
-        configuration (Ili2DbCommandConfiguration): config with the determined parameters
+        tuple[[bool, DbIliMode]: if the needed database connection parameters are determined and the kind of database like pg, gpkg or mssql
     """
     mode = ""
     valid = False

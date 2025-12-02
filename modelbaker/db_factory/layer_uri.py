@@ -17,9 +17,8 @@ from abc import ABC, abstractmethod
 class LayerUri(ABC):
     """Provides layer uri based on database uri (connection string) and specific information of the data source. This is a abstract class.
 
-        This **layer uri** is used to create a Qgis layer.
-
-    str provider: Database provider."""
+    This **layer uri** is used to create a Qgis layer.
+    """
 
     def __init__(self, uri: str) -> None:
         """
