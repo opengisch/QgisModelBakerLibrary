@@ -711,9 +711,9 @@ class GPKGConnector(DBConnector):
         )
         return cursor
 
-    def get_models(self) -> dict:
+    def get_models(self) -> list[dict]:
         if not self._table_exists("T_ILI2DB_TRAFO"):
-            return {}
+            return []
 
         # Get MODELS
         cursor = self.conn.cursor()
@@ -1105,7 +1105,7 @@ class GPKGConnector(DBConnector):
             'Could not edit basket for topic "{}" and dataset "{}"'
         ).format(basket_config["topic"], basket_config["datasetname"])
 
-    def get_tid_handling(self) -> dict:
+    def get_tid_handling(self) -> bool:
         if self._table_exists(GPKG_SETTINGS_TABLE):
             cursor = self.conn.cursor()
             cursor.execute(

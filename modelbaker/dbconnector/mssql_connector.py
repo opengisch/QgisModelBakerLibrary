@@ -763,9 +763,9 @@ class MssqlConnector(DBConnector):
 
         return result
 
-    def get_models(self) -> dict:
+    def get_models(self) -> list[dict]:
         if not self._table_exists("t_ili2db_trafo"):
-            return {}
+            return []
 
         # Get MODELS
         if self.schema:
@@ -808,7 +808,7 @@ class MssqlConnector(DBConnector):
                         list_result.append(result)
                         result = dict()
             return list_result
-        return {}
+        return []
 
     def get_classili_classdb_mapping(self, models_info, extended_classes):
         result = {}
@@ -1184,7 +1184,7 @@ WHERE TABLE_SCHEMA='{schema}'
             'Could not edit basket for topic "{}" and dataset "{}"'
         ).format(basket_config["topic"], basket_config["datasetname"])
 
-    def get_tid_handling(self) -> dict:
+    def get_tid_handling(self) -> bool:
         if self.schema and self._table_exists(SETTINGS_TABLE):
             cur = self.conn.cursor()
             cur.execute(

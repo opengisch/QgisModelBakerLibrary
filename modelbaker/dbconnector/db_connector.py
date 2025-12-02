@@ -280,11 +280,11 @@ class DBConnector(QObject):
         """Used for ili2db version 3"""
         return {}
 
-    def get_models(self) -> dict:
+    def get_models(self) -> list[dict]:
         """
         Returns the models in use, the ili-file content and the direct parents of the model.
         """
-        return {}
+        return []
 
     def ili_version(self) -> str:
         """
@@ -399,12 +399,12 @@ class DBConnector(QObject):
         """
         return False, None
 
-    def get_tid_handling(self) -> dict:
+    def get_tid_handling(self) -> bool:
         """
         Returns `True` if a tid handling is enabled according to the settings table (when the database has been created with `--createTidCol`).
         If t_ili_tids are used only because of a stable id definition in the model (with `OID as` in the topic or the class definition), this parameter is not set and this function will return `{}`.
         """
-        return {}
+        return False
 
     def get_ili2db_settings(self) -> dict:
         """

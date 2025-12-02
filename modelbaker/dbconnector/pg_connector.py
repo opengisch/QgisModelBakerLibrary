@@ -915,9 +915,9 @@ class PGConnector(DBConnector):
 
         return {}
 
-    def get_models(self) -> dict:
+    def get_models(self) -> list[dict]:
         if not self._table_exists("t_ili2db_trafo"):
-            return {}
+            return []
 
         # Get MODELS
         if self.schema:
@@ -964,7 +964,7 @@ class PGConnector(DBConnector):
                         result = dict()
 
             return list_result
-        return {}
+        return []
 
     def ili_version(self) -> str:
         cur = self.conn.cursor()
@@ -1282,7 +1282,7 @@ class PGConnector(DBConnector):
             'Could not edit basket for topic "{}" and dataset "{}"'
         ).format(basket_config["topic"], basket_config["datasetname"])
 
-    def get_tid_handling(self) -> dict:
+    def get_tid_handling(self) -> bool:
         if self.schema and self._table_exists(PG_SETTINGS_TABLE):
             cur = self.conn.cursor()
             cur.execute(
