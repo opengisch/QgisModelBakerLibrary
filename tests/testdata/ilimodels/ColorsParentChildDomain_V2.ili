@@ -33,17 +33,17 @@ VERSION "2020-08-26"  =
   TOPIC Colors =
 
     CLASS BaseColor =
-      ColorType : Colors.DomBaseColorType;
+      ColorType : Colors_V2.DomBaseColorType;
     END BaseColor;
 
     CLASS ChildColor
     EXTENDS BaseColor =
-      ColorType (EXTENDED) : Colors.DomChildColorType;
+      ColorType (EXTENDED) : Colors_V2.DomChildColorType;
     END ChildColor;
 
     CLASS AnotherChildColor
     EXTENDS BaseColor =
-      ColorType (EXTENDED) : Colors.DomAnotherChildColorType;
+      ColorType (EXTENDED) : Colors_V2.DomAnotherChildColorType;
     END AnotherChildColor;
 
   END Colors;

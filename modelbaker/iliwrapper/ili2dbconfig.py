@@ -268,6 +268,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.pre_script = ""
         self.post_script = ""
         self.name_lang = ""
+        self.enum_tabs = "tabsid"  # "tabs","singletabs"
 
     def to_ili2db_args(
         self, extra_args: list[str] = [], with_action: bool = True
@@ -309,7 +310,12 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
 
         if self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--createTypeConstraint"], True)
-            self.append_args(args, ["--createEnumTabsWithId"], True)
+            if self.enum_tabs == "tabs":
+                self.append_args(args, ["--createEnumTabs"], True)
+            elif self.enum_tabs == "singletabs":
+                self.append_args(args, ["--createSingleEnumTab"], True)
+            else:
+                self.append_args(args, ["--createEnumTabsWithId"], True)
             self.append_args(args, ["--createTidCol"], True)
         else:
             # version 3 backwards compatibility (not needed in newer versions)
