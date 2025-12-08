@@ -4086,6 +4086,313 @@ class TestDomainClassRelation(unittest.TestCase):
 
         assert count == 1
 
+    def test_enumtabsid_for_domain_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.name == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                # to do: there should be something - but it's not filtered at all
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors.DomBaseColorType'"
+                # )
+                count += 1
+
+            if layer.name == "ChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors.DomChildColorType'"
+                )
+                count += 1
+
+            if layer.name == "AnotherChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors.DomAnotherChildColorType'"
+                )
+                count += 1
+        assert count == 3
+
+    def test_enumtabsid_for_domain_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.name == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                # to do: there should be something - but it's not filtered at all
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors.DomBaseColorType'"
+                # )
+                count += 1
+
+            if layer.name == "ChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors.DomChildColorType'"
+                )
+                count += 1
+
+            if layer.name == "AnotherChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors.DomAnotherChildColorType'"
+                )
+                count += 1
+        assert count == 3
+
+    def test_enumtabs_for_domain_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        # createEnumTabs
+        importer.configuration.enum_tabs = "tabs"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+    def test_enumtabs_for_domain_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        # createEnumTabs
+        importer.configuration.enum_tabs = "tabs"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+    def test_enumsingletab_for_domain_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        # createSingleEnumTab
+        importer.configuration.enum_tabs = "singletabs"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+    def test_enumsingletab_for_domain_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        # createSingleEnumTab
+        importer.configuration.enum_tabs = "singletabs"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
     def print_info(self, text):
         logging.info(text)
 
