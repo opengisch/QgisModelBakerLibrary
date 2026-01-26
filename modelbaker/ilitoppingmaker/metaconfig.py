@@ -14,6 +14,7 @@ License:
 
 import configparser
 import os
+from typing import Union
 
 from ..libs.toppingmaker import ProjectTopping, Target
 from ..libs.toppingmaker.utils import slugify
@@ -38,7 +39,7 @@ class MetaConfig:
         self.metaconfigparamsonly = False
         self.ili2db_settings = Ili2dbSettings()
 
-    def update_referencedata_paths(self, value: list | str | bool) -> None:
+    def update_referencedata_paths(self, value: Union[list, str]) -> None:
         if isinstance(value, str):
             value = [value]
         self.referencedata_paths.extend(value)
