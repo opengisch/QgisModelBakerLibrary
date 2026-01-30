@@ -617,19 +617,18 @@ class GPKGConnector(DBConnector):
         if self.metadata_exists():
             cursor = self.conn.cursor()
             cursor.execute(
-                """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
-                            meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
-                            meta_attrs_array.attr_value as mapping_type
-                            FROM T_ILI2DB_COLUMN_PROP as cprop
-                            LEFT JOIN T_ILI2DB_CLASSNAME as cname
-                            ON cname.sqlname = cprop.tablename
-                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_array
-                            ON LOWER(meta_attrs_array.ilielement) = LOWER(cname.iliname||'.'||cprop.columnname) AND meta_attrs_array.attr_name = 'ili2db.mapping'
-                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_min
-                            ON LOWER(meta_attrs_cardinality_min.ilielement) = LOWER(cname.iliname||'.'||cprop.columnname) AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
-                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
-                            ON LOWER(meta_attrs_cardinality_max.ilielement) = LOWER(cname.iliname||'.'||cprop.columnname) AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
-                            WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
+                """SELECT
+                        cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type
+                        FROM T_ILI2DB_COLUMN_PROP as cprop
+                        LEFT JOIN T_ILI2DB_ATTRNAME aname
+                        ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
+                        LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_array
+                        ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                        LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_min
+                        ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                        LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
+                        ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                        WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
                     """
             )
             bags_of_info = cursor.fetchall()
