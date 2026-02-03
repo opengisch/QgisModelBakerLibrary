@@ -2103,7 +2103,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "catarrays",
                 "t_id",
                 "dispname",
@@ -2111,7 +2111,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "catarrays",
                 "t_id",
                 "dispname",
@@ -2119,7 +2119,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "catarrays",
                 "t_id",
                 "dispname",
@@ -2127,7 +2127,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "catarrays",
                 "t_id",
                 "dispname",
@@ -2135,7 +2135,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "enumarrays",
                 "t_id",
                 "dispname",
@@ -2143,7 +2143,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "enumarrays",
                 "t_id",
                 "dispname",
@@ -2151,7 +2151,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "enumarrays",
                 "t_id",
                 "dispname",
@@ -2159,7 +2159,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "enumarrays",
                 "t_id",
                 "dispname",
@@ -2167,7 +2167,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "textarrays",
                 "t_id",
                 "dispname",
@@ -2175,7 +2175,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "textarrays",
                 "t_id",
                 "dispname",
@@ -2183,7 +2183,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "textarrays",
                 "t_id",
                 "dispname",
@@ -2191,7 +2191,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "textarrays",
                 "t_id",
                 "dispname",
@@ -2382,7 +2382,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "catarrays",
                 "T_Id",
                 "dispName",
@@ -2390,7 +2390,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "catarrays",
                 "T_Id",
                 "dispName",
@@ -2398,7 +2398,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "catarrays",
                 "T_Id",
                 "dispName",
@@ -2406,7 +2406,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "catarrays",
                 "T_Id",
                 "dispName",
@@ -2414,7 +2414,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "enumarrays",
                 "T_Id",
                 "dispName",
@@ -2422,7 +2422,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "enumarrays",
                 "T_Id",
                 "dispName",
@@ -2430,7 +2430,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "enumarrays",
                 "T_Id",
                 "dispName",
@@ -2438,7 +2438,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "enumarrays",
                 "T_Id",
                 "dispName",
@@ -2446,7 +2446,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "textarrays",
                 "T_Id",
                 "dispName",
@@ -2454,7 +2454,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "textarrays",
                 "T_Id",
                 "dispName",
@@ -2462,7 +2462,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "textarrays",
                 "T_Id",
                 "dispName",
@@ -2470,7 +2470,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "textarrays",
                 "T_Id",
                 "dispName",

@@ -2507,7 +2507,7 @@ class TestDomainClassRelation(unittest.TestCase):
             [
                 "parzellenidentifikation_None",
                 "belasteter_standort_parzellenverweis",
-                "",  # "0..*",
+                "0..*",
                 "belasteter_standort",
                 "t_id",
                 "dispname",
@@ -2515,7 +2515,7 @@ class TestDomainClassRelation(unittest.TestCase):
             [
                 "egrid__None",
                 "belasteter_standort_egrid",
-                "",  # "0..*",
+                "0..*",
                 "belasteter_standort",
                 "t_id",
                 "dispname",
@@ -2757,7 +2757,7 @@ class TestDomainClassRelation(unittest.TestCase):
             [
                 "parzellenidentifikation_None",
                 "belasteter_standort_parzellenverweis",
-                "",  # "0..*",
+                "0..*",
                 "belasteter_standort",
                 "T_Id",
                 "dispName",
@@ -2765,7 +2765,7 @@ class TestDomainClassRelation(unittest.TestCase):
             [
                 "egrid__None",
                 "belasteter_standort_egrid",
-                "",  # "0..*",
+                "0..*",
                 "belasteter_standort",
                 "T_Id",
                 "dispName",
