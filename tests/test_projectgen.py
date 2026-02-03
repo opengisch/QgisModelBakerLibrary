@@ -2103,7 +2103,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "catarrays",
                 "t_id",
                 "dispname",
@@ -2111,7 +2111,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "catarrays",
                 "t_id",
                 "dispname",
@@ -2119,7 +2119,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "catarrays",
                 "t_id",
                 "dispname",
@@ -2127,7 +2127,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "catarrays",
                 "t_id",
                 "dispname",
@@ -2135,7 +2135,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "enumarrays",
                 "t_id",
                 "dispname",
@@ -2143,7 +2143,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "enumarrays",
                 "t_id",
                 "dispname",
@@ -2151,7 +2151,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "enumarrays",
                 "t_id",
                 "dispname",
@@ -2159,7 +2159,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "enumarrays",
                 "t_id",
                 "dispname",
@@ -2167,7 +2167,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "textarrays",
                 "t_id",
                 "dispname",
@@ -2175,7 +2175,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "textarrays",
                 "t_id",
                 "dispname",
@@ -2183,7 +2183,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "textarrays",
                 "t_id",
                 "dispname",
@@ -2191,7 +2191,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "textarrays",
                 "t_id",
                 "dispname",
@@ -2382,7 +2382,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "catarrays",
                 "T_Id",
                 "dispName",
@@ -2390,7 +2390,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "catarrays",
                 "T_Id",
                 "dispName",
@@ -2398,7 +2398,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "catarrays",
                 "T_Id",
                 "dispName",
@@ -2406,7 +2406,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "refitem_None",
                 "catarrays_catbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "catarrays",
                 "T_Id",
                 "dispName",
@@ -2414,7 +2414,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "enumarrays",
                 "T_Id",
                 "dispName",
@@ -2422,7 +2422,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "enumarrays",
                 "T_Id",
                 "dispName",
@@ -2430,7 +2430,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "enumarrays",
                 "T_Id",
                 "dispName",
@@ -2438,7 +2438,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "ei_typ_None",
                 "enumarrays_enumbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "enumarrays",
                 "T_Id",
                 "dispName",
@@ -2446,7 +2446,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textbagnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "textarrays",
                 "T_Id",
                 "dispName",
@@ -2454,7 +2454,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textbagnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "textarrays",
                 "T_Id",
                 "dispName",
@@ -2462,7 +2462,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textlistnoarray_0",
-                "",  # "0..*",
+                "0..*",
                 "textarrays",
                 "T_Id",
                 "dispName",
@@ -2470,7 +2470,7 @@ class TestProjectGen(unittest.TestCase):
             [
                 "structtext_None",
                 "textarrays_textlistnoarray_1",
-                "",  # "1..*",
+                "1..*",
                 "textarrays",
                 "T_Id",
                 "dispName",
@@ -2606,6 +2606,230 @@ class TestProjectGen(unittest.TestCase):
                     == 'array_length("catlist_1")>0'
                 )
         assert count == 2
+
+    def test_array_mapping_tomlfile_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels//BagOfEnumBase.ili")
+        importer.configuration.ilimodels = "BagOfEnumBase"
+        importer.configuration.tomlfile = testdata_path("toml//BagOfEnumExt.ini")
+        importer.configuration.dbschema = "bagofenums_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.bags_of_enum = bags_of_enum
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # Test BAGs OF ENUM with ARRAY
+        expected_bags_of_enum = [
+            ["strasse", "mat", "ARRAY"],
+        ]
+
+        obtained_bags_of = []
+        for _, b_of_enum in project.bags_of_enum.items():
+            for attribute, bag_of_enum_info in b_of_enum.items():
+                layer_obj = bag_of_enum_info[0]
+                mapping_type = bag_of_enum_info[5]
+                obtained_bags_of.append([layer_obj.name, attribute, mapping_type])
+
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
+
+    def test_array_mapping_tomlfile_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels//BagOfEnumBase.ili")
+        importer.configuration.ilimodels = "BagOfEnumBase"
+        importer.configuration.tomlfile = testdata_path("toml//BagOfEnumExt.ini")
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_bagofenums_array_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.bags_of_enum = bags_of_enum
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # Test BAGs OF ENUM with ARRAY
+        expected_bags_of_enum = [
+            ["strasse", "mat", "ARRAY"],
+        ]
+
+        obtained_bags_of = []
+        for _, b_of_enum in project.bags_of_enum.items():
+            for attribute, bag_of_enum_info in b_of_enum.items():
+                layer_obj = bag_of_enum_info[0]
+                mapping_type = bag_of_enum_info[5]
+                obtained_bags_of.append([layer_obj.name, attribute, mapping_type])
+
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
+
+    def test_array_mapping_tomlfile_extended_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels//BagOfEnumExt.ili")
+        importer.configuration.ilimodels = "BagOfEnumExt"
+        importer.configuration.tomlfile = testdata_path("toml//BagOfEnumExt.ini")
+        importer.configuration.dbschema = "bagofenumsext_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.bags_of_enum = bags_of_enum
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # Test BAGs OF ENUM with ARRAY
+        expected_bags_of_enum = [
+            ["strasse", "mat", "ARRAY"],
+            ["bagofenumextstrassen_strasse", "mat", "ARRAY"],
+        ]
+
+        obtained_bags_of = []
+        for _, b_of_enum in project.bags_of_enum.items():
+            for attribute, bag_of_enum_info in b_of_enum.items():
+                layer_obj = bag_of_enum_info[0]
+                mapping_type = bag_of_enum_info[5]
+                obtained_bags_of.append([layer_obj.name, attribute, mapping_type])
+
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
+
+    def test_array_mapping_tomlfile_extended_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels//BagOfEnumExt.ili")
+        importer.configuration.ilimodels = "BagOfEnumExt"
+        importer.configuration.tomlfile = testdata_path("toml//BagOfEnumExt.ini")
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_bagofenums_array_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.bags_of_enum = bags_of_enum
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # Test BAGs OF ENUM with ARRAY
+        expected_bags_of_enum = [
+            ["strasse", "mat", "ARRAY"],
+            ["bagofenumextstrassen_strasse", "mat", "ARRAY"],
+        ]
+
+        obtained_bags_of = []
+        for _, b_of_enum in project.bags_of_enum.items():
+            for attribute, bag_of_enum_info in b_of_enum.items():
+                layer_obj = bag_of_enum_info[0]
+                mapping_type = bag_of_enum_info[5]
+                obtained_bags_of.append([layer_obj.name, attribute, mapping_type])
+
+        for bag_of in expected_bags_of_enum:
+            assert bag_of in obtained_bags_of
 
     def test_relation_strength_postgis(self):
         # Schema Import

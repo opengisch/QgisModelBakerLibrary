@@ -803,14 +803,14 @@ class PGConnector(DBConnector):
                         meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
                         meta_attrs_array.attr_value as mapping_type
                     FROM {schema}.t_ili2db_column_prop as cprop
-                    LEFT JOIN {schema}.t_ili2db_classname as cname
-                    ON cname.sqlname = cprop.tablename
+                    LEFT JOIN {schema}.t_ili2db_attrname aname
+                    ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
                     LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_array
-                    ON meta_attrs_array.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                    ON meta_attrs_array.ilielement ILIKE aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
                     LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_min
-                    ON meta_attrs_cardinality_min.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                    ON meta_attrs_cardinality_min.ilielement ILIKE aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
                     LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_max
-                    ON meta_attrs_cardinality_max.ilielement ILIKE cname.iliname||'.'||cprop.columnname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                    ON meta_attrs_cardinality_max.ilielement ILIKE aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
                     WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
                     """
                 ).format(

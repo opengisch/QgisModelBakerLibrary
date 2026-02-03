@@ -1,0 +1,13 @@
+INTERLIS 2.3;
+
+MODEL BagOfEnumExt (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+  IMPORTS BagOfEnumBase;
+
+  TOPIC Strassen EXTENDS BagOfEnumBase.Strassen=
+
+    CLASS Strasse (EXTENDED)=
+        Bemerkung: TEXT;
+    END Strasse;
+  END Strassen;
+
+END BagOfEnumExt.

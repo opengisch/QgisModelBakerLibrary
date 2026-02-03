@@ -1,0 +1,28 @@
+INTERLIS 2.3;
+
+MODEL BagOfEnumBase (en) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+  IMPORTS GeometryCHLV95_V1;
+
+  DOMAIN
+
+    Material = (
+      !!@ili2db.dispName="Normaler Asphalt"
+      Asphalt,
+      Holz,
+      Kies,
+      unbekannt
+    );
+
+    CHLine = POLYLINE WITH (STRAIGHTS) VERTEX GeometryCHLV95_V1.Coord2;
+
+    STRUCTURE Material_ = value : MANDATORY Material; END Material_;
+
+  TOPIC Strassen =
+    CLASS Strasse =
+        Name : MANDATORY TEXT*99;
+        Mat : BAG {1..*} OF BagOfEnumBase.Material_;
+        Geometrie : MANDATORY BagOfEnumBase.CHLine;
+    END Strasse;
+  END Strassen;
+
+END BagOfEnumBase.
