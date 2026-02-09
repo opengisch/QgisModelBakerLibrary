@@ -543,10 +543,6 @@ class Generator(QObject):
             layer_map[layer.name].append(layer)
         relations = list()
 
-        classname_info = [
-            record["iliname"] for record in self.get_iliname_dbname_mapping()
-        ]
-
         for record in relations_info:
             if (
                 record["referencing_table"] in layer_map.keys()
@@ -615,10 +611,7 @@ class Generator(QObject):
                             ]
                             if fields:
                                 field = fields[0]
-                                if (
-                                    field.enum_domain
-                                    and field.enum_domain not in classname_info
-                                ):
+                                if field.enum_domain:
                                     child_name = field.enum_domain
                         relation.child_domain_name = child_name
 
