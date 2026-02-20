@@ -4132,12 +4132,11 @@ class TestDomainClassRelation(unittest.TestCase):
 
                 config = field.editorWidgetSetup().config()
                 assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors.DomBaseColorType'"
+                    config["FilterExpression"] == "\"thisclass\" = 'Colors.ColorType'"
                 )
                 count += 1
 
-            if layer.alias == "ChildColor":
+            if layer.alias == "BlueChildColor":
                 field = layer.layer.fields().field("colortype")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
@@ -4145,11 +4144,11 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.DomChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
                 )
                 count += 1
 
-            if layer.alias == "AnotherChildColor":
+            if layer.alias == "GreenChildColor":
                 field = layer.layer.fields().field("colortype")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
@@ -4157,7 +4156,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.DomAnotherChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
                 )
                 count += 1
         assert count == 3
@@ -4208,12 +4207,11 @@ class TestDomainClassRelation(unittest.TestCase):
 
                 config = field.editorWidgetSetup().config()
                 assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors.DomBaseColorType'"
+                    config["FilterExpression"] == "\"thisclass\" = 'Colors.ColorType'"
                 )
                 count += 1
 
-            if layer.alias == "ChildColor":
+            if layer.alias == "BlueChildColor":
                 field = layer.layer.fields().field("colortype")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
@@ -4221,11 +4219,11 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.DomChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
                 )
                 count += 1
 
-            if layer.alias == "AnotherChildColor":
+            if layer.alias == "GreenChildColor":
                 field = layer.layer.fields().field("colortype")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
@@ -4233,7 +4231,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.DomAnotherChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
                 )
                 count += 1
         assert count == 3
