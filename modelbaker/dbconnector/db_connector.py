@@ -49,6 +49,7 @@ class DBConnector(QObject):
             "dispname_name": self.dispName,
             "baskettable_name": self.basket_table_name,
             "datasettable_name": self.dataset_table_name,
+            "ilicodename": self.iliCodeName,
         }
 
     def map_data_types(self, data_type: str) -> str:

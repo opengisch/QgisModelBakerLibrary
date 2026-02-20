@@ -36,6 +36,8 @@ VERSION "2020-08-26"  =
       Yello
     );
 
+    STRUCTURE UninheritedCMYColorTypeStruct = value : MANDATORY UninheritedCMYColorType; END UninheritedCMYColorTypeStruct;
+
   TOPIC Colors =
 
     CLASS BaseColor =
@@ -54,6 +56,8 @@ VERSION "2020-08-26"  =
 
     CLASS UninheritedCMYColor =
       ColorType : Colors_V2.UninheritedCMYColorType;
+      !!@ili2db.mapping="ARRAY"
+      BagOfColorType : BAG {0..*} OF Colors_V2.UninheritedCMYColorTypeStruct;
     END UninheritedCMYColor;
 
   END Colors;

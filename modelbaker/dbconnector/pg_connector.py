@@ -723,6 +723,8 @@ class PGConnector(DBConnector):
             cardinality_join = ""
             cardinality_group_bys = ""
             translate = ""
+            distinct = ""
+            fake_relation_union = ""
 
             if self._table_exists(PG_METAATTRS_TABLE):
                 strength_field = ", META_ATTRS.attr_value as strength"
@@ -765,8 +767,24 @@ class PGConnector(DBConnector):
                     ", true AS tr_enabled" if self.get_translation_handling()[0] else ""
                 )
 
+                # In case of enumtabs without id we have to generate fake relations based on the enumDomain
+                distinct = "SELECT DISTINCT ON (referencing_table, referencing_column) * FROM ("
+                fake_relation_union = """
+                    UNION SELECT CONCAT( p.tablename, '_', p.columnname, '_enumkey') AS constraint_name, p.tablename AS referencing_table, p.columnname AS referencing_column, 'tabsidsmart2' AS constraint_schema, c.sqlname AS referenced_table, 'ilicode' AS referenced_column{translate}, 1 AS ordinal_position,
+                    NULL AS strength, NULL AS cardinality_max, NULL AS cardinality_min, NULL AS assoc_cardinality_max, NULL AS assoc_cardinality_min
+                    FROM {schema}.T_ILI2DB_COLUMN_PROP p
+                    JOIN {schema}.T_ILI2DB_CLASSNAME c
+                    ON c.iliname=p.setting
+                    and tag = 'ch.ehi.ili2db.enumDomain'
+                    ) all_relations
+                    ORDER BY referencing_table, referencing_column, referenced_column, ordinal_position DESC
+                    """.format(
+                    translate=translate, schema=self.schema
+                )
+
             cur.execute(
-                """SELECT RC.CONSTRAINT_NAME, KCU1.TABLE_NAME AS referencing_table, KCU1.COLUMN_NAME AS referencing_column, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME AS referenced_table, KCU2.COLUMN_NAME AS referenced_column, KCU1.ORDINAL_POSITION{strength_field}{cardinality_fields}{translate}
+                """ {distinct}
+                SELECT RC.CONSTRAINT_NAME, KCU1.TABLE_NAME AS referencing_table, KCU1.COLUMN_NAME AS referencing_column, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME AS referenced_table, KCU2.COLUMN_NAME AS referenced_column, KCU1.ORDINAL_POSITION{strength_field}{cardinality_fields}{translate}
                             FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
                             INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
                              ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME {schema_where1} {filter_layer_where}
@@ -776,8 +794,10 @@ class PGConnector(DBConnector):
                             {strength_join}
                             {cardinality_join}
                             GROUP BY RC.CONSTRAINT_NAME, KCU1.TABLE_NAME, KCU1.COLUMN_NAME, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME, KCU2.COLUMN_NAME, KCU1.ORDINAL_POSITION{strength_group_by}{cardinality_group_bys}
-                            ORDER BY KCU1.ORDINAL_POSITION
+                            {order_by}
+                            {fake_relation_union}
                             """.format(
+                    distinct=distinct,
                     schema_where1=schema_where1,
                     schema_where2=schema_where2,
                     filter_layer_where=filter_layer_where,
@@ -788,6 +808,10 @@ class PGConnector(DBConnector):
                     cardinality_join=cardinality_join,
                     cardinality_group_bys=cardinality_group_bys,
                     translate=translate,
+                    order_by="ORDER BY KCU1.ORDINAL_POSITION"
+                    if not fake_relation_union
+                    else "",
+                    fake_relation_union=fake_relation_union,
                 )
             )
             return cur

@@ -263,14 +263,17 @@ class Generator(QObject):
                         for entry in mapped_dispnames:
                             if entry["label"]:
                                 case_expression += (
-                                    "WHEN iliCode = '{code}' THEN '{label}'\n".format(
-                                        code=entry["code"], label=entry["label"]
+                                    "WHEN {ilicode} = '{code}' THEN '{label}'\n".format(
+                                        ilicode=provider_names_map.get("ilicodename"),
+                                        code=entry["code"],
+                                        label=entry["label"],
                                     )
                                 )
                             else:
                                 case_expression += (
-                                    "WHEN iliCode = '{code}' THEN dispName\n".format(
-                                        code=entry["code"]
+                                    "WHEN {ilicode} = '{code}' THEN dispName\n".format(
+                                        ilicode=provider_names_map.get("ilicodename"),
+                                        code=entry["code"],
                                     )
                                 )
                         case_expression += "END"
@@ -316,7 +319,8 @@ class Generator(QObject):
                 provider_names_map=provider_names_map,
             )
 
-            # Configure fields for current table
+            # CONFIGURE FIELDS FOR THE CURRENT TABLE
+
             fields_info = self.get_fields_info(record["tablename"])
             min_max_info = self.get_min_max_info(record["tablename"])
             # We get the value map values from the check-constraints (only pg support) and additionally we check the t_type values in the ili2db-meta-tables
@@ -326,6 +330,7 @@ class Generator(QObject):
 
             re_iliname = re.compile(r".*\.(.*)$")
             for fielddef in fields_info:
+                # FIELD NAMING
                 column_name = fielddef["column_name"]
 
                 # If raw_naming is True, the fieldname should be the columnname
@@ -358,7 +363,8 @@ class Generator(QObject):
                 field = Field(column_name)
                 field.alias = alias
 
-                # Should we hide the field?
+                # HIDDEN FIELD
+
                 hide_attribute = False
 
                 if "fully_qualified_name" in fielddef:
@@ -380,8 +386,12 @@ class Generator(QObject):
 
                 field.hidden = hide_attribute
 
+                # READ-ONLY FIELD
+
                 if column_name in READONLY_FIELDNAMES:
                     field.read_only = True
+
+                # WIDGET CONFIGURATION
 
                 if column_name in min_max_info:
                     field.widget = "Range"
@@ -453,7 +463,7 @@ class Generator(QObject):
                 if "enum_domain" in fielddef and fielddef["enum_domain"]:
                     field.enum_domain = fielddef["enum_domain"]
 
-                # default value expressions
+                # DEFAULT VALUE EXPRESSION:
 
                 ## we have this to provide e.g. the T_Id expression for GPKG defined in the db_connector
                 if "default_value_expression" in fielddef:
@@ -600,20 +610,23 @@ class Generator(QObject):
                             # ...then it's a composition in QGIS
                             relation.strength = QgsRelation.RelationStrength.Composition
 
-                        # For domain-class relations, if we have an extended domain, get its child name
-                        child_name = None
-                        if referenced_layer.is_domain:
-                            # Get child name (if domain is extended)
-                            fields = [
-                                field
-                                for field in referencing_layer.fields
-                                if field.name == record["referencing_column"]
-                            ]
-                            if fields:
-                                field = fields[0]
-                                if field.enum_domain:
-                                    child_name = field.enum_domain
-                        relation.child_domain_name = child_name
+                        # For enum-class relations, if we have an extended domain, get its child name, but only when it's created with ids
+                        if record[
+                            "referenced_column"
+                        ] != referenced_layer.provider_names_map.get("ilicodename"):
+                            child_name = None
+                            if referenced_layer.is_domain:
+                                # Get child name (if domain is extended)
+                                fields = [
+                                    field
+                                    for field in referencing_layer.fields
+                                    if field.name == record["referencing_column"]
+                                ]
+                                if fields:
+                                    field = fields[0]
+                                    if field.enum_domain:
+                                        child_name = field.enum_domain
+                            relation.child_domain_name = child_name
 
                         relations.append(relation)
 
