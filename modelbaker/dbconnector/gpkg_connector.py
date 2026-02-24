@@ -524,7 +524,7 @@ class GPKGConnector(DBConnector):
         for table_info_name, table_info in tables_info_dict.items():
             cursor.execute("""PRAGMA foreign_key_list("{}");""".format(table_info_name))
             foreign_keys = cursor.fetchall()
-            fks = [("fk", fk["from"], fk["table"]) for fk in foreign_keys]
+            fks = [(fk["from"], fk["table"]) for fk in foreign_keys]
 
             fake_enum_fks = []
             if self._table_exists(GPKG_METAATTRS_TABLE):
@@ -542,9 +542,19 @@ class GPKGConnector(DBConnector):
                 fake_enum_foreign_keys = cursor.fetchall()
 
                 fake_enum_fks = [
-                    ("enum", fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
+                    (fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
                 ]
-            all_foreign_keys = list(set(fks + fake_enum_fks))
+            all_foreign_keys = []
+            for fk in fks:
+                all_foreign_keys.append(("fk", fk[0], fk[1]))  # type, from, table
+            for fake_enum_fk in fake_enum_fks:
+                if (
+                    fake_enum_fk[0],
+                    fake_enum_fk[1],
+                ) not in fks:  # avoid duplicates in case there is already a real fk for the same field
+                    all_foreign_keys.append(
+                        ("enum", fake_enum_fk[0], fake_enum_fk[1])
+                    )  # type, from, table
 
             for foreign_key in all_foreign_keys:
                 record = {}
