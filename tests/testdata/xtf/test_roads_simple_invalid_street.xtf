@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?><TRANSFER xmlns="http://www.interlis.ch/INTERLIS2.3">
+<HEADERSECTION SENDER="ili2gpkg-5.5.0-a63de657a43b4ef80b3400f35d088f91ea36fe98" VERSION="2.3"><MODELS><MODEL NAME="RoadsSimple" VERSION="2016-08-11" URI="http://www.interlis.ch/models"></MODEL></MODELS></HEADERSECTION>
+<DATASECTION>
+<RoadsSimple.Roads BID="RoadsSimple.Roads">
+<RoadsSimple.Roads.Street TID="_8f5d05f5-7290-45ce-8103-6d660be68352"><Name>Schoorenstrasse</Name></RoadsSimple.Roads.Street>
+<RoadsSimple.Roads.Street TID="_93dacbc6-2a15-448a-8dbb-722193d96e98"></RoadsSimple.Roads.Street>
+</RoadsSimple.Roads>
+</DATASECTION>
+</TRANSFER>
