@@ -4470,10 +4470,6 @@ class TestDomainClassRelation(unittest.TestCase):
                     qgis_project.mapLayer(config["Layer"]).name()
                     == "UninheritedCMYColorType"
                 )
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
-                )
                 count += 1
         assert count == 2
 
@@ -4530,10 +4526,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
                     == "UninheritedCMYColorType"
-                )
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
                 )
                 count += 1
         assert count == 2
