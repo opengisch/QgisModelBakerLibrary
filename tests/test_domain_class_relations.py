@@ -90,7 +90,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "t_id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": "Avaluo.Uso_AvaluoTipo",
+                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
             }
         )
         # Domain inherited from superclass and from another model
@@ -101,7 +101,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": "Avaluo.DerechoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
             }
         )
         # Domain from another model
@@ -112,7 +112,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "t_id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": "Avaluo.InteresadoDocumentoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
             }
         )
         # Domain from another model
@@ -123,7 +123,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "t_id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": "Avaluo.Genero",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
             }
         )
         # Domain inherited from abstract class
@@ -134,7 +134,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": "Avaluo.InteresadoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
             }
         )
         # Domain inherited from abstract class
@@ -145,7 +145,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": "Avaluo.BaunitTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
             }
         )
 
@@ -395,7 +395,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "T_Id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": "Avaluo.Uso_AvaluoTipo",
+                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
             }
         )
         # Domain inherited from superclass and from another model
@@ -406,7 +406,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": "Avaluo.DerechoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
             }
         )
         # Domain from another model
@@ -417,7 +417,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": "Avaluo.InteresadoDocumentoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
             }
         )
         # Domain from another model
@@ -428,7 +428,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "T_Id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": "Avaluo.Genero",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
             }
         )
         # Domain inherited from abstract class
@@ -439,7 +439,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": "Avaluo.InteresadoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
             }
         )
         # Domain inherited from abstract class
@@ -450,7 +450,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": "Avaluo.BaunitTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
             }
         )
         for expected_relation in expected_relations:
@@ -707,7 +707,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "T_Id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": "Avaluo.Uso_AvaluoTipo",
+                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
             }
         )
         # Domain inherited from superclass and from another model
@@ -718,7 +718,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": "Avaluo.DerechoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
             }
         )
         # Domain from another model
@@ -729,7 +729,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": "Avaluo.InteresadoDocumentoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
             }
         )
         # Domain from another model
@@ -740,7 +740,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "T_Id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": "Avaluo.Genero",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
             }
         )
         # Domain inherited from abstract class
@@ -751,7 +751,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": "Avaluo.InteresadoTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
             }
         )
         # Domain inherited from abstract class
@@ -762,7 +762,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": "Avaluo.BaunitTipo",
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
             }
         )
 
