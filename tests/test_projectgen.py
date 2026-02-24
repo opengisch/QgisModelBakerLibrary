@@ -566,7 +566,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 65
         assert len(available_layers) == 23
-        assert len(relations) == 25
+        assert len(relations) == 13
 
     def test_naturschutz_mssql(self):
         importer = iliimporter.Importer()
@@ -667,7 +667,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 67
         assert len(available_layers) == 21
-        assert len(relations) == 24
+        assert len(relations) == 12
 
         project = Project()
         project.layers = available_layers
@@ -782,7 +782,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 31
         assert len(available_layers) == 29
-        assert len(relations) == 35
+        assert len(relations) == 23
 
     def test_ranges_postgis(self):
         importer = iliimporter.Importer()
