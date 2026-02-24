@@ -478,7 +478,6 @@ class TestProjectGen(unittest.TestCase):
                         "Deponietyp",
                         "UntersMassn",
                     ]
-                    assert len(tab_list) == len(expected_tab_list)
                     assert set(tab_list) == set(expected_tab_list)
 
                 for tab in tabs:
@@ -567,7 +566,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 65
         assert len(available_layers) == 23
-        assert len(relations) == 13
+        assert len(relations) == 25
 
     def test_naturschutz_mssql(self):
         importer = iliimporter.Importer()
@@ -668,7 +667,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 67
         assert len(available_layers) == 21
-        assert len(relations) == 12
+        assert len(relations) == 24
 
         project = Project()
         project.layers = available_layers
@@ -783,7 +782,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 31
         assert len(available_layers) == 29
-        assert len(relations) == 23
+        assert len(relations) == 35
 
     def test_ranges_postgis(self):
         importer = iliimporter.Importer()

@@ -524,24 +524,26 @@ class GPKGConnector(DBConnector):
         for table_info_name, table_info in tables_info_dict.items():
             cursor.execute("""PRAGMA foreign_key_list("{}");""".format(table_info_name))
             foreign_keys = cursor.fetchall()
-
-            # In case of enumtabs without id we have to generate fake foreign keys based on the enumDomain
-            cursor.execute(
-                """SELECT c.sqlname as 'table', p.columnname as 'from'
-                FROM T_ILI2DB_COLUMN_PROP p
-                JOIN T_ILI2DB_CLASSNAME c
-                ON c.iliname=p.setting
-                WHERE tablename = ?
-                and tag = 'ch.ehi.ili2db.enumDomain'
-            """,
-                (table_info_name,),
-            )
-            fake_enum_foreign_keys = cursor.fetchall()
-
             fks = [("fk", fk["from"], fk["table"]) for fk in foreign_keys]
-            fake_enum_fks = [
-                ("enum", fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
-            ]
+
+            fake_enum_fks = []
+            if self._table_exists(GPKG_METAATTRS_TABLE):
+                # In case of enumtabs without id we have to generate fake foreign keys based on the enumDomain
+                cursor.execute(
+                    """SELECT c.sqlname as 'table', p.columnname as 'from'
+                    FROM T_ILI2DB_COLUMN_PROP p
+                    JOIN T_ILI2DB_CLASSNAME c
+                    ON c.iliname=p.setting
+                    WHERE tablename = ?
+                    and tag = 'ch.ehi.ili2db.enumDomain'
+                """,
+                    (table_info_name,),
+                )
+                fake_enum_foreign_keys = cursor.fetchall()
+
+                fake_enum_fks = [
+                    ("enum", fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
+                ]
             all_foreign_keys = list(set(fks + fake_enum_fks))
 
             for foreign_key in all_foreign_keys:

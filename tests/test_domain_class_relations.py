@@ -453,7 +453,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 "child_domain_name": "Avaluo.BaunitTipo",
             }
         )
-
         for expected_relation in expected_relations:
             assert expected_relation in relations_dicts
 

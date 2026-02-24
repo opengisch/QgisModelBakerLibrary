@@ -768,21 +768,54 @@ class PGConnector(DBConnector):
                 )
 
                 # In case of enumtabs without id we have to generate fake relations based on the enumDomain
-                distinct = "SELECT DISTINCT ON (referencing_table, referencing_column) * FROM ("
+                distinct = "SELECT * FROM ( SELECT DISTINCT ON (referencing_table, referencing_column) * FROM ("
                 fake_relation_union = """
-                    UNION SELECT CONCAT( p.tablename, '_', p.columnname, '_enumkey') AS constraint_name, p.tablename AS referencing_table, p.columnname AS referencing_column, 'tabsidsmart2' AS constraint_schema, c.sqlname AS referenced_table, 'ilicode' AS referenced_column{translate}, 1 AS ordinal_position,
-                    NULL AS strength, NULL AS cardinality_max, NULL AS cardinality_min, NULL AS assoc_cardinality_max, NULL AS assoc_cardinality_min
+                    UNION SELECT CONCAT( p.tablename, '_', p.columnname, '_enumkey') AS constraint_name, p.tablename AS referencing_table, p.columnname AS referencing_column, '{schema}' AS constraint_schema, c.sqlname AS referenced_table, 'ilicode' AS referenced_column, 1 AS ordinal_position,
+                    NULL AS strength, NULL AS cardinality_max, NULL AS cardinality_min, NULL AS assoc_cardinality_max, NULL AS assoc_cardinality_min{translate}
                     FROM {schema}.T_ILI2DB_COLUMN_PROP p
                     JOIN {schema}.T_ILI2DB_CLASSNAME c
                     ON c.iliname=p.setting
                     and tag = 'ch.ehi.ili2db.enumDomain'
                     ) all_relations
-                    ORDER BY referencing_table, referencing_column, referenced_column, ordinal_position DESC
-                    """.format(
+                    ORDER BY referencing_table, referencing_column, referenced_column DESC
+                    ) relations_without_duplicates """.format(
                     translate=translate, schema=self.schema
                 )
 
             cur.execute(
+                """ {distinct}
+                SELECT RC.CONSTRAINT_NAME, KCU1.TABLE_NAME AS referencing_table, KCU1.COLUMN_NAME AS referencing_column, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME AS referenced_table, KCU2.COLUMN_NAME AS referenced_column, KCU1.ORDINAL_POSITION AS ordinal_position{strength_field}{cardinality_fields}{translate}
+                            FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
+                            INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU1
+                             ON KCU1.CONSTRAINT_CATALOG = RC.CONSTRAINT_CATALOG AND KCU1.CONSTRAINT_SCHEMA = RC.CONSTRAINT_SCHEMA AND KCU1.CONSTRAINT_NAME = RC.CONSTRAINT_NAME {schema_where1} {filter_layer_where}
+                            INNER JOIN INFORMATION_SCHEMA.KEY_COLUMN_USAGE AS KCU2
+                             ON KCU2.CONSTRAINT_CATALOG = RC.UNIQUE_CONSTRAINT_CATALOG AND KCU2.CONSTRAINT_SCHEMA = RC.UNIQUE_CONSTRAINT_SCHEMA AND KCU2.CONSTRAINT_NAME = RC.UNIQUE_CONSTRAINT_NAME
+                             AND KCU2.ORDINAL_POSITION = KCU1.ORDINAL_POSITION {schema_where2}
+                            {strength_join}
+                            {cardinality_join}
+                            GROUP BY RC.CONSTRAINT_NAME, KCU1.TABLE_NAME, KCU1.COLUMN_NAME, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME, KCU2.COLUMN_NAME, KCU1.ORDINAL_POSITION{strength_group_by}{cardinality_group_bys}
+                            {fake_relation_union}
+                            {order_by}
+                            """.format(
+                    distinct=distinct,
+                    schema_where1=schema_where1,
+                    schema_where2=schema_where2,
+                    filter_layer_where=filter_layer_where,
+                    strength_field=strength_field,
+                    strength_join=strength_join,
+                    strength_group_by=strength_group_by,
+                    cardinality_fields=cardinality_fields,
+                    cardinality_join=cardinality_join,
+                    cardinality_group_bys=cardinality_group_bys,
+                    translate=translate,
+                    order_by="ORDER BY ordinal_position"
+                    if not fake_relation_union
+                    else "",
+                    fake_relation_union=fake_relation_union,
+                )
+            )
+
+            print(
                 """ {distinct}
                 SELECT RC.CONSTRAINT_NAME, KCU1.TABLE_NAME AS referencing_table, KCU1.COLUMN_NAME AS referencing_column, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME AS referenced_table, KCU2.COLUMN_NAME AS referenced_column, KCU1.ORDINAL_POSITION{strength_field}{cardinality_fields}{translate}
                             FROM INFORMATION_SCHEMA.REFERENTIAL_CONSTRAINTS AS RC
