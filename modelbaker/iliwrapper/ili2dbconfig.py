@@ -268,6 +268,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         self.pre_script = ""
         self.post_script = ""
         self.name_lang = ""
+        self.disable_mandatory = False
 
     def to_ili2db_args(
         self, extra_args: list[str] = [], with_action: bool = True
@@ -293,6 +294,8 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
             self.append_args(args, ["--sqlEnableNull"], force_append=True)
             self.append_args(args, ["--sqlColsAsText"], force_append=True)
         else:
+            if self.disable_mandatory:
+                self.append_args(args, ["--sqlEnableNull"], True)
             self.append_args(args, ["--createNumChecks"], True)
             self.append_args(args, ["--createUnique"], True)
             self.append_args(args, ["--createFk"], True)
