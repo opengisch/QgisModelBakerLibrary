@@ -448,6 +448,226 @@ class TestImport(unittest.TestCase):
         assert record is not None
         assert record[0].lower() == "59ba6620-6cbc-452f-91c2-ea2574b47330"
 
+    def test_import_nonmandatory_import_postgis(self):
+        # Schema Import normal
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
+        importer.configuration.ilimodels = "RoadsSimple"
+        importer.configuration.dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 3116
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import valid data succeeds
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2pg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbschema = importer.configuration.dbschema
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_valid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = False
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+        # Import invalid data fails because validation is not disabled
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2pg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbschema = importer.configuration.dbschema
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_invalid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = False
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() != iliimporter.Importer.SUCCESS
+
+        # Import invalid data with disabled validation still fails because of the not null constraint in the DB
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2pg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbschema = importer.configuration.dbschema
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_invalid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = True
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() != iliimporter.Importer.SUCCESS
+
+        # Schema Import allowing NOT NULL values for mandatory attributes (disable_mandatory)
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
+        importer.configuration.ilimodels = "RoadsSimple"
+        importer.configuration.dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.srs_code = 3116
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.disable_mandatory = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import valid data succeeds
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2pg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbschema = importer.configuration.dbschema
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_valid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = False
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+        # Import invalid data fails because validation is not disabled
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.ili2pg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbschema = importer.configuration.dbschema
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_invalid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = False
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() != iliimporter.Importer.SUCCESS
+
+        # Import invalid data with disabled validation finally succeeds because of the disabled mandatory constraint in the DB
+        dataImporter.tool = DbIliMode.ili2pg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbschema = importer.configuration.dbschema
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_invalid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = True
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+    def test_import_nonmandatory_import_geopackage(self):
+        # Schema Import normal
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
+        importer.configuration.ilimodels = "RoadsSimple"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_roads_simple_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.srs_code = 3116
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import valid data succeeds
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.gpkg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_valid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = False
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+        # Import invalid data fails because validation is not disabled
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.gpkg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_invalid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = False
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() != iliimporter.Importer.SUCCESS
+
+        # Import invalid data with disabled validation still fails because of the not null constraint in the DB
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.gpkg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_invalid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = True
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() != iliimporter.Importer.SUCCESS
+
+        # Schema Import allowing NOT NULL values for mandatory attributes (disable_mandatory)
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.gpkg
+        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
+        importer.configuration.ilimodels = "RoadsSimple"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_roads_simple_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.srs_code = 3116
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.disable_mandatory = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        # Import valid data succeeds
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.gpkg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_valid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = False
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
+        # Import invalid data fails because validation is not disabled
+        dataImporter = iliimporter.Importer(dataImport=True)
+        dataImporter.tool = DbIliMode.gpkg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_invalid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = False
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() != iliimporter.Importer.SUCCESS
+
+        # Import invalid data with disabled validation finally succeeds because of the disabled mandatory constraint in the DB
+        dataImporter.tool = DbIliMode.gpkg
+        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration.dbfile = importer.configuration.dbfile
+        dataImporter.configuration.xtffile = testdata_path(
+            "xtf/test_roads_simple_invalid_street.xtf"
+        )
+        dataImporter.configuration.disable_validation = True
+        dataImporter.stdout.connect(self.print_info)
+        dataImporter.stderr.connect(self.print_error)
+        assert dataImporter.run() == iliimporter.Importer.SUCCESS
+
     def print_info(self, text):
         logging.info(text)
 
