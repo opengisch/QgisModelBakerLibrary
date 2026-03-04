@@ -90,7 +90,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "t_id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
             }
         )
         # Domain inherited from superclass and from another model
@@ -101,7 +101,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
             }
         )
         # Domain from another model
@@ -112,7 +112,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "t_id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
             }
         )
         # Domain from another model
@@ -123,7 +123,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "t_id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
             }
         )
         # Domain inherited from abstract class
@@ -134,7 +134,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
             }
         )
         # Domain inherited from abstract class
@@ -145,7 +145,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
             }
         )
 
@@ -395,7 +395,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "T_Id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
             }
         )
         # Domain inherited from superclass and from another model
@@ -406,7 +406,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
             }
         )
         # Domain from another model
@@ -417,7 +417,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
             }
         )
         # Domain from another model
@@ -428,7 +428,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "T_Id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
             }
         )
         # Domain inherited from abstract class
@@ -439,7 +439,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
             }
         )
         # Domain inherited from abstract class
@@ -450,10 +450,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
             }
         )
-
         for expected_relation in expected_relations:
             assert expected_relation in relations_dicts
 
@@ -708,7 +707,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "T_Id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
             }
         )
         # Domain inherited from superclass and from another model
@@ -719,7 +718,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
             }
         )
         # Domain from another model
@@ -730,7 +729,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
             }
         )
         # Domain from another model
@@ -741,7 +740,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "T_Id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
             }
         )
         # Domain inherited from abstract class
@@ -752,7 +751,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
             }
         )
         # Domain inherited from abstract class
@@ -763,7 +762,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": None,
+                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
             }
         )
 
@@ -4085,6 +4084,786 @@ class TestDomainClassRelation(unittest.TestCase):
                 count += 1
 
         assert count == 1
+
+    def test_enumtabsid_smart1_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart1"
+        importer.configuration.create_basket_col = False
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                # This is still a bug https://github.com/opengisch/QgisModelBaker/issues/1120
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                # )
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "UninheritedCMYColorType"
+                )
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+                count += 1
+        assert count == 2
+
+    def test_enumtabsid_smart1_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart1"
+        importer.configuration.create_basket_col = False
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                # This is still a bug https://github.com/opengisch/QgisModelBaker/issues/1120
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                # )
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "UninheritedCMYColorType"
+                )
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+                count += 1
+        assert count == 2
+
+    def test_enumtabsid_smart2_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                )
+                count += 1
+
+            if layer.alias == "BlueChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                )
+                count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "UninheritedCMYColorType"
+                )
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+                count += 1
+        assert count == 4
+
+    def test_enumtabsid_smart2_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                )
+                count += 1
+
+            if layer.alias == "BlueChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                )
+                count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "UninheritedCMYColorType"
+                )
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+                count += 1
+        assert count == 4
+
+    def test_enumtabs_smart1_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart1"
+        importer.configuration.create_basket_col = False
+        # createEnumTabs
+        importer.configuration.enum_tabs = "tabs"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                # It's technically not possible to have a sollution here, because the enumeration types are in a different table
+                count += 1
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "UninheritedCMYColorType"
+                )
+                count += 1
+        assert count == 2
+
+    def test_enumtabs_smart1_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart1"
+        importer.configuration.create_basket_col = False
+        # createEnumTabs
+        importer.configuration.enum_tabs = "tabs"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                # It's technically not possible to have a sollution here, because the enumeration types are in a different table
+                count += 1
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "UninheritedCMYColorType"
+                )
+                count += 1
+        assert count == 2
+
+    def test_enumtabs_smart2_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        # createEnumTabs
+        importer.configuration.enum_tabs = "tabs"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "BlueChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "BlueChildColorType"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "GreenChildColorType"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "UninheritedCMYColorType"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+        assert count == 4
+
+    def test_enumtabs_smart2_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        # createEnumTabs
+        importer.configuration.enum_tabs = "tabs"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "BlueChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "BlueChildColorType"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "GreenChildColorType"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "UninheritedCMYColorType"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+        assert count == 4
+
+    def test_enumsingletab_smart1_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart1"
+        importer.configuration.create_basket_col = False
+        # createSingleEnumTab
+        importer.configuration.enum_tabs = "singletab"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+    def test_enumsingletab_smart1_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart1"
+        importer.configuration.create_basket_col = False
+        # createSingleEnumTab
+        importer.configuration.enum_tabs = "singletab"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+    def test_enumsingletab_smart2_postgis(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbschema = "colors_v2_{:%Y%m%d%H%M%S%f}".format(
+            datetime.datetime.now()
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        # createSingleEnumTab
+        importer.configuration.enum_tabs = "singletab"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+    def test_enumsingletab_smart2_geopackage(self):
+        # Schema Import
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Colors_V2"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "colors_v2_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = False
+        # createSingleEnumTab
+        importer.configuration.enum_tabs = "singletab"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
 
     def print_info(self, text):
         logging.info(text)

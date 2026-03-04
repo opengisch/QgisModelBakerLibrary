@@ -524,15 +524,48 @@ class GPKGConnector(DBConnector):
         for table_info_name, table_info in tables_info_dict.items():
             cursor.execute("""PRAGMA foreign_key_list("{}");""".format(table_info_name))
             foreign_keys = cursor.fetchall()
+            fks = [(fk["from"], fk["table"]) for fk in foreign_keys]
 
-            for foreign_key in foreign_keys:
+            fake_enum_fks = []
+            if self._table_exists(GPKG_METAATTRS_TABLE):
+                # In case of enumtabs without id we have to generate fake foreign keys based on the enumDomain
+                cursor.execute(
+                    """SELECT c.sqlname as 'table', p.columnname as 'from'
+                    FROM T_ILI2DB_COLUMN_PROP p
+                    JOIN T_ILI2DB_CLASSNAME c
+                    ON c.iliname=p.setting
+                    WHERE tablename = ?
+                    and tag = 'ch.ehi.ili2db.enumDomain'
+                """,
+                    (table_info_name,),
+                )
+                fake_enum_foreign_keys = cursor.fetchall()
+
+                fake_enum_fks = [
+                    (fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
+                ]
+            all_foreign_keys = []
+            for fk in fks:
+                all_foreign_keys.append(("fk", fk[0], fk[1]))  # type, from, table
+            for fake_enum_fk in fake_enum_fks:
+                if (
+                    fake_enum_fk[0],
+                    fake_enum_fk[1],
+                ) not in fks:  # avoid duplicates in case there is already a real fk for the same field
+                    all_foreign_keys.append(
+                        ("enum", fake_enum_fk[0], fake_enum_fk[1])
+                    )  # type, from, table
+
+            for foreign_key in all_foreign_keys:
                 record = {}
                 record["referencing_table"] = table_info["tablename"]
-                record["referencing_column"] = foreign_key["from"]
-                record["referenced_table"] = foreign_key["table"]
-                record["referenced_column"] = tables_info_dict[foreign_key["table"]][
-                    "primary_key"
-                ]
+                record["referencing_column"] = foreign_key[1]  # from
+                record["referenced_table"] = foreign_key[2]  # table
+                record["referenced_column"] = (
+                    tables_info_dict[foreign_key[2]]["primary_key"]
+                    if foreign_key[0] == "fk"
+                    else "iliCode"
+                )
                 record["constraint_name"] = "{}_{}_{}_{}".format(
                     record["referencing_table"],
                     record["referencing_column"],
@@ -554,9 +587,9 @@ class GPKGConnector(DBConnector):
                             colowner="owner" if self.ili_version() == 3 else "colowner"
                         ),
                         (
-                            foreign_key["from"],
+                            foreign_key[1],  # from
                             table_info["tablename"],
-                            foreign_key["table"],
+                            foreign_key[2],  # table
                         ),
                     )
                     strength_record = cursor.fetchone()
@@ -581,9 +614,9 @@ class GPKGConnector(DBConnector):
                             colowner="owner" if self.ili_version() == 3 else "colowner"
                         ),
                         (
-                            foreign_key["from"],
+                            foreign_key[1],  # from
                             table_info["tablename"],
-                            foreign_key["table"],
+                            foreign_key[2],  # table
                         ),
                     )
                     cardinality_record = cursor.fetchone()

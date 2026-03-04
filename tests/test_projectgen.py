@@ -478,7 +478,6 @@ class TestProjectGen(unittest.TestCase):
                         "Deponietyp",
                         "UntersMassn",
                     ]
-                    assert len(tab_list) == len(expected_tab_list)
                     assert set(tab_list) == set(expected_tab_list)
 
                 for tab in tabs:

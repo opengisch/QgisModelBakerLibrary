@@ -1,0 +1,65 @@
+INTERLIS 2.3;
+
+MODEL Colors_V2 (es)
+AT "mailto:PC-1@localhost"
+VERSION "2020-08-26"  =
+
+  DOMAIN
+
+    ColorType = (
+      Green,
+      Red,
+      Blue
+    );
+
+    BlueChildColorType
+    EXTENDS ColorType = (
+      Blue(
+        Dark_Blue,
+        Light_Blue,
+        Medium_Blue
+      )
+    );
+
+    GreenChildColorType
+    EXTENDS ColorType = (
+      Green(
+        Dark_Green,
+        Light_Green,
+        Medium_Green
+      )
+    );
+
+    UninheritedCMYColorType = (
+      Cyan,
+      Magenta,
+      Yello
+    );
+
+    STRUCTURE UninheritedCMYColorTypeStruct = value : MANDATORY UninheritedCMYColorType; END UninheritedCMYColorTypeStruct;
+
+  TOPIC Colors =
+
+    CLASS BaseColor =
+      ColorType : Colors_V2.ColorType;
+    END BaseColor;
+
+    CLASS BlueChildColor
+    EXTENDS BaseColor =
+      ColorType (EXTENDED) : Colors_V2.BlueChildColorType;
+    END BlueChildColor;
+
+    CLASS GreenChildColor
+    EXTENDS BaseColor =
+      ColorType (EXTENDED) : Colors_V2.GreenChildColorType;
+    END GreenChildColor;
+
+    CLASS UninheritedCMYColor =
+      ColorType : Colors_V2.UninheritedCMYColorType;
+      !!@ili2db.mapping="ARRAY"
+      BagOfColorType : BAG {0..*} OF Colors_V2.UninheritedCMYColorTypeStruct;
+    END UninheritedCMYColor;
+
+  END Colors;
+
+END Colors_V2.

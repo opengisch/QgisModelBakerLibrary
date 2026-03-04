@@ -207,9 +207,9 @@ class TestTranslations(unittest.TestCase):
                 assert layer.layer.displayExpression() == "\n".join(
                     [
                         "CASE",
-                        "WHEN iliCode = 'AenderungOhneVorwirkung' THEN 'ModificationSansEffetAnticipe'",
-                        "WHEN iliCode = 'AenderungMitVorwirkung' THEN 'ModificationAvecEffetAnticipe'",
-                        "WHEN iliCode = 'inKraft' THEN 'enVigueur'",
+                        "WHEN ilicode = 'AenderungOhneVorwirkung' THEN 'ModificationSansEffetAnticipe'",
+                        "WHEN ilicode = 'AenderungMitVorwirkung' THEN 'ModificationAvecEffetAnticipe'",
+                        "WHEN ilicode = 'inKraft' THEN 'enVigueur'",
                         "END",
                     ]
                 )
@@ -493,9 +493,9 @@ class TestTranslations(unittest.TestCase):
                 assert layer.layer.displayExpression() == "\n".join(
                     [
                         "CASE",
-                        "WHEN iliCode = 'AenderungMitVorwirkung' THEN 'AenderungMitVorwirkung'",
-                        "WHEN iliCode = 'AenderungOhneVorwirkung' THEN 'AenderungOhneVorwirkung'",
-                        "WHEN iliCode = 'inKraft' THEN 'inKraft'",
+                        "WHEN ilicode = 'AenderungMitVorwirkung' THEN 'AenderungMitVorwirkung'",
+                        "WHEN ilicode = 'AenderungOhneVorwirkung' THEN 'AenderungOhneVorwirkung'",
+                        "WHEN ilicode = 'inKraft' THEN 'inKraft'",
                         "END",
                     ]
                 )

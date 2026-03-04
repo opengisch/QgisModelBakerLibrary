@@ -156,6 +156,7 @@ class Project(QObject):
                     crs = QgsCoordinateReferenceSystem(self.crs)  # Fallback
                 qgis_project.setCrs(crs)
 
+        # Set relations and relation depending editor widgets accordingly
         qgis_relations = list(qgis_project.relationManager().relations().values())
         dict_layers = {layer.layer.id(): layer for layer in self.layers}
         for relation in self.relations:
@@ -194,12 +195,13 @@ class Project(QObject):
                         )
                         if relation.child_domain_name
                         else "",
-                        "Key": referenced_layer.provider_names_map.get("tid_name"),
+                        "Key": relation.referenced_field,
                         "NofColumns": 1,
                         "OrderByField": True,
                         "OrderByFieldName": "seq",
                     },
                 )
+                # here we don't append the relation because we don't need it anymore
             elif referenced_layer and referenced_layer.is_domain:
                 editor_widget_setup = QgsEditorWidgetSetup(
                     "RelationReference",
@@ -271,7 +273,7 @@ class Project(QObject):
             )
         qgis_project.relationManager().setRelations(qgis_relations)
 
-        # Set Bag of Enum widget
+        # BAG-OF Enumerations with ARRAY mapping are value relations as well
         for layer_name, bag_of_enum in self.bags_of_enum.items():
             current_layer = None
             for attribute, bag_of_enum_info in bag_of_enum.items():
@@ -299,7 +301,9 @@ class Project(QObject):
                     "OrderByValue": False,
                     "AllowNull": True,
                     "Layer": domain_table.create().id(),
-                    "FilterExpression": "",
+                    "FilterExpression": "\"{}\" = '{}'".format(
+                        ENUM_THIS_CLASS_COLUMN, layer.ili_name
+                    ),
                     "Key": key_field,
                     "NofColumns": 1,
                 }
