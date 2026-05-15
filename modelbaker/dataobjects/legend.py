@@ -74,7 +74,7 @@ class LegendGroup:
     def create(
         self, qgis_project: QgsProject, group: Optional[QgsLayerTreeGroup] = None
     ) -> None:
-        if not group:
+        if group is None:
             group = qgis_project.layerTreeRoot()
 
         existing_layer_source_uris = [
