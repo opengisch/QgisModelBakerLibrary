@@ -8,7 +8,8 @@ RUN apt-get update && \
 # MSSQL: client side
 RUN apt-get update
 RUN apt-get install -y curl locales postgresql-client libpq-dev
-RUN apt-get install -y unixodbc unixodbc-dev odbcinst unixodbc-common libodbcinst2 libodbccr2 libodbc2 libqt5sql5-odbc
+RUN apt-get install -y unixodbc unixodbc-dev odbcinst unixodbc-common libodbcinst2 libodbccr2 libodbc2
+RUN apt-get install -y libqt5sql5-odbc libqt6sql6-odbc
 
 RUN curl https://packages.microsoft.com/keys/microsoft.asc | gpg --dearmor -o /usr/share/keyrings/microsoft-archive-keyring.gpg
 RUN echo "deb [arch=amd64,arm64,armhf signed-by=/usr/share/keyrings/microsoft-archive-keyring.gpg] https://packages.microsoft.com/ubuntu/20.04/prod focal main" > /etc/apt/sources.list.d/msprod.list
