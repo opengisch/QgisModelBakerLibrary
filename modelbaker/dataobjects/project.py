@@ -294,16 +294,20 @@ class Project(QObject):
                     current_layer = layer_obj.create()
 
                 field_widget = "ValueRelation"
+                domain_layer = domain_table.create()
                 field_widget_config = {
                     "AllowMulti": True,
                     "UseCompleter": False,
                     "Value": value_field,
                     "OrderByValue": False,
                     "AllowNull": True,
-                    "Layer": domain_table.create().id(),
+                    "Layer": domain_layer.id(),
+                    # Filter only if domain layer uses 'thisClass' containing multiple inherited layer targets
                     "FilterExpression": "\"{}\" = '{}'".format(
-                        ENUM_THIS_CLASS_COLUMN, layer.ili_name
-                    ),
+                        ENUM_THIS_CLASS_COLUMN, domain_table.ili_name
+                    )
+                    if domain_layer.fields().lookupField(ENUM_THIS_CLASS_COLUMN) >= 0
+                    else "",
                     "Key": key_field,
                     "NofColumns": 1,
                 }
