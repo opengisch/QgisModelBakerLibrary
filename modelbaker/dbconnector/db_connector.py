@@ -407,11 +407,21 @@ class DBConnector(QObject):
         """
         return False
 
-    def get_ili2db_settings(self) -> dict:
+    def get_ili2db_settings(self) -> list:
         """
         Returns the settings like they are without any name mapping etc.
         """
-        return {}
+        return []
+
+    def get_ili2db_settings_as_dict(self) -> dict:
+        """
+        Returns the settings as a simple dict with key (tag) and value (setting)
+        """
+        settings_dict = {}
+        setting_records = self.get_ili2db_settings()
+        for setting_record in setting_records:
+            settings_dict[setting_record["tag"]] = setting_record["setting"]
+        return settings_dict
 
     def get_ili2db_sequence_value(self) -> str:
         """
