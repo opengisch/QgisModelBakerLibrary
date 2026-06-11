@@ -649,21 +649,51 @@ class GPKGConnector(DBConnector):
         bags_of_info = {}
         if self.metadata_exists():
             cursor = self.conn.cursor()
-            cursor.execute(
-                """SELECT
-                        cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type
-                        FROM T_ILI2DB_COLUMN_PROP as cprop
-                        LEFT JOIN T_ILI2DB_ATTRNAME aname
-                        ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
-                        LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_array
-                        ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
-                        LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_min
-                        ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
-                        LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
-                        ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
-                        WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
-                    """
-            )
+
+            if (
+                self.get_ili2db_settings_as_dict().get(
+                    "ch.ehi.ili2db.createEnumDefs", None
+                )
+                == "multiTableWithId"
+            ):
+                # When we use fks for the relations, we get it by the property ch.ehi.ili2db.foreignKey
+                cursor.execute(
+                    """SELECT
+                            cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type, '{}' as target_layer_key
+                            FROM T_ILI2DB_COLUMN_PROP as cprop
+                            LEFT JOIN T_ILI2DB_ATTRNAME aname
+                            ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_array
+                            ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_min
+                            ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
+                            ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                            WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
+                            """.format(
+                        self.tid
+                    )
+                )
+            else:
+                # When we don't have fks we get it by property ch.ehi.ili2db.enumDomain
+                cursor.execute(
+                    """SELECT
+                            aname.colowner as current_layer_name, aname.sqlname as attribute, classn.sqlname as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type, '{}' as target_layer_key
+                            FROM T_ILI2DB_ATTRNAME aname
+                            LEFT JOIN T_ILI2DB_COLUMN_PROP as cprop
+                            ON aname.sqlname = cprop.columnname and cprop.tag = 'ch.ehi.ili2db.enumDomain' AND aname.colowner = cprop.tablename
+                            LEFT JOIN T_ILI2DB_CLASSNAME as classn
+                            ON classn.iliname = cprop.setting
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_array
+                            ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_min
+                            ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
+                            ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                    """.format(
+                        "iliCode"
+                    )
+                )
             bags_of_info = cursor.fetchall()
             cursor.close()
         return bags_of_info

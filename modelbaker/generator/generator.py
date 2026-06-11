@@ -653,7 +653,7 @@ class Generator(QObject):
                             if record["cardinality_min"] and record["cardinality_max"]
                             else "",
                             layer_map[record["target_layer_name"]][0],
-                            self._db_connector.tid,
+                            record["target_layer_key"],
                             self._db_connector.dispName,
                             record["mapping_type"],
                         ]

@@ -338,7 +338,7 @@ class SchemaImportConfiguration(Ili2DbCommandConfiguration):
         elif self.db_ili_version is None or self.db_ili_version > 3:
             self.append_args(args, ["--strokeArcs=False"])
 
-        if self.tool and (self.tool & DbIliMode.gpkg):
+        if self.tool and (self.tool in [DbIliMode.gpkg, DbIliMode.ili2gpkg]):
             if self.create_gpkg_multigeom:
                 self.append_args(args, ["--gpkgMultiGeomPerTable"])
             elif self.db_ili_version is None or self.db_ili_version > 3:

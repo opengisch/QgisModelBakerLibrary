@@ -822,27 +822,61 @@ class PGConnector(DBConnector):
     def get_bags_of_info(self) -> list[dict]:
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
-            cur.execute(
-                sql.SQL(
-                    """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
-                        meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
-                        meta_attrs_array.attr_value as mapping_type
-                    FROM {schema}.t_ili2db_column_prop as cprop
-                    LEFT JOIN {schema}.t_ili2db_attrname aname
-                    ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
-                    LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_array
-                    ON meta_attrs_array.ilielement ILIKE aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
-                    LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_min
-                    ON meta_attrs_cardinality_min.ilielement ILIKE aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
-                    LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_max
-                    ON meta_attrs_cardinality_max.ilielement ILIKE aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
-                    WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
-                    """
-                ).format(
-                    schema=sql.Identifier(self.schema),
-                    t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
+
+            if (
+                self.get_ili2db_settings_as_dict().get(
+                    "ch.ehi.ili2db.createEnumDefs", None
                 )
-            )
+                == "multiTableWithId"
+            ):
+                # When we use fks for the relations, we get it by the property ch.ehi.ili2db.foreignKey
+                cur.execute(
+                    sql.SQL(
+                        """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
+                            meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
+                            meta_attrs_array.attr_value as mapping_type,  %s as target_layer_key
+                        FROM {schema}.t_ili2db_column_prop as cprop
+                        LEFT JOIN {schema}.t_ili2db_attrname aname
+                        ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_array
+                        ON meta_attrs_array.ilielement ILIKE aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_min
+                        ON meta_attrs_cardinality_min.ilielement ILIKE aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_max
+                        ON meta_attrs_cardinality_max.ilielement ILIKE aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                        WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
+                        """
+                    ).format(
+                        schema=sql.Identifier(self.schema),
+                        t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
+                    ),
+                    (self.tid,),
+                )
+            else:
+                # When we don't have fks we get it by property ch.ehi.ili2db.enumDomain
+                cur.execute(
+                    sql.SQL(
+                        """SELECT aname.colowner as current_layer_name, aname.sqlname as attribute, classn.sqlname as target_layer_name,
+                            meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
+                            meta_attrs_array.attr_value as mapping_type, %s as target_layer_key
+                        FROM {schema}.t_ili2db_attrname aname
+                        LEFT JOIN {schema}.t_ili2db_column_prop as cprop
+                        ON aname.sqlname = cprop.columnname and cprop.tag = 'ch.ehi.ili2db.enumDomain' AND aname.colowner = cprop.tablename
+                        LEFT JOIN {schema}.t_ili2db_classname as classn
+                        ON classn.iliname = cprop.setting
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_array
+                        ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_min
+                        ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_max
+                        ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                        """
+                    ).format(
+                        schema=sql.Identifier(self.schema),
+                        t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
+                    ),
+                    ("ilicode",),
+                )
             return cur
         return []
 
