@@ -659,7 +659,7 @@ class GPKGConnector(DBConnector):
                 # When we use fks for the relations, we get it by the property ch.ehi.ili2db.foreignKey
                 cursor.execute(
                     """SELECT
-                            cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type, '{}' as fk_key
+                            cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type, '{}' as target_layer_key
                             FROM T_ILI2DB_COLUMN_PROP as cprop
                             LEFT JOIN T_ILI2DB_ATTRNAME aname
                             ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
@@ -678,7 +678,7 @@ class GPKGConnector(DBConnector):
                 # When we don't have fks we get it by property ch.ehi.ili2db.enumDomain
                 cursor.execute(
                     """SELECT
-                            aname.colowner as current_layer_name, aname.sqlname as attribute, classn.sqlname as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type, '{}' as fk_key
+                            aname.colowner as current_layer_name, aname.sqlname as attribute, classn.sqlname as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type, '{}' as target_layer_key
                             FROM T_ILI2DB_ATTRNAME aname
                             LEFT JOIN T_ILI2DB_COLUMN_PROP as cprop
                             ON aname.sqlname = cprop.columnname and cprop.tag = 'ch.ehi.ili2db.enumDomain' AND aname.colowner = cprop.tablename

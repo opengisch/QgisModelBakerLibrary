@@ -834,7 +834,7 @@ class PGConnector(DBConnector):
                     sql.SQL(
                         """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
                             meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
-                            meta_attrs_array.attr_value as mapping_type,  %s as fk_key
+                            meta_attrs_array.attr_value as mapping_type,  %s as target_layer_key
                         FROM {schema}.t_ili2db_column_prop as cprop
                         LEFT JOIN {schema}.t_ili2db_attrname aname
                         ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
@@ -858,7 +858,7 @@ class PGConnector(DBConnector):
                     sql.SQL(
                         """SELECT aname.colowner as current_layer_name, aname.sqlname as attribute, classn.sqlname as target_layer_name,
                             meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
-                            meta_attrs_array.attr_value as mapping_type, %s as fk_key
+                            meta_attrs_array.attr_value as mapping_type, %s as target_layer_key
                         FROM {schema}.t_ili2db_attrname aname
                         LEFT JOIN {schema}.t_ili2db_column_prop as cprop
                         ON aname.sqlname = cprop.columnname and cprop.tag = 'ch.ehi.ili2db.enumDomain' AND aname.colowner = cprop.tablename
@@ -872,7 +872,6 @@ class PGConnector(DBConnector):
                         ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
                         """
                     ).format(
-                        fk_key="ilicode",
                         schema=sql.Identifier(self.schema),
                         t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
                     ),
