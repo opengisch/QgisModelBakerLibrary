@@ -129,7 +129,10 @@ class Generator(QObject):
             if filter_layer_list and record["tablename"] not in filter_layer_list:
                 continue
 
-            is_enum = record.get("kind_settings") == "ENUM"
+            is_enum = (
+                record.get("kind_settings") == "ENUM"
+                or record.get("tablename") == self._db_connector.enum_table_name
+            )
             is_domain = is_enum or record.get("kind_settings") == "CATALOGUE"
             is_attribute = bool(record.get("attribute_name"))
             is_structure = record.get("kind_settings") == "STRUCTURE"
@@ -610,10 +613,14 @@ class Generator(QObject):
                             # ...then it's a composition in QGIS
                             relation.strength = QgsRelation.RelationStrength.Composition
 
-                        # For enum-class relations, if we have an extended domain, get its child name, but only when it's created with ids
-                        if record[
-                            "referenced_column"
-                        ] != referenced_layer.provider_names_map.get("ilicodename"):
+                        # For enum-class relations, if we have an extended domain, get its child name
+                        # only when it's created with ids or all the enums are stored in a single table (t_ili2db_enum)
+                        if (
+                            record["referenced_column"]
+                            != referenced_layer.provider_names_map.get("ilicodename")
+                            or record["referenced_table"]
+                            == self._db_connector.enum_table_name
+                        ):
                             child_name = None
                             if referenced_layer.is_domain:
                                 # Get child name (if domain is extended)
@@ -624,9 +631,13 @@ class Generator(QObject):
                                 ]
                                 if fields:
                                     field = fields[0]
+                                    print(
+                                        f"we hav here layer {referencing_layer.name} with field {field.name} and enum domain {field.enum_domain}"
+                                    )
                                     if field.enum_domain:
                                         child_name = field.enum_domain
                             relation.child_domain_name = child_name
+                            print(f"we set {relation.child_domain_name}")
 
                         relations.append(relation)
 
@@ -656,6 +667,7 @@ class Generator(QObject):
                             record["target_layer_key"],
                             self._db_connector.dispName,
                             record["mapping_type"],
+                            record["thisclass_name"],
                         ]
                         unique_current_layer_name = "{}_{}".format(
                             record["current_layer_name"], layer.geometry_column

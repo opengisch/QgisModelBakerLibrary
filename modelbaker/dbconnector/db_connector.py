@@ -36,6 +36,9 @@ class DBConnector(QObject):
         self.dispName = ""  # For BAG OF config, specific for each DB
         self.basket_table_name = ""  # For basket handling, specific for each DB
         self.dataset_table_name = ""  # For basket handling, specific for each DB
+        self.enum_table_name = (
+            ""  # When there is a technical table holding all the enum values
+        )
         self._lang = ""  # Preferred tr language for table/column info (2 characters)
 
     def get_provider_specific_names(self) -> dict:
