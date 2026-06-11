@@ -534,7 +534,19 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 15
         assert len(available_layers) == 23
-        assert len(relations) == 13
+        assert len(relations) == 22  # 21 of them are enum-relations
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.post_generate()
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # in the end we only have one connection (Datenbestand -> ZustaendigeStelle)
+        # the enums are value relations
+        qgis_relations = qgis_project.relationManager().relations()
+        assert len(qgis_relations) == 1
 
     def test_naturschutz_geopackage(self):
         importer = iliimporter.Importer()
@@ -566,7 +578,19 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 65
         assert len(available_layers) == 23
-        assert len(relations) == 13
+        assert len(relations) == 22  # 21 of them are enum-relations
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.post_generate()
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # in the end we only have one connection (Datenbestand -> ZustaendigeStelle)
+        # the enums are value relations
+        qgis_relations = qgis_project.relationManager().relations()
+        assert len(qgis_relations) == 1
 
     def test_naturschutz_mssql(self):
         importer = iliimporter.Importer()
@@ -602,7 +626,19 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 20
         assert len(available_layers) == 23
-        assert len(relations) == 22
+        assert len(relations) == 22  # 21 of them are enum-relations
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.post_generate()
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # in the end we only have one connection (Datenbestand -> ZustaendigeStelle)
+        # the enums are value relations
+        qgis_relations = qgis_project.relationManager().relations()
+        assert len(qgis_relations) == 1
 
     def test_naturschutz_set_ignored_layers_postgis(self):
         importer = iliimporter.Importer()
@@ -633,7 +669,19 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 17
         assert len(available_layers) == 21
-        assert len(relations) == 12
+        assert len(relations) == 21  # 21 of them are enum-relations
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.post_generate()
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # in the end we have no connections
+        # the enums are value relations
+        qgis_relations = qgis_project.relationManager().relations()
+        assert len(qgis_relations) == 0
 
     def test_naturschutz_set_ignored_layers_geopackage(self):
         importer = iliimporter.Importer()
@@ -662,21 +710,25 @@ class TestProjectGen(unittest.TestCase):
         generator.set_additional_ignored_layers(["einzelbaum", "datenbestand"])
         ignored_layers = generator.get_ignored_layers()
         available_layers = generator.layers([])
-        legend = generator.legend(available_layers)
+        generator.legend(available_layers)
         relations, _ = generator.relations(available_layers)
 
         assert len(ignored_layers) == 67
         assert len(available_layers) == 21
-        assert len(relations) == 12
+        assert len(relations) == 21  # 21 of them are enum-relations
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
-        project.legend = legend
         project.post_generate()
 
         qgis_project = QgsProject.instance()
         project.create(None, qgis_project)
+
+        # in the end we have no connections
+        # the enums are value relations
+        qgis_relations = qgis_project.relationManager().relations()
+        assert len(qgis_relations) == 0
 
         layer_names = [l.name().lower() for l in qgis_project.mapLayers().values()]
         assert "einzelbaum" not in layer_names
@@ -718,7 +770,20 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 22
         assert len(available_layers) == 21
-        assert len(relations) == 21
+        assert len(relations) == 21  # 21 of them are enum-relations
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # in the end we have no connections
+        # the enums are value relations
+        qgis_relations = qgis_project.relationManager().relations()
+        assert len(qgis_relations) == 0
 
     def test_naturschutz_nometa_postgis(self):
         # model with missing meta attributes for multigeometry - no layers should be ignored
@@ -749,7 +814,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 9
         assert len(available_layers) == 29
-        assert len(relations) == 23
+        assert len(relations) == 32
 
     def test_naturschutz_nometa_geopackage(self):
         # model with missing meta attributes for multigeometry - no layers should be ignored
@@ -782,7 +847,7 @@ class TestProjectGen(unittest.TestCase):
 
         assert len(ignored_layers) == 31
         assert len(available_layers) == 29
-        assert len(relations) == 23
+        assert len(relations) == 32
 
     def test_ranges_postgis(self):
         importer = iliimporter.Importer()

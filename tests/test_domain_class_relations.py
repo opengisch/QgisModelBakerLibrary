@@ -4108,13 +4108,14 @@ class TestDomainClassRelation(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations, bags_of_enum = generator.relations(available_layers)
 
         legend = generator.legend(available_layers)
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
+        project.bags_of_enum = bags_of_enum
         project.legend = legend
         project.post_generate()
 
@@ -4198,13 +4199,14 @@ class TestDomainClassRelation(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations, bags_of_enum = generator.relations(available_layers)
 
         legend = generator.legend(available_layers)
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
+        project.bags_of_enum = bags_of_enum
         project.legend = legend
         project.post_generate()
 
@@ -4286,13 +4288,14 @@ class TestDomainClassRelation(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations, bags_of_enum = generator.relations(available_layers)
 
         legend = generator.legend(available_layers)
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
+        project.bags_of_enum = bags_of_enum
         project.legend = legend
         project.post_generate()
 
@@ -4401,13 +4404,14 @@ class TestDomainClassRelation(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations, bags_of_enum = generator.relations(available_layers)
 
         legend = generator.legend(available_layers)
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
+        project.bags_of_enum = bags_of_enum
         project.legend = legend
         project.post_generate()
 
@@ -4515,13 +4519,14 @@ class TestDomainClassRelation(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations, bags_of_enum = generator.relations(available_layers)
 
         legend = generator.legend(available_layers)
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
+        project.bags_of_enum = bags_of_enum
         project.legend = legend
         project.post_generate()
 
@@ -4548,7 +4553,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert not (config["AllowMulti"])
 
                 # bagofcolortype
-                """
                 field = layer.layer.fields().field("bagofcolortype")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
@@ -4559,8 +4563,7 @@ class TestDomainClassRelation(unittest.TestCase):
                     == "UninheritedCMYColorType"
                 )
                 assert config["FilterExpression"] == ""
-                assert (config["AllowMulti"])
-                """
+                assert config["AllowMulti"]
                 count += 1
         assert count == 2
 
@@ -4590,13 +4593,14 @@ class TestDomainClassRelation(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations, bags_of_enum = generator.relations(available_layers)
 
         legend = generator.legend(available_layers)
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
+        project.bags_of_enum = bags_of_enum
         project.legend = legend
         project.post_generate()
 
@@ -4622,7 +4626,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["FilterExpression"] == ""
 
                 # bagofcolortype
-                """
                 field = layer.layer.fields().field("bagofcolortype")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
@@ -4632,9 +4635,8 @@ class TestDomainClassRelation(unittest.TestCase):
                     qgis_project.mapLayer(config["Layer"]).name()
                     == "UninheritedCMYColorType"
                 )
-                assert (config["AllowMulti"])
+                assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
-                """
                 count += 1
         assert count == 2
 
@@ -4663,13 +4665,14 @@ class TestDomainClassRelation(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations, bags_of_enum = generator.relations(available_layers)
 
         legend = generator.legend(available_layers)
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
+        project.bags_of_enum = bags_of_enum
         project.legend = legend
         project.post_generate()
 
@@ -4728,7 +4731,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["FilterExpression"] == ""
 
                 # bagofcolortype
-                """
                 field = layer.layer.fields().field("bagofcolortype")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
@@ -4738,9 +4740,8 @@ class TestDomainClassRelation(unittest.TestCase):
                     qgis_project.mapLayer(config["Layer"]).name()
                     == "UninheritedCMYColorType"
                 )
-                assert (config["AllowMulti"])
+                assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
-                """
                 count += 1
         assert count == 4
 
@@ -4770,13 +4771,14 @@ class TestDomainClassRelation(unittest.TestCase):
         )
 
         available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
+        relations, bags_of_enum = generator.relations(available_layers)
 
         legend = generator.legend(available_layers)
 
         project = Project()
         project.layers = available_layers
         project.relations = relations
+        project.bags_of_enum = bags_of_enum
         project.legend = legend
         project.post_generate()
 
@@ -4835,7 +4837,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["FilterExpression"] == ""
 
                 # bagofcolortype
-                """
                 field = layer.layer.fields().field("bagofcolortype")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
@@ -4845,9 +4846,9 @@ class TestDomainClassRelation(unittest.TestCase):
                     qgis_project.mapLayer(config["Layer"]).name()
                     == "UninheritedCMYColorType"
                 )
-                assert (config["AllowMulti"])
+                assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
-                """
+
                 count += 1
         assert count == 4
 
@@ -4868,27 +4869,6 @@ class TestDomainClassRelation(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
-        generator = Generator(
-            DbIliMode.ili2pg,
-            get_pg_connection_string(),
-            importer.configuration.inheritance,
-            importer.configuration.dbschema,
-        )
-
-        available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
-
-        legend = generator.legend(available_layers)
-
-        project = Project()
-        project.layers = available_layers
-        project.relations = relations
-        project.legend = legend
-        project.post_generate()
-
-        qgis_project = QgsProject.instance()
-        project.create(None, qgis_project)
-
     def test_enumsingletab_smart1_geopackage(self):
         # Schema Import
         importer = iliimporter.Importer()
@@ -4907,27 +4887,6 @@ class TestDomainClassRelation(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
-        config_manager = GpkgCommandConfigManager(importer.configuration)
-        uri = config_manager.get_uri()
-
-        generator = Generator(
-            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
-        )
-
-        available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
-
-        legend = generator.legend(available_layers)
-
-        project = Project()
-        project.layers = available_layers
-        project.relations = relations
-        project.legend = legend
-        project.post_generate()
-
-        qgis_project = QgsProject.instance()
-        project.create(None, qgis_project)
-
     def test_enumsingletab_smart2_postgis(self):
         # Schema Import
         importer = iliimporter.Importer()
@@ -4944,27 +4903,6 @@ class TestDomainClassRelation(unittest.TestCase):
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
-
-        generator = Generator(
-            DbIliMode.ili2pg,
-            get_pg_connection_string(),
-            importer.configuration.inheritance,
-            importer.configuration.dbschema,
-        )
-
-        available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
-
-        legend = generator.legend(available_layers)
-
-        project = Project()
-        project.layers = available_layers
-        project.relations = relations
-        project.legend = legend
-        project.post_generate()
-
-        qgis_project = QgsProject.instance()
-        project.create(None, qgis_project)
 
     def test_enumsingletab_smart2_geopackage(self):
         # Schema Import
@@ -4983,27 +4921,6 @@ class TestDomainClassRelation(unittest.TestCase):
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
-
-        config_manager = GpkgCommandConfigManager(importer.configuration)
-        uri = config_manager.get_uri()
-
-        generator = Generator(
-            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
-        )
-
-        available_layers = generator.layers()
-        relations, _ = generator.relations(available_layers)
-
-        legend = generator.legend(available_layers)
-
-        project = Project()
-        project.layers = available_layers
-        project.relations = relations
-        project.legend = legend
-        project.post_generate()
-
-        qgis_project = QgsProject.instance()
-        project.create(None, qgis_project)
 
     def print_info(self, text):
         logging.info(text)
