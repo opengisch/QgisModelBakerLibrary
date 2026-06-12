@@ -354,7 +354,7 @@ class PGConnector(DBConnector):
                 LEFT JOIN pg_attribute ga
                   ON ga.attrelid = i.indrelid
                   AND ga.attname = g.f_geometry_column
-                WHERE i.indisprimary {schema_where}
+                WHERE (i.indisprimary OR i.indisprimary IS NULL) {schema_where}
             """.format(
                     kind_settings_field=kind_settings_field,
                     table_alias=table_alias,
