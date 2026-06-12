@@ -554,6 +554,9 @@ class Generator(QObject):
             if layer.name not in layer_map.keys():
                 layer_map[layer.name] = list()
             layer_map[layer.name].append(layer)
+
+        # RELATION INFORMATION
+
         relations = list()
 
         for record in relations_info:
@@ -613,33 +616,18 @@ class Generator(QObject):
                             # ...then it's a composition in QGIS
                             relation.strength = QgsRelation.RelationStrength.Composition
 
-                        # For enum-class relations, if we have an extended domain, get its child name
-                        # only when it's created with ids or all the enums are stored in a single table (t_ili2db_enum)
-                        if (
-                            record["referenced_column"]
-                            != referenced_layer.provider_names_map.get("ilicodename")
-                            or record["referenced_table"]
-                            == self._db_connector.enum_table_name
-                        ):
-                            child_name = None
-                            if referenced_layer.is_domain:
-                                # Get child name (if domain is extended)
-                                fields = [
-                                    field
-                                    for field in referencing_layer.fields
-                                    if field.name == record["referencing_column"]
-                                ]
-                                if fields:
-                                    field = fields[0]
-                                    print(
-                                        f"we hav here layer {referencing_layer.name} with field {field.name} and enum domain {field.enum_domain}"
-                                    )
-                                    if field.enum_domain:
-                                        child_name = field.enum_domain
-                            relation.child_domain_name = child_name
-                            print(f"we set {relation.child_domain_name}")
+                        # on enum relations, if we have an extended domain, get its child name
+                        relation.child_domain_name = self._child_domain_name(
+                            referenced_layer,
+                            referencing_layer,
+                            record["referenced_column"],
+                            record["referencing_column"],
+                        )
 
+                        # append to relation list
                         relations.append(relation)
+
+        # BAG OF INFORMATION
 
         if self._db_connector.ili_version() == 3:
             # Used for ili2db version 3 relation creation
@@ -658,6 +646,15 @@ class Generator(QObject):
             for record in bags_of_info:
                 for layer in layers:
                     if record["current_layer_name"] == layer.name:
+                        # on enum relations, if we have an extended domain, get its child name
+                        child_domain_name = self._child_domain_name(
+                            layer_map[record["target_layer_name"]][0],
+                            layer,
+                            record["target_layer_key"],
+                            record["attribute"],
+                        )
+
+                        # create pseudo relation list item
                         new_item_list = [
                             layer,
                             record["cardinality_min"] + ".." + record["cardinality_max"]
@@ -667,7 +664,7 @@ class Generator(QObject):
                             record["target_layer_key"],
                             self._db_connector.dispName,
                             record["mapping_type"],
-                            record["thisclass_name"],
+                            child_domain_name,
                         ]
                         unique_current_layer_name = "{}_{}".format(
                             record["current_layer_name"], layer.geometry_column
@@ -680,7 +677,36 @@ class Generator(QObject):
                             bags_of_enum[unique_current_layer_name] = {
                                 record["attribute"]: new_item_list
                             }
+
         return (relations, bags_of_enum)
+
+    def _child_domain_name(
+        self,
+        referenced_layer,
+        referencing_layer,
+        referenced_column_name,
+        referencing_column_name,
+    ):
+        # For enum-class relations, if we have an extended domain, get its child name
+        # but only when it's created with ids or all the enums are stored in a single table (t_ili2db_enum)
+        child_domain_name = None
+        if referenced_column_name != referenced_layer.provider_names_map.get(
+            "ilicodename"
+        ) or referenced_layer.name == referenced_layer.provider_names_map.get(
+            "enumtable_name"
+        ):
+            if referenced_layer.is_domain:
+                # Get child name (if domain is extended)
+                fields = [
+                    field
+                    for field in referencing_layer.fields
+                    if field.name == referencing_column_name
+                ]
+                if fields:
+                    field = fields[0]
+                    if field.enum_domain:
+                        child_domain_name = field.enum_domain
+        return child_domain_name
 
     @staticmethod
     def suppress_catalogue_reference_layers(

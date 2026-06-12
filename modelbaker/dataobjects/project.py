@@ -215,7 +215,6 @@ class Project(QObject):
                             ENUM_THIS_CLASS_COLUMN, relation.child_domain_name
                         )
                         if relation.child_domain_name
-                        and relation.child_domain_name != "None"
                         else "",
                         "FilterFields": list(),
                     },
@@ -286,7 +285,7 @@ class Project(QObject):
                 domain_table = bag_of_enum_info[2]
                 key_field = bag_of_enum_info[3]
                 value_field = bag_of_enum_info[4]
-                thisclass_value = bag_of_enum_info[6]
+                child_domain_name = bag_of_enum_info[6]
 
                 minimal_selection = cardinality.startswith("1")
 
@@ -305,8 +304,7 @@ class Project(QObject):
                     "Layer": domain_layer.id(),
                     # Filter only if domain layer uses 'thisClass' containing multiple inherited layer targets
                     "FilterExpression": "\"{}\" = '{}'".format(
-                        ENUM_THIS_CLASS_COLUMN,
-                        thisclass_value,  # this does not work for the ones with id - because it does not have the iliname - maybe here works the old way but this is odd on inherited bag of it really needs inherited bag of tests
+                        ENUM_THIS_CLASS_COLUMN, child_domain_name
                     )
                     if domain_layer.fields().lookupField(ENUM_THIS_CLASS_COLUMN) >= 0
                     else "",
