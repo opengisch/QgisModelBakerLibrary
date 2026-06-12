@@ -875,7 +875,7 @@ class PGConnector(DBConnector):
                         schema=sql.Identifier(self.schema),
                         t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
                     ),
-                    ("ilicode",),
+                    (self.iliCodeName,),
                 )
             return cur
         return []

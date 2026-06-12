@@ -584,7 +584,7 @@ class GPKGConnector(DBConnector):
                 record["referenced_column"] = (
                     tables_info_dict[foreign_key[2]]["primary_key"]
                     if foreign_key[0] == "fk"
-                    else "iliCode"
+                    else self.iliCodeName
                 )
                 record["constraint_name"] = "{}_{}_{}_{}".format(
                     record["referencing_table"],
@@ -716,7 +716,7 @@ class GPKGConnector(DBConnector):
                             LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
                             ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
                     """.format(
-                        GPKG_ENUM_TABLE, "iliCode"
+                        GPKG_ENUM_TABLE, self.iliCodeName
                     )
                 )
             else:
@@ -736,7 +736,7 @@ class GPKGConnector(DBConnector):
                             LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
                             ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
                     """.format(
-                        "iliCode"
+                        self.iliCodeName
                     )
                 )
             bags_of_info = cursor.fetchall()
