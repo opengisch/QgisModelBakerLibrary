@@ -4137,6 +4137,19 @@ class TestDomainClassRelation(unittest.TestCase):
                 #    config["FilterExpression"]
                 #    == "\"thisclass\" = 'Colors_V2.ColorType'"
                 # )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
                 count += 1
 
             if layer.alias == "UninheritedCMYColor":
@@ -4228,6 +4241,19 @@ class TestDomainClassRelation(unittest.TestCase):
                 #    config["FilterExpression"]
                 #    == "\"thisclass\" = 'Colors_V2.ColorType'"
                 # )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
                 count += 1
 
             if layer.alias == "UninheritedCMYColor":
@@ -4332,19 +4358,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
-                type = field.editorWidgetSetup().type()
-                self.assertEqual(type, "ValueRelation")
-
-                config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
-                )
-                count += 1
-
             if layer.alias == "UninheritedCMYColor":
                 field = layer.layer.fields().field("colortype")
                 type = field.editorWidgetSetup().type()
@@ -4376,8 +4389,34 @@ class TestDomainClassRelation(unittest.TestCase):
                     config["FilterExpression"]
                     == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
                 )
-
                 count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                count += 1
+
         assert count == 4
 
     def test_enumtabsid_smart2_geopackage(self):
@@ -4446,19 +4485,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
-                type = field.editorWidgetSetup().type()
-                self.assertEqual(type, "ValueRelation")
-
-                config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
-                )
-                count += 1
-
             if layer.alias == "UninheritedCMYColor":
                 field = layer.layer.fields().field("colortype")
                 type = field.editorWidgetSetup().type()
@@ -4489,6 +4515,31 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert (
                     config["FilterExpression"]
                     == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+                count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
                 )
                 count += 1
 
@@ -4704,19 +4755,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["FilterExpression"] == ""
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
-                type = field.editorWidgetSetup().type()
-                self.assertEqual(type, "ValueRelation")
-
-                config = field.editorWidgetSetup().config()
-                assert (
-                    qgis_project.mapLayer(config["Layer"]).name()
-                    == "GreenChildColorType"
-                )
-                assert config["FilterExpression"] == ""
-                count += 1
-
             if layer.alias == "UninheritedCMYColor":
                 field = layer.layer.fields().field("colortype")
                 type = field.editorWidgetSetup().type()
@@ -4739,6 +4777,32 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
                     == "UninheritedCMYColorType"
+                )
+                assert config["AllowMulti"]
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "GreenChildColorType"
+                )
+                assert config["FilterExpression"] == ""
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "GreenChildColorType"
                 )
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
@@ -4810,19 +4874,6 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["FilterExpression"] == ""
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
-                type = field.editorWidgetSetup().type()
-                self.assertEqual(type, "ValueRelation")
-
-                config = field.editorWidgetSetup().config()
-                assert (
-                    qgis_project.mapLayer(config["Layer"]).name()
-                    == "GreenChildColorType"
-                )
-                assert config["FilterExpression"] == ""
-                count += 1
-
             if layer.alias == "UninheritedCMYColor":
                 field = layer.layer.fields().field("colortype")
                 type = field.editorWidgetSetup().type()
@@ -4848,8 +4899,34 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
-
                 count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "GreenChildColorType"
+                )
+                assert config["FilterExpression"] == ""
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "GreenChildColorType"
+                )
+                assert config["AllowMulti"]
+                assert config["FilterExpression"] == ""
+                count += 1
+
         assert count == 4
 
     def test_enumsingletab_smart1_postgis(self):
@@ -4869,6 +4946,87 @@ class TestDomainClassRelation(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.bags_of_enum = bags_of_enum
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                # This is still a bug https://github.com/opengisch/QgisModelBaker/issues/1120
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                # )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                # colortype
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert not (config["AllowMulti"])
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+
+                count += 1
+        assert count == 2
+
     def test_enumsingletab_smart1_geopackage(self):
         # Schema Import
         importer = iliimporter.Importer()
@@ -4887,6 +5045,87 @@ class TestDomainClassRelation(unittest.TestCase):
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
 
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.bags_of_enum = bags_of_enum
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                # This is still a bug https://github.com/opengisch/QgisModelBaker/issues/1120
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                # )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert not (config["AllowMulti"])
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+
+                count += 1
+        assert count == 2
+
     def test_enumsingletab_smart2_postgis(self):
         # Schema Import
         importer = iliimporter.Importer()
@@ -4903,6 +5142,113 @@ class TestDomainClassRelation(unittest.TestCase):
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
+
+        generator = Generator(
+            DbIliMode.ili2pg,
+            get_pg_connection_string(),
+            importer.configuration.inheritance,
+            importer.configuration.dbschema,
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.bags_of_enum = bags_of_enum
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                )
+                count += 1
+
+            if layer.alias == "BlueChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                )
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert not (config["AllowMulti"])
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+                count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                count += 1
+
+        assert count == 4
 
     def test_enumsingletab_smart2_geopackage(self):
         # Schema Import
@@ -4921,6 +5267,110 @@ class TestDomainClassRelation(unittest.TestCase):
         importer.stdout.connect(self.print_info)
         importer.stderr.connect(self.print_error)
         assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(
+            DbIliMode.ili2gpkg, uri, importer.configuration.inheritance
+        )
+
+        available_layers = generator.layers()
+        relations, bags_of_enum = generator.relations(available_layers)
+
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.bags_of_enum = bags_of_enum
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        count = 0
+        for layer in available_layers:
+            if layer.alias == "BaseColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                )
+                count += 1
+
+            if layer.alias == "BlueChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                )
+                count += 1
+
+            if layer.alias == "UninheritedCMYColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert not (config["AllowMulti"])
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                )
+                count += 1
+
+            if layer.alias == "GreenChildColor":
+                field = layer.layer.fields().field("colortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                # bagofcolortype
+                field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                )
+                count += 1
+
+        assert count == 4
 
     def print_info(self, text):
         logging.info(text)
