@@ -48,6 +48,7 @@ class MssqlConnector(DBConnector):
         self.iliCodeName = "iliCode"
         self.tid = "T_Id"
         self.tilitid = "T_Ili_Tid"
+        self.ttype_name = "T_Type"
         self.attachmentKey = "attachmentkey"
         self.dispName = "dispName"
         self.basket_table_name = BASKET_TABLE
@@ -505,7 +506,14 @@ class MssqlConnector(DBConnector):
                 stmt += ln + "    , txttype.setting AS texttype"
                 stmt += ln + "    , alias.setting AS column_alias"
                 stmt += ln + "    , full_name.iliname AS fully_qualified_name"
-                stmt += ln + "    , enum_domain.setting AS enum_domain"
+                stmt += (
+                    ln
+                    + "    , CASE"
+                    + "        WHEN enum_domain.setting IS NOT NULL"
+                    + "        THEN CAST('[{{\"+ enum_domain.setting + \":null}}]' AS NVARCHAR(MAX))"
+                    + "        ELSE CAST('[]' AS NVARCHAR(MAX))"
+                    + "    END AS enum_domain"
+                )
                 stmt += ln + "    , oid_domain.setting AS oid_domain"
                 if metaattrs_exists:
                     stmt += (

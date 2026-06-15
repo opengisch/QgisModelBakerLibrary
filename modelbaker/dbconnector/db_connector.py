@@ -39,6 +39,7 @@ class DBConnector(QObject):
         self.enum_table_name = (
             ""  # When there is a technical table holding all the enum values
         )
+        self.ttype_name = ""  # On smart1 the type of inherited object (t_type)
         self._lang = ""  # Preferred tr language for table/column info (2 characters)
 
     def get_provider_specific_names(self) -> dict:
@@ -54,6 +55,7 @@ class DBConnector(QObject):
             "datasettable_name": self.dataset_table_name,
             "ilicodename": self.iliCodeName,
             "enumtable_name": self.enum_table_name,
+            "ttype_name": self.ttype_name,
         }
 
     def map_data_types(self, data_type: str) -> str:

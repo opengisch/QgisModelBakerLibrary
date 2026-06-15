@@ -49,6 +49,7 @@ class PGConnector(DBConnector):
         self.tilitid = "t_ili_tid"
         self.attachmentKey = "attachmentkey"
         self.dispName = "dispname"
+        self.ttype_name = "t_type"
         self.basket_table_name = PG_BASKET_TABLE
         self.dataset_table_name = PG_DATASET_TABLE
         self.enum_table_name = PG_ENUM_TABLE
@@ -460,7 +461,7 @@ class PGConnector(DBConnector):
             unit_field = ""
             text_kind_field = ""
             full_name_field = ""
-            enum_domain_field = ""
+            enum_domain_structure = ""
             oid_domain_field = ""
             attr_order_field = ""
             attr_mapping_field = ""
@@ -484,7 +485,16 @@ class PGConnector(DBConnector):
                 text_kind_field = "txttype.setting AS texttype,"
                 column_alias = "alias.setting AS column_alias,"
                 full_name_field = "full_name.iliname as fully_qualified_name,"
-                enum_domain_field = "enum_domain.setting as enum_domain,"
+                # In Smart1, a field can have multiple types (enum_domains) due to inherited enumerations.
+                # To handle this, we create a JSON dict containing:
+                #   - 'type': The specific type
+                #   - 't_type': The targetable type used for filtering
+                enum_domain_structure = """COALESCE(
+                    json_agg(
+                    json_build_object(enum_domain.setting, enum_domain.subtype)
+                    ) FILTER (WHERE enum_domain.setting IS NOT NULL),
+                    '[]'::json
+                ) AS enum_domain,"""
                 oid_domain_field = "oid_domain.setting as oid_domain,"
                 translations = """nls.label AS column_tr,""" if tr_enabled else ""
                 unit_join = """LEFT JOIN {}.t_ili2db_column_prop unit
@@ -525,6 +535,24 @@ class PGConnector(DBConnector):
                                                     oid_domain.tag = 'ch.ehi.ili2db.oidDomain'""".format(
                     self.schema
                 )
+                # group by because of coalesce in the enum domain
+                group_by = """GROUP BY
+                    c.column_name,
+                    c.data_type,
+                    c.numeric_scale,
+                    unit.setting,
+                    txttype.setting,
+                    alias.setting,
+                    full_name.iliname,
+                    oid_domain.setting,
+                    form_order.attr_value,
+                    meta_attr_mapping_value.attr_value,
+                    pgd.description,
+                    {translation_label}
+                    c.ordinal_position
+                """.format(
+                    translation_label="nls.label" if tr_enabled else ""
+                )
 
                 if self._table_exists(PG_METAATTRS_TABLE):
                     attr_order_field = "COALESCE(to_number(form_order.attr_value, '999'), 999) as attr_order,"
@@ -537,7 +565,7 @@ class PGConnector(DBConnector):
                                                             """.format(
                         schema=self.schema, t_ili2db_meta_attrs=PG_METAATTRS_TABLE
                     )
-                    order_by_attr_order = """ORDER BY attr_order"""
+                    order_by_attr_order = """ORDER BY attr_order, ordinal_position --to keep the sort of the occurence"""
 
                     attr_mapping_field = (
                         "meta_attr_mapping_value.attr_value as attr_mapping,"
@@ -570,7 +598,7 @@ class PGConnector(DBConnector):
                       {text_kind_field}
                       {column_alias}
                       {full_name_field}
-                      {enum_domain_field}
+                      {enum_domain_structure}
                       {oid_domain_field}
                       {attr_order_field}
                       {attr_mapping_field}
@@ -589,6 +617,7 @@ class PGConnector(DBConnector):
                     {attr_mapping_join}
                     {translations_left_join}
                     WHERE st.relid = '{schema}."{table}"'::regclass
+                    {group_by}
                     {order_by_attr_order};
                     """.format(
                         schema=self.schema,
@@ -597,7 +626,7 @@ class PGConnector(DBConnector):
                         text_kind_field=text_kind_field,
                         column_alias=column_alias,
                         full_name_field=full_name_field,
-                        enum_domain_field=enum_domain_field,
+                        enum_domain_structure=enum_domain_structure,
                         oid_domain_field=oid_domain_field,
                         attr_order_field=attr_order_field,
                         attr_mapping_field=attr_mapping_field,
@@ -611,10 +640,10 @@ class PGConnector(DBConnector):
                         attr_order_join=attr_order_join,
                         attr_mapping_join=attr_mapping_join,
                         translations_left_join=translations_left_join,
+                        group_by=group_by,
                         order_by_attr_order=order_by_attr_order,
                     )
                 )
-
                 return fields_cur
 
         return []

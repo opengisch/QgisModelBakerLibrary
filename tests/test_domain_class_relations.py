@@ -90,7 +90,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "t_id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
+                "child_domain_name": [{"CIAF_LADM.Avaluo_UsoTipo": "avaluo"}],
             }
         )
         # Domain inherited from superclass and from another model
@@ -101,7 +101,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.COL_DerechoTipo": "derecho"}
+                ],
             }
         )
         # Domain from another model
@@ -112,7 +114,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "t_id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo": "persona"}
+                ],
             }
         )
         # Domain from another model
@@ -123,7 +127,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "t_id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
+                "child_domain_name": [{"Catastro_COL_ES_V2_1_6.COL_Genero": "persona"}],
             }
         )
         # Domain inherited from abstract class
@@ -134,7 +138,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.LA_InteresadoTipo": "persona"}
+                ],
             }
         )
         # Domain inherited from abstract class
@@ -145,7 +151,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "t_id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.LA_BAUnitTipo": "predio"}
+                ],
             }
         )
 
@@ -308,7 +316,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "colortype",
                 "referenced_field": "t_id",
                 "name": "childcolor_colortype_fkey",
-                "child_domain_name": "Colors.DomChildColorType",
+                "child_domain_name": [{"Colors.DomChildColorType": "childcolor"}],
             }
         )
 
@@ -395,7 +403,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "T_Id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
+                "child_domain_name": [{"CIAF_LADM.Avaluo_UsoTipo": "avaluo"}],
             }
         )
         # Domain inherited from superclass and from another model
@@ -406,7 +414,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.COL_DerechoTipo": "derecho"}
+                ],
             }
         )
         # Domain from another model
@@ -417,7 +427,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo": "persona"}
+                ],
             }
         )
         # Domain from another model
@@ -428,7 +440,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "T_Id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
+                "child_domain_name": [{"Catastro_COL_ES_V2_1_6.COL_Genero": "persona"}],
             }
         )
         # Domain inherited from abstract class
@@ -439,7 +451,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.LA_InteresadoTipo": "persona"}
+                ],
             }
         )
         # Domain inherited from abstract class
@@ -450,7 +464,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.LA_BAUnitTipo": "predio"}
+                ],
             }
         )
         for expected_relation in expected_relations:
@@ -614,7 +630,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "colortype",
                 "referenced_field": "T_Id",
                 "name": "childcolor_colortype_fkey",
-                "child_domain_name": "Colors.DomChildColorType",
+                "child_domain_name": [{"Colors.DomChildColorType": "childcolor"}],
             }
         )
 
@@ -707,7 +723,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "uso",
                 "referenced_field": "T_Id",
                 "name": "avaluo_uso_fkey",
-                "child_domain_name": "CIAF_LADM.Avaluo_UsoTipo",
+                "child_domain_name": [
+                    {"CIAF_LADM.Avaluo_UsoTipo": None}
+                ],  # multi enum not integrated in mssql
             }
         )
         # Domain inherited from superclass and from another model
@@ -718,7 +736,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "derecho_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_DerechoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.COL_DerechoTipo": None}
+                ],  # multi enum not integrated in mssql
             }
         )
         # Domain from another model
@@ -729,7 +749,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "documento_tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_documento_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.COL_InteresadoDocumentoTipo": None}
+                ],  # multi enum not integrated in mssql
             }
         )
         # Domain from another model
@@ -740,7 +762,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "genero",
                 "referenced_field": "T_Id",
                 "name": "persona_genero_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.COL_Genero",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.COL_Genero": None}
+                ],  # multi enum not integrated in mssql
             }
         )
         # Domain inherited from abstract class
@@ -751,7 +775,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "persona_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_InteresadoTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.LA_InteresadoTipo": None}
+                ],  # multi enum not integrated in mssql
             }
         )
         # Domain inherited from abstract class
@@ -762,7 +788,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "tipo",
                 "referenced_field": "T_Id",
                 "name": "predio_tipo_fkey",
-                "child_domain_name": "Catastro_COL_ES_V2_1_6.LA_BAUnitTipo",
+                "child_domain_name": [
+                    {"Catastro_COL_ES_V2_1_6.LA_BAUnitTipo": None}
+                ],  # multi enum not integrated in mssql
             }
         )
 
@@ -938,7 +966,9 @@ class TestDomainClassRelation(unittest.TestCase):
                 "referencing_field": "colortype",
                 "referenced_field": "T_Id",
                 "name": "childcolor_colortype_fkey",
-                "child_domain_name": "Colors.DomChildColorType",
+                "child_domain_name": [
+                    {"Colors.DomChildColorType": None}
+                ],  # multi enum not integrated in mssql
             }
         )
 
@@ -4132,14 +4162,27 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
 
                 assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
-                # This is still a bug https://github.com/opengisch/QgisModelBaker/issues/1120
-                # assert (
-                #    config["FilterExpression"]
-                #    == "\"thisclass\" = 'Colors_V2.ColorType'"
-                # )
+                assert (
+                    config["FilterExpression"]
+                    == """CASE\n    WHEN current_value('t_type') = 'greenchildcolor' THEN\n        "thisclass" = 'Colors_V2.GreenChildColorType'\n    WHEN current_value('t_type') = 'basecolor' THEN\n        "thisclass" = 'Colors_V2.ColorType'\n    WHEN current_value('t_type') = 'bluechildcolor' THEN\n        "thisclass" = 'Colors_V2.BlueChildColorType'\nEND"""
+                )
 
-                # bagofcolortype
+                # there are two equal fields
+                # bagofcolortype for for bluechild
                 field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                )
+
+                # bagofcolortype1 for for greenchild
+                field = layer.layer.fields().field("bagofcolortype1")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -4150,6 +4193,7 @@ class TestDomainClassRelation(unittest.TestCase):
                     config["FilterExpression"]
                     == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
                 )
+
                 count += 1
 
             if layer.alias == "UninheritedCMYColor":
@@ -4236,14 +4280,27 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
 
                 assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
-                # This is still a bug https://github.com/opengisch/QgisModelBaker/issues/1120
-                # assert (
-                #    config["FilterExpression"]
-                #    == "\"thisclass\" = 'Colors_V2.ColorType'"
-                # )
+                assert (
+                    config["FilterExpression"]
+                    == """CASE\n    WHEN current_value('T_Type') = 'greenchildcolor' THEN\n        "thisclass" = 'Colors_V2.GreenChildColorType'\n    WHEN current_value('T_Type') = 'basecolor' THEN\n        "thisclass" = 'Colors_V2.ColorType'\n    WHEN current_value('T_Type') = 'bluechildcolor' THEN\n        "thisclass" = 'Colors_V2.BlueChildColorType'\nEND"""
+                )
 
-                # bagofcolortype
+                # there are two equal fields
+                # bagofcolortype for for bluechild
                 field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                )
+
+                # bagofcolortype for for greenchild
+                field = layer.layer.fields().field("bagofcolortype1")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -4254,6 +4311,7 @@ class TestDomainClassRelation(unittest.TestCase):
                     config["FilterExpression"]
                     == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
                 )
+
                 count += 1
 
             if layer.alias == "UninheritedCMYColor":
@@ -4977,14 +5035,26 @@ class TestDomainClassRelation(unittest.TestCase):
 
                 config = field.editorWidgetSetup().config()
                 assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
-                # This is still a bug https://github.com/opengisch/QgisModelBaker/issues/1120
-                # assert (
-                #    config["FilterExpression"]
-                #    == "\"thisclass\" = 'Colors_V2.ColorType'"
-                # )
+                assert (
+                    config["FilterExpression"]
+                    == """CASE\n    WHEN current_value('t_type') = 'greenchildcolor' THEN\n        "thisclass" = 'Colors_V2.GreenChildColorType'\n    WHEN current_value('t_type') = 'basecolor' THEN\n        "thisclass" = 'Colors_V2.ColorType'\n    WHEN current_value('t_type') = 'bluechildcolor' THEN\n        "thisclass" = 'Colors_V2.BlueChildColorType'\nEND"""
+                )
 
-                # bagofcolortype
+                # there are two equal fields
+                # bagofcolortype for for bluechild
                 field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                )
+                # bagofcolortype for for greenchild
+                field = layer.layer.fields().field("bagofcolortype1")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5077,14 +5147,26 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
 
                 assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
-                # This is still a bug https://github.com/opengisch/QgisModelBaker/issues/1120
-                # assert (
-                #    config["FilterExpression"]
-                #    == "\"thisclass\" = 'Colors_V2.ColorType'"
-                # )
+                assert (
+                    config["FilterExpression"]
+                    == """CASE\n    WHEN current_value('T_Type') = 'greenchildcolor' THEN\n        "thisclass" = 'Colors_V2.GreenChildColorType'\n    WHEN current_value('T_Type') = 'basecolor' THEN\n        "thisclass" = 'Colors_V2.ColorType'\n    WHEN current_value('T_Type') = 'bluechildcolor' THEN\n        "thisclass" = 'Colors_V2.BlueChildColorType'\nEND"""
+                )
 
-                # bagofcolortype
+                # there are two equal fields
+                # bagofcolortype for for bluechild
                 field = layer.layer.fields().field("bagofcolortype")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert config["AllowMulti"]
+                assert (
+                    config["FilterExpression"]
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                )
+                # bagofcolortype for for greenchild
+                field = layer.layer.fields().field("bagofcolortype1")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 

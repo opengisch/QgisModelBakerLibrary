@@ -689,7 +689,7 @@ class Generator(QObject):
     ):
         # For enum-class relations, if we have an extended domain, get its child name
         # but only when it's created with ids or all the enums are stored in a single table (t_ili2db_enum)
-        child_domain_name = None
+        child_domain_name = []
         if referenced_column_name != referenced_layer.provider_names_map.get(
             "ilicodename"
         ) or referenced_layer.name == referenced_layer.provider_names_map.get(
