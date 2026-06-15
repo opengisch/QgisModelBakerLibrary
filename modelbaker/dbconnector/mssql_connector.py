@@ -11,6 +11,7 @@ License:
     (at your option) any later version.
 """
 
+import json
 import numbers
 import re
 from typing import Optional
@@ -510,7 +511,7 @@ class MssqlConnector(DBConnector):
                     ln
                     + "    , CASE"
                     + "        WHEN enum_domain.setting IS NOT NULL"
-                    + "        THEN CAST('[{{\"+ enum_domain.setting + \":null}}]' AS NVARCHAR(MAX))"
+                    + "        THEN CAST(CONCAT('[{{\"', enum_domain.setting, '\":null}}]') AS NVARCHAR(MAX))"
                     + "        ELSE CAST('[]' AS NVARCHAR(MAX))"
                     + "    END AS enum_domain"
                 )
@@ -877,6 +878,8 @@ class MssqlConnector(DBConnector):
         res = []
         for row in cur.fetchall():
             my_rec = dict(zip(columns, row))
+            if "enum_domain" in my_rec and isinstance(my_rec["enum_domain"], str):
+                my_rec["enum_domain"] = json.loads(my_rec["enum_domain"])
             res.append(my_rec)
 
         return res
