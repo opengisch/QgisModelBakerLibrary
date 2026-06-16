@@ -6,14 +6,14 @@ VERSION "2020-08-26"  =
 
   DOMAIN
 
-    ColorType = (
+    Colors = (
       Green,
       Red,
       Blue
     );
 
-    BlueChildColorType
-    EXTENDS ColorType = (
+    BlueChildColors
+    EXTENDS Colors = (
       Blue(
         Dark_Blue,
         Light_Blue,
@@ -21,8 +21,8 @@ VERSION "2020-08-26"  =
       )
     );
 
-    GreenChildColorType
-    EXTENDS ColorType = (
+    GreenChildColors
+    EXTENDS Colors = (
       Green(
         Dark_Green,
         Light_Green,
@@ -30,42 +30,42 @@ VERSION "2020-08-26"  =
       )
     );
 
-    UninheritedCMYColorType = (
+    UninheritedCMYColors = (
       Cyan,
       Magenta,
       Yello
     );
 
-    STRUCTURE UninheritedCMYColorTypeStruct = value : MANDATORY UninheritedCMYColorType; END UninheritedCMYColorTypeStruct;
-    STRUCTURE GreenChildColorTypeStruct = value : MANDATORY GreenChildColorType; END GreenChildColorTypeStruct;
-    STRUCTURE BlueChildColorTypeStruct = value : MANDATORY BlueChildColorType; END BlueChildColorTypeStruct;
+    STRUCTURE UninheritedCMYColorsStruct = value : MANDATORY UninheritedCMYColors; END UninheritedCMYColorsStruct;
+    STRUCTURE GreenChildColorsStruct = value : MANDATORY GreenChildColors; END GreenChildColorsStruct;
+    STRUCTURE BlueChildColorsStruct = value : MANDATORY BlueChildColors; END BlueChildColorsStruct;
 
-  TOPIC Colors =
+  TOPIC SomeColors =
 
-    CLASS BaseColor =
-      ColorType : Colors_V2.ColorType;
-    END BaseColor;
+    CLASS BaseColorClass =
+      Colors : Colors_V2.Colors;
+    END BaseColorClass;
 
-    CLASS BlueChildColor
-    EXTENDS BaseColor =
-      ColorType (EXTENDED) : Colors_V2.BlueChildColorType;
+    CLASS BlueChildColorClass
+    EXTENDS BaseColorClass =
+      Colors (EXTENDED) : Colors_V2.BlueChildColors;
       !!@ili2db.mapping="ARRAY"
-      BagOfColorType : BAG {0..*} OF Colors_V2.BlueChildColorTypeStruct;
-    END BlueChildColor;
+      BagOfColors : BAG {0..*} OF Colors_V2.BlueChildColorsStruct;
+    END BlueChildColorClass;
 
-    CLASS UninheritedCMYColor =
-      ColorType : Colors_V2.UninheritedCMYColorType;
+    CLASS UninheritedCMYColorClass =
+      Colors : Colors_V2.UninheritedCMYColors;
       !!@ili2db.mapping="ARRAY"
-      BagOfColorType : BAG {0..*} OF Colors_V2.UninheritedCMYColorTypeStruct;
-    END UninheritedCMYColor;
+      BagOfColors : BAG {0..*} OF Colors_V2.UninheritedCMYColorsStruct;
+    END UninheritedCMYColorClass;
 
-    CLASS GreenChildColor
-    EXTENDS BaseColor =
-      ColorType (EXTENDED) : Colors_V2.GreenChildColorType;
+    CLASS GreenChildColorClass
+    EXTENDS BaseColorClass =
+      Colors (EXTENDED) : Colors_V2.GreenChildColors;
       !!@ili2db.mapping="ARRAY"
-      BagOfColorType : BAG {0..*} OF Colors_V2.GreenChildColorTypeStruct;
-    END GreenChildColor;
+      BagOfColors : BAG {0..*} OF Colors_V2.GreenChildColorsStruct;
+    END GreenChildColorClass;
 
-  END Colors;
+  END SomeColors;
 
 END Colors_V2.

@@ -312,11 +312,11 @@ class TestDomainClassRelation(unittest.TestCase):
         expected_relations.append(
             {
                 "referencing_layer": "childcolor",
-                "referenced_layer": "dombasecolortype",
-                "referencing_field": "colortype",
+                "referenced_layer": "dombasecolorclasss",
+                "referencing_field": "colors",
                 "referenced_field": "t_id",
-                "name": "childcolor_colortype_fkey",
-                "child_domain_name": [{"Colors.DomChildColorType": "childcolor"}],
+                "name": "childcolor_colors_fkey",
+                "child_domain_name": [{"Colors.DomChildColors": "childcolor"}],
             }
         )
 
@@ -340,11 +340,11 @@ class TestDomainClassRelation(unittest.TestCase):
         for layer in available_layers:
             if layer.name == "childcolor":
                 config = (
-                    layer.layer.fields().field("colortype").editorWidgetSetup().config()
+                    layer.layer.fields().field("colors").editorWidgetSetup().config()
                 )
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors.DomChildColorType'"
+                    == "\"thisclass\" = 'Colors.DomChildColors'"
                 )
                 count += 1
 
@@ -626,11 +626,11 @@ class TestDomainClassRelation(unittest.TestCase):
         expected_relations.append(
             {
                 "referencing_layer": "childcolor",
-                "referenced_layer": "dombasecolortype",
-                "referencing_field": "colortype",
+                "referenced_layer": "dombasecolorclasss",
+                "referencing_field": "colors",
                 "referenced_field": "T_Id",
-                "name": "childcolor_colortype_fkey",
-                "child_domain_name": [{"Colors.DomChildColorType": "childcolor"}],
+                "name": "childcolor_colors_fkey",
+                "child_domain_name": [{"Colors.DomChildColors": "childcolor"}],
             }
         )
 
@@ -654,11 +654,11 @@ class TestDomainClassRelation(unittest.TestCase):
         for layer in available_layers:
             if layer.name == "childcolor":
                 config = (
-                    layer.layer.fields().field("colortype").editorWidgetSetup().config()
+                    layer.layer.fields().field("colors").editorWidgetSetup().config()
                 )
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors.DomChildColorType'"
+                    == "\"thisclass\" = 'Colors.DomChildColors'"
                 )
                 count += 1
 
@@ -962,12 +962,12 @@ class TestDomainClassRelation(unittest.TestCase):
         expected_relations.append(
             {
                 "referencing_layer": "childcolor",
-                "referenced_layer": "dombasecolortype",
-                "referencing_field": "colortype",
+                "referenced_layer": "dombasecolorclasss",
+                "referencing_field": "colors",
                 "referenced_field": "T_Id",
-                "name": "childcolor_colortype_fkey",
+                "name": "childcolor_colors_fkey",
                 "child_domain_name": [
-                    {"Colors.DomChildColorType": None}
+                    {"Colors.DomChildColors": None}
                 ],  # multi enum not integrated in mssql
             }
         )
@@ -992,11 +992,11 @@ class TestDomainClassRelation(unittest.TestCase):
         for layer in available_layers:
             if layer.name == "childcolor":
                 config = (
-                    layer.layer.fields().field("colortype").editorWidgetSetup().config()
+                    layer.layer.fields().field("colors").editorWidgetSetup().config()
                 )
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors.DomChildColorType'"
+                    == "\"thisclass\" = 'Colors.DomChildColors'"
                 )
                 count += 1
 
@@ -4154,79 +4154,79 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
 
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert (
                     config["FilterExpression"]
-                    == """CASE\n    WHEN current_value('t_type') = 'greenchildcolor' THEN\n        "thisclass" = 'Colors_V2.GreenChildColorType'\n    WHEN current_value('t_type') = 'basecolor' THEN\n        "thisclass" = 'Colors_V2.ColorType'\n    WHEN current_value('t_type') = 'bluechildcolor' THEN\n        "thisclass" = 'Colors_V2.BlueChildColorType'\nEND"""
+                    == """CASE\n    WHEN current_value('t_type') = 'basecolorclass' THEN\n        "thisclass" = 'Colors_V2.Colors'\n    WHEN current_value('t_type') = 'greenchildcolorclass' THEN\n        "thisclass" = 'Colors_V2.GreenChildColors'\n    WHEN current_value('t_type') = 'bluechildcolorclass' THEN\n        "thisclass" = 'Colors_V2.BlueChildColors'\nEND"""
                 )
 
                 # there are two equal fields
-                # bagofcolortype for for bluechild
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors for for bluechild
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColors'"
                 )
 
-                # bagofcolortype1 for for greenchild
-                field = layer.layer.fields().field("bagofcolortype1")
+                # bagofcolors1 for for greenchild
+                field = layer.layer.fields().field("bagofcolors1")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
 
                 count += 1
 
-            if layer.alias == "UninheritedCMYColor":
-                # colortype
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                # colors
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert not (config["AllowMulti"])
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
                 count += 1
@@ -4272,78 +4272,78 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
 
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert (
                     config["FilterExpression"]
-                    == """CASE\n    WHEN current_value('T_Type') = 'greenchildcolor' THEN\n        "thisclass" = 'Colors_V2.GreenChildColorType'\n    WHEN current_value('T_Type') = 'basecolor' THEN\n        "thisclass" = 'Colors_V2.ColorType'\n    WHEN current_value('T_Type') = 'bluechildcolor' THEN\n        "thisclass" = 'Colors_V2.BlueChildColorType'\nEND"""
+                    == """CASE\n    WHEN current_value('T_Type') = 'basecolorclass' THEN\n        "thisclass" = 'Colors_V2.Colors'\n    WHEN current_value('T_Type') = 'greenchildcolorclass' THEN\n        "thisclass" = 'Colors_V2.GreenChildColors'\n    WHEN current_value('T_Type') = 'bluechildcolorclass' THEN\n        "thisclass" = 'Colors_V2.BlueChildColors'\nEND"""
                 )
 
                 # there are two equal fields
-                # bagofcolortype for for bluechild
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors for for bluechild
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColors'"
                 )
 
-                # bagofcolortype for for greenchild
-                field = layer.layer.fields().field("bagofcolortype1")
+                # bagofcolors for for greenchild
+                field = layer.layer.fields().field("bagofcolors1")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
 
                 count += 1
 
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert not (config["AllowMulti"])
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
                 count += 1
@@ -4388,90 +4388,89 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
 
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                    config["FilterExpression"] == "\"thisclass\" = 'Colors_V2.Colors'"
                 )
                 count += 1
 
-            if layer.alias == "BlueChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BlueChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
 
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColors'"
                 )
                 count += 1
 
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert not (config["AllowMulti"])
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "GreenChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
                 count += 1
 
@@ -4517,87 +4516,86 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                    config["FilterExpression"] == "\"thisclass\" = 'Colors_V2.Colors'"
                 )
                 count += 1
 
-            if layer.alias == "BlueChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BlueChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColors'"
                 )
                 count += 1
 
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert not (config["AllowMulti"])
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "GreenChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
                 count += 1
 
@@ -4644,11 +4642,11 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
+            if layer.alias == "BaseColorClass":
                 # It's technically not possible to have a sollution here, because the enumeration types are in a different table
                 count += 1
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -4656,20 +4654,20 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert not (config["AllowMulti"])
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["FilterExpression"] == ""
                 assert not (config["AllowMulti"])
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["FilterExpression"] == ""
                 assert config["AllowMulti"]
@@ -4718,31 +4716,31 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
+            if layer.alias == "BaseColorClass":
                 # It's technically not possible to have a sollution here, because the enumeration types are in a different table
                 count += 1
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert not (config["AllowMulti"])
                 assert config["FilterExpression"] == ""
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
@@ -4790,77 +4788,74 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["FilterExpression"] == ""
                 count += 1
 
-            if layer.alias == "BlueChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BlueChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
-                    qgis_project.mapLayer(config["Layer"]).name()
-                    == "BlueChildColorType"
+                    qgis_project.mapLayer(config["Layer"]).name() == "BlueChildColors"
                 )
                 assert config["FilterExpression"] == ""
                 count += 1
 
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert not (config["AllowMulti"])
                 assert config["FilterExpression"] == ""
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "GreenChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
-                    qgis_project.mapLayer(config["Layer"]).name()
-                    == "GreenChildColorType"
+                    qgis_project.mapLayer(config["Layer"]).name() == "GreenChildColors"
                 )
                 assert config["FilterExpression"] == ""
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
-                    qgis_project.mapLayer(config["Layer"]).name()
-                    == "GreenChildColorType"
+                    qgis_project.mapLayer(config["Layer"]).name() == "GreenChildColors"
                 )
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
@@ -4909,77 +4904,74 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "ColorType"
+                assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["FilterExpression"] == ""
                 count += 1
 
-            if layer.alias == "BlueChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BlueChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
-                    qgis_project.mapLayer(config["Layer"]).name()
-                    == "BlueChildColorType"
+                    qgis_project.mapLayer(config["Layer"]).name() == "BlueChildColors"
                 )
                 assert config["FilterExpression"] == ""
                 count += 1
 
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert not (config["AllowMulti"])
                 assert config["FilterExpression"] == ""
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
                     qgis_project.mapLayer(config["Layer"]).name()
-                    == "UninheritedCMYColorType"
+                    == "UninheritedCMYColors"
                 )
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "GreenChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
-                    qgis_project.mapLayer(config["Layer"]).name()
-                    == "GreenChildColorType"
+                    qgis_project.mapLayer(config["Layer"]).name() == "GreenChildColors"
                 )
                 assert config["FilterExpression"] == ""
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
                 config = field.editorWidgetSetup().config()
                 assert (
-                    qgis_project.mapLayer(config["Layer"]).name()
-                    == "GreenChildColorType"
+                    qgis_project.mapLayer(config["Layer"]).name() == "GreenChildColors"
                 )
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
@@ -5028,8 +5020,8 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5037,12 +5029,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
                 assert (
                     config["FilterExpression"]
-                    == """CASE\n    WHEN current_value('t_type') = 'greenchildcolor' THEN\n        "thisclass" = 'Colors_V2.GreenChildColorType'\n    WHEN current_value('t_type') = 'basecolor' THEN\n        "thisclass" = 'Colors_V2.ColorType'\n    WHEN current_value('t_type') = 'bluechildcolor' THEN\n        "thisclass" = 'Colors_V2.BlueChildColorType'\nEND"""
+                    == """CASE\n    WHEN current_value('t_type') = 'basecolorclass' THEN\n        "thisclass" = 'Colors_V2.Colors'\n    WHEN current_value('t_type') = 'greenchildcolorclass' THEN\n        "thisclass" = 'Colors_V2.GreenChildColors'\n    WHEN current_value('t_type') = 'bluechildcolorclass' THEN\n        "thisclass" = 'Colors_V2.BlueChildColors'\nEND"""
                 )
 
                 # there are two equal fields
-                # bagofcolortype for for bluechild
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors for for bluechild
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5051,10 +5043,10 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColors'"
                 )
-                # bagofcolortype for for greenchild
-                field = layer.layer.fields().field("bagofcolortype1")
+                # bagofcolors for for greenchild
+                field = layer.layer.fields().field("bagofcolors1")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5063,13 +5055,13 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
                 count += 1
 
-            if layer.alias == "UninheritedCMYColor":
-                # colortype
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                # colors
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5078,11 +5070,11 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert not (config["AllowMulti"])
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5091,7 +5083,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
                 count += 1
@@ -5139,8 +5131,8 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5149,12 +5141,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
                 assert (
                     config["FilterExpression"]
-                    == """CASE\n    WHEN current_value('T_Type') = 'greenchildcolor' THEN\n        "thisclass" = 'Colors_V2.GreenChildColorType'\n    WHEN current_value('T_Type') = 'basecolor' THEN\n        "thisclass" = 'Colors_V2.ColorType'\n    WHEN current_value('T_Type') = 'bluechildcolor' THEN\n        "thisclass" = 'Colors_V2.BlueChildColorType'\nEND"""
+                    == """CASE\n    WHEN current_value('T_Type') = 'basecolorclass' THEN\n        "thisclass" = 'Colors_V2.Colors'\n    WHEN current_value('T_Type') = 'greenchildcolorclass' THEN\n        "thisclass" = 'Colors_V2.GreenChildColors'\n    WHEN current_value('T_Type') = 'bluechildcolorclass' THEN\n        "thisclass" = 'Colors_V2.BlueChildColors'\nEND"""
                 )
 
                 # there are two equal fields
-                # bagofcolortype for for bluechild
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors for for bluechild
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5163,10 +5155,10 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColors'"
                 )
-                # bagofcolortype for for greenchild
-                field = layer.layer.fields().field("bagofcolortype1")
+                # bagofcolors for for greenchild
+                field = layer.layer.fields().field("bagofcolors1")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5175,12 +5167,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
                 count += 1
 
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5189,11 +5181,11 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert not (config["AllowMulti"])
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5202,7 +5194,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
                 count += 1
@@ -5249,8 +5241,21 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert (
+                    config["FilterExpression"] == "\"thisclass\" = 'Colors_V2.Colors'"
+                )
+                count += 1
+
+            if layer.alias == "BlueChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5259,26 +5264,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColors'"
                 )
                 count += 1
 
-            if layer.alias == "BlueChildColor":
-                field = layer.layer.fields().field("colortype")
-                type = field.editorWidgetSetup().type()
-                self.assertEqual(type, "ValueRelation")
-
-                config = field.editorWidgetSetup().config()
-
-                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
-                )
-                count += 1
-
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5287,11 +5278,11 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert not (config["AllowMulti"])
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5300,12 +5291,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "GreenChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5313,11 +5304,11 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5326,7 +5317,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
                 count += 1
 
@@ -5374,8 +5365,20 @@ class TestDomainClassRelation(unittest.TestCase):
 
         count = 0
         for layer in available_layers:
-            if layer.alias == "BaseColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "BaseColorClass":
+                field = layer.layer.fields().field("colors")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert (
+                    config["FilterExpression"] == "\"thisclass\" = 'Colors_V2.Colors'"
+                )
+                count += 1
+
+            if layer.alias == "BlueChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5383,25 +5386,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.ColorType'"
+                    == "\"thisclass\" = 'Colors_V2.BlueChildColors'"
                 )
                 count += 1
 
-            if layer.alias == "BlueChildColor":
-                field = layer.layer.fields().field("colortype")
-                type = field.editorWidgetSetup().type()
-                self.assertEqual(type, "ValueRelation")
-
-                config = field.editorWidgetSetup().config()
-                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.BlueChildColorType'"
-                )
-                count += 1
-
-            if layer.alias == "UninheritedCMYColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "UninheritedCMYColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5410,11 +5400,11 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert not (config["AllowMulti"])
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
 
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5423,12 +5413,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColorType'"
+                    == "\"thisclass\" = 'Colors_V2.UninheritedCMYColors'"
                 )
                 count += 1
 
-            if layer.alias == "GreenChildColor":
-                field = layer.layer.fields().field("colortype")
+            if layer.alias == "GreenChildColorClass":
+                field = layer.layer.fields().field("colors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5436,10 +5426,10 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
-                # bagofcolortype
-                field = layer.layer.fields().field("bagofcolortype")
+                # bagofcolors
+                field = layer.layer.fields().field("bagofcolors")
                 type = field.editorWidgetSetup().type()
                 self.assertEqual(type, "ValueRelation")
 
@@ -5448,7 +5438,7 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert (
                     config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.GreenChildColorType'"
+                    == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
                 count += 1
 

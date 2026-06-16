@@ -535,25 +535,8 @@ class PGConnector(DBConnector):
                                                     oid_domain.tag = 'ch.ehi.ili2db.oidDomain'""".format(
                     self.schema
                 )
-                # group by because of coalesce in the enum domain
-                group_by = """GROUP BY
-                    c.column_name,
-                    c.data_type,
-                    c.numeric_scale,
-                    unit.setting,
-                    txttype.setting,
-                    alias.setting,
-                    full_name.iliname,
-                    oid_domain.setting,
-                    form_order.attr_value,
-                    meta_attr_mapping_value.attr_value,
-                    pgd.description,
-                    {translation_label}
-                    c.ordinal_position
-                """.format(
-                    translation_label="nls.label" if tr_enabled else ""
-                )
 
+                metaattr_groupby_part = ""
                 if self._table_exists(PG_METAATTRS_TABLE):
                     attr_order_field = "COALESCE(to_number(form_order.attr_value, '999'), 999) as attr_order,"
                     attr_order_join = """LEFT JOIN {schema}.{t_ili2db_meta_attrs} form_order
@@ -587,6 +570,28 @@ class PGConnector(DBConnector):
                         if tr_enabled
                         else ""
                     )
+
+                    metaattr_groupby_part = """form_order.attr_value,
+                        meta_attr_mapping_value.attr_value,"""
+
+                # group by because of coalesce in the enum domain
+                group_by = """GROUP BY
+                    c.column_name,
+                    c.data_type,
+                    c.numeric_scale,
+                    unit.setting,
+                    txttype.setting,
+                    alias.setting,
+                    full_name.iliname,
+                    oid_domain.setting,
+                    {metaattr_part}
+                    pgd.description,
+                    {translation_label}
+                    c.ordinal_position
+                """.format(
+                    metaattr_part=metaattr_groupby_part,
+                    translation_label="nls.label," if tr_enabled else "",
+                )
 
                 fields_cur.execute(
                     """
