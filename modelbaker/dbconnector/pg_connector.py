@@ -840,12 +840,11 @@ class PGConnector(DBConnector):
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-            if (
-                self.get_ili2db_settings_as_dict().get(
-                    "ch.ehi.ili2db.createEnumDefs", None
-                )
-                == "multiTableWithId"
-            ):
+            create_enum_defs = self.get_ili2db_settings_as_dict().get(
+                "ch.ehi.ili2db.createEnumDefs", None
+            )
+
+            if create_enum_defs == "multiTableWithId":
                 # When we use fks for the relations, we get it by the property ch.ehi.ili2db.foreignKey
                 cur.execute(
                     sql.SQL(
@@ -869,12 +868,7 @@ class PGConnector(DBConnector):
                     ),
                     (self.tid,),
                 )
-            elif (
-                self.get_ili2db_settings_as_dict().get(
-                    "ch.ehi.ili2db.createEnumDefs", None
-                )
-                == "singleTable"
-            ):
+            elif create_enum_defs == "singleTable":
                 # When the enums are in a single table and we don't have fks we get it by property ch.ehi.ili2db.enumDomain and target t_ili2db_enum
                 cur.execute(
                     sql.SQL(

@@ -531,7 +531,7 @@ class GPKGConnector(DBConnector):
             fake_enum_fks = []
             if self._table_exists(GPKG_METAATTRS_TABLE):
                 if self._table_exists(GPKG_ENUM_TABLE):
-                    # In case of enums in a single table T_ILI2DB_ENUM tables without id (createSingleEnumTab)
+                    # In case of enums in a single table (T_ILI2DB_ENUM) without id (createSingleEnumTab)
                     # we have to generate the fake foreign keys to it based on the enumDomain
                     cursor.execute(
                         f"""SELECT '{GPKG_ENUM_TABLE}' as 'table', p.columnname as 'from'
@@ -670,12 +670,11 @@ class GPKGConnector(DBConnector):
         if self.metadata_exists():
             cursor = self.conn.cursor()
 
-            if (
-                self.get_ili2db_settings_as_dict().get(
-                    "ch.ehi.ili2db.createEnumDefs", None
-                )
-                == "multiTableWithId"
-            ):
+            create_enum_defs = self.get_ili2db_settings_as_dict().get(
+                "ch.ehi.ili2db.createEnumDefs", None
+            )
+
+            if create_enum_defs == "multiTableWithId":
                 # When we use fks for the relations, we get it by the property ch.ehi.ili2db.foreignKey
                 cursor.execute(
                     """SELECT
@@ -694,12 +693,7 @@ class GPKGConnector(DBConnector):
                         self.tid
                     )
                 )
-            elif (
-                self.get_ili2db_settings_as_dict().get(
-                    "ch.ehi.ili2db.createEnumDefs", None
-                )
-                == "singleTable"
-            ):
+            elif create_enum_defs == "singleTable":
                 # When the enums are in a single table and we don't have fks we get it by property ch.ehi.ili2db.enumDomain and target T_ILI2DB_ENUM
                 cursor.execute(
                     """SELECT
