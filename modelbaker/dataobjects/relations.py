@@ -13,7 +13,7 @@ class Relation:
         self.strength = QgsRelation.RelationStrength.Association
         self.cardinality_max = None
         self.cardinality_min = None
-        self.child_domain_name = None
+        self.child_domain_name = []
         self.qgis_relation = None
         self._id = None
         self.translate_name = False

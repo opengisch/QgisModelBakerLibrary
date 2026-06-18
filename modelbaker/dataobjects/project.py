@@ -190,11 +190,10 @@ class Project(QObject):
                         else True,  # order by value if order by field is not available yet
                         "AllowNull": True,
                         "Layer": rel.referencedLayerId(),
-                        "FilterExpression": "\"{}\" = '{}'".format(
-                            ENUM_THIS_CLASS_COLUMN, relation.child_domain_name
-                        )
-                        if relation.child_domain_name
-                        else "",
+                        "FilterExpression": self._enum_filter_expression(
+                            relation.child_domain_name,
+                            referenced_layer.provider_names_map.get("ttype_name"),
+                        ),
                         "Key": relation.referenced_field,
                         "NofColumns": 1,
                         "OrderByField": True,
@@ -211,11 +210,10 @@ class Project(QObject):
                         "OrderByValue": True,
                         "ShowOpenFormButton": False,
                         "AllowNULL": True,
-                        "FilterExpression": "\"{}\" = '{}'".format(
-                            ENUM_THIS_CLASS_COLUMN, relation.child_domain_name
-                        )
-                        if relation.child_domain_name
-                        else "",
+                        "FilterExpression": self._enum_filter_expression(
+                            relation.child_domain_name,
+                            referenced_layer.provider_names_map.get("ttype_name"),
+                        ),
                         "FilterFields": list(),
                     },
                 )
@@ -303,11 +301,10 @@ class Project(QObject):
                     "AllowNull": True,
                     "Layer": domain_layer.id(),
                     # Filter only if domain layer uses 'thisClass' containing multiple inherited layer targets
-                    "FilterExpression": "\"{}\" = '{}'".format(
-                        ENUM_THIS_CLASS_COLUMN, child_domain_name
-                    )
-                    if domain_layer.fields().lookupField(ENUM_THIS_CLASS_COLUMN) >= 0
-                    else "",
+                    "FilterExpression": self._enum_filter_expression(
+                        child_domain_name,
+                        layer_obj.provider_names_map.get("ttype_name"),
+                    ),
                     "Key": key_field,
                     "NofColumns": 1,
                 }
@@ -344,6 +341,24 @@ class Project(QObject):
 
         if path:
             qgis_project.write(path)
+
+    def _enum_filter_expression(self, child_domain_names, t_type_name):
+        expression = ""
+        if len(child_domain_names) == 1:
+            # usual case with one type per domain
+            expression = "\"{}\" = '{}'".format(
+                ENUM_THIS_CLASS_COLUMN, list(child_domain_names[0].keys())[0]
+            )
+        if len(child_domain_names) > 1:
+            # this must be a multiple inherited types on smart1
+            when_blocks = [
+                f"    WHEN current_value('{t_type_name}') = '{t_type_value}' THEN\n        \"thisclass\" = '{child_domain}'"
+                for child_domain_item in child_domain_names
+                for child_domain, t_type_value in child_domain_item.items()
+            ]
+            return "CASE\n" + "\n".join(when_blocks) + "\nEND"
+
+        return expression
 
     def load_custom_layer_order(self, qgis_project: QgsProject) -> None:
         custom_layer_order = list()

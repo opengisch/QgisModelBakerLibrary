@@ -54,6 +54,7 @@ class GPKGConnector(DBConnector):
         self.tilitid = "T_Ili_Tid"
         self.dispName = "dispName"
         self.attachmentKey = "attachmentKey"
+        self.ttype_name = "T_Type"
         self.basket_table_name = GPKG_BASKET_TABLE
         self.dataset_table_name = GPKG_DATASET_TABLE
         self.enum_table_name = GPKG_ENUM_TABLE
@@ -403,7 +404,7 @@ class GPKGConnector(DBConnector):
             record["unit"] = None
             record["texttype"] = None
             record["column_alias"] = None
-            record["enum_domain"] = None
+            record["enum_domain"] = []
             record["oid_domain"] = None
 
             if record["column_name"] == "T_Id" and Qgis.QGIS_VERSION_INT >= 30500:
@@ -431,7 +432,13 @@ class GPKGConnector(DBConnector):
                     elif column_prop["tag"] == "ch.ehi.ili2db.dispName":
                         record["column_alias"] = column_prop["setting"]
                     elif column_prop["tag"] == "ch.ehi.ili2db.enumDomain":
-                        record["enum_domain"] = column_prop["setting"]
+                        # In Smart1, a field can have multiple types (enum_domains) due to inherited enumerations.
+                        # To handle this, we create a dict containing:
+                        #   - 'type': The specific type
+                        #   - 't_type': The targetable type used for filtering
+                        record["enum_domain"].append(
+                            {column_prop["setting"]: column_prop["subtype"]}
+                        )
                     elif column_prop["tag"] == "ch.ehi.ili2db.oidDomain":
                         record["oid_domain"] = column_prop["setting"]
 
