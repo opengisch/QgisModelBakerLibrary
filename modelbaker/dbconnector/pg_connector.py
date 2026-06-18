@@ -28,6 +28,7 @@ PG_SETTINGS_TABLE = "t_ili2db_settings"
 PG_DATASET_TABLE = "t_ili2db_dataset"
 PG_BASKET_TABLE = "t_ili2db_basket"
 PG_NLS_TABLE = "t_ili2db_nls"
+PG_ENUM_TABLE = "t_ili2db_enum"
 
 
 class PGConnector(DBConnector):
@@ -50,6 +51,7 @@ class PGConnector(DBConnector):
         self.dispName = "dispname"
         self.basket_table_name = PG_BASKET_TABLE
         self.dataset_table_name = PG_DATASET_TABLE
+        self.enum_table_name = PG_ENUM_TABLE
 
     def map_data_types(self, data_type: str) -> str:
         if not data_type:
@@ -352,7 +354,7 @@ class PGConnector(DBConnector):
                 LEFT JOIN pg_attribute ga
                   ON ga.attrelid = i.indrelid
                   AND ga.attname = g.f_geometry_column
-                WHERE i.indisprimary {schema_where}
+                WHERE (i.indisprimary OR i.indisprimary IS NULL) {schema_where}
             """.format(
                     kind_settings_field=kind_settings_field,
                     table_alias=table_alias,
@@ -768,18 +770,33 @@ class PGConnector(DBConnector):
                 )
 
                 # In case of enumtabs without id we have to generate fake relations based on the enumDomain
+                # On singletab we always reference t_ili2db_enum, otherwise individual tables depending on the setting
+                if self._table_exists(PG_ENUM_TABLE):
+                    target_table = f"'{PG_ENUM_TABLE}'"
+                    target_table_join = (
+                        "WHERE"  # only the where introducing the condition
+                    )
+                else:
+                    target_table = "c.sqlname"
+                    target_table_join = """JOIN {}.T_ILI2DB_CLASSNAME c
+                        ON c.iliname=p.setting
+                        AND""".format(
+                        self.schema
+                    )
+
                 distinct = "SELECT * FROM ( SELECT DISTINCT ON (referencing_table, referencing_column) * FROM ("
                 fake_relation_union = """
-                    UNION SELECT CONCAT( p.tablename, '_', p.columnname, '_enumkey') AS constraint_name, p.tablename AS referencing_table, p.columnname AS referencing_column, '{schema}' AS constraint_schema, c.sqlname AS referenced_table, 'ilicode' AS referenced_column, 1 AS ordinal_position,
+                    UNION SELECT CONCAT( p.tablename, '_', p.columnname, '_enumkey') AS constraint_name, p.tablename AS referencing_table, p.columnname AS referencing_column, '{schema}' AS constraint_schema, {target_table} AS referenced_table, 'ilicode' AS referenced_column, 1 AS ordinal_position,
                     NULL AS strength, NULL AS cardinality_max, NULL AS cardinality_min, NULL AS assoc_cardinality_max, NULL AS assoc_cardinality_min{translate}
                     FROM {schema}.T_ILI2DB_COLUMN_PROP p
-                    JOIN {schema}.T_ILI2DB_CLASSNAME c
-                    ON c.iliname=p.setting
-                    and tag = 'ch.ehi.ili2db.enumDomain'
+                    {target_table_join} tag = 'ch.ehi.ili2db.enumDomain'
                     ) all_relations
                     ORDER BY referencing_table, referencing_column, referenced_column DESC
                     ) relations_without_duplicates """.format(
-                    translate=translate, schema=self.schema
+                    target_table=target_table,
+                    translate=translate,
+                    schema=self.schema,
+                    target_table_join=target_table_join,
                 )
 
             cur.execute(
@@ -823,18 +840,17 @@ class PGConnector(DBConnector):
         if self.schema and self.metadata_exists():
             cur = self.conn.cursor(cursor_factory=psycopg2.extras.DictCursor)
 
-            if (
-                self.get_ili2db_settings_as_dict().get(
-                    "ch.ehi.ili2db.createEnumDefs", None
-                )
-                == "multiTableWithId"
-            ):
+            create_enum_defs = self.get_ili2db_settings_as_dict().get(
+                "ch.ehi.ili2db.createEnumDefs", None
+            )
+
+            if create_enum_defs == "multiTableWithId":
                 # When we use fks for the relations, we get it by the property ch.ehi.ili2db.foreignKey
                 cur.execute(
                     sql.SQL(
                         """SELECT cprop.tablename as current_layer_name, cprop.columnname as attribute, cprop.setting as target_layer_name,
                             meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
-                            meta_attrs_array.attr_value as mapping_type,  %s as target_layer_key
+                            meta_attrs_array.attr_value as mapping_type, %s as target_layer_key
                         FROM {schema}.t_ili2db_column_prop as cprop
                         LEFT JOIN {schema}.t_ili2db_attrname aname
                         ON aname.sqlname = cprop.columnname AND aname.colowner = cprop.tablename
@@ -851,6 +867,31 @@ class PGConnector(DBConnector):
                         t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
                     ),
                     (self.tid,),
+                )
+            elif create_enum_defs == "singleTable":
+                # When the enums are in a single table and we don't have fks we get it by property ch.ehi.ili2db.enumDomain and target t_ili2db_enum
+                cur.execute(
+                    sql.SQL(
+                        """SELECT aname.colowner as current_layer_name, aname.sqlname as attribute, %s as target_layer_name,
+                            meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max,
+                            meta_attrs_array.attr_value as mapping_type, %s as target_layer_key
+                        FROM {schema}.t_ili2db_attrname aname
+                        LEFT JOIN {schema}.t_ili2db_column_prop as cprop
+                        ON aname.sqlname = cprop.columnname and cprop.tag = 'ch.ehi.ili2db.enumDomain' AND aname.colowner = cprop.tablename
+                        LEFT JOIN {schema}.t_ili2db_classname as classn
+                        ON classn.iliname = cprop.setting
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_array
+                        ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_min
+                        ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                        LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_cardinality_max
+                        ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                        """
+                    ).format(
+                        schema=sql.Identifier(self.schema),
+                        t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
+                    ),
+                    (PG_ENUM_TABLE, self.iliCodeName),
                 )
             else:
                 # When we don't have fks we get it by property ch.ehi.ili2db.enumDomain
@@ -875,7 +916,7 @@ class PGConnector(DBConnector):
                         schema=sql.Identifier(self.schema),
                         t_ili2db_meta_attrs=sql.Identifier(PG_METAATTRS_TABLE),
                     ),
-                    ("ilicode",),
+                    (self.iliCodeName,),
                 )
             return cur
         return []

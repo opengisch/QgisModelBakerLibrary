@@ -532,7 +532,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 15
+        assert len(ignored_layers) == 20
         assert len(available_layers) == 23
         assert len(relations) == 22  # 21 of them are enum-relations
 
@@ -667,7 +667,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 17
+        assert len(ignored_layers) == 22
         assert len(available_layers) == 21
         assert len(relations) == 21  # 21 of them are enum-relations
 
@@ -812,7 +812,7 @@ class TestProjectGen(unittest.TestCase):
         available_layers = generator.layers([])
         relations, _ = generator.relations(available_layers)
 
-        assert len(ignored_layers) == 9
+        assert len(ignored_layers) == 14
         assert len(available_layers) == 29
         assert len(relations) == 32
 

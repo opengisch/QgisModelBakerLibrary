@@ -30,6 +30,7 @@ GPKG_SETTINGS_TABLE = "T_ILI2DB_SETTINGS"
 GPKG_DATASET_TABLE = "T_ILI2DB_DATASET"
 GPKG_BASKET_TABLE = "T_ILI2DB_BASKET"
 GPKG_NLS_TABLE = "T_ILI2DB_NLS"
+GPKG_ENUM_TABLE = "T_ILI2DB_ENUM"
 
 
 class GPKGConnector(DBConnector):
@@ -55,6 +56,7 @@ class GPKGConnector(DBConnector):
         self.attachmentKey = "attachmentKey"
         self.basket_table_name = GPKG_BASKET_TABLE
         self.dataset_table_name = GPKG_DATASET_TABLE
+        self.enum_table_name = GPKG_ENUM_TABLE
 
     def map_data_types(self, data_type: str) -> str:
         """GPKG date/time types correspond to QGIS date/time types"""
@@ -528,22 +530,40 @@ class GPKGConnector(DBConnector):
 
             fake_enum_fks = []
             if self._table_exists(GPKG_METAATTRS_TABLE):
-                # In case of enumtabs without id we have to generate fake foreign keys based on the enumDomain
-                cursor.execute(
-                    """SELECT c.sqlname as 'table', p.columnname as 'from'
-                    FROM T_ILI2DB_COLUMN_PROP p
-                    JOIN T_ILI2DB_CLASSNAME c
-                    ON c.iliname=p.setting
-                    WHERE tablename = ?
-                    and tag = 'ch.ehi.ili2db.enumDomain'
-                """,
-                    (table_info_name,),
-                )
-                fake_enum_foreign_keys = cursor.fetchall()
+                if self._table_exists(GPKG_ENUM_TABLE):
+                    # In case of enums in a single table (T_ILI2DB_ENUM) without id (createSingleEnumTab)
+                    # we have to generate the fake foreign keys to it based on the enumDomain
+                    cursor.execute(
+                        f"""SELECT '{GPKG_ENUM_TABLE}' as 'table', p.columnname as 'from'
+                        FROM T_ILI2DB_COLUMN_PROP p
+                        WHERE tablename = ?
+                        and tag = 'ch.ehi.ili2db.enumDomain'
+                    """,
+                        (table_info_name,),
+                    )
+                    fake_enum_foreign_keys = cursor.fetchall()
+                    fake_enum_fks = [
+                        (fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
+                    ]
+                else:
+                    # In case of enums in multiple tables without id (createEnumTabs)
+                    # we have to generate fake foreign keys based on the enumDomain
+                    cursor.execute(
+                        """SELECT c.sqlname as 'table', p.columnname as 'from'
+                        FROM T_ILI2DB_COLUMN_PROP p
+                        JOIN T_ILI2DB_CLASSNAME c
+                        ON c.iliname=p.setting
+                        WHERE tablename = ?
+                        and tag = 'ch.ehi.ili2db.enumDomain'
+                    """,
+                        (table_info_name,),
+                    )
+                    fake_enum_foreign_keys = cursor.fetchall()
 
-                fake_enum_fks = [
-                    (fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
-                ]
+                    fake_enum_fks = [
+                        (fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
+                    ]
+
             all_foreign_keys = []
             for fk in fks:
                 all_foreign_keys.append(("fk", fk[0], fk[1]))  # type, from, table
@@ -564,7 +584,7 @@ class GPKGConnector(DBConnector):
                 record["referenced_column"] = (
                     tables_info_dict[foreign_key[2]]["primary_key"]
                     if foreign_key[0] == "fk"
-                    else "iliCode"
+                    else self.iliCodeName
                 )
                 record["constraint_name"] = "{}_{}_{}_{}".format(
                     record["referencing_table"],
@@ -650,12 +670,11 @@ class GPKGConnector(DBConnector):
         if self.metadata_exists():
             cursor = self.conn.cursor()
 
-            if (
-                self.get_ili2db_settings_as_dict().get(
-                    "ch.ehi.ili2db.createEnumDefs", None
-                )
-                == "multiTableWithId"
-            ):
+            create_enum_defs = self.get_ili2db_settings_as_dict().get(
+                "ch.ehi.ili2db.createEnumDefs", None
+            )
+
+            if create_enum_defs == "multiTableWithId":
                 # When we use fks for the relations, we get it by the property ch.ehi.ili2db.foreignKey
                 cursor.execute(
                     """SELECT
@@ -672,6 +691,26 @@ class GPKGConnector(DBConnector):
                             WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
                             """.format(
                         self.tid
+                    )
+                )
+            elif create_enum_defs == "singleTable":
+                # When the enums are in a single table and we don't have fks we get it by property ch.ehi.ili2db.enumDomain and target T_ILI2DB_ENUM
+                cursor.execute(
+                    """SELECT
+                            aname.colowner as current_layer_name, aname.sqlname as attribute, '{}' as target_layer_name, meta_attrs_cardinality_min.attr_value as cardinality_min, meta_attrs_cardinality_max.attr_value as cardinality_max, meta_attrs_array.attr_value as mapping_type, '{}' as target_layer_key
+                            FROM T_ILI2DB_ATTRNAME aname
+                            LEFT JOIN T_ILI2DB_COLUMN_PROP as cprop
+                            ON aname.sqlname = cprop.columnname and cprop.tag = 'ch.ehi.ili2db.enumDomain' AND aname.colowner = cprop.tablename
+                            LEFT JOIN T_ILI2DB_CLASSNAME as classn
+                            ON classn.iliname = cprop.setting
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_array
+                            ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_min
+                            ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
+                            LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
+                            ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
+                    """.format(
+                        GPKG_ENUM_TABLE, self.iliCodeName
                     )
                 )
             else:
@@ -691,7 +730,7 @@ class GPKGConnector(DBConnector):
                             LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
                             ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
                     """.format(
-                        "iliCode"
+                        self.iliCodeName
                     )
                 )
             bags_of_info = cursor.fetchall()

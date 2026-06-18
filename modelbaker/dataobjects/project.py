@@ -219,7 +219,6 @@ class Project(QObject):
                         "FilterFields": list(),
                     },
                 )
-
                 qgis_relations.append(rel)
             elif referenced_layer and referenced_layer.is_basket_table:
                 # list the topics we filter the basket with. On NONE strategy those should be all topics the class could be in. On optimized strategies GROUP/HIDE only the relevant topics should be listed.
@@ -286,6 +285,7 @@ class Project(QObject):
                 domain_table = bag_of_enum_info[2]
                 key_field = bag_of_enum_info[3]
                 value_field = bag_of_enum_info[4]
+                child_domain_name = bag_of_enum_info[6]
 
                 minimal_selection = cardinality.startswith("1")
 
@@ -304,7 +304,7 @@ class Project(QObject):
                     "Layer": domain_layer.id(),
                     # Filter only if domain layer uses 'thisClass' containing multiple inherited layer targets
                     "FilterExpression": "\"{}\" = '{}'".format(
-                        ENUM_THIS_CLASS_COLUMN, domain_table.ili_name
+                        ENUM_THIS_CLASS_COLUMN, child_domain_name
                     )
                     if domain_layer.fields().lookupField(ENUM_THIS_CLASS_COLUMN) >= 0
                     else "",
