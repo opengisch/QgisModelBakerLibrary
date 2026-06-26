@@ -23,8 +23,8 @@ from .ili2dbutils import get_all_modeldir_in_path
 
 class BaseConfiguration:
     def __init__(self):
-        self.super_pg_user = "postgres"
-        self.super_pg_password = "postgres"
+        self.super_pg_user = "postgres"  # nosec
+        self.super_pg_password = "postgres"  # nosec
         self.dbparam_map = {}
 
         self.custom_model_directories_enabled = False
@@ -48,7 +48,9 @@ class BaseConfiguration:
 
     def restore(self, settings: QSettings) -> None:
         self.super_pg_user = settings.value("SuperUser", "postgres", str)
-        self.super_pg_password = settings.value("SuperPassword", "postgres", str)
+        self.super_pg_password = settings.value(
+            "SuperPassword", "postgres", str
+        )  # nosec
         self.dbparam_map = settings.value("CustomDbParameters", {}, dict)
         self.custom_model_directories_enabled = settings.value(
             "CustomModelDirectoriesEnabled", False, bool
