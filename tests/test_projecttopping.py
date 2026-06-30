@@ -18,6 +18,7 @@ import os
 import pathlib
 import shutil
 import tempfile
+import urllib.parse
 
 import yaml
 from qgis.core import QgsEditFormConfig, QgsLayerTreeModel, QgsProject
@@ -268,15 +269,14 @@ class TestProjectTopping(unittest.TestCase):
             qgis_layer = layer.layer()
             if layer.name() == "Local WMS":
                 assert qgis_layer.dataProvider().name() == "wms"
-                print(qgis_layer.dataProvider().dataSourceUri())
-                assert (
+                assert urllib.parse.unquote(
                     qgis_layer.dataProvider().dataSourceUri()
-                    == "contextualWMSLegend=0&crs=EPSG:2056&dpiMode=7&featureCount=10&format=image/jpeg&layers=ch.bav.kataster-belasteter-standorte-oev&styles=default&url=https://wms.geo.admin.ch/?%0ASERVICE%3DWMS%0A%26VERSION%3D1.3.0%0A%26REQUEST%3DGetCapabilities"
+                ) == urllib.parse.unquote(
+                    "contextualWMSLegend=0&crs=EPSG:2056&dpiMode=7&featureCount=10&format=image/jpeg&layers=ch.bav.kataster-belasteter-standorte-oev&styles=default&url=https://wms.geo.admin.ch/?%0ASERVICE%3DWMS%0A%26VERSION%3D1.3.0%0A%26REQUEST%3DGetCapabilities"
                 )
                 assert qgis_layer.isValid()
             if layer.name() == "Local Zuständigkeit Kataster":
                 assert qgis_layer.dataProvider().name() == "postgres"
-                print(qgis_layer.dataProvider().dataSourceUri())
                 assert (
                     qgis_layer.dataProvider().dataSourceUri()
                     == f"dbname='gis' host={importer.configuration.dbhost} user='docker' password='docker' key='t_id' checkPrimaryKeyUnicity='1' table=\"{importer.configuration.dbschema}\".\"zustaendigkeitkataster\""

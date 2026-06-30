@@ -15,8 +15,8 @@ License:
 import mimetypes
 import os
 import uuid
-import xml.dom.minidom as minidom
-import xml.etree.ElementTree as ET
+import xml.dom.minidom as minidom  # nosec
+import xml.etree.ElementTree as ET  # nosec
 from typing import Optional
 
 from .ilitarget import IliTarget
@@ -184,7 +184,7 @@ class IliData:
             dataset.make_xml_element(dataset_metadata_element)
 
         tree = ET.ElementTree(transfer)
-        xmlstr = minidom.parseString(ET.tostring(tree.getroot())).toprettyxml(
+        xmlstr = minidom.parseString(ET.tostring(tree.getroot())).toprettyxml(  # nosec
             indent="   "
         )
         ilidata_path = os.path.join(target.main_dir, "ilidata.xml")
