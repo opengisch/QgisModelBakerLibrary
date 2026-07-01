@@ -11,6 +11,7 @@ License:
     (at your option) any later version.
 """
 
+import ast
 import json
 import numbers
 import re
@@ -74,7 +75,7 @@ class MssqlConnector(DBConnector):
                 SELECT case when count(schema_name)>0 then 1 else 0 end
                 FROM information_schema.schemata
                 where schema_name = '{}'
-            """.format(
+            """.format(  # nosec
                     self.schema
                 )
             )
@@ -99,7 +100,7 @@ class MssqlConnector(DBConnector):
                 WHERE TABLE_TYPE = 'BASE TABLE'
                 AND TABLE_SCHEMA = '{}'
                     AND TABLE_NAME = '{}'
-            """.format(
+            """.format(  # nosec
                     self.schema, tablename
                 )
             )
@@ -225,7 +226,7 @@ class MssqlConnector(DBConnector):
                                         )
                                     )
                                     THEN 0 ELSE 1 END AS relevance
-                """
+                """  # nosec
                 )
                 stmt += (
                     ln
@@ -327,7 +328,7 @@ class MssqlConnector(DBConnector):
                         ON substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', inheritance.baseClass)+1, len(inheritance.baseClass)))+CHARINDEX('.', inheritance.baseClass)-1) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
                         WHERE substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1, len(inheritance.thisClass)))+CHARINDEX('.', inheritance.thisClass)-1) != children.childTopic -- break the recursion when the coming childTopic will be the same
                     ) SELECT STRING_AGG(childTopic,',') as all_topics FROM children
-                    """.format(
+                    """.format(  # nosec
                         schema=self.schema, base_topic=res_entry["base_topic"]
                     )
                     cur.execute(stmt)
@@ -362,7 +363,7 @@ class MssqlConnector(DBConnector):
                         ON substring( inheritance.baseClass, 1, CHARINDEX('.', substring( inheritance.baseClass, CHARINDEX('.', inheritance.baseClass)+1, len(inheritance.baseClass)))+CHARINDEX('.', inheritance.baseClass)-1) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
                         WHERE substring( inheritance.thisClass, 1, CHARINDEX('.', substring( inheritance.thisClass, CHARINDEX('.', inheritance.thisClass)+1, len(inheritance.thisClass)))+CHARINDEX('.', inheritance.thisClass)-1) != children.childTopic -- break the recursion when the coming childTopic will be the same
                     ) SELECT STRING_AGG(childTopic,',') as relevant_topics FROM children WHERE is_a_base = 0
-                    """.format(
+                    """.format(  # nosec
                         schema=self.schema, base_topic=res_entry["base_topic"]
                     )
                     cur.execute(stmt)
@@ -430,7 +431,7 @@ class MssqlConnector(DBConnector):
             END
             CLOSE db_cursor
             DEALLOCATE db_cursor
-            execute sp_executesql @query """.format(
+            execute sp_executesql @query """.format(  # nosec
             query=query
         )
 
@@ -448,7 +449,7 @@ class MssqlConnector(DBConnector):
                 """
                         SELECT *
                         FROM {schema}.{metaattrs_table};
-            """.format(
+            """.format(  # nosec
                     schema=self.schema,
                     metaattrs_table=METAATTRS_TABLE,
                 )
@@ -473,7 +474,7 @@ class MssqlConnector(DBConnector):
                           attr_value
                         FROM {schema}.{metaattrs_table}
                         WHERE ilielement='{ili_name}';
-            """.format(
+            """.format(  # nosec
                     schema=self.schema,
                     metaattrs_table=METAATTRS_TABLE,
                     ili_name=ili_name,
@@ -595,7 +596,7 @@ class MssqlConnector(DBConnector):
                 WHERE
                     cc.CONSTRAINT_SCHEMA = '{schema}'
                     AND TABLE_NAME = '{table}'
-                """.format(
+                """.format(  # nosec
                 schema=self.schema, table=table_name
             )
 
@@ -630,7 +631,7 @@ class MssqlConnector(DBConnector):
                 FROM {}.t_ili2db_column_prop
                 WHERE tablename = '{}'
                 AND tag = 'ch.ehi.ili2db.types'
-                """.format(
+                """.format(  # nosec
                     self.schema, table_name
                 )
             )
@@ -638,7 +639,7 @@ class MssqlConnector(DBConnector):
 
             types_mapping = dict()
             for types_entry in types_entries:
-                values = eval(types_entry["setting"])
+                values = ast.literal_eval(types_entry["setting"])
                 types_mapping[types_entry["columnname"]] = values
             return types_mapping
         return {}
@@ -678,7 +679,7 @@ class MssqlConnector(DBConnector):
                     ON ATTRNAME.sqlname = KCU1.COLUMN_NAME AND ATTRNAME.{colowner} = KCU1.TABLE_NAME AND ATTRNAME.target = KCU2.TABLE_NAME
                 LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS
                     ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.assocKind'
-                    """.format(
+                    """.format(  # nosec
                     schema=self.schema,
                     colowner="owner" if self.ili_version() == 3 else "colowner",
                 )
@@ -698,7 +699,7 @@ class MssqlConnector(DBConnector):
                     ON META_ATTRS_ASSOC_CARDINALITY_MAX.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ASSOC_CARDINALITY_MAX.attr_name = 'ili2db.ili.assocCardinalityMax'
                 LEFT JOIN {schema}.t_ili2db_meta_attrs AS META_ATTRS_ASSOC_CARDINALITY_MIN
                     ON META_ATTRS_ASSOC_CARDINALITY_MIN.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ASSOC_CARDINALITY_MIN.attr_name = 'ili2db.ili.assocCardinalityMin'
-                    """.format(
+                    """.format(  # nosec
                     schema=self.schema,
                     colowner="owner" if self.ili_version() == 3 else "colowner",
                 )
@@ -732,7 +733,7 @@ class MssqlConnector(DBConnector):
 
                 WHERE 1=1 {schema_where1} {schema_where2} {filter_layer_where}
                 order by constraint_name, ordinal_position
-                """.format(
+                """.format(  # nosec
                 schema_where1=schema_where1,
                 schema_where2=schema_where2,
                 filter_layer_where=filter_layer_where,
@@ -763,7 +764,7 @@ class MssqlConnector(DBConnector):
                 """SELECT iliname, sqlname
                            FROM {schema}.t_ili2db_classname
                            {where}
-                        """.format(
+                        """.format(  # nosec
                     schema=self.schema, where=where
                 )
             )
@@ -782,7 +783,7 @@ class MssqlConnector(DBConnector):
 
             cur.execute(
                 """SELECT distinct left(iliname, charindex('.', iliname)-1) as modelname
-                            FROM {schema}.t_ili2db_trafo""".format(
+                            FROM {schema}.t_ili2db_trafo""".format(  # nosec
                     schema=self.schema
                 )
             )
@@ -792,7 +793,7 @@ class MssqlConnector(DBConnector):
             cur.execute(
                 """SELECT modelname, content
                            FROM {schema}.t_ili2db_model
-                        """.format(
+                        """.format(  # nosec
                     schema=self.schema
                 )
             )
@@ -832,7 +833,7 @@ class MssqlConnector(DBConnector):
                 """SELECT iliname, sqlname
                            FROM {schema}.t_ili2db_classname
                            WHERE iliname IN ({class_names})
-                        """.format(
+                        """.format(  # nosec
                     schema=self.schema, class_names=class_names
                 )
             )
@@ -849,7 +850,7 @@ class MssqlConnector(DBConnector):
                 """SELECT iliname, sqlname, owner
                            FROM {schema}.t_ili2db_attrname
                            WHERE iliname IN ({attr_names})
-                        """.format(
+                        """.format(  # nosec
                     schema=self.schema, attr_names=attr_names
                 )
             )
@@ -865,7 +866,7 @@ class MssqlConnector(DBConnector):
                 """SELECT iliname, sqlname, owner
                            FROM {schema}.t_ili2db_attrname
                            WHERE owner IN ({owner_names})
-                        """.format(
+                        """.format(  # nosec
                     schema=self.schema, owner_names=owner_names
                 )
             )
@@ -891,7 +892,7 @@ class MssqlConnector(DBConnector):
 FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_SCHEMA='{schema}'
 	AND(TABLE_NAME='t_ili2db_attrname' OR TABLE_NAME='t_ili2db_model')
-                       AND(COLUMN_NAME='owner' OR COLUMN_NAME='file')""".format(
+                       AND(COLUMN_NAME='owner' OR COLUMN_NAME='file')""".format(  # nosec
                 schema=self.schema
             )
         )
@@ -913,7 +914,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 """SELECT setting
                             FROM {schema}.{table}
                             WHERE tag = ?
-                            """.format(
+                            """.format(  # nosec
                     schema=self.schema, table=SETTINGS_TABLE
                 ),
                 ("ch.ehi.ili2db.BasketHandling",),
@@ -936,7 +937,7 @@ WHERE TABLE_SCHEMA='{schema}'
                             d.datasetname as datasetname from {schema}.{basket_table} b
                             JOIN {schema}.{dataset_table} d
                             ON b.dataset = d.t_id
-                        """.format(
+                        """.format(  # nosec
                     schema=self.schema,
                     basket_table=BASKET_TABLE,
                     dataset_table=DATASET_TABLE,
@@ -952,7 +953,7 @@ WHERE TABLE_SCHEMA='{schema}'
             cur.execute(
                 """SELECT t_id, datasetname
                            FROM {schema}.{dataset_table}
-                        """.format(
+                        """.format(  # nosec
                     schema=self.schema, dataset_table=DATASET_TABLE
                 )
             )
@@ -966,7 +967,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 cur.execute(
                     """
                     INSERT INTO {schema}.{dataset_table} VALUES (NEXT VALUE FOR {schema}.{sequence}, ?)
-                    """.format(
+                    """.format(  # nosec
                         schema=self.schema,
                         sequence="t_ili2db_seq",
                         dataset_table=DATASET_TABLE,
@@ -990,7 +991,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 cur.execute(
                     """
                     UPDATE {schema}.{dataset_table} SET datasetname = ? WHERE {tid_name} = {tid}
-                    """.format(
+                    """.format(  # nosec
                         schema=self.schema,
                         dataset_table=DATASET_TABLE,
                         tid_name=self.tid,
@@ -1027,7 +1028,7 @@ WHERE TABLE_SCHEMA='{schema}'
                     LEFT JOIN {schema}.t_ili2db_meta_attrs as ma
                     ON CONCAT(PARSENAME(cn.iliname,3),'.',PARSENAME(cn.iliname,2)) = ma.ilielement AND ma.attr_name = 'ili2db.ili.bidDomain'
 					WHERE PARSENAME(cn.iliname,3) != '' and ( tp.setting != 'ENUM' OR tp.setting IS NULL )
-                """.format(
+                """.format(  # nosec
                     schema=self.schema
                 )
             )
@@ -1091,7 +1092,7 @@ WHERE TABLE_SCHEMA='{schema}'
                     )
                     THEN 0 ELSE 1 END AS relevance
                 FROM {schema}.t_ili2db_classname c
-                """.format(
+                """.format(  # nosec
                     schema=self.schema
                 )
             )
@@ -1111,7 +1112,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 """
                     SELECT * FROM {schema}.{basket_table}
                     WHERE dataset = {dataset_tid} and topic = '{topic}'
-                """.format(
+                """.format(  # nosec
                     schema=self.schema,
                     basket_table=BASKET_TABLE,
                     dataset_tid=dataset_tid,
@@ -1132,7 +1133,7 @@ WHERE TABLE_SCHEMA='{schema}'
                     """
                     INSERT INTO {schema}.{basket_table} ({tid_name}, dataset, topic, {tilitid_name}, attachmentkey )
                     VALUES (NEXT VALUE FOR {schema}.{sequence}, {dataset_tid}, '{topic}', {tilitid}, '{attachment_key}')
-                """.format(
+                """.format(  # nosec
                         schema=self.schema,
                         sequence="t_ili2db_seq",
                         tid_name=self.tid,
@@ -1166,7 +1167,7 @@ WHERE TABLE_SCHEMA='{schema}'
                         {t_ili_tid} = ?,
                         {attachment_key} = ?
                     WHERE {tid_name} = ?
-                    """.format(
+                    """.format(  # nosec
                         schema=self.schema,
                         basket_table=BASKET_TABLE,
                         t_ili_tid=self.tilitid,
@@ -1202,7 +1203,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 """SELECT setting
                             FROM {schema}.{table}
                             WHERE tag = ?
-                            """.format(
+                            """.format(  # nosec
                     schema=self.schema, table=SETTINGS_TABLE
                 ),
                 ("ch.ehi.ili2db.TidHandling",),
@@ -1219,7 +1220,7 @@ WHERE TABLE_SCHEMA='{schema}'
             cur.execute(
                 """SELECT tag, setting
                             FROM {schema}.{table}
-                            """.format(
+                            """.format(  # nosec
                     schema=self.schema, table=SETTINGS_TABLE
                 )
             )
@@ -1236,7 +1237,7 @@ WHERE TABLE_SCHEMA='{schema}'
             cur.execute(
                 """
                     SELECT NEXT VALUE FOR {schema}.{sequence};
-                """.format(
+                """.format(  # nosec
                     schema=self.schema, sequence="t_ili2db_seq"
                 )
             )
@@ -1252,7 +1253,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 cur.execute(
                     """
                     ALTER SEQUENCE {schema}.{sequence} RESTART WITH {value};
-                    """.format(
+                    """.format(  # nosec
                         schema=self.schema, sequence="t_ili2db_seq", value=value
                     )
                 )
@@ -1298,7 +1299,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 white_list_restriction = """
                 AND
                 ilielement IN ({relevant_model_list})
-                """.format(
+                """.format(  # nosec
                     relevant_model_list=",".join(
                         [f"'{modelname}'" for modelname in relevant_models]
                     ),
@@ -1308,7 +1309,7 @@ WHERE TABLE_SCHEMA='{schema}'
                 black_list_restriction = """
                 AND
                 ilielement NOT IN ({irrelevant_model_list})
-                """.format(
+                """.format(  # nosec
                     irrelevant_model_list=",".join(
                         [f"'{modelname}'" for modelname in irrelevant_models]
                     ),

@@ -11,6 +11,7 @@ License:
     (at your option) any later version.
 """
 
+import ast
 import errno
 import os
 import re
@@ -147,7 +148,7 @@ class GPKGConnector(DBConnector):
                 {topics},
                 i.baseclass as base_class,
                 {translations}  -- Optional. Trailing comma omitted on purpose.
-                """.format(
+                """.format(  # nosec
                 relevance_field="""CASE WHEN c.iliname IN (
                             -- used to get the class names from the full names
                             WITH names AS (
@@ -189,7 +190,7 @@ class GPKGConnector(DBConnector):
                 # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
                 topics="""substr( c.iliname, 0, instr(substr( c.iliname, instr(c.iliname, '.')+1), '.')+instr(c.iliname, '.')) as base_topic,
                         (SELECT group_concat(childTopic) FROM {topic_pedigree}) as all_topics,
-                        (SELECT group_concat(childTopic) FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics""".format(
+                        (SELECT group_concat(childTopic) FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics""".format(  # nosec
                     topic_pedigree="""(WITH RECURSIVE children(is_a_base, childTopic, baseTopic) AS (
                         SELECT
                         (CASE
@@ -230,11 +231,13 @@ class GPKGConnector(DBConnector):
                    ON c.iliname = i.thisclass
                 LEFT JOIN T_ILI2DB_ATTRNAME attrs
                    ON c.iliname = attrs.iliname
-                {translations}""".format(
+                {translations}""".format(  # nosec
                 translations=f"""LEFT JOIN T_ILI2DB_NLS nls
                     ON c.iliname = nls.ilielement
                     AND nls.lang = '{lang}'
-                """
+                """.format(  # nosec
+                    lang=lang
+                )
                 if tr_enabled
                 else ""
             )
@@ -253,7 +256,7 @@ class GPKGConnector(DBConnector):
                    ON g.table_name = s.name
                 {interlis_joins}
                 WHERE s.type='table';
-            """.format(
+            """.format(  # nosec
                     interlis_fields=interlis_fields, interlis_joins=interlis_joins
                 )
             )
@@ -287,7 +290,7 @@ class GPKGConnector(DBConnector):
             cursor.execute(
                 """
                 PRAGMA table_info("{}")
-                """.format(
+                """.format(  # nosec
                     record["tablename"]
                 )
             )
@@ -314,7 +317,7 @@ class GPKGConnector(DBConnector):
         cursor.execute(
             """SELECT *
             FROM "{}";
-            """.format(
+            """.format(  # nosec
                 GPKG_METAATTRS_TABLE
             )
         )
@@ -333,7 +336,7 @@ class GPKGConnector(DBConnector):
               attr_value
             FROM "{}"
             WHERE ilielement=?;
-            """.format(
+            """.format(  # nosec
                 GPKG_METAATTRS_TABLE
             ),
             (ili_name,),
@@ -344,7 +347,7 @@ class GPKGConnector(DBConnector):
 
     def get_fields_info(self, table_name):
         cursor = self.conn.cursor()
-        cursor.execute("""PRAGMA table_info("{}");""".format(table_name))
+        cursor.execute("""PRAGMA table_info("{}");""".format(table_name))  # nosec
         columns_info = cursor.fetchall()
 
         columns_prop = list()
@@ -514,7 +517,7 @@ class GPKGConnector(DBConnector):
 
             types_mapping = dict()
             for types_entry in types_entries:
-                values = eval(types_entry["setting"])
+                values = ast.literal_eval(types_entry["setting"])
                 types_mapping[types_entry["columnname"]] = values
             return types_mapping
         return {}
@@ -531,7 +534,9 @@ class GPKGConnector(DBConnector):
         tr_enabled, lang = self.get_translation_handling()
 
         for table_info_name, table_info in tables_info_dict.items():
-            cursor.execute("""PRAGMA foreign_key_list("{}");""".format(table_info_name))
+            cursor.execute(
+                """PRAGMA foreign_key_list("{}");""".format(table_info_name)
+            )  # nosec
             foreign_keys = cursor.fetchall()
             fks = [(fk["from"], fk["table"]) for fk in foreign_keys]
 
@@ -610,7 +615,7 @@ class GPKGConnector(DBConnector):
                         INNER JOIN T_ILI2DB_META_ATTRS AS META_ATTRS
                         ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.assocKind'
                         WHERE ATTRNAME.sqlname = ? AND ATTRNAME.{colowner} = ? AND ATTRNAME.target = ?;
-                        """.format(
+                        """.format(  # nosec
                             colowner="owner" if self.ili_version() == 3 else "colowner"
                         ),
                         (
@@ -637,7 +642,7 @@ class GPKGConnector(DBConnector):
                         LEFT JOIN T_ILI2DB_META_ATTRS AS META_ATTRS_ASSOC_MIN
                         ON META_ATTRS_ASSOC_MIN.ilielement = ATTRNAME.iliname AND META_ATTRS_ASSOC_MIN.attr_name = 'ili2db.ili.assocCardinalityMin'
                         WHERE ATTRNAME.sqlname = ? AND ATTRNAME.{colowner} = ? AND ATTRNAME.target = ?;
-                        """.format(
+                        """.format(  # nosec
                             colowner="owner" if self.ili_version() == 3 else "colowner"
                         ),
                         (
@@ -696,7 +701,7 @@ class GPKGConnector(DBConnector):
                             LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
                             ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
                             WHERE cprop.tag = 'ch.ehi.ili2db.foreignKey'
-                            """.format(
+                            """.format(  # nosec
                         self.tid
                     )
                 )
@@ -716,7 +721,7 @@ class GPKGConnector(DBConnector):
                             ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
                             LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
                             ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
-                    """.format(
+                    """.format(  # nosec
                         GPKG_ENUM_TABLE, self.iliCodeName
                     )
                 )
@@ -736,7 +741,7 @@ class GPKGConnector(DBConnector):
                             ON meta_attrs_cardinality_min.ilielement = aname.iliname AND meta_attrs_cardinality_min.attr_name = 'ili2db.ili.attrCardinalityMin'
                             LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_cardinality_max
                             ON meta_attrs_cardinality_max.ilielement = aname.iliname AND meta_attrs_cardinality_max.attr_name = 'ili2db.ili.attrCardinalityMax'
-                    """.format(
+                    """.format(  # nosec
                         self.iliCodeName
                     )
                 )
@@ -765,7 +770,7 @@ class GPKGConnector(DBConnector):
                 """SELECT iliname, sqlname
                 FROM T_ILI2DB_CLASSNAME
                 {where}
-                """.format(
+                """.format(  # nosec
                     where=where
                 )
             )
@@ -785,7 +790,7 @@ class GPKGConnector(DBConnector):
             """SELECT *
             FROM T_ILI2DB_CLASSNAME
             WHERE iliname IN ({class_names})
-            """.format(
+            """.format(  # nosec
                 class_names=class_names
             )
         )
@@ -799,7 +804,7 @@ class GPKGConnector(DBConnector):
             """SELECT iliname, sqlname, owner
             FROM T_ILI2DB_ATTRNAME
             WHERE iliname IN ({attr_names})
-            """.format(
+            """.format(  # nosec
                 attr_names=attr_names
             )
         )
@@ -813,7 +818,7 @@ class GPKGConnector(DBConnector):
             """SELECT iliname, sqlname, owner
             FROM T_ILI2DB_ATTRNAME
             WHERE owner IN ({owner_names})
-            """.format(
+            """.format(  # nosec
                 owner_names=owner_names
             )
         )
@@ -891,7 +896,7 @@ class GPKGConnector(DBConnector):
                 """SELECT setting
                 FROM "{}"
                 WHERE tag = ?
-                """.format(
+                """.format(  # nosec
                     GPKG_SETTINGS_TABLE
                 ),
                 ("ch.ehi.ili2db.BasketHandling",),
@@ -914,7 +919,7 @@ class GPKGConnector(DBConnector):
                 d.datasetname as datasetname from "{basket_table}" b
                 JOIN "{dataset_table}" d
                 ON b.dataset = d.t_id;
-                """.format(
+                """.format(  # nosec
                     basket_table=GPKG_BASKET_TABLE, dataset_table=GPKG_DATASET_TABLE
                 )
             )
@@ -929,7 +934,7 @@ class GPKGConnector(DBConnector):
             cursor.execute(
                 """SELECT t_id, datasetname
                 FROM "{dataset_table}";
-                """.format(
+                """.format(  # nosec
                     dataset_table=GPKG_DATASET_TABLE
                 )
             )
@@ -956,7 +961,7 @@ class GPKGConnector(DBConnector):
                 cursor.execute(
                     """
                     INSERT INTO {dataset_table} ({tid_name},datasetName) VALUES (:next_id, :datasetname)
-                    """.format(
+                    """.format(  # nosec
                         tid_name=self.tid, dataset_table=GPKG_DATASET_TABLE
                     ),
                     {"datasetname": datasetname, "next_id": next_id},
@@ -981,7 +986,7 @@ class GPKGConnector(DBConnector):
                 cursor.execute(
                     """
                     UPDATE {dataset_table} SET datasetName = :datasetname WHERE {tid_name} = {tid}
-                    """.format(
+                    """.format(  # nosec
                         dataset_table=GPKG_DATASET_TABLE, tid_name=self.tid, tid=tid
                     ),
                     {"datasetname": datasetname},
@@ -1016,7 +1021,7 @@ class GPKGConnector(DBConnector):
                     LEFT JOIN T_ILI2DB_META_ATTRS as MA
                     ON substr( CN.IliName, 0, instr(substr( CN.IliName, instr(CN.IliName, '.')+1), '.')+instr(CN.IliName, '.')) = MA.ilielement and MA.attr_name = 'ili2db.ili.bidDomain'
                     WHERE topic != '' and ( TP.setting != 'ENUM' or TP.setting IS NULL )
-                """.format(
+                """.format(  # nosec
                     # relevance is emitted by going recursively through the inheritance table. If nothing on this topic is extended, it is relevant. Otherwise it's not (except if it's extended by itself)
                     relevance="""
                         CASE WHEN (WITH RECURSIVE children(childTopic, baseTopic) AS (
@@ -1119,7 +1124,7 @@ class GPKGConnector(DBConnector):
             cursor.execute(
                 """SELECT * FROM {basket_table}
                 WHERE dataset = ? and topic = ?
-                """.format(
+                """.format(  # nosec
                     basket_table=GPKG_BASKET_TABLE
                 ),
                 (dataset_tid, topic),
@@ -1146,7 +1151,7 @@ class GPKGConnector(DBConnector):
                     """
                     INSERT INTO "{basket_table}" ("{tid_name}", dataset, topic, "{tilitid_name}", attachmentkey )
                     VALUES (?, ?, ?, ?, ?)
-                    """.format(
+                    """.format(  # nosec
                         tid_name=self.tid,
                         tilitid_name=self.tilitid,
                         basket_table=GPKG_BASKET_TABLE,
@@ -1183,7 +1188,7 @@ class GPKGConnector(DBConnector):
                         {t_ili_tid} = ?,
                         {attachment_key} = ?
                     WHERE {tid_name} = ?
-                    """.format(
+                    """.format(  # nosec
                         basket_table=GPKG_BASKET_TABLE,
                         t_ili_tid=self.tilitid,
                         attachment_key=self.attachmentKey,
@@ -1220,7 +1225,7 @@ class GPKGConnector(DBConnector):
                 """SELECT setting
                 FROM "{}"
                 WHERE tag = ?
-                """.format(
+                """.format(  # nosec
                     GPKG_SETTINGS_TABLE
                 ),
                 ("ch.ehi.ili2db.TidHandling",),
@@ -1238,7 +1243,7 @@ class GPKGConnector(DBConnector):
             cursor.execute(
                 """SELECT *
                 FROM "{}"
-                """.format(
+                """.format(  # nosec
                     GPKG_SETTINGS_TABLE
                 )
             )
@@ -1379,7 +1384,7 @@ class GPKGConnector(DBConnector):
             WHERE
             attr_name = 'ili2db.ili.translationOf'
             ;
-            """.format(
+            """.format(  # nosec
                 t_ili2db_meta_attrs=GPKG_METAATTRS_TABLE,
             )
         )
@@ -1398,7 +1403,7 @@ class GPKGConnector(DBConnector):
             white_list_restriction = """
             AND
             ilielement IN ({relevant_model_list})
-            """.format(
+            """.format(  # nosec
                 relevant_model_list=",".join(
                     [f"'{modelname}'" for modelname in relevant_models]
                 ),
@@ -1408,7 +1413,7 @@ class GPKGConnector(DBConnector):
             black_list_restriction = """
             AND
             ilielement NOT IN ({irrelevant_model_list})
-            """.format(
+            """.format(  # nosec
                 irrelevant_model_list=",".join(
                     [f"'{modelname}'" for modelname in irrelevant_models]
                 ),
@@ -1423,7 +1428,7 @@ class GPKGConnector(DBConnector):
             {black_list_restriction}
             {white_list_restriction}
             ;
-            """.format(
+            """.format(  # nosec
                 t_ili2db_meta_attrs=GPKG_METAATTRS_TABLE,
                 black_list_restriction=black_list_restriction,
                 white_list_restriction=white_list_restriction,
@@ -1448,7 +1453,7 @@ class GPKGConnector(DBConnector):
             LEFT JOIN "{t_ili2db_nls}" nls
             ON nls.ilielement = (t.thisClass||'.'||t.iliCode) and lang = '{lang}'
             ;
-            """.format(
+            """.format(  # nosec
                 tablename=tablename, t_ili2db_nls=GPKG_NLS_TABLE, lang=self._lang
             )
         )

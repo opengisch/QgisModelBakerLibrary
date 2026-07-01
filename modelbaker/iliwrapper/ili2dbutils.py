@@ -190,7 +190,7 @@ def get_java_path(base_configuration: BaseConfiguration) -> str:
             try:
                 v = str(winreg.QueryValueEx(rkey, varname)[0])
                 v = winreg.ExpandEnvironmentStrings(v)
-            except:
+            except Exception:
                 pass
         finally:
             winreg.CloseKey(rkey)

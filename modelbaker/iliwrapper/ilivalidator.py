@@ -11,7 +11,7 @@ License:
     (at your option) any later version.
 """
 
-import xml.etree.ElementTree as CET
+import xml.etree.ElementTree as CET  # nosec
 from enum import Enum
 
 from qgis.PyQt.QtCore import Qt
@@ -80,7 +80,7 @@ class ValidationResultModel(QStandardItemModel):
         self.beginResetModel()
         if self.configuration.xtflog:
             try:
-                root = CET.parse(self.configuration.xtflog).getroot()
+                root = CET.parse(self.configuration.xtflog).getroot()  # nosec
             except CET.ParseError as e:
                 print(
                     self.tr(

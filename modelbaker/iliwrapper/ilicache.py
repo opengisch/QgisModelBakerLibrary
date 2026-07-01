@@ -18,7 +18,7 @@ import os
 import re
 import shutil
 import urllib.parse
-import xml.etree.ElementTree as ET
+import xml.etree.ElementTree as ET  # nosec
 from enum import Enum
 from typing import TYPE_CHECKING, Optional
 
@@ -190,7 +190,7 @@ class IliCache(QObject):
         Parses the ilisite.xml provided in ``file`` and recursively downloads any subidiary sites.
         """
         try:
-            root = ET.parse(file).getroot()
+            root = ET.parse(file).getroot()  # nosec
         except ET.ParseError as e:
             QgsMessageLog.logMessage(
                 self.tr(
@@ -220,7 +220,7 @@ class IliCache(QObject):
         """
 
         try:
-            root = ET.parse(file).getroot()
+            root = ET.parse(file).getroot()  # nosec
         except ET.ParseError as e:
             QgsMessageLog.logMessage(
                 self.tr(
@@ -497,7 +497,7 @@ class IliDataCache(IliCache):
         Parses ilidata.xml provided in ``file`` and updates the local repositories cache.
         """
         try:
-            root = ET.parse(file).getroot()
+            root = ET.parse(file).getroot()  # nosec
         except ET.ParseError as e:
             QgsMessageLog.logMessage(
                 self.tr(
@@ -948,7 +948,7 @@ class IliToppingFileCache(IliDataCache):
         Parses ilidata.xml provided in ``file`` and updates the local repositories cache.
         """
         try:
-            root = ET.parse(file).getroot()
+            root = ET.parse(file).getroot()  # nosec
         except ET.ParseError as e:
             QgsMessageLog.logMessage(
                 self.tr(

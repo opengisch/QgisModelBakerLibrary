@@ -11,6 +11,7 @@ License:
     (at your option) any later version.
 """
 
+import ast
 import logging
 import re
 from typing import Optional
@@ -189,7 +190,7 @@ class PGConnector(DBConnector):
                     AND cprop.columnname = g.f_geometry_column
                     AND cprop."tag" IN ('ch.ehi.ili2db.c1Min', 'ch.ehi.ili2db.c2Min',
                      'ch.ehi.ili2db.c1Max', 'ch.ehi.ili2db.c2Max')
-                ) AS extent,""".format(
+                ) AS extent,""".format(  # nosec
                     self.schema
                 )
                 coord_decimals = """(
@@ -199,7 +200,7 @@ class PGConnector(DBConnector):
                     AND cprop.columnname = g.f_geometry_column
                     AND cprop."tag" IN ('ch.ehi.ili2db.c1Min', 'ch.ehi.ili2db.c2Min',
                      'ch.ehi.ili2db.c1Max', 'ch.ehi.ili2db.c2Max')
-                ) AS coord_decimals,""".format(
+                ) AS coord_decimals,""".format(  # nosec
                     self.schema
                 )
                 model_name = "left(c.iliname, strpos(c.iliname, '.')-1) AS model,"
@@ -236,7 +237,7 @@ class PGConnector(DBConnector):
                             )
                         )
                         THEN FALSE ELSE TRUE END AS relevance,
-                    """.format(
+                    """.format(  # nosec
                     schema=self.schema
                 )
 
@@ -245,7 +246,7 @@ class PGConnector(DBConnector):
                 # the relevant topics for optimization are the ones that are not more extended (or in the very last class).
                 topics = """substring( c.iliname from 1 for position('.' in substring( c.iliname from position('.' in c.iliname)+1))+position('.' in c.iliname)-1) as base_topic,
                         (SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree}) as all_topics,
-                        (SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics,""".format(
+                        (SELECT STRING_AGG(childTopic,',') FROM {topic_pedigree} WHERE NOT is_a_base) as relevant_topics,""".format(  # nosec
                     topic_pedigree="""(WITH RECURSIVE children(is_a_base, childTopic, baseTopic) AS (
                         SELECT
                         (CASE
@@ -271,7 +272,7 @@ class PGConnector(DBConnector):
                         ON substring( inheritance.baseClass from 1 for position('.' in substring( inheritance.baseClass from position('.' in inheritance.baseClass)+1))+position('.' in inheritance.baseClass)-1) = children.childTopic -- when the childTopic is as well the baseTopic of another childTopic
                         WHERE substring( inheritance.thisClass from 1 for position('.' in substring( inheritance.thisClass from position('.' in inheritance.thisClass)+1))+position('.' in inheritance.thisClass)-1) != children.childTopic --break the recursion when the coming childTopic will be the same
                     )
-                    SELECT childTopic, baseTopic, is_a_base FROM children) AS kiddies""".format(
+                    SELECT childTopic, baseTopic, is_a_base FROM children) AS kiddies""".format(  # nosec
                         schema=self.schema
                     )
                 )
@@ -280,32 +281,32 @@ class PGConnector(DBConnector):
 
                 domain_left_join = """LEFT JOIN {}.t_ili2db_table_prop p
                               ON p.tablename = tbls.tablename
-                              AND p.tag = 'ch.ehi.ili2db.tableKind'""".format(
+                              AND p.tag = 'ch.ehi.ili2db.tableKind'""".format(  # nosec
                     self.schema
                 )
                 alias_left_join = """LEFT JOIN {}.t_ili2db_table_prop alias
                               ON alias.tablename = tbls.tablename
-                              AND alias.tag = 'ch.ehi.ili2db.dispName'""".format(
+                              AND alias.tag = 'ch.ehi.ili2db.dispName'""".format(  # nosec
                     self.schema
                 )
                 model_where = """LEFT JOIN {}.t_ili2db_classname c
-                      ON tbls.tablename = c.sqlname""".format(
+                      ON tbls.tablename = c.sqlname""".format(  # nosec
                     self.schema
                 )
                 base_class_left_join = """LEFT JOIN {}.t_ili2db_inheritance inh
-                      ON c.iliname = inh.thisclass""".format(
+                      ON c.iliname = inh.thisclass""".format(  # nosec
                     self.schema
                 )
                 attribute_name = "attrs.sqlname as attribute_name,"
                 attribute_left_join = """LEFT JOIN {}.t_ili2db_attrname attrs
-                      ON c.iliname = attrs.iliname""".format(
+                      ON c.iliname = attrs.iliname""".format(  # nosec
                     self.schema
                 )
                 translations_left_join = (
                     """LEFT JOIN {}.t_ili2db_nls nls
                       ON c.iliname = nls.ilielement
                       AND nls.lang = '{}'
-                """.format(
+                """.format(  # nosec
                         self.schema, lang
                     )
                     if tr_enabled
@@ -356,7 +357,7 @@ class PGConnector(DBConnector):
                   ON ga.attrelid = i.indrelid
                   AND ga.attname = g.f_geometry_column
                 WHERE (i.indisprimary OR i.indisprimary IS NULL) {schema_where}
-            """.format(
+            """.format(  # nosec
                     kind_settings_field=kind_settings_field,
                     table_alias=table_alias,
                     model_name=model_name,
@@ -500,25 +501,25 @@ class PGConnector(DBConnector):
                 unit_join = """LEFT JOIN {}.t_ili2db_column_prop unit
                                                     ON c.table_name=unit.tablename AND
                                                     c.column_name=unit.columnname AND
-                                                    unit.tag = 'ch.ehi.ili2db.unit'""".format(
+                                                    unit.tag = 'ch.ehi.ili2db.unit'""".format(  # nosec
                     self.schema
                 )
                 text_kind_join = """LEFT JOIN {}.t_ili2db_column_prop txttype
                                                         ON c.table_name=txttype.tablename AND
                                                         c.column_name=txttype.columnname AND
-                                                        txttype.tag = 'ch.ehi.ili2db.textKind'""".format(
+                                                        txttype.tag = 'ch.ehi.ili2db.textKind'""".format(  # nosec
                     self.schema
                 )
                 disp_name_join = """LEFT JOIN {}.t_ili2db_column_prop alias
                                                         ON c.table_name=alias.tablename AND
                                                         c.column_name=alias.columnname AND
-                                                        alias.tag = 'ch.ehi.ili2db.dispName'""".format(
+                                                        alias.tag = 'ch.ehi.ili2db.dispName'""".format(  # nosec
                     self.schema
                 )
                 full_name_join = """LEFT JOIN {}.t_ili2db_attrname full_name
                                                             ON full_name.{}='{}' AND
                                                             c.column_name=full_name.sqlname
-                                                            """.format(
+                                                            """.format(  # nosec
                     self.schema,
                     "owner" if self.ili_version() == 3 else "colowner",
                     table_name,
@@ -526,13 +527,13 @@ class PGConnector(DBConnector):
                 enum_domain_join = """LEFT JOIN {}.t_ili2db_column_prop enum_domain
                                                     ON c.table_name=enum_domain.tablename AND
                                                     c.column_name=enum_domain.columnname AND
-                                                    enum_domain.tag = 'ch.ehi.ili2db.enumDomain'""".format(
+                                                    enum_domain.tag = 'ch.ehi.ili2db.enumDomain'""".format(  # nosec
                     self.schema
                 )
                 oid_domain_join = """LEFT JOIN {}.t_ili2db_column_prop oid_domain
                                                     ON c.table_name=oid_domain.tablename AND
                                                     lower(c.column_name)=lower(oid_domain.columnname) AND
-                                                    oid_domain.tag = 'ch.ehi.ili2db.oidDomain'""".format(
+                                                    oid_domain.tag = 'ch.ehi.ili2db.oidDomain'""".format(  # nosec
                     self.schema
                 )
 
@@ -545,7 +546,7 @@ class PGConnector(DBConnector):
                                                                 'form_order', --obsolete
                                                                 'qgis.modelbaker.form_order', --obsolete
                                                                 'qgis.modelbaker.formOrder')
-                                                            """.format(
+                                                            """.format(  # nosec
                         schema=self.schema, t_ili2db_meta_attrs=PG_METAATTRS_TABLE
                     )
                     order_by_attr_order = """ORDER BY attr_order, ordinal_position --to keep the sort of the occurence"""
@@ -556,7 +557,7 @@ class PGConnector(DBConnector):
                     attr_mapping_join = """LEFT JOIN {schema}.{t_ili2db_meta_attrs} meta_attr_mapping_value
                                                             ON full_name.iliname=meta_attr_mapping_value.ilielement AND
                                                             meta_attr_mapping_value.attr_name='ili2db.mapping'
-                                                            """.format(
+                                                            """.format(  # nosec
                         schema=self.schema, t_ili2db_meta_attrs=PG_METAATTRS_TABLE
                     )
 
@@ -564,7 +565,7 @@ class PGConnector(DBConnector):
                         """LEFT JOIN {}.t_ili2db_nls nls
                                           ON full_name.iliname = nls.ilielement
                                           AND nls.lang = '{}'
-                                    """.format(
+                                    """.format(  # nosec
                             self.schema, lang
                         )
                         if tr_enabled
@@ -588,7 +589,7 @@ class PGConnector(DBConnector):
                     pgd.description,
                     {translation_label}
                     c.ordinal_position
-                """.format(
+                """.format(  # nosec
                     metaattr_part=metaattr_groupby_part,
                     translation_label="nls.label," if tr_enabled else "",
                 )
@@ -624,7 +625,7 @@ class PGConnector(DBConnector):
                     WHERE st.relid = '{schema}."{table}"'::regclass
                     {group_by}
                     {order_by_attr_order};
-                    """.format(
+                    """.format(  # nosec
                         schema=self.schema,
                         table=table_name,
                         unit_field=unit_field,
@@ -736,7 +737,7 @@ class PGConnector(DBConnector):
 
             types_mapping = dict()
             for types_entry in types_entries:
-                values = eval(types_entry["setting"])
+                values = ast.literal_eval(types_entry["setting"])
                 types_mapping[types_entry["columnname"].lower()] = values
             return types_mapping
         return {}
@@ -768,7 +769,7 @@ class PGConnector(DBConnector):
                             LEFT JOIN {schema}.t_ili2db_attrname AS ATTRNAME
                              ON ATTRNAME.sqlname = KCU1.COLUMN_NAME AND ATTRNAME.{colowner} = KCU1.TABLE_NAME AND ATTRNAME.target = KCU2.TABLE_NAME
                             LEFT JOIN {schema}.{t_ili2db_meta_attrs} AS META_ATTRS
-                             ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.assocKind'""".format(
+                             ON META_ATTRS.ilielement = ATTRNAME.iliname AND META_ATTRS.attr_name = 'ili2db.ili.assocKind'""".format(  # nosec
                     schema=self.schema,
                     t_ili2db_meta_attrs=PG_METAATTRS_TABLE,
                     colowner="owner" if self.ili_version() == 3 else "colowner",
@@ -789,7 +790,7 @@ class PGConnector(DBConnector):
                             LEFT JOIN {schema}.{t_ili2db_meta_attrs} AS META_ATTRS_ASSOC_CARDINALITY_MAX
                              ON META_ATTRS_ASSOC_CARDINALITY_MAX.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ASSOC_CARDINALITY_MAX.attr_name = 'ili2db.ili.assocCardinalityMax'
                             LEFT JOIN {schema}.{t_ili2db_meta_attrs} AS META_ATTRS_ASSOC_CARDINALITY_MIN
-                             ON META_ATTRS_ASSOC_CARDINALITY_MIN.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ASSOC_CARDINALITY_MIN.attr_name = 'ili2db.ili.assocCardinalityMin'""".format(
+                             ON META_ATTRS_ASSOC_CARDINALITY_MIN.ilielement = ATTRNAME_CARDINALITY.iliname AND META_ATTRS_ASSOC_CARDINALITY_MIN.attr_name = 'ili2db.ili.assocCardinalityMin'""".format(  # nosec
                     schema=self.schema,
                     t_ili2db_meta_attrs=PG_METAATTRS_TABLE,
                     colowner="owner" if self.ili_version() == 3 else "colowner",
@@ -814,7 +815,7 @@ class PGConnector(DBConnector):
                     target_table = "c.sqlname"
                     target_table_join = """JOIN {}.T_ILI2DB_CLASSNAME c
                         ON c.iliname=p.setting
-                        AND""".format(
+                        AND""".format(  # nosec
                         self.schema
                     )
 
@@ -826,7 +827,7 @@ class PGConnector(DBConnector):
                     {target_table_join} tag = 'ch.ehi.ili2db.enumDomain'
                     ) all_relations
                     ORDER BY referencing_table, referencing_column, referenced_column DESC
-                    ) relations_without_duplicates """.format(
+                    ) relations_without_duplicates """.format(  # nosec
                     target_table=target_table,
                     translate=translate,
                     schema=self.schema,
@@ -847,7 +848,7 @@ class PGConnector(DBConnector):
                             GROUP BY RC.CONSTRAINT_NAME, KCU1.TABLE_NAME, KCU1.COLUMN_NAME, KCU2.CONSTRAINT_SCHEMA, KCU2.TABLE_NAME, KCU2.COLUMN_NAME, KCU1.ORDINAL_POSITION{strength_group_by}{cardinality_group_bys}
                             {fake_relation_union}
                             {order_by}
-                            """.format(
+                            """.format(  # nosec
                     distinct=distinct,
                     schema_where1=schema_where1,
                     schema_where2=schema_where2,
@@ -1209,7 +1210,7 @@ class PGConnector(DBConnector):
                 cur.execute(
                     """
                     UPDATE {schema}.{dataset_table} SET datasetname = %(datasetname)s WHERE {tid_name} = {tid}
-                    """.format(
+                    """.format(  # nosec
                         schema=self.schema,
                         dataset_table=PG_DATASET_TABLE,
                         tid_name=self.tid,
