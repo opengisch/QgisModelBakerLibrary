@@ -546,11 +546,13 @@ class GPKGConnector(DBConnector):
                     # In case of enums in a single table (T_ILI2DB_ENUM) without id (createSingleEnumTab)
                     # we have to generate the fake foreign keys to it based on the enumDomain
                     cursor.execute(
-                        f"""SELECT '{GPKG_ENUM_TABLE}' as 'table', p.columnname as 'from'
+                        """SELECT '{GPKG_ENUM_TABLE}' as 'table', p.columnname as 'from'
                         FROM T_ILI2DB_COLUMN_PROP p
                         WHERE tablename = ?
                         and tag = 'ch.ehi.ili2db.enumDomain'
-                    """,
+                    """.format(  # nosec
+                            GPKG_ENUM_TABLE=GPKG_ENUM_TABLE
+                        ),
                         (table_info_name,),
                     )
                     fake_enum_foreign_keys = cursor.fetchall()

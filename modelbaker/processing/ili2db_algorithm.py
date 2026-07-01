@@ -74,7 +74,7 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
     DBNAME = "DBNAME"
     PORT = "PORT"
     USER = "USER"
-    PASSWORD = "PASSWORD"  # nosec
+    PASSWORD = "PASSWORD"  # pragma: allowlist secret
     SCHEMA = "SCHEMA"
     SSLMODE = "SSLMODE"
     USESUPERUSER = "USESUPERUSER"

@@ -47,7 +47,7 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
     DBNAME = "DBNAME"
     PORT = "PORT"
     USER = "USER"
-    PASSWORD = "PASSWORD"  # nosec
+    PASSWORD = "PASSWORD"  # pragma: allowlist secret
     SCHEMA = "SCHEMA"
     SSLMODE = "SSLMODE"
     AUTHCFG = "AUTHCFG"
