@@ -20,15 +20,14 @@ from qgis.PyQt.QtCore import QEventLoop, QObject, QProcess, pyqtSignal
 
 from ..utils.qt_utils import AbstractQObjectMeta
 from .ili2dbargs import get_ili2db_args
-from .ili2dbconfig import Ili2DbCommandConfiguration
-from .ili2dbutils import JavaNotFoundError, get_ili2db_bin, get_java_path
+from .ili2dbconfig import Ili2CCommandConfiguration, Ili2DbCommandConfiguration
+from .ili2dbutils import JavaNotFoundError, get_ili2c_bin, get_ili2db_bin, get_java_path
 
 
 class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     SUCCESS = 0
-    # TODO: Insert more codes?
     ERROR = 1000
-    ILI2DB_NOT_FOUND = 1001
+    ILI2_NOT_FOUND = 1001
 
     stdout = pyqtSignal(str)
     stderr = pyqtSignal(str)
@@ -36,7 +35,8 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     process_finished = pyqtSignal(int, int)
     cancel_process = pyqtSignal()
 
-    __done_pattern = re.compile(r"Info: \.\.\.([a-zA-Z]+ )?done")
+    # supertolerant done pattern
+    _done_pattern = re.compile(r"Info: \.\.\..*done")
     __result = None
 
     def __init__(self, parent=None):
@@ -56,34 +56,31 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
             self.encoding = "UTF8"
 
     @abstractmethod
-    def _create_config(self) -> Ili2DbCommandConfiguration:
+    def _create_config(self) -> Ili2DbCommandConfiguration | Ili2CCommandConfiguration:
         """Creates the configuration that will be used by *run* method.
 
         Returns:
-            Ili2DbCommandConfiguration: configuration"""
+            Ili2DbCommandConfiguration or Ili2CCommandConfiguration: ili2db/ili2c configuration
+        """
 
-    def _get_ili2db_version(self) -> int:
-        return self.configuration.db_ili_version
-
+    @abstractmethod
     def _args(self, hide_password: bool) -> list:
-        """Gets the list of ili2db arguments from configuration.
+        """Gets the list of ili2db/ili2c arguments from configuration.
 
         Args:
             hide_password (bool): *True* to mask the password, *False* otherwise.
 
         Returns:
-            list: ili2db arguments list."""
-        self.configuration.tool = self.tool
+            list: ili2db/ili2c arguments list.
+        """
 
-        return get_ili2db_args(self.configuration, hide_password)
+    @abstractmethod
+    def _ili2_jar_arg(self):
+        """Gets the list of arguments to run ili2db/ili2c jar.
 
-    def _ili2db_jar_arg(self) -> list:
-        ili2db_bin = get_ili2db_bin(
-            self.tool, self._get_ili2db_version(), self.stdout, self.stderr
-        )
-        if not ili2db_bin:
-            return self.ILI2DB_NOT_FOUND
-        return ["-jar", ili2db_bin]
+        Returns:
+            list: ili2db/ili2c jar arguments list.
+        """
 
     def _escaped_arg(self, argument=str) -> str:
         if '"' in argument:
@@ -93,15 +90,15 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         return argument
 
     def command(self, hide_password: bool = False) -> str:
-        ili2db_jar_arg = self._ili2db_jar_arg()
-        if ili2db_jar_arg == self.ILI2DB_NOT_FOUND:
-            return "ili2db tool not found!"
+        ili2_jar_arg = self._ili2_jar_arg()
+        if ili2_jar_arg == self.ILI2_NOT_FOUND:
+            return "ili2 tool not found!"
 
         args = self._args(hide_password)
         java_path = self._escaped_arg(
             get_java_path(self.configuration.base_configuration)
         )
-        command_args = ili2db_jar_arg + args
+        command_args = ili2_jar_arg + args
         valid_args = []
         for command_arg in command_args:
             valid_args.append(self._escaped_arg(command_arg))
@@ -139,9 +136,9 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         )
 
         if not edited_command:
-            ili2db_jar_arg = self._ili2db_jar_arg()
-            if ili2db_jar_arg == self.ILI2DB_NOT_FOUND:
-                return self.ILI2DB_NOT_FOUND
+            ili2db_jar_arg = self._ili2_jar_arg()
+            if ili2db_jar_arg == self.ILI2_NOT_FOUND:
+                return self.ILI2_NOT_FOUND
             args = self._args(False)
             java_path = get_java_path(self.configuration.base_configuration)
             proc.start(java_path, ili2db_jar_arg + args)
@@ -168,7 +165,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     def stderr_ready(self, proc: QProcess) -> None:
         text = bytes(proc.readAllStandardError()).decode(self.encoding)
 
-        if self.__done_pattern.search(text):
+        if self._done_pattern.search(text):
             self.__result = self.SUCCESS
 
         self.stderr.emit(text)
@@ -176,3 +173,67 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     def stdout_ready(self, proc: QProcess) -> None:
         text = bytes(proc.readAllStandardOutput()).decode(self.encoding)
         self.stdout.emit(text)
+
+
+class Ili2DbExecutable(IliExecutable):
+    """Executes operation on ili2db."""
+
+    _done_pattern = re.compile(r"Info: \.\.\.([a-zA-Z]+ )?done")
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def _args(self, hide_password):
+        """Gets the list of ili2db arguments from configuration.
+
+        Args:
+            hide_password (bool): *True* to mask the password, *False* otherwise.
+
+        Returns:
+            list: ili2db arguments list.
+        """
+        self.configuration.tool = self.tool
+
+        return get_ili2db_args(self.configuration, hide_password)
+
+    def _ili2_jar_arg(self):
+        """Locates and creates the Java entrypoint arguments array targeting the ili2db jar.
+
+        Returns:
+            list or int: Executable jar target arguments list, or a missing constant code.
+        """
+        ili2db_bin = get_ili2db_bin(
+            self.tool, self._get_ili2db_version(), self.stdout, self.stderr
+        )
+        if not ili2db_bin:
+            return self.ILI2_NOT_FOUND
+        return ["-jar", ili2db_bin]
+
+    def _get_ili2db_version(self):
+        return self.configuration.db_ili_version
+
+
+class Ili2CExecutable(IliExecutable):
+    """Executes operation on ili2c."""
+
+    _done_pattern = re.compile(r"Info: \.\.\.compiler run done.*$")
+
+    def __init__(self, parent=None):
+        super().__init__(parent)
+
+    def _args(self, _param):
+        """Gets the list of ili2db arguments from configuration.
+
+        Args:
+            _param (bool): Unused parameter, kept for interface compatibility.
+
+        Returns:
+            list: ili2c arguments list.
+        """
+        return self.configuration.to_ili2c_args()
+
+    def _ili2_jar_arg(self):
+        ili2c_bin = get_ili2c_bin(self.stdout, self.stderr)
+        if not ili2c_bin:
+            return self.ILI2_NOT_FOUND
+        return ["-jar", ili2c_bin]

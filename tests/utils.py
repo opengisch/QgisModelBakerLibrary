@@ -24,6 +24,7 @@ from modelbaker.iliwrapper.ili2dbconfig import (
     DeleteConfiguration,
     ExportConfiguration,
     ExportMetaConfigConfiguration,
+    Ili2CCommandConfiguration,
     ImportDataConfiguration,
     SchemaImportConfiguration,
     UpdateDataConfiguration,
@@ -210,6 +211,13 @@ def ilimetaconfigexporter_config(tool=DbIliMode.ili2pg, modeldir=None):
 
     configuration.base_configuration = base_config
 
+    return configuration
+
+
+def ilicompiler_config():
+    base_config = BaseConfiguration()
+    configuration = Ili2CCommandConfiguration()
+    configuration.base_configuration = base_config
     return configuration
 
 

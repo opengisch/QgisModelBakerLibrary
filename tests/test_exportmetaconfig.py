@@ -38,7 +38,7 @@ class TestExportMetaConfig(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -55,7 +55,9 @@ class TestExportMetaConfig(unittest.TestCase):
         # ExportMetaConfig
         exportMetaConfig = ilimetaconfigexporter.MetaConfigExporter()
         exportMetaConfig.tool = DbIliMode.ili2pg
-        exportMetaConfig.configuration = ilimetaconfigexporter_config(importer.tool)
+        exportMetaConfig.configuration = ilimetaconfigexporter_config(
+            importer.tool, "ilimodels"
+        )
         metaconfig_file = os.path.join(
             self.basetestpath, "tmp_exported_metaconfig_pg.ini"
         )
@@ -126,7 +128,7 @@ class TestExportMetaConfig(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -143,7 +145,9 @@ class TestExportMetaConfig(unittest.TestCase):
         # ExportMetaConfig
         exportMetaConfig = ilimetaconfigexporter.MetaConfigExporter()
         exportMetaConfig.tool = DbIliMode.ili2gpkg
-        exportMetaConfig.configuration = ilimetaconfigexporter_config(importer.tool)
+        exportMetaConfig.configuration = ilimetaconfigexporter_config(
+            importer.tool, "ilimodels"
+        )
         exportMetaConfig.configuration.dbfile = importer.configuration.dbfile
         metaconfig_file = os.path.join(
             self.basetestpath, "tmp_exported_metaconfig_gpkg.ini"

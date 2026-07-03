@@ -248,6 +248,12 @@ class IliCache(QObject):
                     model["version"] = self.get_element_text(
                         model_metadata.find("ili23:Version", self.ns)
                     )
+                    model["file"] = (
+                        self.get_element_text(
+                            model_metadata.find("ili23:File", self.ns)
+                        )
+                        or ""
+                    )
                     model["repository"] = netloc
                     repo_models.append(model)
 
@@ -264,6 +270,12 @@ class IliCache(QObject):
                 if model["name"]:
                     model["version"] = self.get_element_text(
                         model_metadata.find("ili23:Version", self.ns)
+                    )
+                    model["file"] = (
+                        self.get_element_text(
+                            model_metadata.find("ili23:File", self.ns)
+                        )
+                        or ""
                     )
                     model["repository"] = netloc
                     repo_models.append(model)
@@ -345,6 +357,7 @@ class IliCache(QObject):
                     model["name"] = result.group(1)
                     model["version"] = ""
                     model["repository"] = ilipath
+                    model["file"] = os.path.basename(ilipath)
                     models += [model]
 
                 result = re_model_version.search(line)
@@ -378,6 +391,7 @@ class IliModelItemModel(QStandardItemModel):
     class Roles(Enum):
         ILIREPO = Qt.ItemDataRole.UserRole + 1
         VERSION = Qt.ItemDataRole.UserRole + 2
+        FILE = Qt.ItemDataRole.UserRole + 3
 
         def __int__(self):
             return self.value
@@ -396,15 +410,22 @@ class IliModelItemModel(QStandardItemModel):
                 if any(model["name"] == s for s in names):
                     continue
 
+                name = model.get("name")
+                if not name:
+                    continue
                 item = QStandardItem()
-                item.setData(model["name"], int(Qt.ItemDataRole.DisplayRole))
+                item.setData(name, int(Qt.ItemDataRole.DisplayRole))
                 item.setData(
-                    model["name"], int(Qt.ItemDataRole.EditRole)
+                    name, int(Qt.ItemDataRole.EditRole)
                 )  # considered in completer
-                item.setData(model["repository"], int(IliModelItemModel.Roles.ILIREPO))
-                item.setData(model["version"], int(IliModelItemModel.Roles.VERSION))
-
-                names.append(model["name"])
+                item.setData(
+                    model.get("repository", ""), int(IliModelItemModel.Roles.ILIREPO)
+                )
+                item.setData(
+                    model.get("version", ""), int(IliModelItemModel.Roles.VERSION)
+                )
+                item.setData(model.get("file", ""), int(IliModelItemModel.Roles.FILE))
+                names.append(name)
                 self.appendRow(item)
 
 

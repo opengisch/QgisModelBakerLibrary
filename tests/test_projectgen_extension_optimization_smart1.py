@@ -65,7 +65,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
         )
@@ -114,7 +114,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
         )
@@ -166,7 +166,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Staedtische_Ortsplanung_V1_1.ili"
         )
@@ -471,7 +471,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Polymorphic_Ortsplanung_V1_1.ili"
         )
@@ -520,7 +520,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Polymorphic_Ortsplanung_V1_1.ili"
         )
@@ -572,7 +572,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Polymorphic_Ortsplanung_V1_1.ili"
         )
@@ -907,7 +907,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Kantonale_Bauplanung_V1_1.ili"
         )
@@ -955,7 +955,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Kantonale_Bauplanung_V1_1.ili"
         )
@@ -1007,7 +1007,7 @@ class TestProjectExtOptimizationSmart1(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Kantonale_Bauplanung_V1_1.ili"
         )

@@ -287,7 +287,7 @@ class TestImport(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -308,7 +308,7 @@ class TestImport(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_winti.xtf"
@@ -341,7 +341,7 @@ class TestImport(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -362,7 +362,7 @@ class TestImport(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_winti.xtf"
@@ -393,7 +393,7 @@ class TestImport(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -415,7 +415,7 @@ class TestImport(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2mssql
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_winti.xtf"
@@ -452,7 +452,7 @@ class TestImport(unittest.TestCase):
         # Schema Import normal
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
         importer.configuration.ilimodels = "RoadsSimple"
         importer.configuration.dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(
@@ -467,7 +467,7 @@ class TestImport(unittest.TestCase):
         # Import valid data succeeds
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_valid_street.xtf"
@@ -480,7 +480,7 @@ class TestImport(unittest.TestCase):
         # Import invalid data fails because validation is not disabled
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_invalid_street.xtf"
@@ -493,7 +493,7 @@ class TestImport(unittest.TestCase):
         # Import invalid data with disabled validation still fails because of the not null constraint in the DB
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_invalid_street.xtf"
@@ -506,7 +506,7 @@ class TestImport(unittest.TestCase):
         # Schema Import allowing NOT NULL values for mandatory attributes (disable_mandatory)
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
         importer.configuration.ilimodels = "RoadsSimple"
         importer.configuration.dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(
@@ -522,7 +522,7 @@ class TestImport(unittest.TestCase):
         # Import valid data succeeds
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_valid_street.xtf"
@@ -535,7 +535,7 @@ class TestImport(unittest.TestCase):
         # Import invalid data fails because validation is not disabled
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_invalid_street.xtf"
@@ -547,7 +547,7 @@ class TestImport(unittest.TestCase):
 
         # Import invalid data with disabled validation finally succeeds because of the disabled mandatory constraint in the DB
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_invalid_street.xtf"
@@ -561,7 +561,7 @@ class TestImport(unittest.TestCase):
         # Schema Import normal
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
         importer.configuration.ilimodels = "RoadsSimple"
         importer.configuration.dbfile = os.path.join(
@@ -577,7 +577,7 @@ class TestImport(unittest.TestCase):
         # Import valid data succeeds
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_valid_street.xtf"
@@ -590,7 +590,7 @@ class TestImport(unittest.TestCase):
         # Import invalid data fails because validation is not disabled
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_invalid_street.xtf"
@@ -603,7 +603,7 @@ class TestImport(unittest.TestCase):
         # Import invalid data with disabled validation still fails because of the not null constraint in the DB
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_invalid_street.xtf"
@@ -616,7 +616,7 @@ class TestImport(unittest.TestCase):
         # Schema Import allowing NOT NULL values for mandatory attributes (disable_mandatory)
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
         importer.configuration.ilimodels = "RoadsSimple"
         importer.configuration.dbfile = os.path.join(
@@ -633,7 +633,7 @@ class TestImport(unittest.TestCase):
         # Import valid data succeeds
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_valid_street.xtf"
@@ -646,7 +646,7 @@ class TestImport(unittest.TestCase):
         # Import invalid data fails because validation is not disabled
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_invalid_street.xtf"
@@ -658,7 +658,7 @@ class TestImport(unittest.TestCase):
 
         # Import invalid data with disabled validation finally succeeds because of the disabled mandatory constraint in the DB
         dataImporter.tool = DbIliMode.gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_roads_simple_invalid_street.xtf"

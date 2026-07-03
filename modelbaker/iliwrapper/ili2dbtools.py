@@ -15,6 +15,11 @@ from .globals import DbIliMode
 
 
 def get_tool_version(tool, db_ili_version: int) -> str:
+    """Gets the hardcoded version string for the corresponding tool and the version 3 or bigger.
+
+    Returns:
+        str: The version string (e.g., "5.6.6").
+    """
     if tool == DbIliMode.ili2gpkg:
         if db_ili_version == 3:
             return "3.11.3"
@@ -35,6 +40,13 @@ def get_tool_version(tool, db_ili_version: int) -> str:
 
 
 def get_tool_url(tool: DbIliMode, db_ili_version: int) -> str:
+    """Constructs the absolute remote download URL for obtaining the ili2db binary archive.
+
+    Uses the version string pulled from :func:`get_tool_version`.
+
+    Returns:
+        str: Absolute download URL string.
+    """
     if tool == DbIliMode.ili2gpkg:
         return "https://downloads.interlis.ch/ili2gpkg/ili2gpkg-{version}.zip".format(
             version=get_tool_version(tool, db_ili_version)
@@ -49,3 +61,25 @@ def get_tool_url(tool: DbIliMode, db_ili_version: int) -> str:
         )
 
     return ""
+
+
+def get_ili2c_tool_version():
+    """Gets the hardcoded stable fallback or current version string for the ili2c tool.
+
+    Returns:
+        str: The version string (e.g., "5.6.6").
+    """
+    return "5.6.6"
+
+
+def get_ili2c_tool_url():
+    """Constructs the absolute remote download URL for obtaining the ili2c binary archive.
+
+    Uses the version string pulled from :func:`get_ili2c_tool_version`.
+
+    Returns:
+        str: Absolute download URL string.
+    """
+    return "https://downloads.interlis.ch/ili2c/ili2c-{version}.zip".format(
+        version=get_ili2c_tool_version()
+    )
