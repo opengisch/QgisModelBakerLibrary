@@ -18,10 +18,10 @@ from qgis.PyQt.QtCore import Qt
 from qgis.PyQt.QtGui import QStandardItem, QStandardItemModel
 
 from .ili2dbconfig import ValidateConfiguration
-from .iliexecutable import IliExecutable
+from .iliexecutable import Ili2DbExecutable
 
 
-class Validator(IliExecutable):
+class Validator(Ili2DbExecutable):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.version = 4

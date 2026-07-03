@@ -15,10 +15,10 @@ from .ili2dbconfig import (
     ImportDataConfiguration,
     SchemaImportConfiguration,
 )
-from .iliexecutable import IliExecutable
+from .iliexecutable import Ili2DbExecutable
 
 
-class Importer(IliExecutable):
+class Importer(Ili2DbExecutable):
     def __init__(self, dataImport=False, parent=None):
         self.__data_import = dataImport
         super().__init__(parent)

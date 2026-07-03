@@ -11,10 +11,10 @@ License:
     (at your option) any later version.
 """
 from .ili2dbconfig import DeleteConfiguration, Ili2DbCommandConfiguration
-from .iliexecutable import IliExecutable
+from .iliexecutable import Ili2DbExecutable
 
 
-class Deleter(IliExecutable):
+class Deleter(Ili2DbExecutable):
     def __init__(self, parent=None):
         super().__init__(parent)
 
