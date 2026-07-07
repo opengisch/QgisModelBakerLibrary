@@ -941,11 +941,11 @@ class Generator(QObject):
                 system_layers,
             ) = self._separated_legend_layers(relevant_layers)
 
-            for l in polygon_layers:
+            for l in point_layers:
                 legend.append(l)
             for l in line_layers:
                 legend.append(l)
-            for l in point_layers:
+            for l in polygon_layers:
                 legend.append(l)
 
             # create groups
