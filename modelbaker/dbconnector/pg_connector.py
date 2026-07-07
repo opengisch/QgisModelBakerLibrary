@@ -938,7 +938,7 @@ class PGConnector(DBConnector):
                         FROM {schema}.t_ili2db_attrname aname
                         LEFT JOIN {schema}.t_ili2db_column_prop as cprop
                         ON aname.sqlname = cprop.columnname and cprop.tag = 'ch.ehi.ili2db.enumDomain' AND aname.colowner = cprop.tablename
-                        LEFT JOIN {schema}.t_ili2db_classname as classn
+                        JOIN {schema}.t_ili2db_classname as classn
                         ON classn.iliname = cprop.setting
                         LEFT JOIN {schema}.{t_ili2db_meta_attrs} as meta_attrs_array
                         ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'
