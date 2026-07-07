@@ -735,7 +735,7 @@ class GPKGConnector(DBConnector):
                             FROM T_ILI2DB_ATTRNAME aname
                             LEFT JOIN T_ILI2DB_COLUMN_PROP as cprop
                             ON aname.sqlname = cprop.columnname and cprop.tag = 'ch.ehi.ili2db.enumDomain' AND aname.colowner = cprop.tablename
-                            LEFT JOIN T_ILI2DB_CLASSNAME as classn
+                            JOIN T_ILI2DB_CLASSNAME as classn
                             ON classn.iliname = cprop.setting
                             LEFT JOIN T_ILI2DB_META_ATTRS as meta_attrs_array
                             ON meta_attrs_array.ilielement = aname.iliname AND meta_attrs_array.attr_name = 'ili2db.mapping'

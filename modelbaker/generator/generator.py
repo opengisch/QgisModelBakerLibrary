@@ -644,9 +644,13 @@ class Generator(QObject):
             bags_of_info = self.get_bags_of_info()
             bags_of_enum = {}
             for record in bags_of_info:
+                if (
+                    record["current_layer_name"] is None
+                    or record["target_layer_name"] is None
+                ):
+                    continue
                 for layer in layers:
                     if record["current_layer_name"] == layer.name:
-                        # on enum relations, if we have an extended domain, get its child name
                         child_domain_name = self._child_domain_name(
                             layer_map[record["target_layer_name"]][0],
                             layer,
