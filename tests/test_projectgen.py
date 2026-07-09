@@ -298,6 +298,23 @@ class TestProjectGen(unittest.TestCase):
             > 3
         )
 
+        # check order of geometry layer
+        point_layer = qgis_project.mapLayersByName(
+            "Belasteter_Standort (Geo_Lage_Punkt)"
+        )[0]
+        polygon_layer = qgis_project.mapLayersByName(
+            "Belasteter_Standort (Geo_Lage_Polygon)"
+        )[0]
+
+        point_node = qgis_project.layerTreeRoot().findLayer(point_layer.id())
+        point_position = point_node.parent().children().index(point_node)
+        polygon_node = qgis_project.layerTreeRoot().findLayer(polygon_layer.id())
+        polygon_position = polygon_node.parent().children().index(polygon_node)
+
+        assert (
+            point_position < polygon_position
+        )  # point layer should be above polygon layer in the legend
+
     def test_ili2db3_kbs_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
@@ -505,6 +522,21 @@ class TestProjectGen(unittest.TestCase):
             "parzellenidentifikation",
             "belasteter_standort_geo_lage_punkt",
         } == {layer.name for layer in available_layers}
+
+        # check order of geometry layer
+        point_layer = qgis_project.mapLayersByName(
+            "Belasteter_Standort (Geo_Lage_Punkt)"
+        )[0]
+        polygon_layer = qgis_project.mapLayersByName("Belasteter_Standort")[0]
+
+        point_node = qgis_project.layerTreeRoot().findLayer(point_layer.id())
+        point_position = point_node.parent().children().index(point_node)
+        polygon_node = qgis_project.layerTreeRoot().findLayer(polygon_layer.id())
+        polygon_position = polygon_node.parent().children().index(polygon_node)
+
+        assert (
+            point_position < polygon_position
+        )  # point layer should be above polygon layer in the legend
 
     def test_naturschutz_postgis(self):
         importer = iliimporter.Importer()
