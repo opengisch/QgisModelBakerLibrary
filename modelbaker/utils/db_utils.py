@@ -214,7 +214,7 @@ def model_files_generated_from_db(
 
     model_records = db_connector.get_models()
     for record in model_records:
-        name = record["modelname"].split("{")[0]
+        name = record["modelname"]
         # on an empty model_list we create a file for every found model
         if not model_list or name in model_list:
             modelfilepath = os.path.join(
