@@ -549,7 +549,7 @@ class GPKGConnector(DBConnector):
                         """SELECT '{GPKG_ENUM_TABLE}' as 'table', p.columnname as 'from'
                         FROM T_ILI2DB_COLUMN_PROP p
                         WHERE tablename = ?
-                        and tag = 'ch.ehi.ili2db.enumDomain'
+                        and tag = 'ch.ehi.ili2db.enumDomain' AND setting != 'INTERLIS.BOOLEAN'
                     """.format(  # nosec
                             GPKG_ENUM_TABLE=GPKG_ENUM_TABLE
                         ),
@@ -569,6 +569,7 @@ class GPKGConnector(DBConnector):
                         ON c.iliname=p.setting
                         WHERE tablename = ?
                         and tag = 'ch.ehi.ili2db.enumDomain'
+                        and c.iliname != 'INTERLIS.BOOLEAN'
                     """,
                         (table_info_name,),
                     )
