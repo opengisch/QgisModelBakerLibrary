@@ -14,6 +14,8 @@ License:
 
 from __future__ import annotations
 
+import os
+from datetime import datetime
 from typing import TYPE_CHECKING
 
 from qgis.core import (
@@ -23,6 +25,7 @@ from qgis.core import (
     QgsDataSourceUri,
     QgsMessageLog,
 )
+from qgis.PyQt.QtCore import QFile, QStandardPaths
 
 from ..db_factory.db_simple_factory import DbSimpleFactory
 from ..dbconnector.db_connector import DBConnectorError
@@ -198,3 +201,32 @@ def get_service_config(servicename: str) -> tuple[dict[str, str], str]:
             {},
             f"The service {servicename} cannot be found in the service file.",
         )
+
+
+def model_files_generated_from_db(
+    configuration, model_list: list[str] | None = None
+) -> list[str]:
+    model_files: list[str] = []
+
+    db_connector = get_db_connector(configuration)
+    if not db_connector:
+        return model_files
+
+    model_records = db_connector.get_models()
+    for record in model_records:
+        name = record["modelname"].split("{")[0]
+        # on an empty model_list we create a file for every found model
+        if not model_list or name in model_list:
+            modelfilepath = os.path.join(
+                QStandardPaths.writableLocation(
+                    QStandardPaths.StandardLocation.TempLocation
+                ),
+                "temp_{}_{:%Y%m%d%H%M%S%f}.ili".format(name, datetime.now()),
+            )
+            file = QFile(modelfilepath)
+            if file.open(QFile.OpenModeFlag.WriteOnly):
+                file.write(record["content"].encode("utf-8"))
+                file.close()
+                model_files.append(modelfilepath)
+
+    return model_files
