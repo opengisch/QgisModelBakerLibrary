@@ -146,7 +146,8 @@ class BakerPyIndex(Index):
         for model in self.types_bucket.get("Model", []):
             if model_names and model.name not in model_names:
                 continue
-            languages.append(model.language)
+            if model.language and model.language not in languages:
+                languages.append(model.language)
         return languages
 
     def attribute_type(self, attribute_iliname: str) -> object:
