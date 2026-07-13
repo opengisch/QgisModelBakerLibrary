@@ -1,0 +1,18 @@
+
+INTERLIS 2.3;
+
+MODEL KT_ArcInfrastruktur_V1 (eo) AT "https://modelbaker.ch" VERSION "2023-03-29" =
+  IMPORTS ArcInfrastruktur_V1;
+
+  TOPIC StrassenEtc EXTENDS ArcInfrastruktur_V1.StrassenEtc =
+    CLASS Strasse (EXTENDED) =
+        Priskribo : MANDATORY TEXT*99;
+    END Strasse;
+
+    CLASS Konstruktion =
+        Nomo : TEXT;
+        Linio : MANDATORY ArcInfrastruktur_V1.Line;
+        Poligono : MANDATORY ArcInfrastruktur_V1.Surface;
+    END Konstruktion;
+  END StrassenEtc;
+END KT_ArcInfrastruktur_V1.
