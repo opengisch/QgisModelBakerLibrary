@@ -4194,6 +4194,10 @@ class TestDomainClassRelation(unittest.TestCase):
                     == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
 
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
                 count += 1
 
             if layer.alias == "UninheritedCMYColorClass":
@@ -4312,6 +4316,11 @@ class TestDomainClassRelation(unittest.TestCase):
                     == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
 
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "UninheritedCMYColorClass":
@@ -4399,6 +4408,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert (
                     config["FilterExpression"] == "\"thisclass\" = 'Colors_V2.Colors'"
                 )
+
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "BlueChildColorClass":
@@ -4526,6 +4541,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert (
                     config["FilterExpression"] == "\"thisclass\" = 'Colors_V2.Colors'"
                 )
+
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "BlueChildColorClass":
@@ -4644,6 +4665,12 @@ class TestDomainClassRelation(unittest.TestCase):
         for layer in available_layers:
             if layer.alias == "BaseColorClass":
                 # It's technically not possible to have a sollution here, because the enumeration types are in a different table
+
+                # But we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
             if layer.alias == "UninheritedCMYColorClass":
                 field = layer.layer.fields().field("colors")
@@ -4718,6 +4745,12 @@ class TestDomainClassRelation(unittest.TestCase):
         for layer in available_layers:
             if layer.alias == "BaseColorClass":
                 # It's technically not possible to have a sollution here, because the enumeration types are in a different table
+
+                # But we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
             if layer.alias == "UninheritedCMYColorClass":
                 field = layer.layer.fields().field("colors")
@@ -4796,6 +4829,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
                 assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["FilterExpression"] == ""
+
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "BlueChildColorClass":
@@ -4912,6 +4951,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 config = field.editorWidgetSetup().config()
                 assert qgis_project.mapLayer(config["Layer"]).name() == "Colors"
                 assert config["FilterExpression"] == ""
+
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "BlueChildColorClass":
@@ -5057,6 +5102,12 @@ class TestDomainClassRelation(unittest.TestCase):
                     config["FilterExpression"]
                     == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
+
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "UninheritedCMYColorClass":
@@ -5169,6 +5220,12 @@ class TestDomainClassRelation(unittest.TestCase):
                     config["FilterExpression"]
                     == "\"thisclass\" = 'Colors_V2.GreenChildColors'"
                 )
+
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "UninheritedCMYColorClass":
@@ -5252,6 +5309,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert (
                     config["FilterExpression"] == "\"thisclass\" = 'Colors_V2.Colors'"
                 )
+
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "BlueChildColorClass":
@@ -5375,6 +5438,12 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert (
                     config["FilterExpression"] == "\"thisclass\" = 'Colors_V2.Colors'"
                 )
+
+                # And we test whether booleans are not handled as enumerations (special case: INTERLIS.BOOLEAN is an enumeration, but should be handled as boolean)
+                field = layer.layer.fields().field("abooleanisanenum")
+                type = field.editorWidgetSetup().type()
+                self.assertNotEqual(type, "ValueRelation")
+
                 count += 1
 
             if layer.alias == "BlueChildColorClass":

@@ -824,7 +824,7 @@ class PGConnector(DBConnector):
                     UNION SELECT CONCAT( p.tablename, '_', p.columnname, '_enumkey') AS constraint_name, p.tablename AS referencing_table, p.columnname AS referencing_column, '{schema}' AS constraint_schema, {target_table} AS referenced_table, 'ilicode' AS referenced_column, 1 AS ordinal_position,
                     NULL AS strength, NULL AS cardinality_max, NULL AS cardinality_min, NULL AS assoc_cardinality_max, NULL AS assoc_cardinality_min{translate}
                     FROM {schema}.T_ILI2DB_COLUMN_PROP p
-                    {target_table_join} tag = 'ch.ehi.ili2db.enumDomain'
+                    {target_table_join} tag = 'ch.ehi.ili2db.enumDomain' AND setting != 'INTERLIS.BOOLEAN'
                     ) all_relations
                     ORDER BY referencing_table, referencing_column, referenced_column DESC
                     ) relations_without_duplicates """.format(  # nosec
