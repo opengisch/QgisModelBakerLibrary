@@ -248,9 +248,6 @@ class IliCache(QObject):
                     model["version"] = self.get_element_text(
                         model_metadata.find("ili23:Version", self.ns)
                     )
-                    model["file"] = self.get_element_text(
-                        model_metadata.find("ili23:File", self.ns)
-                    )
                     model["repository"] = netloc
                     repo_models.append(model)
 
@@ -267,9 +264,6 @@ class IliCache(QObject):
                 if model["name"]:
                     model["version"] = self.get_element_text(
                         model_metadata.find("ili23:Version", self.ns)
-                    )
-                    model["file"] = self.get_element_text(
-                        model_metadata.find("ili23:File", self.ns)
                     )
                     model["repository"] = netloc
                     repo_models.append(model)
@@ -384,7 +378,6 @@ class IliModelItemModel(QStandardItemModel):
     class Roles(Enum):
         ILIREPO = Qt.ItemDataRole.UserRole + 1
         VERSION = Qt.ItemDataRole.UserRole + 2
-        FILE = Qt.ItemDataRole.UserRole + 3
 
         def __int__(self):
             return self.value
@@ -410,7 +403,6 @@ class IliModelItemModel(QStandardItemModel):
                 )  # considered in completer
                 item.setData(model["repository"], int(IliModelItemModel.Roles.ILIREPO))
                 item.setData(model["version"], int(IliModelItemModel.Roles.VERSION))
-                item.setData(model["file"], int(IliModelItemModel.Roles.FILE))
 
                 names.append(model["name"])
                 self.appendRow(item)
