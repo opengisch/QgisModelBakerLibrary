@@ -61,25 +61,3 @@ def get_tool_url(tool: DbIliMode, db_ili_version: int) -> str:
         )
 
     return ""
-
-
-def get_ili2c_tool_version():
-    """Gets the hardcoded stable fallback or current version string for the ili2c tool.
-
-    Returns:
-        str: The version string (e.g., "5.6.6").
-    """
-    return "5.6.6"
-
-
-def get_ili2c_tool_url():
-    """Constructs the absolute remote download URL for obtaining the ili2c binary archive.
-
-    Uses the version string pulled from :func:`get_ili2c_tool_version`.
-
-    Returns:
-        str: Absolute download URL string.
-    """
-    return "https://downloads.interlis.ch/ili2c/ili2c-{version}.zip".format(
-        version=get_ili2c_tool_version()
-    )

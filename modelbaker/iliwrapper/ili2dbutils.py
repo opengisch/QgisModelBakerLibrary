@@ -25,12 +25,7 @@ from qgis.PyQt.QtCore import QCoreApplication, pyqtSignal
 
 from ..utils.qt_utils import NetworkError, download_file
 from .globals import DbIliMode
-from .ili2dbtools import (
-    get_ili2c_tool_url,
-    get_ili2c_tool_version,
-    get_tool_url,
-    get_tool_version,
-)
+from .ili2dbtools import get_tool_url, get_tool_version
 
 if TYPE_CHECKING:
     # only needed for type checking to avoid circular imports
@@ -103,43 +98,6 @@ def get_ili2db_bin(
     return ili2db_file
 
 
-def get_ili2c_bin(stdout, stderr):
-    """Retrieves the local file path to the `ili2c.jar` binary executable.
-
-    Args:
-        stdout (pyqtSignal): Signal used to log normal execution process messages.
-        stderr (pyqtSignal): Signal used to log error execution process messages.
-
-    Returns:
-        str: Local absolute path to the functional ili2c JAR file if successful; otherwise, None.
-    """
-    ili_tool_version = get_ili2c_tool_version()
-    ili_tool_url = get_ili2c_tool_url()
-
-    dir_path = os.path.dirname(os.path.realpath(__file__))
-    ili2c_dir = "ili2c-{}".format(ili_tool_version)
-
-    bin_path = os.path.join(dir_path, "bin", ili2c_dir)
-
-    ili2c_file = os.path.join(
-        bin_path,
-        "ili2c.jar".format(version=ili_tool_version),
-    )
-
-    if not os.path.isfile(ili2c_file):
-        ili2c_file = download_ili2_bin(
-            ili2c_file,
-            bin_path,
-            "ili2c",
-            ili_tool_url,
-            ili_tool_version,
-            stdout,
-            stderr,
-        )
-
-    return ili2c_file
-
-
 def download_ili2_bin(
     bin_file, bin_path, ili_tool_name, ili_tool_url, ili_tool_version, stdout, stderr
 ):
@@ -155,7 +113,7 @@ def download_ili2_bin(
         stderr (pyqtSignal): Signal used to log error execution process messages.
 
     Returns:
-        str or None: Local absolute path to the functional ili2db/ili2c JAR file if successful; otherwise, None.
+        str or None: Local absolute path to the functional ili2db JAR file if successful; otherwise, None.
     """
     try:
         os.makedirs(bin_path, exist_ok=True)

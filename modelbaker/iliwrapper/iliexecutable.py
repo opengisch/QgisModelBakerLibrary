@@ -20,8 +20,8 @@ from qgis.PyQt.QtCore import QEventLoop, QObject, QProcess, pyqtSignal
 
 from ..utils.qt_utils import AbstractQObjectMeta
 from .ili2dbargs import get_ili2db_args
-from .ili2dbconfig import Ili2CCommandConfiguration, Ili2DbCommandConfiguration
-from .ili2dbutils import JavaNotFoundError, get_ili2c_bin, get_ili2db_bin, get_java_path
+from .ili2dbconfig import Ili2DbCommandConfiguration
+from .ili2dbutils import JavaNotFoundError, get_ili2db_bin, get_java_path
 
 
 class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
@@ -57,11 +57,11 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
             self.encoding = "UTF8"
 
     @abstractmethod
-    def _create_config(self) -> Ili2DbCommandConfiguration | Ili2CCommandConfiguration:
+    def _create_config(self) -> Ili2DbCommandConfiguration:
         """Creates the configuration that will be used by *run* method.
 
         Returns:
-            Ili2DbCommandConfiguration or Ili2CCommandConfiguration: ili2db/ili2c configuration
+            Ili2DbCommandConfiguration ili2db/ili2c configuration
         """
 
     """Executes operation on ili2db."""
@@ -186,29 +186,3 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
     def stdout_ready(self, proc: QProcess) -> None:
         text = bytes(proc.readAllStandardOutput()).decode(self.encoding)
         self.stdout.emit(text)
-
-
-class Ili2CExecutable(IliExecutable):
-    """Executes operation on ili2c."""
-
-    _done_pattern = re.compile(r"Info: \.\.\.compiler run done.*$")
-
-    def __init__(self, parent=None):
-        super().__init__(parent)
-
-    def _args(self, _param):
-        """Gets the list of ili2db arguments from configuration.
-
-        Args:
-            _param (bool): Unused parameter, kept for interface compatibility.
-
-        Returns:
-            list: ili2c arguments list.
-        """
-        return self.configuration.to_ili2c_args()
-
-    def _ili2_jar_arg(self):
-        ili2c_bin = get_ili2c_bin(self.stdout, self.stderr)
-        if not ili2c_bin:
-            return self.ILI2_NOT_FOUND
-        return ["-jar", ili2c_bin]
