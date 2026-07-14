@@ -13,10 +13,10 @@ License:
 
 
 from .ili2dbconfig import UpdateDataConfiguration
-from .iliexecutable import Ili2DbExecutable
+from .iliexecutable import IliExecutable
 
 
-class Updater(Ili2DbExecutable):
+class Updater(IliExecutable):
     """Executes an update operation on ili2db."""
 
     def __init__(self, parent=None):

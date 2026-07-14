@@ -11,10 +11,10 @@ License:
     (at your option) any later version.
 """
 from .ili2dbconfig import ExportConfiguration, Ili2DbCommandConfiguration
-from .iliexecutable import Ili2DbExecutable
+from .iliexecutable import IliExecutable
 
 
-class Exporter(Ili2DbExecutable):
+class Exporter(IliExecutable):
     def __init__(self, parent=None):
         super().__init__(parent)
         self.version = 4
