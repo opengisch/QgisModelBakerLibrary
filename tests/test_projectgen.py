@@ -56,7 +56,7 @@ class TestProjectGen(unittest.TestCase):
     def test_ili2db3_kbs_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.dbschema = "ciaf_ladm_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -179,7 +179,7 @@ class TestProjectGen(unittest.TestCase):
     def test_kbs_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.dbschema = "kbs_lv95_v1_3_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -318,7 +318,7 @@ class TestProjectGen(unittest.TestCase):
     def test_ili2db3_kbs_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
@@ -423,7 +423,7 @@ class TestProjectGen(unittest.TestCase):
     def test_kbs_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
@@ -1083,7 +1083,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/RoadsSimpleIndividualExtents.ili"
         )
@@ -1164,7 +1164,7 @@ class TestProjectGen(unittest.TestCase):
     def test_precision_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/RoadsSimpleIndividualExtents.ili"
         )
@@ -1246,7 +1246,7 @@ class TestProjectGen(unittest.TestCase):
     def test_precision_mssql(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/RoadsSimpleIndividualExtents.ili"
         )
@@ -1448,7 +1448,7 @@ class TestProjectGen(unittest.TestCase):
     def test_nmrel_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "CoordSys"
         importer.configuration.dbschema = "ciaf_ladm_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -1492,7 +1492,7 @@ class TestProjectGen(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "CoordSys"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
@@ -2153,7 +2153,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/CardinalityBag.ili")
         importer.configuration.ilimodels = "CardinalityBag"
         importer.configuration.dbschema = "any_{:%Y%m%d%H%M%S%f}".format(
@@ -2429,7 +2429,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/CardinalityBag.ili")
         importer.configuration.ilimodels = "CardinalityBag"
         importer.configuration.dbfile = os.path.join(
@@ -2707,7 +2707,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//BagOfEnumBase.ili")
         importer.configuration.ilimodels = "BagOfEnumBase"
         importer.configuration.tomlfile = testdata_path("toml//BagOfEnumExt.ini")
@@ -2761,7 +2761,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//BagOfEnumBase.ili")
         importer.configuration.ilimodels = "BagOfEnumBase"
         importer.configuration.tomlfile = testdata_path("toml//BagOfEnumExt.ini")
@@ -2818,7 +2818,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//BagOfEnumExt.ili")
         importer.configuration.ilimodels = "BagOfEnumExt"
         importer.configuration.tomlfile = testdata_path("toml//BagOfEnumExt.ini")
@@ -2873,7 +2873,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//BagOfEnumExt.ili")
         importer.configuration.ilimodels = "BagOfEnumExt"
         importer.configuration.tomlfile = testdata_path("toml//BagOfEnumExt.ini")
@@ -2931,7 +2931,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//Assoc23.ili")
         importer.configuration.ilimodels = "Assoc3"
         importer.configuration.dbschema = "assoc23_{:%Y%m%d%H%M%S%f}".format(
@@ -3007,7 +3007,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//Assoc23.ili")
         importer.configuration.ilimodels = "Assoc3"
         importer.configuration.dbfile = os.path.join(
@@ -3102,7 +3102,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//Assoc23.ili")
         importer.configuration.ilimodels = "Assoc3"
         importer.configuration.dbschema = "assoc23_{:%Y%m%d%H%M%S%f}".format(
@@ -3185,7 +3185,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//CompAssoc23.ili")
         importer.configuration.ilimodels = "CompAssoc"
         importer.configuration.dbschema = "compassoc_{:%Y%m%d%H%M%S%f}".format(
@@ -3256,7 +3256,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//CompAssoc23.ili")
         importer.configuration.ilimodels = "CompAssoc"
         importer.configuration.dbfile = os.path.join(
@@ -3336,7 +3336,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels//CompAssoc23.ili")
         importer.configuration.ilimodels = "CompAssoc"
         importer.configuration.dbschema = "compassoc{:%Y%m%d%H%M%S%f}".format(
@@ -3412,7 +3412,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels//OneToOneRelations.ili"
         )
@@ -3498,7 +3498,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels//OneToOneRelations.ili"
         )
@@ -3587,7 +3587,7 @@ class TestProjectGen(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels//OneToOneRelations.ili"
         )
@@ -3681,7 +3681,7 @@ class TestProjectGen(unittest.TestCase):
         """
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -3750,7 +3750,7 @@ class TestProjectGen(unittest.TestCase):
         """
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -3821,7 +3821,7 @@ class TestProjectGen(unittest.TestCase):
         """
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -3895,7 +3895,7 @@ class TestProjectGen(unittest.TestCase):
     def test_kbs_postgis_basket_handling(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.dbschema = "kbs_lv95_v1_3_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -3984,7 +3984,7 @@ class TestProjectGen(unittest.TestCase):
     def test_kbs_geopackage_basket_handling(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
@@ -4861,7 +4861,7 @@ class TestProjectGen(unittest.TestCase):
     def test_kbs_postgis_multisurface(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.tomlfile = testdata_path("toml/multisurface.toml")
         importer.configuration.dbschema = "kbs_lv95_v1_3_{:%Y%m%d%H%M%S%f}".format(
@@ -4901,7 +4901,7 @@ class TestProjectGen(unittest.TestCase):
     def test_kbs_geopackage_multisurface(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.tomlfile = testdata_path("toml/multisurface.toml")
         importer.configuration.dbfile = os.path.join(
@@ -4980,7 +4980,7 @@ class TestProjectGen(unittest.TestCase):
     def test_array_mapping_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/ArrayMapping.ili")
         importer.configuration.ilimodels = "ArrayMapping"
         importer.configuration.dbschema = "array_mapping_{:%Y%m%d%H%M%S%f}".format(
@@ -5034,7 +5034,7 @@ class TestProjectGen(unittest.TestCase):
     def test_array_mapping_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/ArrayMapping.ili")
         importer.configuration.ilimodels = "ArrayMapping"
         importer.configuration.dbfile = os.path.join(
@@ -5087,7 +5087,7 @@ class TestProjectGen(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/ArrayMapping.ili")
         importer.configuration.ilimodels = "ArrayMapping"
         importer.configuration.dbschema = "array_mapping_{:%Y%m%d%H%M%S%f}".format(
@@ -5141,7 +5141,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_bag_of_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/gebaeude_bag_of_V1_6.ili"
         )
@@ -5185,7 +5185,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_bag_of_mapping_array_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ArrayMappingCatalogue.ili"
         )
@@ -5231,7 +5231,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_bag_of_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/gebaeude_bag_of_V1_6.ili"
         )
@@ -5274,7 +5274,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_bag_of_no_mapping_2_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/gebaeude_bag_of_no_mapping_V1_6.ili"
         )
@@ -5318,7 +5318,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_list_of_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/gebaeude_list_of_V1_6.ili"
         )
@@ -5362,7 +5362,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_list_of_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/gebaeude_list_of_V1_6.ili"
         )
@@ -5405,7 +5405,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_bag_of_no_mapping_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/BagOfNoMappingMetaAttr.ili"
         )
@@ -5451,7 +5451,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_bag_of_no_mapping_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/BagOfNoMappingMetaAttr.ili"
         )
@@ -5494,7 +5494,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_no_bag_of_postgis(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/gebaeude_V1_6.ili")
         importer.configuration.ilimodels = "Gebaeudeinventar_V1_6"
         importer.configuration.dbschema = (
@@ -5536,7 +5536,7 @@ class TestProjectGen(unittest.TestCase):
     def test_catalogue_reference_layer_no_bag_of_geopackage(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/gebaeude_V1_6.ili")
         importer.configuration.ilimodels = "Gebaeudeinventar_V1_6"
         importer.configuration.dbfile = os.path.join(
@@ -5576,7 +5576,7 @@ class TestProjectGen(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/Maps_V1.ili")
         importer.configuration.ilimodels = "Maps_V1"
         importer.configuration.dbfile = os.path.join(

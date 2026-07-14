@@ -61,7 +61,7 @@ class TestProjectOIDs(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/OIDMadness_V1.ili")
         importer.configuration.ilimodels = "OIDMadness_V1"
         importer.configuration.dbschema = "oid_madness{:%Y%m%d%H%M%S%f}".format(
@@ -122,7 +122,7 @@ class TestProjectOIDs(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/OIDMadness_V1.ili")
         importer.configuration.ilimodels = "OIDMadness_V1"
         importer.configuration.dbfile = os.path.join(
@@ -185,7 +185,7 @@ class TestProjectOIDs(unittest.TestCase):
 
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/OIDMadness_V1.ili")
         importer.configuration.ilimodels = "OIDMadness_V1"
         importer.configuration.dbschema = (

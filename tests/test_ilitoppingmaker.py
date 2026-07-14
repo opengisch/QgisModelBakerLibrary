@@ -33,7 +33,7 @@ from modelbaker.ilitoppingmaker import (
 from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from modelbaker.iliwrapper.ili2dbconfig import Ili2DbCommandConfiguration
-from tests.utils import testdata_path
+from tests.utils import iliimporter_config, testdata_path
 
 start_app()
 
@@ -207,6 +207,7 @@ class IliToppingMakerTest(unittest.TestCase):
         # import schema with modelbaker library
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_5.ili")
         importer.configuration.ilimodels = "KbS_V1_5"
         dbfile = os.path.join(

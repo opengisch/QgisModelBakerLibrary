@@ -1006,7 +1006,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Abfallsammelstellen_ZEBA_V1.ili"
         )
@@ -1133,7 +1133,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Abfallsammelstellen_ZEBA_V1.ili"
         )
@@ -1257,7 +1257,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Abfallsammelstellen_ZEBA_V1.ili"
         )
@@ -1385,7 +1385,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Abfallsammelstellen_ZEBA_V1.ili"
         )
@@ -1511,7 +1511,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Naturschutz_und_Erholungsinfrastruktur_V1.ili"
         )
@@ -1743,7 +1743,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Naturschutz_und_Erholungsinfrastruktur_V1.ili"
         )
@@ -1971,7 +1971,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Naturschutz_und_Erholungsinfrastruktur_V1.ili"
         )
@@ -2206,7 +2206,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Naturschutz_und_Erholungsinfrastruktur_V1.ili"
         )
@@ -2436,9 +2436,9 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_3.ili")
-        importer.configuration.ilimodels = "KbS_LV95_V1_3"
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_3_metas.ili")
+        importer.configuration.ilimodels = "KbS_LV95_V1_3_metas"
         importer.configuration.dbschema = "any_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
@@ -2577,9 +2577,9 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_3.ili")
-        importer.configuration.ilimodels = "KbS_LV95_V1_3"
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_3_metas.ili")
+        importer.configuration.ilimodels = "KbS_LV95_V1_3_metas"
         importer.configuration.dbschema = "any_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
         )
@@ -2699,9 +2699,9 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_3.ili")
-        importer.configuration.ilimodels = "KbS_LV95_V1_3"
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_3_metas.ili")
+        importer.configuration.ilimodels = "KbS_LV95_V1_3_metas"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
             "tmp_import_bags_of_enum_kbs_lv95_v1_3_{:%Y%m%d%H%M%S%f}.gpkg".format(
@@ -2827,9 +2827,9 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
-        importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_3.ili")
-        importer.configuration.ilimodels = "KbS_LV95_V1_3"
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilifile = testdata_path("ilimodels/KbS_V1_3_metas.ili")
+        importer.configuration.ilimodels = "KbS_LV95_V1_3_metas"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
             "tmp_import_bags_of_enum_kbs_lv95_v1_3_{:%Y%m%d%H%M%S%f}.gpkg".format(
@@ -2939,7 +2939,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Hazard_Mapping_V1_2.ili"
         )
@@ -3359,7 +3359,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/Hazard_Mapping_V1_2.ili"
         )
@@ -3777,7 +3777,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Naturschutz_und_Erholungsinfrastruktur_V1.ili"
         )
@@ -3882,7 +3882,7 @@ class TestDomainClassRelation(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/ZG_Naturschutz_und_Erholungsinfrastruktur_V1.ili"
         )

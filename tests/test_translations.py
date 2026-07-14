@@ -44,7 +44,7 @@ class TestTranslations(unittest.TestCase):
     def test_translated_db_objects_gpkg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
@@ -140,7 +140,7 @@ class TestTranslations(unittest.TestCase):
     def test_translated_db_objects_pg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -230,7 +230,7 @@ class TestTranslations(unittest.TestCase):
     def test_translated_available_langs_gpkg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
@@ -280,7 +280,7 @@ class TestTranslations(unittest.TestCase):
     def test_translated_available_langs_pg(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()
@@ -330,7 +330,7 @@ class TestTranslations(unittest.TestCase):
         # same as translated_db_objects but this time is the schema in French (namelang) and the preferred language German.
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbfile = os.path.join(
             self.basetestpath,
@@ -427,7 +427,7 @@ class TestTranslations(unittest.TestCase):
         # same as translated_db_objects but this time is the schema in French (namelang) and the preferred language German.
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "PlansDAffectation_V1_2"
         importer.configuration.dbschema = "tid_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()

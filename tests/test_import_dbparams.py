@@ -37,7 +37,7 @@ class TestDbParams(unittest.TestCase):
     def test_postgis_withandwithout_params(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilimodels = "KbS_LV95_V1_3"
         importer.configuration.dbschema = "kbs_lv95_v1_3_{:%Y%m%d%H%M%S%f}".format(
             datetime.datetime.now()

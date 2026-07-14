@@ -25,7 +25,12 @@ from qgis.PyQt.QtCore import QCoreApplication, pyqtSignal
 
 from ..utils.qt_utils import NetworkError, download_file
 from .globals import DbIliMode
-from .ili2dbtools import get_tool_url, get_tool_version
+from .ili2dbtools import (
+    get_ili2c_tool_url,
+    get_ili2c_tool_version,
+    get_tool_url,
+    get_tool_version,
+)
 
 if TYPE_CHECKING:
     # only needed for type checking to avoid circular imports
@@ -35,6 +40,17 @@ if TYPE_CHECKING:
 def get_ili2db_bin(
     tool: DbIliMode, db_ili_version: int, stdout: pyqtSignal, stderr: pyqtSignal
 ) -> Optional[str]:
+    """Retrieves the local file path to the `ili2pg.jar`/`ili2gpkg.jar` binary executable depending on the tool and the version.
+
+    Args:
+        tool (DbIliMode): The tool for which the binary is requested (e.g., ili2pg, ili2gpkg).
+        db_ili_version (int): The version of the Interlis database (e.g., 3 or 4).
+        stdout (pyqtSignal): Signal used to log normal execution process messages.
+        stderr (pyqtSignal): Signal used to log error execution process messages.
+
+    Returns:
+        str: Local absolute path to the functional ili2db JAR file if successful; otherwise, None.
+    """
     if tool not in DbIliMode or tool == DbIliMode.ili:
         raise RuntimeError("Tool {} not found".format(tool))
 
@@ -48,6 +64,7 @@ def get_ili2db_bin(
 
     dir_path = os.path.dirname(os.path.realpath(__file__))
     ili2db_dir = "{}-{}".format(tool_name, ili_tool_version)
+    bin_path = os.path.join(dir_path, "bin", ili2db_dir)
 
     # the structure changed since 3.12.2
     if is_version_valid(
@@ -73,59 +90,126 @@ def get_ili2db_bin(
         )
 
     if not os.path.isfile(ili2db_file):
-        try:
-            os.makedirs(os.path.join(dir_path, "bin", ili2db_dir), exist_ok=True)
-        except FileExistsError:
-            pass
-
-        tmpfile = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
-
-        stdout.emit(
-            QCoreApplication.translate(
-                "ili2dbutils",
-                "Downloading {} version {}…".format(tool_name, ili_tool_version),
-            )
+        ili2db_file = download_ili2_bin(
+            ili2db_file,
+            bin_path,
+            tool_name,
+            ili_tool_url,
+            ili_tool_version,
+            stdout,
+            stderr,
         )
 
-        try:
-            download_file(
-                ili_tool_url,
-                tmpfile.name,
-                on_progress=lambda received, total: stdout.emit("."),
-            )
-        except NetworkError as e:
-            stderr.emit(
-                QCoreApplication.translate(
-                    "ili2dbutils",
-                    'Could not download {tool_name}\n\n  Error: {error}\n\nFile "{file}" not found. Please download and extract <a href="{ili2db_url}">{tool_name}</a>'.format(
-                        tool_name=tool_name,
-                        ili2db_url=ili_tool_url,
-                        error=e.msg,
-                        file=ili2db_file,
-                    ),
-                )
-            )
-            return None
-
-        try:
-            with zipfile.ZipFile(tmpfile.name, "r") as z:
-                z.extractall(os.path.join(dir_path, "bin", ili2db_dir))
-        except zipfile.BadZipFile:
-            # We will realize soon enough that the files were not extracted
-            pass
-
-        if not os.path.isfile(ili2db_file):
-            stderr.emit(
-                QCoreApplication.translate(
-                    "ili2dbutils",
-                    'File "{file}" not found. Please download and extract <a href="{ili2db_url}">{tool_name}</a>.'.format(
-                        tool_name=tool_name, file=ili2db_file, ili2db_url=ili_tool_url
-                    ),
-                )
-            )
-            return None
-
     return ili2db_file
+
+
+def get_ili2c_bin(stdout, stderr):
+    """Retrieves the local file path to the `ili2c.jar` binary executable.
+
+    Args:
+        stdout (pyqtSignal): Signal used to log normal execution process messages.
+        stderr (pyqtSignal): Signal used to log error execution process messages.
+
+    Returns:
+        str: Local absolute path to the functional ili2c JAR file if successful; otherwise, None.
+    """
+    ili_tool_version = get_ili2c_tool_version()
+    ili_tool_url = get_ili2c_tool_url()
+
+    dir_path = os.path.dirname(os.path.realpath(__file__))
+    ili2c_dir = "ili2c-{}".format(ili_tool_version)
+
+    bin_path = os.path.join(dir_path, "bin", ili2c_dir)
+
+    ili2c_file = os.path.join(
+        bin_path,
+        "ili2c.jar".format(version=ili_tool_version),
+    )
+
+    if not os.path.isfile(ili2c_file):
+        ili2c_file = download_ili2_bin(
+            ili2c_file,
+            bin_path,
+            "ili2c",
+            ili_tool_url,
+            ili_tool_version,
+            stdout,
+            stderr,
+        )
+
+    return ili2c_file
+
+
+def download_ili2_bin(
+    bin_file, bin_path, ili_tool_name, ili_tool_url, ili_tool_version, stdout, stderr
+):
+    """Downloads java file.
+
+    Args:
+        bin_file (str): Expected destination filepath of the extracted target file.
+        bin_path (str): Extraction base directory where the archive structures belong.
+        ili_tool_name (str): String identifying the tool.
+        ili_tool_url (str): Remote address where the archive stream resides.
+        ili_tool_version (str): Identifier string of the version.
+        stdout (pyqtSignal): Signal used to log normal execution process messages.
+        stderr (pyqtSignal): Signal used to log error execution process messages.
+
+    Returns:
+        str or None: Local absolute path to the functional ili2db/ili2c JAR file if successful; otherwise, None.
+    """
+    try:
+        os.makedirs(bin_path, exist_ok=True)
+    except FileExistsError:
+        pass
+
+    tmpfile = tempfile.NamedTemporaryFile(suffix=".zip", delete=False)
+
+    stdout.emit(
+        QCoreApplication.translate(
+            "ili2dbutils",
+            "Downloading {} version {}…".format(ili_tool_name, ili_tool_version),
+        )
+    )
+
+    try:
+        download_file(
+            ili_tool_url,
+            tmpfile.name,
+            on_progress=lambda received, total: stdout.emit("."),
+        )
+    except NetworkError as e:
+        stderr.emit(
+            QCoreApplication.translate(
+                "ili2dbutils",
+                'Could not download {tool_name}\n\n  Error: {error}\n\nFile "{file}" not found. Please download and extract <a href="{ili2db_url}">{tool_name}</a>'.format(
+                    tool_name=ili_tool_name,
+                    ili2db_url=ili_tool_url,
+                    error=e.msg,
+                    file=bin_file,
+                ),
+            )
+        )
+        return None
+
+    try:
+        with zipfile.ZipFile(tmpfile.name, "r") as z:
+            z.extractall(bin_path)
+
+    except zipfile.BadZipFile:
+        # We will realize soon enough that the files were not extracted
+        pass
+
+    if not os.path.isfile(bin_file):
+        stderr.emit(
+            QCoreApplication.translate(
+                "ili2dbutils",
+                'File "{file}" not found. Please download and extract <a href="{ili_tool_url}">{tool_name}</a>.'.format(
+                    tool_name=ili_tool_name, file=bin_file, ili_tool_url=ili_tool_url
+                ),
+            )
+        )
+        return None
+    return bin_file
 
 
 def get_all_modeldir_in_path(

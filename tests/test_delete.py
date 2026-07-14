@@ -43,7 +43,7 @@ class TestDelete(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -60,7 +60,7 @@ class TestDelete(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_winti.xtf"
@@ -86,7 +86,7 @@ class TestDelete(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2pg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_seuzach.xtf"
@@ -126,7 +126,7 @@ class TestDelete(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2gpkg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -143,7 +143,7 @@ class TestDelete(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_winti.xtf"
@@ -169,7 +169,7 @@ class TestDelete(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2gpkg
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbfile = importer.configuration.dbfile
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_seuzach.xtf"
@@ -210,7 +210,7 @@ class TestDelete(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path(
             "ilimodels/PipeBasketTest_V1.ili"
         )
@@ -228,7 +228,7 @@ class TestDelete(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2mssql
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_winti.xtf"
@@ -254,7 +254,7 @@ class TestDelete(unittest.TestCase):
         # Import data
         dataImporter = iliimporter.Importer(dataImport=True)
         dataImporter.tool = DbIliMode.ili2mssql
-        dataImporter.configuration = ilidataimporter_config(importer.tool)
+        dataImporter.configuration = ilidataimporter_config(importer.tool, "ilimodels")
         dataImporter.configuration.dbschema = importer.configuration.dbschema
         dataImporter.configuration.xtffile = testdata_path(
             "xtf/test_pipebaskettest_v1_seuzach.xtf"

@@ -66,7 +66,7 @@ class TestPgservice(unittest.TestCase):
         """
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
         importer.configuration.ilimodels = "RoadsSimple"
         importer.configuration.dbschema = "roads_simple_pure{:%Y%m%d%H%M%S%f}".format(
@@ -173,7 +173,7 @@ class TestPgservice(unittest.TestCase):
         # Schema Import
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool)
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
         importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
         importer.configuration.ilimodels = "RoadsSimple"
         importer.configuration.dbschema = "roads_simple_pure{:%Y%m%d%H%M%S%f}".format(
