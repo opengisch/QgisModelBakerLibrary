@@ -61,7 +61,7 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
         """Creates the configuration that will be used by *run* method.
 
         Returns:
-            Ili2DbCommandConfiguration ili2db/ili2c configuration
+            Ili2DbCommandConfiguration ili2db configuration
         """
 
     """Executes operation on ili2db."""
