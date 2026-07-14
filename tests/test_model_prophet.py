@@ -22,7 +22,7 @@ from modelbaker.utils.globals import MODELS_BLACKLIST
 sys.path.insert(
     0, os.path.join(os.path.dirname(os.path.dirname(__file__)), "modelbaker", "libs")
 )
-from modelbaker.ili2pytools.prophets import SettingsProphet
+from modelbaker.ili2pytools.prophets import ModelProphet, SettingsProphet
 from modelbaker.ili2pytools.pythonizer import BakerPyIndex
 from modelbaker.iliwrapper.ili2dbconfig import BaseConfiguration
 from modelbaker.utils.ili2db_utils import Ili2DbUtils
@@ -59,15 +59,17 @@ class TestSettingsProphet(unittest.TestCase):
         _, imd_file, _ = Ili2DbUtils().compile(ili_file)
         index = BakerPyIndex.from_imd(imd_file)
         model_name = "Nutzungsplanung_V1_2"
-        settings_prophet = SettingsProphet(index, model_name, MODELS_BLACKLIST)
 
-        assert settings_prophet.has_basket_oids() is True
-        assert settings_prophet.has_extended_topics() is False
+        model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
+        settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
+
+        assert model_prophet.has_basket_oids() is True
+        assert model_prophet.has_extended_topics() is False
         assert settings_prophet.needs_basket_column() is True
-        assert settings_prophet.has_arcs() is True
-        assert settings_prophet.has_multiple_geometry_columns() is False
-        assert settings_prophet.has_enumerations() is True
-        assert settings_prophet.has_extended_enumerations() is False
+        assert settings_prophet.contains_arcs() is True
+        assert settings_prophet.contains_multiple_geometry_columns() is False
+        assert settings_prophet.contains_arcs() is True
+        assert settings_prophet.contains_extended_enumerations() is False
 
         is_translation, languages, _ = settings_prophet.language_infos()
         assert is_translation is False
@@ -89,15 +91,16 @@ class TestSettingsProphet(unittest.TestCase):
         index = BakerPyIndex.from_imd(imd_file)
         model_name = "KT_ArcInfrastruktur_V1"
 
-        settings_prophet = SettingsProphet(index, model_name, MODELS_BLACKLIST)
+        model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
+        settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert settings_prophet.has_basket_oids() is False
-        assert settings_prophet.has_extended_topics() is True
+        assert model_prophet.has_basket_oids() is False
+        assert model_prophet.has_extended_topics() is True
         assert settings_prophet.needs_basket_column() is True
-        assert settings_prophet.has_arcs() is True
-        assert settings_prophet.has_multiple_geometry_columns() is True
-        assert settings_prophet.has_enumerations() is False
-        assert settings_prophet.has_extended_enumerations() is False
+        assert settings_prophet.contains_arcs() is True
+        assert settings_prophet.contains_multiple_geometry_columns() is True
+        assert settings_prophet.contains_enumerations() is False
+        assert settings_prophet.contains_extended_enumerations() is False
 
         is_translation, languages, _ = settings_prophet.language_infos()
         assert is_translation is False
@@ -119,15 +122,16 @@ class TestSettingsProphet(unittest.TestCase):
         index = BakerPyIndex.from_imd(imd_file)
         model_name = "KbS_V1_5"
 
-        settings_prophet = SettingsProphet(index, model_name, MODELS_BLACKLIST)
+        model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
+        settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert settings_prophet.has_basket_oids() is False
-        assert settings_prophet.has_extended_topics() is False
+        assert model_prophet.has_basket_oids() is False
+        assert model_prophet.has_extended_topics() is False
         assert settings_prophet.needs_basket_column() is False
-        assert settings_prophet.has_arcs() is False
-        assert settings_prophet.has_multiple_geometry_columns() is True
-        assert settings_prophet.has_enumerations() is True
-        assert settings_prophet.has_extended_enumerations() is False
+        assert settings_prophet.contains_arcs() is False
+        assert settings_prophet.contains_multiple_geometry_columns() is True
+        assert settings_prophet.contains_enumerations() is True
+        assert settings_prophet.contains_extended_enumerations() is False
 
         is_translation, languages, _ = settings_prophet.language_infos()
         assert is_translation is False
@@ -148,16 +152,17 @@ class TestSettingsProphet(unittest.TestCase):
         index = BakerPyIndex.from_imd(imd_file)
         model_name = "Colors_V2"
 
-        settings_prophet = SettingsProphet(index, model_name, MODELS_BLACKLIST)
+        model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
+        settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert settings_prophet.has_basket_oids() is False
-        assert settings_prophet.has_extended_topics() is False
+        assert model_prophet.has_basket_oids() is False
+        assert model_prophet.has_extended_topics() is False
         assert settings_prophet.needs_basket_column() is False
 
-        assert settings_prophet.has_arcs() is False
-        assert settings_prophet.has_multiple_geometry_columns() is False
-        assert settings_prophet.has_enumerations() is True
-        assert settings_prophet.has_extended_enumerations() is True
+        assert settings_prophet.contains_arcs() is False
+        assert settings_prophet.contains_multiple_geometry_columns() is False
+        assert settings_prophet.contains_enumerations() is True
+        assert settings_prophet.contains_extended_enumerations() is True
 
         is_translation, languages, _ = settings_prophet.language_infos()
         assert is_translation is False
@@ -179,15 +184,17 @@ class TestSettingsProphet(unittest.TestCase):
         _, imd_file, _ = Ili2DbUtils().compile(ili_file)
         index = BakerPyIndex.from_imd(imd_file)
         model_name = "PlansDAffectation_V1_2"
-        settings_prophet = SettingsProphet(index, model_name, MODELS_BLACKLIST)
 
-        assert settings_prophet.has_basket_oids() is True
-        assert settings_prophet.has_extended_topics() is False
+        model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
+        settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
+
+        assert model_prophet.has_basket_oids() is True
+        assert model_prophet.has_extended_topics() is False
         assert settings_prophet.needs_basket_column() is True
-        assert settings_prophet.has_arcs() is True
-        assert settings_prophet.has_multiple_geometry_columns() is False
-        assert settings_prophet.has_enumerations() is True
-        assert settings_prophet.has_extended_enumerations() is False
+        assert settings_prophet.contains_arcs() is True
+        assert settings_prophet.contains_multiple_geometry_columns() is False
+        assert settings_prophet.contains_enumerations() is True
+        assert settings_prophet.contains_extended_enumerations() is False
 
         (
             is_translation,
@@ -214,15 +221,16 @@ class TestSettingsProphet(unittest.TestCase):
         _, imd_file, _ = Ili2DbUtils().compile(ili_file)
         index = BakerPyIndex.from_imd(imd_file)
         model_name = "PianiDiUtilizzazione_V1_2"
-        settings_prophet = SettingsProphet(index, model_name, MODELS_BLACKLIST)
+        model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
+        settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert settings_prophet.has_basket_oids() is True
-        assert settings_prophet.has_extended_topics() is False
+        assert model_prophet.has_basket_oids() is True
+        assert model_prophet.has_extended_topics() is False
         assert settings_prophet.needs_basket_column() is True
-        assert settings_prophet.has_arcs() is True
-        assert settings_prophet.has_multiple_geometry_columns() is False
-        assert settings_prophet.has_enumerations() is True
-        assert settings_prophet.has_extended_enumerations() is False
+        assert settings_prophet.contains_arcs() is True
+        assert settings_prophet.contains_multiple_geometry_columns() is False
+        assert settings_prophet.contains_enumerations() is True
+        assert settings_prophet.contains_extended_enumerations() is False
 
         (
             is_translation,
