@@ -294,9 +294,10 @@ class SettingsProphet(QObject):
             ):
                 # when there are not more models than the relevant ones, then it is not a translation model.
                 # when there are not more languages than the relevant ones, then it is not a translation model.
-                is_translation = False
-                all_languages.extend(languages)
-                preferred_language = None
+                for language in languages:
+                    if language not in all_languages:
+                        all_languages.append(language)
+                # we don't update the preferred language and the is_translation flag, because when we already found a translation model.
             else:
                 # otherwise we assume it's a translation model and we return the languages
                 # and the preferred language (the first one of the ones that are not relevant (because this might be the original)).
@@ -305,7 +306,9 @@ class SettingsProphet(QObject):
                     if lang not in languages_of_relevant_models:
                         original_languages.append(lang)
                 is_translation = True
-                all_languages.extend(languages)
+                for language in languages:
+                    if language not in all_languages:
+                        all_languages.append(language)
                 preferred_language = (
                     original_languages[0] if original_languages else None
                 )
