@@ -43,6 +43,16 @@ if TYPE_CHECKING:
 
 
 class IliCache(QObject):
+    """
+    Parses repositories connected via ilisites.xml (or local repository folders) for ilimodels.xml information files,
+    then downloads and stores them in the .ilicache folder.
+    It keeps information about the models (such as name, location, etc.) in an IliModelItemModel().
+    It does not download the actual model files when processing the information files
+    (if model files exist, they may have been downloaded by ili2db or the Model Baker plugin frontend, but not by IliCache).
+
+    :var ilidata: Description
+    """
+
     ns = {"ili23": "http://www.interlis.ch/INTERLIS2.3"}
 
     new_message = pyqtSignal(int, str)
@@ -477,6 +487,14 @@ class ModelCompleterDelegate(QItemDelegate):
 
 
 class IliDataCache(IliCache):
+    """
+    Parses repositories connected via ilisites.xml (or local repository folders) for ilidata.xml information files,
+    then downloads and stores them in the .ilidatacache folder.
+    It collects data objects based on the passed models and types (filtering by the category element) and stores their
+    details (such as ID, description, location, etc.) in an IliDataItemModel().
+    It does not download the actual data files when processing the information files, but it provides a download_file function
+    to be called externally (by IliToppingFileCache or the Model Baker frontend, but not by IliCache).
+    """
 
     file_download_succeeded = pyqtSignal(str, str)
     file_download_failed = pyqtSignal(str, str)
@@ -885,6 +903,13 @@ class IliDataFileCompleterDelegate(QItemDelegate):
 
 
 class IliToppingFileCache(IliDataCache):
+
+    """
+    IliTopping parses repositories connected via ilisites.xml (or local repository folders) for ilidata.xml information files,
+    then downloads and stores them in the .ilitoppingfilescache folder.
+    It collects data objects based on passed IDs and stores their details (such as local_file_path) in an IliToppingFileItemModel()
+    because it DOES download the actual data files when processing the information files (unlike IliDataCache and IliCache).
+    """
 
     download_finished_and_model_fresh = pyqtSignal()
     """
