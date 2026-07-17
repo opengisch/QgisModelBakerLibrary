@@ -265,6 +265,7 @@ class IliCache(QObject):
                         or ""
                     )
                     model["repository"] = netloc
+                    model["url"] = url
                     repo_models.append(model)
 
         for repo in root.iter(
@@ -288,6 +289,7 @@ class IliCache(QObject):
                         or ""
                     )
                     model["repository"] = netloc
+                    model["url"] = url
                     repo_models.append(model)
 
         self.repositories[netloc] = sorted(
@@ -401,7 +403,8 @@ class IliModelItemModel(QStandardItemModel):
     class Roles(Enum):
         ILIREPO = Qt.ItemDataRole.UserRole + 1
         VERSION = Qt.ItemDataRole.UserRole + 2
-        FILE = Qt.ItemDataRole.UserRole + 3
+        URL = Qt.ItemDataRole.UserRole + 3
+        FILE = Qt.ItemDataRole.UserRole + 4
 
         def __int__(self):
             return self.value
@@ -434,6 +437,7 @@ class IliModelItemModel(QStandardItemModel):
                 item.setData(
                     model.get("version", ""), int(IliModelItemModel.Roles.VERSION)
                 )
+                item.setData(model.get("url", ""), int(IliModelItemModel.Roles.URL))
                 item.setData(model.get("file", ""), int(IliModelItemModel.Roles.FILE))
                 names.append(name)
                 self.appendRow(item)
