@@ -182,7 +182,8 @@ class ModelProphet(QObject):
 class SettingsProphet(QObject):
     """Suggests ili2db command settings based on the models properties.
     This Prophet can handle multiple models and will return the union of all relevant settings.
-    It uses the ModelProphet to get the relevant information for each model."""
+    It uses the ModelProphet to get the relevant information for each model.
+    """
 
     def __init__(
         self,
