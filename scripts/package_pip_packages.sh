@@ -1,12 +1,10 @@
 #!/bin/bash
 LIBS_DIR="modelbaker/libs"
 
-DEPRECATION=("deprecation" "2.1.0")
 PGSERVICEPARSER=("pgserviceparser" "2.2.1")
 TOPPINGMAKER=("toppingmaker" "1.6.0")
 
 PACKAGES=(
-  DEPRECATION[@]
   PGSERVICEPARSER[@]
   TOPPINGMAKER[@]
 )
