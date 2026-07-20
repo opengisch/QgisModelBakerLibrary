@@ -23,8 +23,8 @@ from .ili2dbutils import get_all_modeldir_in_path
 
 class BaseConfiguration:
     def __init__(self):
-        self.super_pg_user = "postgres"  # nosec
-        self.super_pg_password = "postgres"  # nosec
+        self.super_pg_user = "postgres"  # nosec # pragma: allowlist secret
+        self.super_pg_password = "postgres"  # nosec # pragma: allowlist secret
         self.dbparam_map = {}
 
         self.custom_model_directories_enabled = False
