@@ -16,7 +16,7 @@ import glob
 import os
 import platform
 import re
-import subprocess
+import subprocess  # nosec
 import tempfile
 import zipfile
 from typing import TYPE_CHECKING, Callable, Optional
@@ -274,7 +274,7 @@ def get_java_path(base_configuration: BaseConfiguration) -> str:
             try:
                 v = str(winreg.QueryValueEx(rkey, varname)[0])
                 v = winreg.ExpandEnvironmentStrings(v)
-            except Exception:
+            except OSError:
                 pass
         finally:
             winreg.CloseKey(rkey)
@@ -319,7 +319,7 @@ def get_java_path(base_configuration: BaseConfiguration) -> str:
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     startupinfo=startupinfo,
-                )
+                )  # nosec
                 output, err = p.communicate()
                 version_output = err.decode("utf-8")
                 java_version = java_version_re.match(version_output)
