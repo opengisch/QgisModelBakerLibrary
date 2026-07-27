@@ -647,6 +647,7 @@ class Generator(QObject):
                 if (
                     record["current_layer_name"] is None
                     or record["target_layer_name"] is None
+                    or record["target_layer_name"] not in layer_map.keys()
                 ):
                     continue
                 for layer in layers:
