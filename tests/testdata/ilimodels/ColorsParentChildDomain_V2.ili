@@ -67,6 +67,15 @@ VERSION "2020-08-26"  =
       BagOfColors : BAG {0..*} OF Colors_V2.GreenChildColorsStruct;
     END GreenChildColorClass;
 
+    CLASS MaterialClass =
+      Material : ( Straw, Wood, Stone );
+    END MaterialClass;
+
+    CLASS InheritedMaterialClass
+    EXTENDS MaterialClass =
+      Material(EXTENDED) : ( Wood (Oak, Beech, Hazel) );
+    END InheritedMaterialClass;
+
   END SomeColors;
 
 END Colors_V2.
