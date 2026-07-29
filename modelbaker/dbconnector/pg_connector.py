@@ -808,23 +808,35 @@ class PGConnector(DBConnector):
                 # On singletab we always reference t_ili2db_enum, otherwise individual tables depending on the setting
                 if self._table_exists(PG_ENUM_TABLE):
                     target_table = f"'{PG_ENUM_TABLE}'"
-                    target_table_join = (
-                        "WHERE"  # only the where introducing the condition
-                    )
+                    target_table_join = "WHERE tag = 'ch.ehi.ili2db.typeKind' and setting = 'ENUM'"  # only the where introducing the condition
                 else:
                     target_table = "c.sqlname"
-                    target_table_join = """JOIN {}.T_ILI2DB_CLASSNAME c
+                    target_table_join = """JOIN {schema}.T_ILI2DB_CLASSNAME c
                         ON c.iliname=p.setting
-                        AND""".format(  # nosec
-                        self.schema
+                        AND tag = 'ch.ehi.ili2db.enumDomain' AND setting != 'INTERLIS.BOOLEAN'
+                        -- and for enums defined in an attribute
+                        UNION SELECT CONCAT( p.tablename, '_', p.columnname, '_enumkey') AS constraint_name, p.tablename AS referencing_table, p.columnname AS referencing_column, '{schema}' AS constraint_schema, {target_table} AS referenced_table, 'ilicode' AS referenced_column, 1 AS ordinal_position,
+                        NULL AS strength, NULL AS cardinality_max, NULL AS cardinality_min, NULL AS assoc_cardinality_max, NULL AS assoc_cardinality_min{translate}
+                        FROM {schema}.T_ILI2DB_COLUMN_PROP p
+                        JOIN {schema}.T_ILI2DB_ATTRNAME a
+                        ON a.colowner = p.tablename AND a.sqlname = p.columnname
+                        JOIN {schema}.T_ILI2DB_CLASSNAME c
+                        ON c.iliname = a.iliname
+                        WHERE p.tag = 'ch.ehi.ili2db.typeKind'
+                    AND p.setting = 'ENUM'
+                        """.format(  # nosec
+                        schema=self.schema,
+                        translate=translate,
+                        target_table=target_table,
                     )
 
                 distinct = "SELECT * FROM ( SELECT DISTINCT ON (referencing_table, referencing_column) * FROM ("
                 fake_relation_union = """
+                    -- and for enums defined in the domains
                     UNION SELECT CONCAT( p.tablename, '_', p.columnname, '_enumkey') AS constraint_name, p.tablename AS referencing_table, p.columnname AS referencing_column, '{schema}' AS constraint_schema, {target_table} AS referenced_table, 'ilicode' AS referenced_column, 1 AS ordinal_position,
                     NULL AS strength, NULL AS cardinality_max, NULL AS cardinality_min, NULL AS assoc_cardinality_max, NULL AS assoc_cardinality_min{translate}
                     FROM {schema}.T_ILI2DB_COLUMN_PROP p
-                    {target_table_join} tag = 'ch.ehi.ili2db.enumDomain' AND setting != 'INTERLIS.BOOLEAN'
+                    {target_table_join}
                     ) all_relations
                     ORDER BY referencing_table, referencing_column, referenced_column DESC
                     ) relations_without_duplicates """.format(  # nosec
