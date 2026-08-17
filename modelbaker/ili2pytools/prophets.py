@@ -115,12 +115,10 @@ class ModelProphet(QObject):
         relevant_geometric_attributes_per_class = (
             self.index.relevant_geometric_attributes_per_class(self.relevant_topics)
         )
-        if any(
+        return any(
             len(columns) > 1
             for columns in relevant_geometric_attributes_per_class.values()
-        ):
-            return True
-        return False
+        )
 
     def filtered_models(self) -> set:
         """Returns the models excluding the blacklisted ones.
