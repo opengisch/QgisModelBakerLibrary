@@ -63,17 +63,16 @@ class TestSettingsProphet(unittest.TestCase):
         model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
         settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert model_prophet.has_basket_oids() is True
-        assert model_prophet.has_extended_topics() is False
-        assert settings_prophet.needs_basket_column() is True
-        assert settings_prophet.contains_arcs() is True
-        assert settings_prophet.contains_multiple_geometry_columns() is False
-        assert settings_prophet.contains_arcs() is True
-        assert settings_prophet.contains_extended_enumerations() is False
+        self.assertTrue(model_prophet.has_basket_oids())
+        self.assertFalse(model_prophet.has_extended_topics())
+        self.assertTrue(settings_prophet.needs_basket_column())
+        self.assertTrue(settings_prophet.contains_arcs())
+        self.assertFalse(settings_prophet.contains_multiple_geometry_columns())
+        self.assertFalse(settings_prophet.contains_extended_enumerations())
 
         is_translation, languages, _ = settings_prophet.language_infos()
-        assert is_translation is False
-        assert set(languages) == {"de"}
+        self.assertFalse(is_translation)
+        self.assertEqual(set(languages), {"de"})
 
     def test_settings_prophet_arcs(self):
         """
@@ -94,17 +93,17 @@ class TestSettingsProphet(unittest.TestCase):
         model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
         settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert model_prophet.has_basket_oids() is False
-        assert model_prophet.has_extended_topics() is True
-        assert settings_prophet.needs_basket_column() is True
-        assert settings_prophet.contains_arcs() is True
-        assert settings_prophet.contains_multiple_geometry_columns() is True
-        assert settings_prophet.contains_enumerations() is False
-        assert settings_prophet.contains_extended_enumerations() is False
+        self.assertFalse(model_prophet.has_basket_oids())
+        self.assertTrue(model_prophet.has_extended_topics())
+        self.assertTrue(settings_prophet.needs_basket_column())
+        self.assertTrue(settings_prophet.contains_arcs())
+        self.assertTrue(settings_prophet.contains_multiple_geometry_columns())
+        self.assertFalse(settings_prophet.contains_enumerations())
+        self.assertFalse(settings_prophet.contains_extended_enumerations())
 
         is_translation, languages, _ = settings_prophet.language_infos()
-        assert is_translation is False
-        assert set(languages) == {"de", "eo"}
+        self.assertFalse(is_translation)
+        self.assertEqual(set(languages), {"de", "eo"})
 
     def test_settings_prophet_kbs(self):
         """
@@ -125,17 +124,17 @@ class TestSettingsProphet(unittest.TestCase):
         model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
         settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert model_prophet.has_basket_oids() is False
-        assert model_prophet.has_extended_topics() is False
-        assert settings_prophet.needs_basket_column() is False
-        assert settings_prophet.contains_arcs() is False
-        assert settings_prophet.contains_multiple_geometry_columns() is True
-        assert settings_prophet.contains_enumerations() is True
-        assert settings_prophet.contains_extended_enumerations() is False
+        self.assertFalse(model_prophet.has_basket_oids())
+        self.assertFalse(model_prophet.has_extended_topics())
+        self.assertFalse(settings_prophet.needs_basket_column())
+        self.assertFalse(settings_prophet.contains_arcs())
+        self.assertTrue(settings_prophet.contains_multiple_geometry_columns())
+        self.assertTrue(settings_prophet.contains_enumerations())
+        self.assertFalse(settings_prophet.contains_extended_enumerations())
 
         is_translation, languages, _ = settings_prophet.language_infos()
-        assert is_translation is False
-        assert set(languages) == {"de"}
+        self.assertFalse(is_translation)
+        self.assertEqual(set(languages), {"de"})
 
     def test_settings_prophet_color_enums(self):
         """
@@ -155,18 +154,18 @@ class TestSettingsProphet(unittest.TestCase):
         model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
         settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert model_prophet.has_basket_oids() is False
-        assert model_prophet.has_extended_topics() is False
-        assert settings_prophet.needs_basket_column() is False
+        self.assertFalse(model_prophet.has_basket_oids())
+        self.assertFalse(model_prophet.has_extended_topics())
+        self.assertFalse(settings_prophet.needs_basket_column())
 
-        assert settings_prophet.contains_arcs() is False
-        assert settings_prophet.contains_multiple_geometry_columns() is False
-        assert settings_prophet.contains_enumerations() is True
-        assert settings_prophet.contains_extended_enumerations() is True
+        self.assertFalse(settings_prophet.contains_arcs())
+        self.assertFalse(settings_prophet.contains_multiple_geometry_columns())
+        self.assertTrue(settings_prophet.contains_enumerations())
+        self.assertTrue(settings_prophet.contains_extended_enumerations())
 
         is_translation, languages, _ = settings_prophet.language_infos()
-        assert is_translation is False
-        assert set(languages) == {"es"}
+        self.assertFalse(is_translation)
+        self.assertEqual(set(languages), {"es"})
 
     def test_settings_prophet_nupla_fr(self):
         """
@@ -188,22 +187,22 @@ class TestSettingsProphet(unittest.TestCase):
         model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
         settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert model_prophet.has_basket_oids() is True
-        assert model_prophet.has_extended_topics() is False
-        assert settings_prophet.needs_basket_column() is True
-        assert settings_prophet.contains_arcs() is True
-        assert settings_prophet.contains_multiple_geometry_columns() is False
-        assert settings_prophet.contains_enumerations() is True
-        assert settings_prophet.contains_extended_enumerations() is False
+        self.assertTrue(model_prophet.has_basket_oids())
+        self.assertFalse(model_prophet.has_extended_topics())
+        self.assertTrue(settings_prophet.needs_basket_column())
+        self.assertTrue(settings_prophet.contains_arcs())
+        self.assertFalse(settings_prophet.contains_multiple_geometry_columns())
+        self.assertTrue(settings_prophet.contains_enumerations())
+        self.assertFalse(settings_prophet.contains_extended_enumerations())
 
         (
             is_translation,
             languages,
             preferred_language,
         ) = settings_prophet.language_infos()
-        assert is_translation is True
-        assert set(languages) == {"de", "fr"}
-        assert preferred_language == "de"  # original language
+        self.assertTrue(is_translation)
+        self.assertEqual(set(languages), {"de", "fr"})
+        self.assertEqual(preferred_language, "de")  # original language
 
     def test_settings_prophet_nupla_it(self):
         """
@@ -224,19 +223,19 @@ class TestSettingsProphet(unittest.TestCase):
         model_prophet = ModelProphet(index, model_name, MODELS_BLACKLIST)
         settings_prophet = SettingsProphet({model_name: index}, MODELS_BLACKLIST)
 
-        assert model_prophet.has_basket_oids() is True
-        assert model_prophet.has_extended_topics() is False
-        assert settings_prophet.needs_basket_column() is True
-        assert settings_prophet.contains_arcs() is True
-        assert settings_prophet.contains_multiple_geometry_columns() is False
-        assert settings_prophet.contains_enumerations() is True
-        assert settings_prophet.contains_extended_enumerations() is False
+        self.assertTrue(model_prophet.has_basket_oids())
+        self.assertFalse(model_prophet.has_extended_topics())
+        self.assertTrue(settings_prophet.needs_basket_column())
+        self.assertTrue(settings_prophet.contains_arcs())
+        self.assertFalse(settings_prophet.contains_multiple_geometry_columns())
+        self.assertTrue(settings_prophet.contains_enumerations())
+        self.assertFalse(settings_prophet.contains_extended_enumerations())
 
         (
             is_translation,
             languages,
             preferred_language,
         ) = settings_prophet.language_infos()
-        assert is_translation is True
-        assert set(languages) == {"de", "it"}
-        assert preferred_language == "de"  # original language
+        self.assertTrue(is_translation)
+        self.assertEqual(set(languages), {"de", "it"})
+        self.assertEqual(preferred_language, "de")  # original language

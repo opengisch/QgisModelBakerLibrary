@@ -51,18 +51,13 @@ class ModelProphet(QObject):
         """Returns whether any relevant topic defines a basket OID."""
         bid_in_topics = self.index.basket_oid_in_submodel
 
-        bid_in_relevant_topics = {
-            topic: bid_in_topics[topic]
-            for topic in self.relevant_topics
-            if topic in bid_in_topics
-        }
-        if len(bid_in_relevant_topics.keys()):
-            return True
+        for topic in self.relevant_topics:
+            if topic in bid_in_topics and bid_in_topics[topic]:
+                return True
         return False
 
     def has_extended_topics(self) -> bool:
-        """Returns whether any relevant topic extends another topic."""
-        # check if one of the relevant topics is a parent topic of an extension
+        """Returns whether any relevant topic is extended by another topic."""
         supers = self.index.data_unit_supers
         for topic in self.relevant_topics:
             basket = self.index.topic_basket.get(topic)
@@ -152,7 +147,11 @@ class ModelProphet(QObject):
         Returns:
             A list of geometric attribute tids.
         """
-        return list(self.index.relevant_geometric_attributes_per_class(self.relevant_topics).values())
+        return list(
+            self.index.relevant_geometric_attributes_per_class(
+                self.relevant_topics
+            ).values()
+        )
 
     def available_languages(self, models: list = None) -> list:
         """Returns all the found languages of the given models.
@@ -165,8 +164,7 @@ class ModelProphet(QObject):
         Returns:
             A list of language codes.
         """
-        languages = self.index.languages(models)
-        return languages
+        return self.index.languages(models)
 
 
 class SettingsProphet(QObject):
