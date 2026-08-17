@@ -4540,10 +4540,11 @@ class TestDomainClassRelation(unittest.TestCase):
                     == "MaterialClass_Material"
                 )
                 assert not (config["AllowMulti"])
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
-                )
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
+                # )
                 count += 1
 
             if layer.alias == "InheritedMaterialClass":
@@ -4557,10 +4558,11 @@ class TestDomainClassRelation(unittest.TestCase):
                     == "MaterialClass_Material"
                 )
                 assert not (config["AllowMulti"])
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
-                )
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
+                # )
                 count += 1
 
         assert count == 6
@@ -4705,10 +4707,11 @@ class TestDomainClassRelation(unittest.TestCase):
                     == "MaterialClass_Material"
                 )
                 assert not (config["AllowMulti"])
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
-                )
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
+                # )
                 count += 1
 
             if layer.alias == "InheritedMaterialClass":
@@ -4722,10 +4725,11 @@ class TestDomainClassRelation(unittest.TestCase):
                     == "MaterialClass_Material"
                 )
                 assert not (config["AllowMulti"])
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
-                )
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
+                # )
                 count += 1
 
         assert count == 6
@@ -5620,10 +5624,11 @@ class TestDomainClassRelation(unittest.TestCase):
 
                 config = field.editorWidgetSetup().config()
                 assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
-                )
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
+                # )
                 count += 1
 
             if layer.alias == "InheritedMaterialClass":
@@ -5633,10 +5638,11 @@ class TestDomainClassRelation(unittest.TestCase):
 
                 config = field.editorWidgetSetup().config()
                 assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
-                )
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
+                # )
                 count += 1
 
         assert count == 6
@@ -5773,10 +5779,11 @@ class TestDomainClassRelation(unittest.TestCase):
 
                 config = field.editorWidgetSetup().config()
                 assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
-                )
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
+                # )
                 count += 1
 
             if layer.alias == "InheritedMaterialClass":
@@ -5786,10 +5793,11 @@ class TestDomainClassRelation(unittest.TestCase):
 
                 config = field.editorWidgetSetup().config()
                 assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
-                assert (
-                    config["FilterExpression"]
-                    == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
-                )
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
+                # )
                 count += 1
 
         assert count == 6
