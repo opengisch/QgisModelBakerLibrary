@@ -578,17 +578,20 @@ class GPKGConnector(DBConnector):
 
                     # or for enums defined in an attribute we have to generate fake foreign keys
                     # based on the typeKind and checking if it's referenced to a table
-                    cursor.execute(
-                        """SELECT c.sqlname as 'table',  p.columnname as 'from'
+                    query = """SELECT c.sqlname as 'table',  p.columnname as 'from'
                         FROM T_ILI2DB_COLUMN_PROP p
                         JOIN T_ILI2DB_ATTRNAME a
-                        ON a.colowner = p.tablename AND a.sqlname = p.columnname
+                        ON a.{colowner} = p.tablename AND a.sqlname = p.columnname
                         JOIN T_ILI2DB_CLASSNAME c
                         ON c.iliname = a.iliname
                         WHERE p.tablename = ?
                         AND p.tag = 'ch.ehi.ili2db.typeKind'
                         AND p.setting = 'ENUM'
-                    """,
+                    """.format(
+                        colowner="owner" if self.ili_version() == 3 else "colowner"
+                    )
+                    cursor.execute(
+                        query,
                         (table_info_name,),
                     )
                     fake_enum_column_foreign_keys = cursor.fetchall()

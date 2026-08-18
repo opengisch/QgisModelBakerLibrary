@@ -819,7 +819,7 @@ class PGConnector(DBConnector):
                         NULL AS strength, NULL AS cardinality_max, NULL AS cardinality_min, NULL AS assoc_cardinality_max, NULL AS assoc_cardinality_min{translate}
                         FROM {schema}.T_ILI2DB_COLUMN_PROP p
                         JOIN {schema}.T_ILI2DB_ATTRNAME a
-                        ON a.colowner = p.tablename AND a.sqlname = p.columnname
+                        ON a.{colowner} = p.tablename AND a.sqlname = p.columnname
                         JOIN {schema}.T_ILI2DB_CLASSNAME c
                         ON c.iliname = a.iliname
                         WHERE p.tag = 'ch.ehi.ili2db.typeKind'
@@ -828,6 +828,7 @@ class PGConnector(DBConnector):
                         schema=self.schema,
                         translate=translate,
                         target_table=target_table,
+                        colowner="owner" if self.ili_version() == 3 else "colowner",
                     )
 
                 distinct = "SELECT * FROM ( SELECT DISTINCT ON (referencing_table, referencing_column) * FROM ("
