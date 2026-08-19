@@ -544,12 +544,12 @@ class GPKGConnector(DBConnector):
             if self._table_exists(GPKG_METAATTRS_TABLE):
                 if self._table_exists(GPKG_ENUM_TABLE):
                     # In case of enums in a single table (T_ILI2DB_ENUM) without id (createSingleEnumTab)
-                    # we have to generate the fake foreign keys to it based on the enumDomain
+                    # we have to generate the fake foreign keys to it based on the typeKind
                     cursor.execute(
                         """SELECT '{GPKG_ENUM_TABLE}' as 'table', p.columnname as 'from'
                         FROM T_ILI2DB_COLUMN_PROP p
                         WHERE tablename = ?
-                        and tag = 'ch.ehi.ili2db.enumDomain' AND setting != 'INTERLIS.BOOLEAN'
+                        and tag = 'ch.ehi.ili2db.typeKind' and setting = 'ENUM'
                     """.format(  # nosec
                             GPKG_ENUM_TABLE=GPKG_ENUM_TABLE
                         ),
@@ -561,7 +561,8 @@ class GPKGConnector(DBConnector):
                     ]
                 else:
                     # In case of enums in multiple tables without id (createEnumTabs)
-                    # we have to generate fake foreign keys based on the enumDomain
+                    # for enums defined in domains we have to generate fake foreign keys
+                    # based on the enumDomain
                     cursor.execute(
                         """SELECT c.sqlname as 'table', p.columnname as 'from'
                         FROM T_ILI2DB_COLUMN_PROP p
@@ -573,10 +574,34 @@ class GPKGConnector(DBConnector):
                     """,
                         (table_info_name,),
                     )
-                    fake_enum_foreign_keys = cursor.fetchall()
+                    fake_enum_domain_foreign_keys = cursor.fetchall()
+
+                    # or for enums defined in an attribute we have to generate fake foreign keys
+                    # based on the typeKind and checking if it's referenced to a table
+                    query = """SELECT c.sqlname as 'table',  p.columnname as 'from'
+                        FROM T_ILI2DB_COLUMN_PROP p
+                        JOIN T_ILI2DB_ATTRNAME a
+                        ON a.{colowner} = p.tablename AND a.sqlname = p.columnname
+                        JOIN T_ILI2DB_CLASSNAME c
+                        ON c.iliname = a.iliname
+                        WHERE p.tablename = ?
+                        AND p.tag = 'ch.ehi.ili2db.typeKind'
+                        AND p.setting = 'ENUM'
+                    """.format(
+                        colowner="owner" if self.ili_version() == 3 else "colowner"
+                    )
+                    cursor.execute(
+                        query,
+                        (table_info_name,),
+                    )
+                    fake_enum_column_foreign_keys = cursor.fetchall()
 
                     fake_enum_fks = [
-                        (fk["from"], fk["table"]) for fk in fake_enum_foreign_keys
+                        (fk["from"], fk["table"])
+                        for fk in fake_enum_domain_foreign_keys
+                    ] + [
+                        (fk["from"], fk["table"])
+                        for fk in fake_enum_column_foreign_keys
                     ]
 
             all_foreign_keys = []

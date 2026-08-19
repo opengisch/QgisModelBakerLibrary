@@ -4234,7 +4234,27 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
 
                 count += 1
-        assert count == 2
+
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+                assert not (config["AllowMulti"])
+
+                # not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == """CASE\n    WHEN current_value('t_type') = 'materialclass' THEN\n        "thisclass" = 'Colors_V2.SomeColors.MaterialClass.Material'\n    WHEN current_value('t_type') = 'inheritedmaterialclass' THEN\n        "thisclass" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'\nEND"""
+                # )
+                count += 1
+
+        assert count == 3
 
     def test_enumtabsid_smart1_geopackage(self):
         # Schema Import
@@ -4356,7 +4376,27 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
 
                 count += 1
-        assert count == 2
+
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+                assert not (config["AllowMulti"])
+
+                # not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == """CASE\n    WHEN current_value('t_type') = 'materialclass' THEN\n        "thisclass" = 'Colors_V2.SomeColors.MaterialClass.Material'\n    WHEN current_value('t_type') = 'inheritedmaterialclass' THEN\n        "thisclass" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'\nEND"""
+                # )
+                count += 1
+
+        assert count == 3
 
     def test_enumtabsid_smart2_postgis(self):
         # Schema Import
@@ -4489,7 +4529,43 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
                 count += 1
 
-        assert count == 4
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+                assert not (config["AllowMulti"])
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
+                # )
+                count += 1
+
+            if layer.alias == "InheritedMaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+                assert not (config["AllowMulti"])
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
+                # )
+                count += 1
+
+        assert count == 6
 
     def test_enumtabsid_smart2_geopackage(self):
         # Schema Import
@@ -4620,7 +4696,43 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
                 count += 1
 
-        assert count == 4
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+                assert not (config["AllowMulti"])
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
+                # )
+                count += 1
+
+            if layer.alias == "InheritedMaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+                assert not (config["AllowMulti"])
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #    config["FilterExpression"]
+                #    == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
+                # )
+                count += 1
+
+        assert count == 6
 
     def test_enumtabs_smart1_postgis(self):
         # Schema Import
@@ -4699,7 +4811,24 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["FilterExpression"] == ""
                 assert config["AllowMulti"]
                 count += 1
-        assert count == 2
+
+            if layer.alias == "MaterialClass":
+                # It's technically not possible to have a sollution here, because the enumeration types are in a different table
+
+                # But we test whether the enums defined at the attribute are handled
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert not (config["AllowMulti"])
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+
+                count += 1
+        assert count == 3
 
     def test_enumtabs_smart1_geopackage(self):
         # Schema Import
@@ -4778,7 +4907,24 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
                 count += 1
-        assert count == 2
+
+            if layer.alias == "MaterialClass":
+                # It's technically not possible to have a sollution here, because the enumeration types are in a different table
+
+                # But we test whether the enums defined at the attribute are handled
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert not (config["AllowMulti"])
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+
+                count += 1
+        assert count == 3
 
     def test_enumtabs_smart2_postgis(self):
         # Schema Import
@@ -4899,7 +5045,34 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["AllowMulti"]
                 assert config["FilterExpression"] == ""
                 count += 1
-        assert count == 4
+
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "InheritedMaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "InheritedMaterialClass_Material"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+
+        assert count == 6
 
     def test_enumtabs_smart2_geopackage(self):
         # Schema Import
@@ -5022,7 +5195,33 @@ class TestDomainClassRelation(unittest.TestCase):
                 assert config["FilterExpression"] == ""
                 count += 1
 
-        assert count == 4
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "MaterialClass_Material"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+
+            if layer.alias == "InheritedMaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert (
+                    qgis_project.mapLayer(config["Layer"]).name()
+                    == "InheritedMaterialClass_Material"
+                )
+                assert config["FilterExpression"] == ""
+                count += 1
+
+        assert count == 6
 
     def test_enumsingletab_smart1_postgis(self):
         # Schema Import
@@ -5138,7 +5337,24 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
 
                 count += 1
-        assert count == 2
+
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                assert not (config["AllowMulti"])
+
+                # not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == """CASE\n    WHEN current_value('t_type') = 'materialclass' THEN\n        "thisclass" = 'Colors_V2.SomeColors.MaterialClass.Material'\n    WHEN current_value('t_type') = 'inheritedmaterialclass' THEN\n        "thisclass" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'\nEND"""
+                # )
+                count += 1
+
+        assert count == 3
 
     def test_enumsingletab_smart1_geopackage(self):
         # Schema Import
@@ -5255,7 +5471,24 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
 
                 count += 1
-        assert count == 2
+
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                assert not (config["AllowMulti"])
+
+                # not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == """CASE\n    WHEN current_value('t_type') = 'materialclass' THEN\n        "thisclass" = 'Colors_V2.SomeColors.MaterialClass.Material'\n    WHEN current_value('t_type') = 'inheritedmaterialclass' THEN\n        "thisclass" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'\nEND"""
+                # )
+                count += 1
+
+        assert count == 3
 
     def test_enumsingletab_smart2_postgis(self):
         # Schema Import
@@ -5384,7 +5617,35 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
                 count += 1
 
-        assert count == 4
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
+                # )
+                count += 1
+
+            if layer.alias == "InheritedMaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "t_ili2db_enum"
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
+                # )
+                count += 1
+
+        assert count == 6
 
     def test_enumsingletab_smart2_geopackage(self):
         # Schema Import
@@ -5511,7 +5772,35 @@ class TestDomainClassRelation(unittest.TestCase):
                 )
                 count += 1
 
-        assert count == 4
+            if layer.alias == "MaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == "\"thisclass\" = 'Colors_V2.SomeColors.MaterialClass.Material'"
+                # )
+                count += 1
+
+            if layer.alias == "InheritedMaterialClass":
+                field = layer.layer.fields().field("material")
+                type = field.editorWidgetSetup().type()
+                self.assertEqual(type, "ValueRelation")
+
+                config = field.editorWidgetSetup().config()
+                assert qgis_project.mapLayer(config["Layer"]).name() == "T_ILI2DB_ENUM"
+                # this filter would be needed to handle inherited enums defined in attributes - not yet working due to issue https://github.com/claeis/ili2db/issues/596
+                # assert (
+                #     config["FilterExpression"]
+                #     == "\"thisclass\" = 'Colors_V2.SomeColors.InheritedMaterialClass.Material'"
+                # )
+                count += 1
+
+        assert count == 6
 
     def print_info(self, text):
         logging.info(text)
