@@ -109,17 +109,18 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         )
         params.append(enum_handling_param)
 
-        multigeom_columns_param = QgsProcessingParameterBoolean(
-            self.MULTIGEOMSPERTABLE,
-            self.tr("Multiple geometry columns per table in GeoPackage"),
-            defaultValue=False,
-        )
-        multigeom_columns_param.setHelp(
-            self.tr(
-                "If the model class has multiple geometries, creates multiple columns in GeoPackage."
+        if self.parent.ili2dbtool() == DbIliMode.ili2gpkg:
+            multigeom_columns_param = QgsProcessingParameterBoolean(
+                self.MULTIGEOMSPERTABLE,
+                self.tr("Multiple geometry columns per table in GeoPackage"),
+                defaultValue=False,
             )
-        )
-        params.append(multigeom_columns_param)
+            multigeom_columns_param.setHelp(
+                self.tr(
+                    "If the model class has multiple geometries, creates multiple columns in GeoPackage."
+                )
+            )
+            params.append(multigeom_columns_param)
 
         stroke_arcs_param = QgsProcessingParameterBoolean(
             self.STROKEARCS,
@@ -245,9 +246,12 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         configuration.enum_tabs = self.parent.parameterAsString(
             parameters, self.ENUMHANDLING, context
         )
-        configuration.create_gpkg_multigeom = self.parent.parameterAsBool(
-            parameters, self.MULTIGEOMSPERTABLE, context
-        )
+
+        if self.parent.ili2dbtool() == DbIliMode.ili2gpkg:
+            configuration.create_gpkg_multigeom = self.parent.parameterAsBool(
+                parameters, self.MULTIGEOMSPERTABLE, context
+            )
+
         configuration.stroke_arcs = self.parent.parameterAsBool(
             parameters, self.STROKEARCS, context
         )

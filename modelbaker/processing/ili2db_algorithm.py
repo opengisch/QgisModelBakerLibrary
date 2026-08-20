@@ -18,6 +18,7 @@ from qgis.core import (
 from qgis.PyQt.QtCore import QCoreApplication, QSettings
 from qgis.PyQt.QtGui import QIcon
 
+from ..iliwrapper.globals import DbIliMode
 from ..iliwrapper.ili2dbconfig import BaseConfiguration
 from ..utils.db_utils import get_authconfig_map, get_service_config
 
@@ -25,6 +26,8 @@ from ..utils.db_utils import get_authconfig_map, get_service_config
 class Ili2dbAlgorithm(QgsProcessingAlgorithm):
     def __init__(self):
         super().__init__()
+
+        self._ili2dbtool: DbIliMode = None
 
     def group(self):
         return self.tr("ili2db")
@@ -68,6 +71,9 @@ class Ili2dbAlgorithm(QgsProcessingAlgorithm):
         baseconfig.restore(settings)
         return baseconfig
 
+    def ili2dbtool(self):
+        return self._ili2dbtool
+
 
 class Ili2pgAlgorithm(Ili2dbAlgorithm):
     SERVICE = "SERVICE"
@@ -83,6 +89,7 @@ class Ili2pgAlgorithm(Ili2dbAlgorithm):
 
     def __init__(self):
         super().__init__()
+        self._ili2dbtool = DbIliMode.ili2pg
 
     def connection_input_params(self):
         params = []
@@ -282,6 +289,7 @@ class Ili2gpkgAlgorithm(Ili2dbAlgorithm):
     def __init__(self):
         super().__init__()
         self._db_file_should_exist = True
+        self._ili2dbtool = DbIliMode.ili2gpkg
 
     def connection_input_params(self):
         params = []
