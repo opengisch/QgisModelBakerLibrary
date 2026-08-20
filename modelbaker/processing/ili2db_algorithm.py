@@ -11,6 +11,7 @@ from qgis.core import (
     QgsProcessingParameterBoolean,
     QgsProcessingParameterEnum,
     QgsProcessingParameterFile,
+    QgsProcessingParameterFileDestination,
     QgsProcessingParameterNumber,
     QgsProcessingParameterString,
 )
@@ -280,16 +281,27 @@ class Ili2gpkgAlgorithm(Ili2dbAlgorithm):
 
     def __init__(self):
         super().__init__()
+        self._db_file_should_exist = True
 
     def connection_input_params(self):
         params = []
 
-        dbpath_param = QgsProcessingParameterFile(
-            self.DBPATH,
-            self.tr("Database File Path"),
-            defaultValue=None,
-            optional=True,
-        )
+        if self._db_file_should_exist:
+            dbpath_param = QgsProcessingParameterFile(
+                self.DBPATH,
+                self.tr("Database File Path"),
+                defaultValue=None,
+                optional=True,
+            )
+        else:
+            dbpath_param = QgsProcessingParameterFileDestination(
+                self.DBPATH,
+                self.tr("Database File Path"),
+                fileFilter="GPKG files (*.gpkg)",
+                defaultValue=None,
+                optional=False,
+            )
+
         dbpath_param.setHelp(self.tr("The database file path (*.gpkg)."))
         params.append(dbpath_param)
 
