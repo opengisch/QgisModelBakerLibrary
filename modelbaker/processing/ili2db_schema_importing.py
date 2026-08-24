@@ -25,7 +25,6 @@ from qgis.core import (
     QgsProcessingParameterFile,
     QgsProcessingParameterString,
 )
-from qgis.utils import Qgis
 
 from ..iliwrapper import iliimporter
 from ..iliwrapper.globals import DbIliMode
@@ -66,7 +65,7 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             self.CRS,
             self.tr("Coordinate Reference System"),
             defaultValue=QgsCoordinateReferenceSystem("EPSG:2056"),
-            optional=False,
+            optional=True,
         )
         crs_param.setHelp(self.tr("The reference system for the data base."))
         params.append(crs_param)
@@ -149,7 +148,6 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         ilifile_param = QgsProcessingParameterFile(
             self.ILIFILE,
             self.tr("INTERLIS Model file (.ili)"),
-            behavior=Qgis.ProcessingFileParameterBehavior.File,
             extension="ili",
             optional=True,
         )
@@ -163,11 +161,9 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         return params
 
     def import_output_params(self):
-        params = []
-
-        params.append(
+        params = [
             QgsProcessingOutputBoolean(self.ISVALID, self.tr("Schema Import Result"))
-        )
+        ]
 
         return params
 
