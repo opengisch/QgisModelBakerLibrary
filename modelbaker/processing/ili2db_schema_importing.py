@@ -14,7 +14,6 @@ License:
 from typing import Any, Optional
 
 from qgis.core import (
-    QgsCoordinateReferenceSystem,
     QgsProcessingContext,
     QgsProcessingException,
     QgsProcessingFeedback,
@@ -64,7 +63,7 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         crs_param = QgsProcessingParameterCrs(
             self.CRS,
             self.tr("Coordinate Reference System"),
-            defaultValue=QgsCoordinateReferenceSystem("EPSG:2056"),
+            defaultValue="EPSG:2056",
             optional=True,
         )
         crs_param.setHelp(self.tr("The reference system for the data base."))
@@ -88,6 +87,7 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             self.BASKETCOL,
             self.tr("Create basket column"),
             defaultValue=False,
+            optional=True,
         )
         basket_col_param.setHelp(
             self.tr("Creates a basket column in all the tables of the model.")
@@ -100,7 +100,7 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             ["createEnumTypesWithId", "createEnumTabs", "createEnumSingleTab"],
             allowMultiple=False,
             defaultValue="createEnumTypesWithId",
-            optional=False,
+            optional=True,
             usesStaticStrings=True,
         )
         enum_handling_param.setHelp(
@@ -113,6 +113,7 @@ class ProcessSchemaImporter(ProcessOperatorBase):
                 self.MULTIGEOMSPERTABLE,
                 self.tr("Multiple geometry columns per table in GeoPackage"),
                 defaultValue=False,
+                optional=True,
             )
             multigeom_columns_param.setHelp(
                 self.tr(
@@ -125,6 +126,7 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             self.STROKEARCS,
             self.tr("Strokes arcs"),
             defaultValue=False,
+            optional=True,
         )
         stroke_arcs_param.setHelp(self.tr("Strokes arcs."))
         params.append(stroke_arcs_param)
@@ -198,9 +200,9 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             result = importer.run(None)
             if result == iliimporter.Importer.SUCCESS:
                 feedback.pushInfo(self.tr("... import succeeded"))
+                isvalid = True
             else:
                 feedback.pushWarning(self.tr("... import failed"))
-            isvalid = bool(result == iliimporter.Importer.SUCCESS)
         except JavaNotFoundError as e:
             raise QgsProcessingException(
                 self.tr("Java not found error:").format(e.error_string)
@@ -223,11 +225,8 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         configuration = SchemaImportConfiguration(configuration)
 
         # get settings from the input
-        crsinfo = (
-            self.parent.parameterAsCrs(parameters, self.CRS, context)
-            .authid()
-            .split(":")
-        )
+        crs = self.parent.parameterAsCrs(parameters, self.CRS, context)
+        crsinfo = crs.authid().split(":")
         if len(crsinfo) != 2:
             return None
         configuration.srs_auth = crsinfo[0].upper()

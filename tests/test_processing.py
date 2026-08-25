@@ -105,6 +105,93 @@ class TestProcessingAlgorithms(unittest.TestCase):
         self.schema_import_alg_test(DbIliMode.ili2pg, schema_import_parameters, True)
         return dbschema
 
+    def test_schema_import(self):
+        def params_gpkg(base):
+            params = base.copy()
+            params["DBPATH"] = os.path.join(
+                self.basetestpath,
+                "tmp_roads_simple_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                    datetime.datetime.now()
+                ),
+            )
+            return params
+
+        def params_pg(base):
+            params = base.copy()
+            params["SCHEMA"] = dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(
+                datetime.datetime.now()
+            )
+            params.update(self.iliimporter_pg_config_params())
+            return params
+
+        base_params = {  # Only mandatory params, should succeed
+            "INHERITANCE": "smart2",
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # smart1
+            "INHERITANCE": "smart1",
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # nosmart
+            "INHERITANCE": "nosmart",
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # No models, ilifile's implicit model
+            "INHERITANCE": "smart2",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # Models with no ilifile
+            "INHERITANCE": "smart2",
+            "MODELS": "RoadsSimple",
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+
+        base_params = {  # Missing both models and ilifile
+            "INHERITANCE": "smart2",
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+
+        base_params = {  # Model requires basket col
+            "INHERITANCE": "smart2",
+            "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+
+        base_params = {  # Model translation, with basket column
+            "BASKETCOL": True,
+            "INHERITANCE": "smart2",
+            "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
+            "LANGUAGE": "fr",
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # Import several models
+            "INHERITANCE": "smart2",
+            "MODELS": "CIAF_LADM;another",
+            "ILIFILE": testdata_path("ilimodels/CIAF_LADM/CIAF_LADM.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
     def test_algs_gpkg(self):
         conn_parameters_baskets = {}
         conn_parameters_baskets["DBPATH"] = self.gpkg_file(True)
