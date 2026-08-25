@@ -47,7 +47,6 @@ class ProcessSchemaImporter(ProcessOperatorBase):
     STROKEARCS = "STROKEARCS"
     MODELS = "MODELS"  # StringList
     LANGUAGE = "LANGUAGE"  # String (2)
-    DISABLEMANDATORY = "DISABLEMANDATORY"  # Bool
     ILIFILE = "ILIFILE"  # File
 
     # Result
@@ -66,7 +65,9 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             defaultValue="EPSG:2056",
             optional=True,
         )
-        crs_param.setHelp(self.tr("The reference system for the data base."))
+        crs_param.setHelp(
+            self.tr("The reference system for geometry columns in the database.")
+        )
         params.append(crs_param)
 
         inheritance_param = QgsProcessingParameterEnum(
@@ -79,7 +80,9 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             usesStaticStrings=True,
         )
         inheritance_param.setHelp(
-            self.tr("The type of inheritance for the model classes.")
+            self.tr(
+                "Defines the strategy to implement class inheritance. Choose 'nosmart' to disable all optimizations."
+            )
         )
         params.append(inheritance_param)
 
@@ -87,10 +90,10 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             self.BASKETCOL,
             self.tr("Create basket column"),
             defaultValue=False,
-            optional=True,
+            optional=False,
         )
         basket_col_param.setHelp(
-            self.tr("Creates a basket column in all the tables of the model.")
+            self.tr("Creates a basket column in all the tables from the model.")
         )
         params.append(basket_col_param)
 
@@ -100,51 +103,69 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             ["createEnumTypesWithId", "createEnumTabs", "createEnumSingleTab"],
             allowMultiple=False,
             defaultValue="createEnumTypesWithId",
-            optional=True,
+            optional=False,
             usesStaticStrings=True,
         )
         enum_handling_param.setHelp(
-            self.tr("The way in which ENUMS are implemented in the database.")
+            self.tr(
+                """<html><head/><body>
+            <p><b>createEnumTypesWithId:</b> creates a table per enum-domain and links via Foreign Keys to it.</p>
+            <p><b>createEnumTabs:</b> creates a table per enum-domain without Foreign Keys to it.</p>
+            <p><b>createEnumSingleTab:</b> creates one table for all the enum-domains.</p>
+            </body></html>"""
+            )
         )
         params.append(enum_handling_param)
 
         if self.parent.ili2dbtool() == DbIliMode.ili2gpkg:
             multigeom_columns_param = QgsProcessingParameterBoolean(
                 self.MULTIGEOMSPERTABLE,
-                self.tr("Multiple geometry columns per table in GeoPackage"),
+                self.tr("Multiple geometry columns per table"),
                 defaultValue=False,
-                optional=True,
+                optional=False,
             )
             multigeom_columns_param.setHelp(
                 self.tr(
-                    "If the model class has multiple geometries, creates multiple columns in GeoPackage."
+                    "Creates multiple geometry columns per table if there is more than one geometry attribute in a class/table."
                 )
             )
             params.append(multigeom_columns_param)
 
         stroke_arcs_param = QgsProcessingParameterBoolean(
             self.STROKEARCS,
-            self.tr("Strokes arcs"),
+            self.tr("Stroke arcs"),
             defaultValue=False,
-            optional=True,
+            optional=False,
         )
-        stroke_arcs_param.setHelp(self.tr("Strokes arcs."))
+        stroke_arcs_param.setHelp(
+            self.tr(
+                "Replaces any curved geometry column by its linear equivalent (e.g., CompoundCurve by LineString or MultiSurface by MultiPolygon)."
+            )
+        )
         params.append(stroke_arcs_param)
 
         language_param = QgsProcessingParameterString(
-            self.LANGUAGE, self.tr("Language"), optional=True
+            self.LANGUAGE, self.tr("Language (semicolon-separated)"), optional=True
         )
         language_param.setHelp(
             self.tr(
-                "The language in which the model classes will be created in the database."
+                """<html><head/><body>
+            <p>Defines the language for database objects like tables and columns (e.g., de, fr, it, en, es).</p>
+            <p>The model definition needs to be declared as a translated version (i.e., with TRANSLATION OF keywords).</p>
+            <p>Multiple languages can be separated by semicolon to regulate priority. If the given language is not provided by the model, the original model language will be used.</p>
+            </body></html>"""
             )
         )
         params.append(language_param)
 
         models_param = QgsProcessingParameterString(
-            self.MODELS, self.tr("Models"), optional=True
+            self.MODELS, self.tr("Models (semicolon-separated)"), optional=True
         )
-        models_param.setHelp(self.tr("Model names to be imported into the database."))
+        models_param.setHelp(
+            self.tr(
+                "Name of the model(s) to import. If there are several, they can be separated by semicolon."
+            )
+        )
         params.append(models_param)
 
         ilifile_param = QgsProcessingParameterFile(
@@ -155,7 +176,7 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         )
         ilifile_param.setHelp(
             self.tr(
-                "Path to the ili file containing the model(s) to be imported into the database."
+                "Path to a local INTERLIS file with the model definition. If passed, the 'Models' parameter can be omitted, since ili2db will import the last model in the ilifile."
             )
         )
         params.append(ilifile_param)
@@ -309,13 +330,9 @@ class SchemaImportingPGAlgorithm(Ili2pgAlgorithm):
         """
         return self.tr(
             """<html><head/><body>
-            <p>Imports data to PostgreSQL schema with ili2pg.</p>
+            <p>Imports INTERLIS models to a PostgreSQL schema file with ili2pg.</p>
             <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
             <p>General Model Baker settings like custom model directories or db parameters are concerned.</p>
-            <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
-            <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
-            <p>Additionally, you need to define a dataset name for the import on such databases.</p>
-            <p>On a database where no basket column has been created, the command will be <code>--import</code> (and <code>--deleteData</code> when you choose to delete data previously).</p>
         </body></html>
         """
         )
@@ -326,13 +343,9 @@ class SchemaImportingPGAlgorithm(Ili2pgAlgorithm):
         """
         return self.tr(
             """<html><head/><body>
-            <p>Imports data to PostgreSQL schema with ili2pg.</p>
+            <p>Imports INTERLIS models to a PostgreSQL schema file with ili2pg.</p>
             <p>The ili2pg parameters are set in the same way as in the Model Baker Plugin.</p>
             <p>General Model Baker settings like custom model directories or db parameters are concerned.</p>
-            <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
-            <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
-            <p>Additionally, you need to define a dataset name for the import on such databases.</p>
-            <p>On a database where no basket column has been created, the command will be <code>--import</code> (and <code>--deleteData</code> when you choose to delete data previously).</p>
         </body></html>
         """
         )
@@ -411,13 +424,9 @@ class SchemaImportingGPKGAlgorithm(Ili2gpkgAlgorithm):
         """
         return self.tr(
             """<html><head/><body>
-            <p>Imports INTERLIS models to GeoPackage file with ili2gpkg.</p>
+            <p>Imports INTERLIS models to a GeoPackage file with ili2gpkg.</p>
             <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin.</p>
             <p>General Model Baker settings like custom model directories concerned.</p>
-            <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
-            <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
-            <p>Additionally, you need to define a dataset name for the import on such databases.</p>
-            <p>On a database where no basket column has been created, the command will be <code>--import</code> (and <code>--deleteData</code> when you choose to delete data previously).</p>
         </body></html>
         """
         )
@@ -428,13 +437,9 @@ class SchemaImportingGPKGAlgorithm(Ili2gpkgAlgorithm):
         """
         return self.tr(
             """<html><head/><body>
-            <p>Imports data to GeoPackage file with ili2gpkg.</p>
+            <p>Imports INTERLIS models to a GeoPackage file with ili2gpkg.</p>
             <p>The ili2gpkg parameters are set in the same way as in the Model Baker Plugin.</p>
             <p>General Model Baker settings like custom model directories concerned.</p>
-            <p>The parameters passed to ili2db by default are <code>--importTid</code> and, on databases where you have created basket columns, <code>--importBid</code> as well.</p>
-            <p>On a database where you have created basket columns, the command is <code>--update</code> (or <code>--replace</code> when you choose to delete data previously).</p>
-            <p>Additionally, you need to define a dataset name for the import on such databases.</p>
-            <p>On a database where no basket column has been created, the command will be <code>--import</code> (and <code>--deleteData</code> when you choose to delete data previously).</p>
         </body></html>
         """
         )
