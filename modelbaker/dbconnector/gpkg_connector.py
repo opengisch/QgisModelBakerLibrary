@@ -587,7 +587,7 @@ class GPKGConnector(DBConnector):
                         WHERE p.tablename = ?
                         AND p.tag = 'ch.ehi.ili2db.typeKind'
                         AND p.setting = 'ENUM'
-                    """.format(
+                    """.format(  # nosec
                         colowner="owner" if self.ili_version() == 3 else "colowner"
                     )
                     cursor.execute(
