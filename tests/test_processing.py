@@ -83,7 +83,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         schema_import_parameters = {
             "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
             "BASKETCOL": basket_col,
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
             "MODELS": "RoadsSimple",
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
             "DBPATH": dbfile,
@@ -96,7 +96,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         schema_import_parameters = {
             "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
             "BASKETCOL": basket_col,
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
             "MODELS": "RoadsSimple",
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
             "SCHEMA": dbschema,
@@ -125,7 +125,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
             return params
 
         base_params = {  # Only mandatory params, should succeed
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
             "MODELS": "RoadsSimple",
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
         }
@@ -133,7 +133,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # smart1
-            "INHERITANCE": "smart1",
+            "INHERITANCE": 0,  # smart1
             "MODELS": "RoadsSimple",
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
         }
@@ -141,7 +141,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # nosmart
-            "INHERITANCE": "nosmart",
+            "INHERITANCE": 2,  # nosmart
             "MODELS": "RoadsSimple",
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
         }
@@ -149,27 +149,27 @@ class TestProcessingAlgorithms(unittest.TestCase):
         self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # No models, ilifile's implicit model
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
         }
         self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
         self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # Models with no ilifile
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
             "MODELS": "RoadsSimple",
         }
         self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
         self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
 
         base_params = {  # Missing both models and ilifile
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
         }
         self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
         self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
 
         base_params = {  # Model requires basket col
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
             "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
         }
         self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
@@ -177,7 +177,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
 
         base_params = {  # Model translation, with basket column
             "BASKETCOL": True,
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
             "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
             "LANGUAGE": "fr",
         }
@@ -185,7 +185,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # Import several models
-            "INHERITANCE": "smart2",
+            "INHERITANCE": 1,  # smart2
             "MODELS": "CIAF_LADM;another",
             "ILIFILE": testdata_path("ilimodels/CIAF_LADM/CIAF_LADM.ili"),
         }

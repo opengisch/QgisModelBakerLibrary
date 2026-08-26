@@ -46,7 +46,7 @@ class ProcessSchemaImporter(ProcessOperatorBase):
     MULTIGEOMSPERTABLE = "MULTIGEOMSPERTABLE"
     STROKEARCS = "STROKEARCS"
     MODELS = "MODELS"  # StringList
-    LANGUAGE = "LANGUAGE"  # String (2)
+    LANGUAGE = "LANGUAGE"  # StringList
     ILIFILE = "ILIFILE"  # File
 
     # Result
@@ -55,6 +55,18 @@ class ProcessSchemaImporter(ProcessOperatorBase):
     def __init__(self, parent):
         super().__init__(parent)
         self.parent = parent
+
+        self._inheritance_type = (
+            ("smart1Inheritance", "smart1"),  # 0
+            ("smart2Inheritance", "smart2"),  # 1
+            ("noSmartMapping", "nosmart"),  # 2
+        )
+
+        self._enum_handling = (
+            ("createEnumTypesWithId", "tabsid"),  # 0
+            ("createEnumSingleTab", "singletab"),  # 1
+            ("createEnumTabs", "tabs"),  # 2
+        )
 
     def import_input_params(self):
         params = []
@@ -73,15 +85,26 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         inheritance_param = QgsProcessingParameterEnum(
             self.INHERITANCE,
             self.tr("Inheritance type"),
-            ["smart1", "smart2", "nosmart"],
+            [option[0] for option in self._inheritance_type],
             allowMultiple=False,
-            defaultValue="smart2",
+            defaultValue=0,  # smart1
             optional=False,
-            usesStaticStrings=True,
         )
         inheritance_param.setHelp(
             self.tr(
-                "Defines the strategy to implement class inheritance. Choose 'nosmart' to disable all optimizations."
+                "Defines the strategy to implement class inheritance."
+                """<html><head/><body>
+                <p><span style=" font-family:'monospace';">smart1Inheritance</span> Form the inheritance hierarchy with a dynamic strategy. The NewClass strategy is used for classes that are
+referenced and whose base classes are not mapped using a NewClass strategy. Abstract classes are mapped
+using a SubClass strategy. Concrete classes, without a base class or their direct base classes with a SubClass
+strategy are mapped using a NewClass strategy. All other classes are mapped using a SuperClass strategy.</p>
+
+                <p><span style=" font-family:'monospace';">smart2Inheritance</span> Form the inheritance hierarchy with a dynamic strategy. Abstract classes are mapped using a SubClass
+strategy. Concrete classes are mapped using a NewAndSubClass strategy.</p>
+
+                <p><span style=" font-family:'monospace';">noSmartMapping</span> Disable all optimizations.</p>
+                </body></html>
+                """
             )
         )
         params.append(inheritance_param)
@@ -93,26 +116,36 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             optional=False,
         )
         basket_col_param.setHelp(
-            self.tr("Creates a basket column in all the tables from the model.")
+            self.tr(
+                """
+            <html><head/><body><p>Creates a new column t_basket in class tables which references entries in the additional table t_ili2db_basket.</p>
+            <p>The T_basket column needs to be filled with the basket to which an object belongs.</p>
+            <p><span style=" font-weight:600;">Warning</span></p><p>If this option is enabled, it is required to make sure that this column is filled by the database, by default values on QGIS side or manually from the user.</p>
+            <p>If<span style=" font-style:italic;"> BASKET OID</span> is defined in the model, it's required to use the basket handling in QGIS. This is currently not automatically detected by the Model Baker and needs to be assured by the user.</p>
+            </body></html>
+            """
+            )
         )
         params.append(basket_col_param)
 
         enum_handling_param = QgsProcessingParameterEnum(
             self.ENUMHANDLING,
             self.tr("Enumeration handling"),
-            ["createEnumTypesWithId", "createEnumTabs", "createEnumSingleTab"],
+            [option[0] for option in self._enum_handling],
             allowMultiple=False,
-            defaultValue="createEnumTypesWithId",
+            defaultValue=0,  # tabsid
             optional=False,
-            usesStaticStrings=True,
         )
         enum_handling_param.setHelp(
             self.tr(
                 """<html><head/><body>
-            <p><b>createEnumTypesWithId:</b> creates a table per enum-domain and links via Foreign Keys to it.</p>
-            <p><b>createEnumTabs:</b> creates a table per enum-domain without Foreign Keys to it.</p>
-            <p><b>createEnumSingleTab:</b> creates one table for all the enum-domains.</p>
-            </body></html>"""
+                <p><span style=" font-family:'monospace';">createEnumTabsWithId</span> creates a table for each enumeration definition (extensions are merged), containing the individual enumeration values with technical IDs. </p>
+                <p>In the tables the <span style=" font-weight:600;">IDs </span>of the enumerations (FKs) are stored.</p>
+                <p><span style=" font-family:'monospace';">createEnumSingleTab</span> creates a single table with all enumeration values from all enumeration definitions.<br/>In the tables the enumeration <span style=" font-weight:600;">values</span> (<span style=" font-family:'monospace';">iliCode</span>) are stored.</p>
+                <p><span style=" font-family:'monospace';">createEnumTabs</span> creates a table for each enumeration definition, containing the individual enumeration values.<br/>In the tables the enumeration <span style=" font-weight:600;">values</span> (<span style=" font-family:'monospace';">iliCode</span>) are stored.</p>
+                <p><span style=" font-style:italic;">Note: Inherited enumerations cannot be implemented with smart1 using this option.</span></p>
+                </body></html>
+                """
             )
         )
         params.append(enum_handling_param)
@@ -126,7 +159,9 @@ class ProcessSchemaImporter(ProcessOperatorBase):
             )
             multigeom_columns_param.setHelp(
                 self.tr(
-                    "Creates multiple geometry columns per table if there is more than one geometry attribute in a class/table."
+                    """<html><head/><body>
+                    <p>If the INTERLIS model has classes that contain <span style=" font-weight:600;">multiple geometries</span>, tables with multiple geometry columns can be created in <span style=" font-weight:600;">GeoPackage</span>.</p>
+                    </body></html>"""
                 )
             )
             params.append(multigeom_columns_param)
@@ -134,12 +169,12 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         stroke_arcs_param = QgsProcessingParameterBoolean(
             self.STROKEARCS,
             self.tr("Stroke arcs"),
-            defaultValue=False,
+            defaultValue=True,
             optional=False,
         )
         stroke_arcs_param.setHelp(
             self.tr(
-                "Replaces any curved geometry column by its linear equivalent (e.g., CompoundCurve by LineString or MultiSurface by MultiPolygon)."
+                "Replaces any curved geometry column by its linear equivalent (e.g., arcs by straight lines or surfaces by polygons)."
             )
         )
         params.append(stroke_arcs_param)
@@ -253,15 +288,15 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         configuration.srs_auth = crsinfo[0].upper()
         configuration.srs_code = crsinfo[1]
 
-        configuration.inheritance = self.parent.parameterAsEnum(
-            parameters, self.INHERITANCE, context
-        )
+        configuration.inheritance = self._inheritance_type[
+            self.parent.parameterAsEnum(parameters, self.INHERITANCE, context)
+        ][1]
         configuration.create_basket_col = self.parent.parameterAsBool(
             parameters, self.BASKETCOL, context
         )
-        configuration.enum_tabs = self.parent.parameterAsString(
-            parameters, self.ENUMHANDLING, context
-        )
+        configuration.enum_tabs = self._enum_handling[
+            self.parent.parameterAsEnum(parameters, self.ENUMHANDLING, context)
+        ][1]
 
         if self.parent.ili2dbtool() == DbIliMode.ili2gpkg:
             configuration.create_gpkg_multigeom = self.parent.parameterAsBool(
