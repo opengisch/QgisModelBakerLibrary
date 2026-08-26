@@ -299,7 +299,8 @@ class Ili2gpkgAlgorithm(Ili2dbAlgorithm):
                 self.DBPATH,
                 self.tr("Database File Path"),
                 defaultValue=None,
-                optional=True,
+                optional=False,
+                fileFilter="GPKG files (*.gpkg)",
             )
         else:
             dbpath_param = QgsProcessingParameterFileDestination(
