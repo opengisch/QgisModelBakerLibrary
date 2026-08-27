@@ -168,7 +168,8 @@ class TestProcessingAlgorithms(unittest.TestCase):
         self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
         self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
 
-        base_params = {  # Model requires basket col
+        base_params = {  # Model requires basket column
+            "BASKETCOL": False,
             "INHERITANCE": 1,  # smart2
             "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
         }

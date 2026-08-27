@@ -112,7 +112,7 @@ strategy. Concrete classes are mapped using a NewAndSubClass strategy.</p>
         basket_col_param = QgsProcessingParameterBoolean(
             self.BASKETCOL,
             self.tr("Create basket column"),
-            defaultValue=False,
+            defaultValue=True,
             optional=False,
         )
         basket_col_param.setHelp(
