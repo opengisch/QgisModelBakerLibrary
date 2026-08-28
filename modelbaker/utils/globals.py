@@ -80,6 +80,7 @@ MODELS_BLACKLIST = [
     "DictionariesCH_V2",
     "CatalogueObjects_V2",
     "CatalogueObjectTrees_V2",
+    "INTERLIS",
 ]
 
 
