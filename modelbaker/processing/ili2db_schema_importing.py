@@ -56,18 +56,6 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         super().__init__(parent)
         self.parent = parent
 
-        self._inheritance_type = (
-            ("smart1Inheritance", "smart1"),  # 0
-            ("smart2Inheritance", "smart2"),  # 1
-            ("noSmartMapping", "nosmart"),  # 2
-        )
-
-        self._enum_handling = (
-            ("createEnumTypesWithId", "tabsid"),  # 0
-            ("createEnumSingleTab", "singletab"),  # 1
-            ("createEnumTabs", "tabs"),  # 2
-        )
-
     def import_input_params(self):
         params = []
 
@@ -85,10 +73,11 @@ class ProcessSchemaImporter(ProcessOperatorBase):
         inheritance_param = QgsProcessingParameterEnum(
             self.INHERITANCE,
             self.tr("Inheritance type"),
-            [option[0] for option in self._inheritance_type],
+            ["smart1", "smart2", "nosmart"],
             allowMultiple=False,
-            defaultValue=0,  # smart1
+            defaultValue="smart2",
             optional=False,
+            usesStaticStrings=True,
         )
         inheritance_param.setHelp(
             self.tr(
@@ -131,10 +120,11 @@ strategy. Concrete classes are mapped using a NewAndSubClass strategy.</p>
         enum_handling_param = QgsProcessingParameterEnum(
             self.ENUMHANDLING,
             self.tr("Enumeration handling"),
-            [option[0] for option in self._enum_handling],
+            ["tabsid", "singletab", "tabs"],
             allowMultiple=False,
-            defaultValue=0,  # tabsid
+            defaultValue="tabsid",
             optional=False,
+            usesStaticStrings=True,
         )
         enum_handling_param.setHelp(
             self.tr(
@@ -154,7 +144,7 @@ strategy. Concrete classes are mapped using a NewAndSubClass strategy.</p>
             multigeom_columns_param = QgsProcessingParameterBoolean(
                 self.MULTIGEOMSPERTABLE,
                 self.tr("Multiple geometry columns per table"),
-                defaultValue=False,
+                defaultValue=True,
                 optional=False,
             )
             multigeom_columns_param.setHelp(
@@ -288,15 +278,17 @@ strategy. Concrete classes are mapped using a NewAndSubClass strategy.</p>
         configuration.srs_auth = crsinfo[0].upper()
         configuration.srs_code = crsinfo[1]
 
-        configuration.inheritance = self._inheritance_type[
-            self.parent.parameterAsEnum(parameters, self.INHERITANCE, context)
-        ][1]
+        configuration.inheritance = self.parent.parameterAsString(
+            parameters, self.INHERITANCE, context
+        )
+
         configuration.create_basket_col = self.parent.parameterAsBool(
             parameters, self.BASKETCOL, context
         )
-        configuration.enum_tabs = self._enum_handling[
-            self.parent.parameterAsEnum(parameters, self.ENUMHANDLING, context)
-        ][1]
+
+        configuration.enum_tabs = self.parent.parameterAsString(
+            parameters, self.ENUMHANDLING, context
+        )
 
         if self.parent.ili2dbtool() == DbIliMode.ili2gpkg:
             configuration.create_gpkg_multigeom = self.parent.parameterAsBool(
