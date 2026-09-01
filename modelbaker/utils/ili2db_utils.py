@@ -13,17 +13,22 @@ License:
 
 from __future__ import annotations
 
+import datetime
+import os
 from typing import TYPE_CHECKING
 
-from qgis.PyQt.QtCore import QObject, Qt, pyqtSignal
+from qgis.PyQt.QtCore import QObject, QStandardPaths, Qt, pyqtSignal
 
 from ..iliwrapper import ilideleter, ilimetaconfigexporter
 from ..iliwrapper.ili2dbconfig import (
+    BaseConfiguration,
     DeleteConfiguration,
     ExportMetaConfigConfiguration,
+    Ili2CCommandConfiguration,
     Ili2DbCommandConfiguration,
 )
 from ..iliwrapper.ili2dbutils import JavaNotFoundError
+from ..iliwrapper.ilicompiler import IliCompiler
 from ..utils.qt_utils import OverrideCursor
 
 if TYPE_CHECKING:
@@ -160,6 +165,47 @@ class Ili2DbUtils(QObject):
             self._disconnect_ili_executable_signals(metaconfig_exporter)
 
         return res, msg
+
+    def compile(self, ili_file, base_configuration=None, imd_file=None):
+        if base_configuration is None:
+            base_configuration = BaseConfiguration()
+        compiler = IliCompiler()
+        compiler.configuration = Ili2CCommandConfiguration()
+        compiler.configuration.base_configuration = base_configuration
+        compiler.configuration.ilifile = ili_file
+        if imd_file:
+            compiler.configuration.imdfile = imd_file
+        else:
+            compiler.configuration.imdfile = os.path.join(
+                QStandardPaths.writableLocation(
+                    QStandardPaths.StandardLocation.TempLocation
+                ),
+                "temp_imd_{:%Y%m%d%H%M%S%f}.imd".format(datetime.datetime.now()),
+            )
+
+        with OverrideCursor(Qt.CursorShape.WaitCursor):
+            self._connect_ili_executable_signals(compiler)
+            self._log = ""
+
+            result = True
+            msg = self.tr("Model file successfully compiled to '{}'!").format(
+                compiler.configuration.imdfile
+            )
+
+            try:
+                compiler_result = compiler.run()
+                if compiler_result != compiler.SUCCESS:
+                    msg = self.tr("An error occurred when compiling {}").format(
+                        ili_file
+                    )
+                    result = False
+            except JavaNotFoundError as e:
+                msg = e.error_string
+                result = False
+
+            self._disconnect_ili_executable_signals(compiler)
+
+        return result, compiler.configuration.imdfile, msg
 
     def _connect_ili_executable_signals(self, ili_executable: IliExecutable) -> None:
         ili_executable.process_started.connect(self.process_started)
