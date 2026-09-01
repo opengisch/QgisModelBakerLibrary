@@ -16,10 +16,13 @@ import logging
 import os
 import tempfile
 
-from qgis.core import QgsProcessingContext, QgsProcessingFeedback
+from qgis.core import (
+    QgsCoordinateReferenceSystem,
+    QgsProcessingContext,
+    QgsProcessingFeedback,
+)
 from qgis.testing import start_app, unittest
 
-from modelbaker.iliwrapper import iliimporter
 from modelbaker.iliwrapper.globals import DbIliMode
 from modelbaker.processing.ili2db_exporting import (
     ExportingGPKGAlgorithm,
@@ -28,6 +31,10 @@ from modelbaker.processing.ili2db_exporting import (
 from modelbaker.processing.ili2db_importing import (
     ImportingGPKGAlgorithm,
     ImportingPGAlgorithm,
+)
+from modelbaker.processing.ili2db_schema_importing import (
+    SchemaImportingGPKGAlgorithm,
+    SchemaImportingPGAlgorithm,
 )
 from modelbaker.processing.ili2db_validating import (
     ValidatingGPKGAlgorithm,
@@ -54,42 +61,127 @@ class TestProcessingAlgorithms(unittest.TestCase):
         }
         return params
 
+    def schema_import_alg_test(
+        self, tool: DbIliMode, parameters: dict, expected_result: bool
+    ):
+        alg = (
+            SchemaImportingGPKGAlgorithm()
+            if tool == DbIliMode.ili2gpkg
+            else SchemaImportingPGAlgorithm()
+        )
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(parameters, context, feedback)
+        assert output["ISVALID"] == expected_result
+
     def gpkg_file(self, basket_col):
-        importer = iliimporter.Importer()
-        importer.tool = DbIliMode.ili2gpkg
-        importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
-        importer.configuration.ilimodels = "RoadsSimple"
-        importer.configuration.dbfile = os.path.join(
+        dbfile = os.path.join(
             self.basetestpath,
             "tmp_roads_simple_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
         )
-        importer.configuration.create_basket_col = basket_col
-        importer.configuration.inheritance = "smart2"
-        importer.stdout.connect(self.print_info)
-        importer.stderr.connect(self.print_error)
-        if importer.run() == iliimporter.Importer.SUCCESS:
-            return importer.configuration.dbfile
-        else:
-            return None
+        schema_import_parameters = {  # smart2 by default
+            "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
+            "BASKETCOL": basket_col,
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+            "DBPATH": dbfile,
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, schema_import_parameters, True)
+        return dbfile
 
     def pg_schema(self, basket_col):
-        importer = iliimporter.Importer()
-        importer.tool = DbIliMode.ili2pg
-        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
-        importer.configuration.ilifile = testdata_path("ilimodels/RoadsSimple.ili")
-        importer.configuration.ilimodels = "RoadsSimple"
-        importer.configuration.dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(
-            datetime.datetime.now()
-        )
-        importer.configuration.srs_code = 2056
-        importer.configuration.inheritance = "smart2"
-        importer.configuration.create_basket_col = basket_col
-        importer.stdout.connect(self.print_info)
-        importer.stderr.connect(self.print_error)
-        if importer.run() == iliimporter.Importer.SUCCESS:
-            return importer.configuration.dbschema
-        else:
-            return None
+        dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        schema_import_parameters = {  # smart2 by default
+            "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
+            "BASKETCOL": basket_col,
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+            "SCHEMA": dbschema,
+        }
+        schema_import_parameters.update(self.iliimporter_pg_config_params())
+        self.schema_import_alg_test(DbIliMode.ili2pg, schema_import_parameters, True)
+        return dbschema
+
+    def test_schema_import(self):
+        def params_gpkg(base):
+            params = base.copy()
+            params["DBPATH"] = os.path.join(
+                self.basetestpath,
+                "tmp_roads_simple_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                    datetime.datetime.now()
+                ),
+            )
+            return params
+
+        def params_pg(base):
+            params = base.copy()
+            params["SCHEMA"] = dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(
+                datetime.datetime.now()
+            )
+            params.update(self.iliimporter_pg_config_params())
+            return params
+
+        base_params = {  # Only mandatory params, should succeed
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # smart1
+            "INHERITANCE": "smart1",
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # nosmart
+            "INHERITANCE": "nosmart",
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # No models, ilifile's implicit model
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # Models with no ilifile
+            "MODELS": "RoadsSimple",
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+
+        base_params = {}  # Missing both models and ilifile
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+
+        base_params = {  # Model requires basket column
+            "BASKETCOL": False,
+            "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+
+        base_params = {  # Model translation, with basket column
+            "BASKETCOL": True,
+            "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
+            "LANGUAGE": "fr",
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+
+        base_params = {  # Import several models
+            "MODELS": "CIAF_LADM;another",
+            "ILIFILE": testdata_path("ilimodels/CIAF_LADM/CIAF_LADM.ili"),
+        }
+        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
 
     def test_algs_gpkg(self):
         conn_parameters_baskets = {}
