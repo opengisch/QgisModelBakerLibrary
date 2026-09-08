@@ -545,6 +545,14 @@ class Generator(QObject):
                             + layer.alias
                         )
 
+    class RelationTuple(tuple):
+        def __new__(cls, relations, bags_of_enum, irrelevant_fk_fields):
+            obj = super().__new__(cls, (relations, bags_of_enum))
+            obj.relations = relations
+            obj.bags_of_enum = bags_of_enum
+            obj.irrelevant_fk_fields = irrelevant_fk_fields
+            return obj
+
     def relations(
         self, layers, filter_layer_list: list[str] = []
     ) -> tuple[list[Relation], dict]:
@@ -558,6 +566,7 @@ class Generator(QObject):
         # RELATION INFORMATION
 
         relations = list()
+        irrelevant_fk_fields = {}
 
         for record in relations_info:
             if (
@@ -577,6 +586,11 @@ class Generator(QObject):
                             and self.optimize_strategy == OptimizeStrategy.HIDE
                             and self.inheritance == "smart2"
                         ):
+                            if referencing_layer not in irrelevant_fk_fields:
+                                irrelevant_fk_fields[referencing_layer] = []
+                            irrelevant_fk_fields[referencing_layer].append(
+                                record["referencing_column"]
+                            )
                             continue
                         relation = Relation()
                         relation.referencing_layer = referencing_layer
@@ -597,6 +611,7 @@ class Generator(QObject):
                         )
 
                         relation.strength = QgsRelation.RelationStrength.Association
+
                         if (
                             # if it's a defined composition...
                             record.get("strength", None) == "COMPOSITE"
@@ -683,7 +698,7 @@ class Generator(QObject):
                                 record["attribute"]: new_item_list
                             }
 
-        return (relations, bags_of_enum)
+        return self.RelationTuple(relations, bags_of_enum, irrelevant_fk_fields)
 
     def _child_domain_name(
         self,

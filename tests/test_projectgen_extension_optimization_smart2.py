@@ -2684,6 +2684,481 @@ class TestProjectExtOptimizationSmart2(unittest.TestCase):
 
         QgsProject.instance().clear()
 
+    def test_extopt_base_assoc_postgis(self):
+        """
+        Tests with Model extending Gebaeude to check if the used base relations and their cardinality are stable.
+        Mainly it has to detect the pure linking tables.
+        """
+        self._set_pg_naming()
+
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2pg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Staedtische_Bauplanung_V1_1.ili"
+        )
+        importer.configuration.ilimodels = "Staedtische_Bauplanung_V1_1"
+        importer.configuration.dbschema = (
+            "optimal_staedtische_baupla_{:%Y%m%d%H%M%S%f}".format(
+                datetime.datetime.now()
+            )
+        )
+
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_base_assoc_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_base_assoc_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2pg,
+            uri=get_pg_connection_string(),
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_base_assoc_hide(generator, strategy)
+
+    def test_extopt_base_assoc_geopackage(self):
+        self._set_pg_naming(False)
+
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Staedtische_Bauplanung_V1_1.ili"
+        )
+        importer.configuration.ilimodels = "Staedtische_Bauplanung_V1_1"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_optimal_staedtische_baupla_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance=importer.configuration.inheritance,
+            optimize_strategy=strategy,
+            consider_basket_handling=True,
+        )
+
+        self._extopt_base_assoc_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance=importer.configuration.inheritance,
+            optimize_strategy=strategy,
+            consider_basket_handling=True,
+        )
+
+        self._extopt_base_assoc_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2gpkg,
+            uri=uri,
+            inheritance=importer.configuration.inheritance,
+            optimize_strategy=strategy,
+            consider_basket_handling=True,
+        )
+
+        self._extopt_base_assoc_hide(generator, strategy)
+
+    def test_extopt_base_assoc_mssql(self):
+        self._set_pg_naming(False)
+
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2mssql
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilifile = testdata_path(
+            "ilimodels/Staedtische_Bauplanung_V1_1.ili"
+        )
+        importer.configuration.ilimodels = "Staedtische_Bauplanung_V1_1"
+        importer.configuration.dbschema = (
+            "optimal_staedtische_baupla_{:%Y%m%d%H%M%S%f}".format(
+                datetime.datetime.now()
+            )
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.configuration.create_basket_col = True
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+
+        uri = "DRIVER={drv};SERVER={server};DATABASE={db};UID={uid};PWD={pwd}".format(
+            drv="{ODBC Driver 17 for SQL Server}",
+            server=importer.configuration.dbhost,
+            db=importer.configuration.database,
+            uid=importer.configuration.dbusr,
+            pwd=importer.configuration.dbpwd,
+        )
+
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        ### 1. OptimizeStrategy.NONE ###
+        strategy = OptimizeStrategy.NONE
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_base_assoc_none(generator, strategy)
+
+        ### 2. OptimizeStrategy.GROUP ###
+        strategy = OptimizeStrategy.GROUP
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_base_assoc_group(generator, strategy)
+
+        ### 3. OptimizeStrategy.HIDE ###
+        strategy = OptimizeStrategy.HIDE
+
+        generator = Generator(
+            tool=DbIliMode.ili2mssql,
+            uri=uri,
+            inheritance=importer.configuration.inheritance,
+            schema=importer.configuration.dbschema,
+            consider_basket_handling=True,
+            optimize_strategy=strategy,
+        )
+
+        self._extopt_base_assoc_hide(generator, strategy)
+
+    def _extopt_base_assoc_none(self, generator, strategy):
+
+        available_layers = generator.layers()
+        relation_info = generator.relations(available_layers)
+        relations = relation_info.relations
+        irrelevant_fk_fields = relation_info.irrelevant_fk_fields
+        legend = generator.legend(available_layers)
+
+        aliases = [l.alias for l in available_layers if l.alias is not None]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        [alias for alias in aliases if aliases.count(alias) > 1]
+
+        # check no ambiguous layers exists
+        expected_aliases = [
+            "Bauart",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Staedtische_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Strasse",
+        ]
+        assert set(aliases) == set(expected_aliases)
+
+        # irrelevant layers are detected
+        assert len(irrelevant_layer_ilinames) > 0
+        expected_irrelevant_layer_ilinames = [
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+        ]
+        assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
+        project.layers = available_layers
+        project.relations = relations
+        project.irrelevant_fk_fields = irrelevant_fk_fields
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        all_layers = root.findLayers()
+        assert len(all_layers) == 11
+
+        # check relations - all are there
+        relations = list(qgis_project.relationManager().relations().values())
+        assert len(relations) == 28
+
+        # Check if Gebaeude is properly linking on Strasse
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() in [
+                "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+                "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+                "Staedtische_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            ]:
+                efc = layer.layer.editFormConfig()
+                for tab in efc.tabs():
+                    if tab.name() == "Strasse":
+                        count += 1
+                        # check if it's using the direct relation and not to the linking table
+                        assert tab.children()[0].nmRelationId() is not None
+        # should find the 5 times relation editors to Strasse (two for Staedtische and Kantonale, because they extend the parent)
+        assert count == 5
+
+        # Check if Strasse is properly linking directly to Gebaeude
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                efc = layer.layer.editFormConfig()
+                for tab in efc.tabs():
+                    if tab.name() in [
+                        "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+                        "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+                        "Staedtische_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+                    ]:
+                        count += 1
+                        # check if it's using the direct relation and not to the linking table
+                        assert tab.children()[0].nmRelationId() is not None
+        # should find the 5 times relation editors (two to Staedtische and Kantonale, because they extend the parent)
+        assert count == 5
+        QgsProject.instance().clear()
+
+    def _extopt_base_assoc_group(self, generator, strategy):
+
+        available_layers = generator.layers()
+        relation_info = generator.relations(available_layers)
+        relations = relation_info.relations
+        irrelevant_fk_fields = relation_info.irrelevant_fk_fields
+        legend = generator.legend(available_layers)
+
+        aliases = [l.alias for l in available_layers if l.alias is not None]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        [alias for alias in aliases if aliases.count(alias) > 1]
+
+        # check no ambiguous layers exists
+        expected_aliases = [
+            "Bauart",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Material",
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+            "Staedtische_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Strasse",
+        ]
+        assert set(aliases) == set(expected_aliases)
+
+        # irrelevant layers are detected
+        assert len(irrelevant_layer_ilinames) > 0
+        expected_irrelevant_layer_ilinames = [
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+        ]
+        assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
+        project.layers = available_layers
+        project.relations = relations
+        project.irrelevant_fk_fields = irrelevant_fk_fields
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        all_layers = root.findLayers()
+        assert len(all_layers) == 11
+
+        # check relations - all are there
+        relations = list(qgis_project.relationManager().relations().values())
+        assert len(relations) == 28
+
+        # Check if Gebaeude is properly linking on Strasse - here Bauplanung_V1_1.Gebaeude should not have a link, the other two should have each one
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() in [
+                "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+                "Staedtische_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            ]:
+                efc = layer.layer.editFormConfig()
+                for tab in efc.tabs():
+                    if tab.name() == "Strasse":
+                        count += 1
+                        # check if it's using the direct relation and not to the linking table
+                        assert tab.children()[0].nmRelationId() is not None
+        assert count == 2
+
+        # Check if Strasse is properly linking directly to Gebaeude
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Strasse":
+                efc = layer.layer.editFormConfig()
+                # should only have one link (and one general tab)
+                assert len(efc.tabs()) == 2
+                for tab in efc.tabs():
+                    if tab.name() in [
+                        "Staedtische_Bauplanung_V1_1.Konstruktionen.Gebaeude"
+                    ]:
+                        count += 1
+                        # check if it's using the direct relation and not to the linking table
+                        assert tab.children()[0].nmRelationId() is not None
+        assert count == 1
+        QgsProject.instance().clear()
+
+    def _extopt_base_assoc_hide(self, generator, strategy):
+        available_layers = generator.layers()
+        relation_info = generator.relations(available_layers)
+        relations = relation_info.relations
+        irrelevant_fk_fields = relation_info.irrelevant_fk_fields
+        legend = generator.legend(available_layers)
+
+        aliases = [l.alias for l in available_layers if l.alias is not None]
+        irrelevant_layer_ilinames = [
+            l.ili_name for l in available_layers if not l.is_relevant
+        ]
+        [alias for alias in aliases if aliases.count(alias) > 1]
+
+        # check no ambiguous layers exists
+        expected_aliases = [
+            "Bauart",
+            "Material",
+            "Strassen_Gebaeude",
+            "Gebaeude",
+            "Strasse",
+        ]
+        assert set(aliases) == set(expected_aliases)
+
+        # irrelevant layers are detected
+        assert len(irrelevant_layer_ilinames) > 0
+        expected_irrelevant_layer_ilinames = [
+            "Kantonale_Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Gebaeude",
+            "Bauplanung_V1_1.Konstruktionen.Material",
+            "Bauplanung_V1_1.Konstruktionen.Strassen_Gebaeude",
+        ]
+        assert set(irrelevant_layer_ilinames) == set(expected_irrelevant_layer_ilinames)
+
+        project = Project(
+            optimize_strategy=strategy,
+            context={"catalogue_datasetname": CATALOGUE_DATASETNAME},
+        )
+        project.layers = available_layers
+        project.relations = relations
+        project.irrelevant_fk_fields = irrelevant_fk_fields
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        # check layertree
+        root = qgis_project.layerTreeRoot()
+        assert root is not None
+
+        all_layers = root.findLayers()
+        assert len(all_layers) == 7
+
+        # check relations - all are there
+        relations = list(qgis_project.relationManager().relations().values())
+        assert len(relations) == 11
+
+        # Check if Gebaeude is properly linking on Strasse and the other way around
+        count = 0
+        for layer in project.layers:
+            if layer.layer.name() == "Gebaeude":
+                efc = layer.layer.editFormConfig()
+                for tab in efc.tabs():
+                    if tab.name() == "Strasse":
+                        count += 1
+                        # check if it's using the direct relation and not to the linking table
+                        assert tab.children()[0].nmRelationId() is not None
+            if layer.layer.name() == "Strasse":
+                efc = layer.layer.editFormConfig()
+                for tab in efc.tabs():
+                    if tab.name() in ["Gebaeude"]:
+                        count += 1
+                        # check if it's using the direct relation and not to the linking table
+                        assert tab.children()[0].nmRelationId() is not None
+        assert count == 2
+        QgsProject.instance().clear()
+
     def _set_pg_naming(self, is_pg=True):
         if is_pg:
             self.dataset_tablename = "t_ili2db_dataset"
