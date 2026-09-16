@@ -58,6 +58,7 @@ class Project(QObject):
         self.auto_transaction = auto_transaction
         self.evaluate_default_values = evaluate_default_values
         self.relations = list[Relation]
+        self.irrelevant_fk_fields = {}
         self.custom_variables = {}
         self.layouts = {}
         self.mapthemes = {}

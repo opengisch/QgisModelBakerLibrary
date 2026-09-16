@@ -396,4 +396,8 @@ class Layer:
                 continue
             remaining_fields.discard(relation.referencing_field)
 
+        irrelevant_fk_fields = project.irrelevant_fk_fields.get(self, [])
+        for irrelevant_fk_field in irrelevant_fk_fields:
+            remaining_fields.discard(irrelevant_fk_field)
+
         return len(remaining_fields) == 0

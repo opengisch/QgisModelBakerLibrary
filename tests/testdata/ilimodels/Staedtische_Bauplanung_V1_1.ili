@@ -1,0 +1,16 @@
+INTERLIS 2.3;
+
+/* Extended Kantonale_Bauplanung_V1_1 as city model importing cantonal model.
+Extending Gebaeude to check if the used base relations are stable */
+MODEL Staedtische_Bauplanung_V1_1 (en) AT "https://modelbaker.ch" VERSION "2023-07-13" =
+  IMPORTS Kantonale_Bauplanung_V1_1;
+
+  TOPIC Konstruktionen EXTENDS Kantonale_Bauplanung_V1_1.Konstruktionen =
+
+    CLASS Gebaeude (EXTENDED) =
+      isBrutal: BOOLEAN;
+    END Gebaeude;
+
+  END Konstruktionen;
+
+END Staedtische_Bauplanung_V1_1.
