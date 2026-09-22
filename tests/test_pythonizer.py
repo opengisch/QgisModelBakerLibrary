@@ -467,6 +467,8 @@ class TestPythonizer(unittest.TestCase):
             "Colors_V2.SomeColors.BlueChildColorClass",
             "Colors_V2.SomeColors.UninheritedCMYColorClass",
             "Colors_V2.SomeColors.GreenChildColorClass",
+            "Colors_V2.SomeColors.MaterialClass",
+            "Colors_V2.SomeColors.InheritedMaterialClass",
         }
         relevant_classes = index.relevant_classes(relevant_topics)
         assert relevant_classes == {
@@ -474,6 +476,8 @@ class TestPythonizer(unittest.TestCase):
             "Colors_V2.SomeColors.BlueChildColorClass",
             "Colors_V2.SomeColors.UninheritedCMYColorClass",
             "Colors_V2.SomeColors.GreenChildColorClass",
+            "Colors_V2.SomeColors.MaterialClass",
+            "Colors_V2.SomeColors.InheritedMaterialClass",
         }
         relevant_geometric_attributes = index.relevant_geometric_attributes_per_class(
             relevant_topics
