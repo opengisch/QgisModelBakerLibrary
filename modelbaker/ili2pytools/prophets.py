@@ -147,11 +147,13 @@ class ModelProphet(QObject):
         Returns:
             A list of geometric attribute tids.
         """
-        return list(
-            self.index.relevant_geometric_attributes_per_class(
+        return [
+            attribute
+            for attributes in self.index.relevant_geometric_attributes_per_class(
                 self.relevant_topics
             ).values()
-        )
+            for attribute in attributes
+        ]
 
     def available_languages(self, models: list = None) -> list:
         """Returns all the found languages of the given models.
