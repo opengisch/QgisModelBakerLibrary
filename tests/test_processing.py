@@ -20,6 +20,7 @@ from qgis.core import (
     QgsCoordinateReferenceSystem,
     QgsProcessingContext,
     QgsProcessingFeedback,
+    QgsProviderRegistry,
 )
 from qgis.testing import start_app, unittest
 
@@ -39,6 +40,10 @@ from modelbaker.processing.ili2db_schema_importing import (
 from modelbaker.processing.ili2db_validating import (
     ValidatingGPKGAlgorithm,
     ValidatingPGAlgorithm,
+)
+from modelbaker.processing.util_dataconnectionparsing import (
+    DataConnectionParsingGPKGAlgorithm,
+    DataConnectionParsingPGAlgorithm,
 )
 from tests.utils import iliimporter_config, testdata_path
 
@@ -442,6 +447,158 @@ class TestProcessingAlgorithms(unittest.TestCase):
         assert output["ISVALID"]
 
         assert os.path.isfile(invalid_targetfile)
+
+    def print_info(self, text):
+        logging.info(text)
+
+    def print_error(self, text):
+        logging.error(text)
+
+
+class TestProcessingUtilAlgorithms(unittest.TestCase):
+
+    PG_CONNECTIONS = {
+        "pg-one": {
+            "uri": "host=localhost1 port=54321 dbname=db1 user=flintheart password=glomgold sslmode=prefer",
+            "config": {"savePassword": "true", "saveUsername": "true"},
+        },
+        "pg-two": {
+            "uri": "host=localhost2 port=54322 dbname=db2 authcfg=xyz sslmode=require",
+            "config": {"savePassword": "false", "saveUsername": "false"},
+        },
+        "pg-three-invalid": {
+            "uri": "port=54323 dbname=db3 user=john password=rockerduck sslmode=disable",
+            "config": {"savePassword": "false", "saveUsername": "true"},
+        },
+    }
+
+    GPKG_CONNECTIONS = {
+        "data1.gpkg": "C:\\Users\\flintheart\\glomgold\\data1.gpkg",
+        "data2.gpkg": "/home/john/rockerduck/data2.gpkg",
+    }
+
+    @classmethod
+    def setUp(self):
+        for name, settings in self.PG_CONNECTIONS.items():
+
+            md = QgsProviderRegistry.instance().providerMetadata("postgres")
+
+            # Create connection instance & save to QGIS settings
+            conn = md.createConnection(settings["uri"], settings["config"])
+            QgsProviderRegistry.instance().providerMetadata("postgres").saveConnection(
+                conn, name
+            )
+
+        for name, path in self.GPKG_CONNECTIONS.items():
+            md = QgsProviderRegistry.instance().providerMetadata("ogr")
+            config = {"database": path}
+            conn = md.createConnection(path, {})
+            QgsProviderRegistry.instance().providerMetadata("ogr").saveConnection(
+                conn, name
+            )
+
+    @classmethod
+    def tearDown(self):
+        for name in self.PG_CONNECTIONS.keys():
+            QgsProviderRegistry.instance().providerMetadata(
+                "postgres"
+            ).deleteConnection(name)
+        for name in self.GPKG_CONNECTIONS.keys():
+            QgsProviderRegistry.instance().providerMetadata("ogr").deleteConnection(
+                name
+            )
+
+    def connection_parsing_alg_test(
+        self, tool: DbIliMode, parameters: dict, expected_output: dict
+    ):
+        alg = (
+            DataConnectionParsingGPKGAlgorithm()
+            if tool == DbIliMode.ili2gpkg
+            else DataConnectionParsingPGAlgorithm()
+        )
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(parameters, context, feedback)
+        assert output == expected_output
+
+    def test_pg_data_connection_parsing(self):
+
+        connection_parameters = {
+            "DATABASE": "pg-one",
+            "NEWSCHEMA": "pg-one-schema",
+        }
+        expected_output = {
+            "SERVICE": "",
+            "HOST": "localhost1",
+            "PORT": "54321",
+            "DBNAME": "db1",
+            "USER": "flintheart",
+            "PASSWORD": "glomgold",
+            "SCHEMA": "pg-one-schema",
+            "SSLMODE": "prefer",
+            "AUTHCFG": "",
+            "ISVALID": True,
+        }
+        self.connection_parsing_alg_test(
+            DbIliMode.ili2pg, connection_parameters, expected_output
+        )
+
+        connection_parameters = {
+            "DATABASE": "pg-two",
+        }
+        expected_output = {
+            "SERVICE": "",
+            "HOST": "localhost2",
+            "PORT": "54322",
+            "DBNAME": "db2",
+            # on an authcfg connection, it takes the user and pw from there, but because the authcfg does not exist it's null here
+            "USER": None,
+            "PASSWORD": None,
+            "SCHEMA": "public",  # taking the default schema
+            "SSLMODE": "require",
+            "AUTHCFG": "xyz",
+            "ISVALID": True,
+        }
+        self.connection_parsing_alg_test(
+            DbIliMode.ili2pg, connection_parameters, expected_output
+        )
+
+        connection_parameters = {
+            "DATABASE": "pg-three-invalid",
+            "SCHEMA": "pg-three-schema",
+        }
+        expected_output = {
+            "SERVICE": "",
+            "HOST": "",
+            "PORT": "54323",
+            "DBNAME": "db3",
+            "USER": "John",
+            "PASSWORD": "",
+            "SCHEMA": "pg-three-schema",
+            "SSLMODE": "disable",
+            "AUTHCFG": "",
+            "ISVALID": False,  # the connection is invalid because the host is missing
+        }
+
+    def test_gpkg_data_connection_parsing(self):
+        connection_parameters = {"DATABASE": "data1.gpkg"}
+        expected_output = {
+            "DBPATH": "C:\\Users\\flintheart\\glomgold\\data1.gpkg",
+            "ISVALID": True,
+        }
+        self.connection_parsing_alg_test(
+            DbIliMode.ili2gpkg, connection_parameters, expected_output
+        )
+
+        connection_parameters = {"DATABASE": "data2.gpkg"}
+        expected_output = {
+            "DBPATH": "/home/john/rockerduck/data2.gpkg",
+            "ISVALID": True,
+        }
+        self.connection_parsing_alg_test(
+            DbIliMode.ili2gpkg, connection_parameters, expected_output
+        )
 
     def print_info(self, text):
         logging.info(text)

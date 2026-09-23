@@ -19,6 +19,7 @@ from datetime import datetime
 from typing import TYPE_CHECKING
 
 from qgis.core import (
+    QgsAbstractProviderConnection,
     QgsApplication,
     QgsAuthMethodConfig,
     QgsDataProvider,
@@ -123,6 +124,57 @@ def get_configuration_from_sourceprovider(
             and configuration.dbhost
             and configuration.database
             and configuration.dbschema
+        )
+    return valid, mode
+
+
+def get_configuration_from_data_connection(
+    conn: QgsAbstractProviderConnection, configuration: Ili2DbCommandConfiguration
+) -> tuple[bool, DbIliMode]:
+    """
+    Determines the connection parameters from a data connection configured in QGIS.
+    On service in postgres it preferences the static parameters over the ones in the service file if available.
+    Gets a configuration (Ili2DbCommandConfiguration) with the determined parameters
+    Returns:
+        tuple[[bool, DbIliMode]: if the needed database connection parameters are determined and the kind of database like pg, gpkg or mssql
+    """
+    mode = ""
+    valid = False
+
+    if conn.providerKey() == "postgres":
+        configuration.tool = mode = DbIliMode.pg
+        data_source = QgsDataSourceUri(conn.uri())
+        configuration.dbservice = data_source.service()
+        service_map, _ = get_service_config(configuration.dbservice)
+        if data_source.authConfigId():
+            configuration.dbauthid = data_source.authConfigId()
+            authconfig_map = get_authconfig_map(configuration.dbauthid)
+            configuration.dbusr = authconfig_map.get("username")
+            configuration.dbpwd = authconfig_map.get("password")
+        else:
+            configuration.dbusr = data_source.username() or service_map.get("user")
+            configuration.dbpwd = data_source.password() or service_map.get("password")
+        configuration.dbhost = data_source.host() or service_map.get("host")
+        configuration.dbport = data_source.port() or service_map.get("port")
+        configuration.database = data_source.database() or service_map.get("dbname")
+        configuration.sslmode = QgsDataSourceUri.encodeSslMode(data_source.sslMode())
+        valid = bool(configuration.dbhost and configuration.database)
+    elif conn.providerKey() == "ogr":
+        configuration.tool = mode = DbIliMode.gpkg
+        configuration.dbfile = conn.uri().split("|")[0].strip()
+        valid = bool(configuration.dbfile)
+    elif conn.providerKey() == "mssql":
+        configuration.tool = mode = DbIliMode.mssql
+        data_source = QgsDataSourceUri(conn.uri())
+        configuration.dbhost = data_source.host()
+        configuration.dbusr = data_source.username()
+        configuration.dbpwd = data_source.password()
+        configuration.database = data_source.database()
+        valid = bool(
+            configuration.dbusr
+            and configuration.dbpwd
+            and configuration.dbhost
+            and configuration.database
         )
     return valid, mode
 
