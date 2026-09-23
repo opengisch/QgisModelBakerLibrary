@@ -14,6 +14,7 @@ License:
 from __future__ import annotations
 
 import re
+from decimal import Decimal
 from typing import Callable, Optional
 
 from qgis.core import Qgis, QgsApplication, QgsRelation, QgsWkbTypes
@@ -404,6 +405,15 @@ class Generator(QObject):
                         field.widget_config["Step"] = pow(
                             10, -1 * fielddef["numeric_scale"]
                         )
+                    else:
+                        # get steps and precision from the max value, because not available in the field
+                        max_value = min_max_info[column_name][1]
+                        split_max_value = max_value.split(".")
+                        if len(split_max_value) > 1:
+                            precision = len(split_max_value[1])
+                            step = f"{(Decimal(10) ** -precision):f}"
+                            field.widget_config["Step"] = step
+                            field.widget_config["Precision"] = precision
                     # field.widget_config['Suffix'] = fielddef['unit'] if 'unit' in fielddef else ''
                     if "unit" in fielddef and fielddef["unit"] is not None:
                         field.alias = "{alias} [{unit}]".format(

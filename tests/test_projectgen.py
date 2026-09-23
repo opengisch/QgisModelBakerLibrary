@@ -1010,6 +1010,134 @@ class TestProjectGen(unittest.TestCase):
 
         assert count == 1
 
+    def test_ranges_more_precision_geopackage(self):
+        importer = iliimporter.Importer()
+        importer.tool = DbIliMode.ili2gpkg
+        importer.configuration = iliimporter_config(importer.tool, "ilimodels")
+        importer.configuration.ilimodels = "Precision_V1_1"
+        importer.configuration.dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_import_more_precision_ranges_gpkg_{:%Y%m%d%H%M%S%f}.gpkg".format(
+                datetime.datetime.now()
+            ),
+        )
+        importer.configuration.srs_code = 2056
+        importer.configuration.inheritance = "smart2"
+        importer.stdout.connect(self.print_info)
+        importer.stderr.connect(self.print_error)
+        assert importer.run() == iliimporter.Importer.SUCCESS
+
+        config_manager = GpkgCommandConfigManager(importer.configuration)
+        uri = config_manager.get_uri()
+
+        generator = Generator(DbIliMode.ili2gpkg, uri, "smart2")
+
+        available_layers = generator.layers()
+        relations, _ = generator.relations(available_layers)
+        legend = generator.legend(available_layers)
+
+        project = Project()
+        project.layers = available_layers
+        project.relations = relations
+        project.legend = legend
+        project.post_generate()
+
+        qgis_project = QgsProject.instance()
+        project.create(None, qgis_project)
+
+        """ test the following values:
+        Zero: 0 .. 99;
+
+        One0: 0.0 .. 9.0;
+        Two0: 0.00 .. 99.00;
+        Three0: 0.000 .. 999.000;
+        Eight0 : 0.00000000 .. 99999999.00000000;
+        One9: 0.0 .. 9.9;
+        Two9: 0.00 .. 99.99;
+        Three9: 0.000 .. 999.999;
+        Eight9 : 0.00000000 .. 99999999.99999999;
+        """
+
+        for layer in available_layers:
+            if layer.name == "precclass":
+                config = layer.layer.fields().field("zero").editorWidgetSetup().config()
+                assert config["Min"] == "0"
+                assert config["Max"] == "99"
+                assert "Step" not in config
+                assert "Precision" not in config
+
+                """ The following values are tested:
+                    One9: 0.0 .. 9.9;
+                    Two9: 0.00 .. 99.99;
+                    Three9: 0.000 .. 999.999;
+                    Eight9 : 0.00000000 .. 99999999.99999999;
+                """
+                config = layer.layer.fields().field("one9").editorWidgetSetup().config()
+                assert config["Min"] == "0.0"
+                assert config["Max"] == "9.9"
+                assert config["Step"] == "0.1"
+                assert config["Precision"] == 1
+
+                config = layer.layer.fields().field("two9").editorWidgetSetup().config()
+                assert config["Min"] == "0.0"
+                assert config["Max"] == "99.99"
+                assert config["Step"] == "0.01"
+                assert config["Precision"] == 2
+
+                config = (
+                    layer.layer.fields().field("three9").editorWidgetSetup().config()
+                )
+                assert config["Min"] == "0.0"
+                assert config["Max"] == "999.999"
+                assert config["Step"] == "0.001"
+                assert config["Precision"] == 3
+
+                config = (
+                    layer.layer.fields().field("eight9").editorWidgetSetup().config()
+                )
+                assert config["Min"] == "0.0"
+                assert config["Max"] == "99999999.99999999"
+                assert config["Step"] == "0.00000001"
+                assert config["Precision"] == 8
+
+                """ The following values are tested:
+                    One0: 0.0 .. 9.0;
+                    Two0: 0.00 .. 99.00;
+                    Three0: 0.000 .. 999.000;
+                    Eight0 : 0.00000000 .. 99999999.00000000;
+                """
+                """
+                But this is currently not supported. See See https://github.com/opengisch/QgisModelBakerLibrary/pull/182#issuecomment-5791327060
+
+                config = layer.layer.fields().field("one0").editorWidgetSetup().config()
+                assert config["Min"] == "0.0"
+                assert config["Max"] == "9.0"
+                assert config["Step"] == "0.1"
+                assert config["Precision"] == 1
+
+                config = layer.layer.fields().field("two0").editorWidgetSetup().config()
+                assert config["Min"] == "0.0"
+                assert config["Max"] == "99.0"
+                assert config["Step"] == "0.01"
+                assert config["Precision"] == 2
+
+                config = (
+                    layer.layer.fields().field("three0").editorWidgetSetup().config()
+                )
+                assert config["Min"] == "0.00"
+                assert config["Max"] == "999.0"
+                assert config["Step"] == "0.001"
+                assert config["Precision"] == 3
+
+                config = (
+                    layer.layer.fields().field("eight0").editorWidgetSetup().config()
+                )
+                assert config["Min"] == "0.0"
+                assert config["Max"] == "99999999.0"
+                assert config["Step"] == "0.00000001"
+                assert config["Precision"] == 8
+                """
+
     def test_ranges_mssql(self):
         importer = iliimporter.Importer()
         importer.tool = DbIliMode.ili2mssql

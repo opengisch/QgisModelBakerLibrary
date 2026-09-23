@@ -17,6 +17,7 @@ import os
 import re
 import sqlite3
 import uuid
+from decimal import Decimal
 from typing import Optional
 
 import qgis.utils
@@ -497,7 +498,10 @@ class GPKGConnector(DBConnector):
                 r"(\w+) BETWEEN ([-?\d\.E]+) AND ([-?\d\.E]+)", res
             )  # Might contain scientific notation
             if res2:
-                constraint_mapping[res2.group(1)] = (res2.group(2), res2.group(3))
+                constraint_mapping[res2.group(1)] = (
+                    str(Decimal(res2.group(2))),
+                    str(Decimal(res2.group(3))),
+                )
 
         cursor.close()
         return constraint_mapping
