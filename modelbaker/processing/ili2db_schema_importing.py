@@ -334,7 +334,7 @@ class SchemaImportingPGAlgorithm(Ili2pgAlgorithm):
         Returns the translated algorithm name, which should be used for any
         user-visible display of the algorithm name.
         """
-        return self.tr("Schema Import with ili2pg (PostGIS)")
+        return self.tr("Create schema with ili2pg (PostGIS)")
 
     def tags(self) -> list[str]:
 
@@ -428,7 +428,7 @@ class SchemaImportingGPKGAlgorithm(Ili2gpkgAlgorithm):
         Returns the translated algorithm name, which should be used for any
         user-visible display of the algorithm name.
         """
-        return self.tr("Schema import with ili2gpkg (GeoPackage)")
+        return self.tr("Create schema with ili2gpkg (GeoPackage)")
 
     def tags(self) -> list[str]:
 
