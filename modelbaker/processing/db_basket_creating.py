@@ -1,7 +1,7 @@
 """
 Metadata:
-    Creation Date: 2025-10-10
-    Copyright: (C) 2025 by Dave Signer
+    Creation Date: 2026-09-27
+    Copyright: (C) 2026 by Dave Signer
     Contact: david@opengis.ch
 
 License:
@@ -116,6 +116,13 @@ class ProcessBasketCreator(ProcessOperatorBase):
 
     def run(self, configuration, parameters, context, feedback):
         dataset_name = self.parent.parameterAsString(parameters, self.DATASET, context)
+        relevant_only = self.parent.parameterAsBool(
+            parameters, self.RELEVANTONLY, context
+        )
+        bid_template = self.parent.parameterAsString(
+            parameters, self.BIDTEMPLATE, context
+        )
+
         db_connector = db_utils.get_db_connector(configuration)
 
         dataset_tid = self._get_dataset_tid(db_connector, dataset_name)
@@ -133,18 +140,16 @@ class ProcessBasketCreator(ProcessOperatorBase):
         else:
             feedback.pushInfo(self.tr("Found existing dataset."))
 
-        existing_baskets = []
+        existing_baskets = set()
         for basket_record in db_connector.get_baskets_info():
             if basket_record["datasetname"] == dataset_name:
-                existing_baskets.append(basket_record["topic"])
+                existing_baskets.add(basket_record["topic"])
 
         feedback.pushInfo(self.tr("Creating baskets:"))
 
         for topic_record in db_connector.get_topics_info():
             topic_key = f"{topic_record['model']}.{topic_record['topic']}"
-            if topic_record["relevance"] == 0 and self.parent.parameterAsBool(
-                parameters, self.RELEVANTONLY, context
-            ):
+            if topic_record["relevance"] == 0 and relevant_only:
                 feedback.pushInfo(
                     self.tr("Skipping non-relevant topic {topic_key}.").format(
                         topic_key=topic_key
@@ -159,9 +164,6 @@ class ProcessBasketCreator(ProcessOperatorBase):
                 )
                 continue
             bid_value = None
-            bid_template = self.parent.parameterAsString(
-                parameters, self.BIDTEMPLATE, context
-            )
             if bid_template:
                 bid_value = bid_template.format(
                     t_id=f"{db_connector.get_next_ili2db_sequence_value()}"
