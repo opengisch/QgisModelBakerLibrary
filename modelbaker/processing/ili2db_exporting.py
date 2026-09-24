@@ -18,7 +18,7 @@ from qgis.core import (
     QgsProcessingException,
     QgsProcessingFeedback,
     QgsProcessingOutputBoolean,
-    QgsProcessingOutputFile,
+    QgsProcessingOutputString,
     QgsProcessingParameterBoolean,
     QgsProcessingParameterEnum,
     QgsProcessingParameterFileDestination,
@@ -127,7 +127,7 @@ class ProcessExporter(ProcessOperatorBase):
             QgsProcessingOutputBoolean(self.ISVALID, self.tr("Export Result"))
         )
         params.append(
-            QgsProcessingOutputFile(self.XTFFILEPATH, self.tr("Transfer File Path"))
+            QgsProcessingOutputString(self.XTFFILEPATH, self.tr("Transfer File Path"))
         )
 
         return params

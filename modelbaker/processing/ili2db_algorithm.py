@@ -4,7 +4,6 @@ from abc import abstractmethod
 from qgis.core import (
     QgsProcessingAlgorithm,
     QgsProcessingOutputBoolean,
-    QgsProcessingOutputFile,
     QgsProcessingOutputNumber,
     QgsProcessingOutputString,
     QgsProcessingParameterAuthConfig,
@@ -320,7 +319,7 @@ class Ili2gpkgAlgorithm(Ili2dbAlgorithm):
         params = []
 
         params.append(
-            QgsProcessingOutputFile(self.DBPATH, self.tr("Database File Path"))
+            QgsProcessingOutputString(self.DBPATH, self.tr("Database File Path"))
         )
 
         return params
