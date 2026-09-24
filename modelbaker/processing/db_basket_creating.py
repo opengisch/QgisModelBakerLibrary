@@ -143,7 +143,7 @@ class ProcessBasketCreator(ProcessOperatorBase):
         for topic_record in db_connector.get_topics_info():
             topic_key = f"{topic_record['model']}.{topic_record['topic']}"
             if topic_record["relevance"] == 0 and self.parent.parameterAsBool(
-                self.RELEVANTONLY, context
+                parameters, self.RELEVANTONLY, context
             ):
                 feedback.pushInfo(
                     self.tr("Skipping non-relevant topic {topic_key}.").format(
