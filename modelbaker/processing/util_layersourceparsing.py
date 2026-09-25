@@ -68,11 +68,22 @@ class LayerSourceParsingAlgorithm(UtilAlgorithm):
         Returns the translated algorithm name, which should be used for any
         user-visible display of the algorithm name.
         """
-        return self.tr("Get connection from layersource")
+        return self.tr("Get connection from layersource (PostGIS/GeoPackage)")
 
     def tags(self) -> list[str]:
 
-        return ["layer", "source", "database", "modelbaker", "ili2db", "interlis"]
+        return [
+            "layer",
+            "source",
+            "database",
+            "modelbaker",
+            "ili2db",
+            "interlis",
+            "postgis",
+            "geopackage",
+            "postgresql",
+            "gpkg",
+        ]
 
     def shortDescription(self) -> str:
         """
