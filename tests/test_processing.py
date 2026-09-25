@@ -24,6 +24,10 @@ from qgis.core import (
 from qgis.testing import start_app, unittest
 
 from modelbaker.iliwrapper.globals import DbIliMode
+from modelbaker.processing.db_basket_creating import (
+    BasketCreatingGPKGAlgorithm,
+    BasketCreatingPGAlgorithm,
+)
 from modelbaker.processing.ili2db_exporting import (
     ExportingGPKGAlgorithm,
     ExportingPGAlgorithm,
@@ -40,6 +44,7 @@ from modelbaker.processing.ili2db_validating import (
     ValidatingGPKGAlgorithm,
     ValidatingPGAlgorithm,
 )
+from modelbaker.utils import db_utils
 from tests.utils import iliimporter_config, testdata_path
 
 start_app()
@@ -61,9 +66,8 @@ class TestProcessingAlgorithms(unittest.TestCase):
         }
         return params
 
-    def schema_import_alg_test(
-        self, tool: DbIliMode, parameters: dict, expected_result: bool
-    ):
+    def _schema_alg(self, tool: DbIliMode, parameters: dict, expected_result: bool):
+        # Run the schema import algorithm with the given parameters
         alg = (
             SchemaImportingGPKGAlgorithm()
             if tool == DbIliMode.ili2gpkg
@@ -75,35 +79,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         output = alg.processAlgorithm(parameters, context, feedback)
         assert output["ISVALID"] == expected_result
 
-    def gpkg_file(self, basket_col):
-        dbfile = os.path.join(
-            self.basetestpath,
-            "tmp_roads_simple_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
-        )
-        schema_import_parameters = {  # smart2 by default
-            "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
-            "BASKETCOL": basket_col,
-            "MODELS": "RoadsSimple",
-            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
-            "DBPATH": dbfile,
-        }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, schema_import_parameters, True)
-        return dbfile
-
-    def pg_schema(self, basket_col):
-        dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
-        schema_import_parameters = {  # smart2 by default
-            "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
-            "BASKETCOL": basket_col,
-            "MODELS": "RoadsSimple",
-            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
-            "SCHEMA": dbschema,
-        }
-        schema_import_parameters.update(self.iliimporter_pg_config_params())
-        self.schema_import_alg_test(DbIliMode.ili2pg, schema_import_parameters, True)
-        return dbschema
-
-    def test_schema_import(self):
+    def test_alg_schema_import(self):
         def params_gpkg(base):
             params = base.copy()
             params["DBPATH"] = os.path.join(
@@ -126,100 +102,128 @@ class TestProcessingAlgorithms(unittest.TestCase):
             "MODELS": "RoadsSimple",
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
         }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # smart1
             "INHERITANCE": "smart1",
             "MODELS": "RoadsSimple",
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
         }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # nosmart
             "INHERITANCE": "nosmart",
             "MODELS": "RoadsSimple",
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
         }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # No models, ilifile's implicit model
             "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
         }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # Models with no ilifile
             "MODELS": "RoadsSimple",
         }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), False)
 
         base_params = {}  # Missing both models and ilifile
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), False)
 
         base_params = {  # Model requires basket column
             "BASKETCOL": False,
             "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
         }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), False)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), False)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), False)
 
         base_params = {  # Model translation, with basket column
             "BASKETCOL": True,
             "ILIFILE": testdata_path("ilimodels/PlansDAffectation_V1_2.ili"),
             "LANGUAGE": "fr",
         }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), True)
 
         base_params = {  # Import several models
             "MODELS": "CIAF_LADM;another",
             "ILIFILE": testdata_path("ilimodels/CIAF_LADM/CIAF_LADM.ili"),
         }
-        self.schema_import_alg_test(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
-        self.schema_import_alg_test(DbIliMode.ili2pg, params_pg(base_params), True)
+        self._schema_alg(DbIliMode.ili2gpkg, params_gpkg(base_params), True)
+        self._schema_alg(DbIliMode.ili2pg, params_pg(base_params), True)
 
-    def test_algs_gpkg(self):
+    def gpkg_file_for_data_algs(self, basket_col):
+        dbfile = os.path.join(
+            self.basetestpath,
+            "tmp_roads_simple_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        schema_import_parameters = {  # smart2 by default
+            "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
+            "BASKETCOL": basket_col,
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+            "DBPATH": dbfile,
+        }
+        self._schema_alg(DbIliMode.ili2gpkg, schema_import_parameters, True)
+        return dbfile
+
+    def pg_schema_for_data_algs(self, basket_col):
+        dbschema = "roads_simple_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        schema_import_parameters = {  # smart2 by default
+            "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
+            "BASKETCOL": basket_col,
+            "MODELS": "RoadsSimple",
+            "ILIFILE": testdata_path("ilimodels/RoadsSimple.ili"),
+            "SCHEMA": dbschema,
+        }
+        schema_import_parameters.update(self.iliimporter_pg_config_params())
+        self._schema_alg(DbIliMode.ili2pg, schema_import_parameters, True)
+        return dbschema
+
+    def test_algs_data_gpkg(self):
         conn_parameters_baskets = {}
-        conn_parameters_baskets["DBPATH"] = self.gpkg_file(True)
-        self._algs_with_baskets(
+        conn_parameters_baskets["DBPATH"] = self.gpkg_file_for_data_algs(True)
+        self._data_algs_with_baskets(
             conn_parameters_baskets,
             ImportingGPKGAlgorithm,
             ValidatingGPKGAlgorithm,
             ExportingGPKGAlgorithm,
         )
         conn_parameters = {}
-        conn_parameters["DBPATH"] = self.gpkg_file(False)
-        self._algs_without_baskets(
+        conn_parameters["DBPATH"] = self.gpkg_file_for_data_algs(False)
+        self._data_algs_without_baskets(
             conn_parameters,
             ImportingGPKGAlgorithm,
             ValidatingGPKGAlgorithm,
             ExportingGPKGAlgorithm,
         )
 
-    def test_algs_pg(self):
+    def test_algs_data_pg(self):
         conn_parameters_baskets = self.iliimporter_pg_config_params()
-        conn_parameters_baskets["SCHEMA"] = self.pg_schema(True)
-        self._algs_with_baskets(
+        conn_parameters_baskets["SCHEMA"] = self.pg_schema_for_data_algs(True)
+        self._data_algs_with_baskets(
             conn_parameters_baskets,
             ImportingPGAlgorithm,
             ValidatingPGAlgorithm,
             ExportingPGAlgorithm,
         )
         conn_parameters = self.iliimporter_pg_config_params()
-        conn_parameters["SCHEMA"] = self.pg_schema(False)
-        self._algs_without_baskets(
+        conn_parameters["SCHEMA"] = self.pg_schema_for_data_algs(False)
+        self._data_algs_without_baskets(
             conn_parameters,
             ImportingPGAlgorithm,
             ValidatingPGAlgorithm,
             ExportingPGAlgorithm,
         )
 
-    def _algs_with_baskets(
+    def _data_algs_with_baskets(
         self,
         conn_parameters,
         importing_algorithm,
@@ -350,7 +354,7 @@ class TestProcessingAlgorithms(unittest.TestCase):
         assert os.path.isfile(valid_targetfile)
         assert os.path.isfile(invalid_targetfile)
 
-    def _algs_without_baskets(
+    def _data_algs_without_baskets(
         self,
         conn_parameters,
         importing_algorithm,
@@ -442,6 +446,167 @@ class TestProcessingAlgorithms(unittest.TestCase):
         assert output["ISVALID"]
 
         assert os.path.isfile(invalid_targetfile)
+
+    def gpkg_file_for_basket_create_alg(self):
+        dbfile = os.path.join(
+            self.basetestpath,
+            "stadtort_{:%Y%m%d%H%M%S%f}.gpkg".format(datetime.datetime.now()),
+        )
+        schema_import_parameters = {  # smart2 by default
+            "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
+            "BASKETCOL": True,
+            "MODELS": "Staedtische_Ortsplanung_V1_1",
+            "ILIFILE": testdata_path("ilimodels/Staedtische_Ortsplanung_V1_1.ili"),
+            "DBPATH": dbfile,
+        }
+        self._schema_alg(DbIliMode.ili2gpkg, schema_import_parameters, True)
+        return dbfile
+
+    def pg_schema_for_basket_create_alg(self):
+        dbschema = "stadtort_{:%Y%m%d%H%M%S%f}".format(datetime.datetime.now())
+        schema_import_parameters = {  # smart2 by default
+            "CRS": QgsCoordinateReferenceSystem("EPSG:2056"),
+            "BASKETCOL": True,
+            "MODELS": "Staedtische_Ortsplanung_V1_1",
+            "ILIFILE": testdata_path("ilimodels/Staedtische_Ortsplanung_V1_1.ili"),
+            "SCHEMA": dbschema,
+        }
+        schema_import_parameters.update(self.iliimporter_pg_config_params())
+        self._schema_alg(DbIliMode.ili2pg, schema_import_parameters, True)
+        return dbschema
+
+    def _create_basket_alg(
+        self,
+        conn_parameters,
+        algorithm,
+    ):
+
+        basket_parameters = {
+            "DATASET": "dataset_all_topics",
+            "RELEVANTONLY": False,
+        }
+
+        basket_parameters.update(conn_parameters)
+        alg = algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(basket_parameters, context, feedback)
+        assert output["ISVALID"]
+
+        basket_parameters = {
+            "DATASET": "dataset_relevant_topics",
+            "RELEVANTONLY": True,
+        }
+
+        basket_parameters.update(conn_parameters)
+        alg = algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(basket_parameters, context, feedback)
+        assert output["ISVALID"]
+
+        basket_parameters = {
+            "DATASET": "dataset_bid_override",
+            "RELEVANTONLY": True,
+            "BIDTEMPLATE": "{t_id}",
+        }
+
+        basket_parameters.update(conn_parameters)
+        alg = algorithm()
+        alg.initAlgorithm()
+        context = QgsProcessingContext()
+        feedback = QgsProcessingFeedback()
+        output = alg.processAlgorithm(basket_parameters, context, feedback)
+        assert output["ISVALID"]
+
+        # check the baskets and datasets now
+        db_configuration = alg.creator.get_configuration_from_input(
+            conn_parameters,
+            context,
+            DbIliMode.pg
+            if issubclass(algorithm, BasketCreatingPGAlgorithm)
+            else DbIliMode.gpkg,
+        )
+        db_connector = db_utils.get_db_connector(db_configuration)
+
+        baskets_of_dataset_all_topics = []
+        bids_of_dataset_all_topics = []
+        baskets_of_dataset_relevant_topics = []
+        bids_of_dataset_relevant_topics = []
+        bids_of_dataset_bid_override = []
+        for basket_record in db_connector.get_baskets_info():
+            if basket_record["datasetname"] == "dataset_all_topics":
+                baskets_of_dataset_all_topics.append(basket_record["topic"])
+                bids_of_dataset_all_topics.append(basket_record["basket_t_ili_tid"])
+            if basket_record["datasetname"] == "dataset_relevant_topics":
+                baskets_of_dataset_relevant_topics.append(basket_record["topic"])
+                bids_of_dataset_relevant_topics.append(
+                    basket_record["basket_t_ili_tid"]
+                )
+            if basket_record["datasetname"] == "dataset_bid_override":
+                bids_of_dataset_bid_override.append(basket_record["basket_t_ili_tid"])
+
+        # check if in the dataset_all_topics are all the topics
+        all_topics = [
+            "Gewerbe_V1.Firmen",
+            "Infrastruktur_V1.Strassen",
+            "Kantonale_Ortsplanung_V1_1.Konstruktionen",
+            "Ortsplanung_V1_1.Konstruktionen",
+            "Staedtische_Ortsplanung_V1_1.Freizeit",
+            "Staedtische_Ortsplanung_V1_1.Gewerbe",
+            "Staedtisches_Gewerbe_V1.Firmen",
+        ]
+        assert len(baskets_of_dataset_all_topics) == len(all_topics)
+        assert set(baskets_of_dataset_all_topics) == set(all_topics)
+        digit_bids = 0
+        for bid in bids_of_dataset_all_topics:
+            if bid[0].isdigit():
+                digit_bids += 1
+        # they should not all be digits
+        assert digit_bids < len(all_topics)
+
+        # check if in the dataset_relevant_topics are only the relevant topics
+        relevant_topics = [
+            "Infrastruktur_V1.Strassen",
+            "Staedtische_Ortsplanung_V1_1.Freizeit",
+            "Staedtische_Ortsplanung_V1_1.Gewerbe",
+            "Staedtisches_Gewerbe_V1.Firmen",
+        ]
+        assert len(baskets_of_dataset_relevant_topics) == len(relevant_topics)
+        assert set(baskets_of_dataset_relevant_topics) == set(relevant_topics)
+        digit_bids = 0
+        for bid in bids_of_dataset_relevant_topics:
+            if bid[0].isdigit():
+                digit_bids += 1
+        # they should not all be digits
+        assert digit_bids < len(relevant_topics)
+
+        # check if the bids of the dataset_bid_override are numeric (because of {t_id} template)
+        assert len(bids_of_dataset_bid_override) == len(relevant_topics)
+        digit_bids = 0
+        for bid in bids_of_dataset_bid_override:
+            if bid[0].isdigit():
+                digit_bids += 1
+        # they should all be digits (because of {t_id} template)
+        assert digit_bids == len(relevant_topics)
+
+    def test_alg_create_basket_gpkg(self):
+        conn_parameters = {}
+        conn_parameters["DBPATH"] = self.gpkg_file_for_basket_create_alg()
+        self._create_basket_alg(
+            conn_parameters,
+            BasketCreatingGPKGAlgorithm,
+        )
+
+    def test_alg_create_basket_pg(self):
+        conn_parameters = self.iliimporter_pg_config_params()
+        conn_parameters["SCHEMA"] = self.pg_schema_for_basket_create_alg()
+        self._create_basket_alg(
+            conn_parameters,
+            BasketCreatingPGAlgorithm,
+        )
 
     def print_info(self, text):
         logging.info(text)
