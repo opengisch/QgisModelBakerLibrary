@@ -526,7 +526,7 @@ class TestProcessingUtilAlgorithms(unittest.TestCase):
 
         connection_parameters = {
             "DATABASE": "pg-one",
-            "NEWSCHEMA": "pg-one-schema",
+            "SCHEMA": "pg-one-schema",
         }
         expected_output = {
             "SERVICE": "",

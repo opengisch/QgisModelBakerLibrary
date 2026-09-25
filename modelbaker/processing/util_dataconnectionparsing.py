@@ -21,7 +21,6 @@ from qgis.core import (
     QgsProcessingOutputString,
     QgsProcessingParameterDatabaseSchema,
     QgsProcessingParameterProviderConnection,
-    QgsProcessingParameterString,
     QgsProviderConnectionException,
     QgsProviderRegistry,
 )
@@ -52,7 +51,6 @@ class DataConnectionParsingPGAlgorithm(UtilAlgorithm):
     SSLMODE = "SSLMODE"
     AUTHCFG = "AUTHCFG"
     SCHEMA = "SCHEMA"
-    NEWSCHEMA = "NEWSCHEMA"
     ISVALID = "ISVALID"
 
     def __init__(self):
@@ -138,18 +136,6 @@ class DataConnectionParsingPGAlgorithm(UtilAlgorithm):
 
         self.addParameter(schema_param)
 
-        newschema_param = QgsProcessingParameterString(
-            self.NEWSCHEMA,
-            self.tr("New Schema (if set, the selected existing schema is ignored)"),
-            optional=True,
-        )
-        newschema_param.setHelp(
-            self.tr(
-                "Schema name to be created for the connection. If set, the selected existing schema is ignored."
-            )
-        )
-        self.addParameter(newschema_param)
-
         self.addOutput(QgsProcessingOutputString(self.SERVICE, self.tr("Service")))
         self.addOutput(QgsProcessingOutputString(self.HOST, self.tr("Host")))
         self.addOutput(QgsProcessingOutputString(self.DBNAME, self.tr("Database")))
@@ -178,17 +164,15 @@ class DataConnectionParsingPGAlgorithm(UtilAlgorithm):
             parameters, self.DATABASE, context
         )
 
-        schema_name = self.parameterAsString(parameters, self.NEWSCHEMA, context)
-
         try:
             md = QgsProviderRegistry.instance().providerMetadata("postgres")
             conn = md.createConnection(connection_name)
             valid, mode = get_configuration_from_data_connection(conn, configuration)
-            # if no new schema set, we use the schema from the connection parameter
-            if not schema_name:
-                schema_name = self.parameterAsString(parameters, self.SCHEMA, context)
+            configuration.dbschema = self.parameterAsString(
+                parameters, self.SCHEMA, context
+            )
 
-            if not (valid and mode and schema_name):
+            if not (valid and mode):
                 self.tr(
                     "Invalid connection settings. Please check the connection parameters. Nevertheless I provide you what I got."
                 )
@@ -211,7 +195,7 @@ class DataConnectionParsingPGAlgorithm(UtilAlgorithm):
             self.DBNAME: configuration.database,
             self.USER: configuration.dbusr,
             self.PASSWORD: configuration.dbpwd,
-            self.SCHEMA: schema_name,
+            self.SCHEMA: configuration.dbschema,
             self.SSLMODE: configuration.sslmode,
             self.AUTHCFG: configuration.dbauthid,
             self.ISVALID: is_valid,
