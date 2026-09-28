@@ -67,7 +67,7 @@ class DataConnectionParsingPGAlgorithm(UtilAlgorithm):
         Returns the translated algorithm name, which should be used for any
         user-visible display of the algorithm name.
         """
-        return self.tr("Get connection from profile (PostGIS)")
+        return self.tr("Get parameters from connection (PostGIS)")
 
     def tags(self) -> list[str]:
 
@@ -81,6 +81,8 @@ class DataConnectionParsingPGAlgorithm(UtilAlgorithm):
             "interlis",
             "postgis",
             "postgresql",
+            "connection",
+            "parameters",
         ]
 
     def shortDescription(self) -> str:
@@ -165,8 +167,8 @@ class DataConnectionParsingPGAlgorithm(UtilAlgorithm):
         )
 
         try:
-            md = QgsProviderRegistry.instance().providerMetadata("postgres")
-            conn = md.createConnection(connection_name)
+            metadata = QgsProviderRegistry.instance().providerMetadata("postgres")
+            conn = metadata.connections().get(connection_name)
             valid, mode = get_configuration_from_data_connection(conn, configuration)
             configuration.dbschema = self.parameterAsString(
                 parameters, self.SCHEMA, context
@@ -235,7 +237,7 @@ class DataConnectionParsingGPKGAlgorithm(UtilAlgorithm):
         Returns the translated algorithm name, which should be used for any
         user-visible display of the algorithm name.
         """
-        return self.tr("Get connection from profile (GeoPackage)")
+        return self.tr("Get parameters from connection (GeoPackage)")
 
     def tags(self) -> list[str]:
 
@@ -249,6 +251,8 @@ class DataConnectionParsingGPKGAlgorithm(UtilAlgorithm):
             "interlis",
             "gpkg",
             "geopackage",
+            "connection",
+            "parameters",
         ]
 
     def shortDescription(self) -> str:
@@ -306,8 +310,8 @@ class DataConnectionParsingGPKGAlgorithm(UtilAlgorithm):
         )
 
         try:
-            md = QgsProviderRegistry.instance().providerMetadata("ogr")
-            conn = md.createConnection(connection_name)
+            metadata = QgsProviderRegistry.instance().providerMetadata("ogr")
+            conn = metadata.connections().get(connection_name)
             valid, mode = get_configuration_from_data_connection(conn, configuration)
 
             if not (valid and mode):

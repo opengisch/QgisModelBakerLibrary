@@ -133,7 +133,7 @@ def get_configuration_from_data_connection(
 ) -> tuple[bool, DbIliMode]:
     """
     Determines the connection parameters from a data connection configured in QGIS.
-    On service in postgres it preferences the static parameters over the ones in the service file if available.
+    On PostgreSQL, it preferences the static parameters over the ones in the service file.
     Gets a configuration (Ili2DbCommandConfiguration) with the determined parameters
     Returns:
         tuple[[bool, DbIliMode]: if the needed database connection parameters are determined and the kind of database like pg, gpkg or mssql
