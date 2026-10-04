@@ -31,7 +31,7 @@ for PACKAGE in ${PACKAGES[@]}; do
 done
 
 # ili2py not yet on pypi - we get it from the repo
-COMMIT="c0e815e2fec9b5a5410633c291098de393529160"
+COMMIT="7d2d7c2a05ffd0c19abe427f2c40130991a2602e"
 echo get ili2py on commit "$COMMIT"
 git clone -q https://github.com/rudert-geoinformatik/ili2py.git temp_ili2py_git
 cd temp_ili2py_git && git checkout -q "$COMMIT" && cd - > /dev/null
