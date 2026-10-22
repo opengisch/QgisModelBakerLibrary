@@ -145,7 +145,11 @@ class IliExecutable(QObject, metaclass=AbstractQObjectMeta):
             java_path = get_java_path(self.configuration.base_configuration)
             proc.start(java_path, ili2db_jar_arg + args)
         else:
-            proc.start(self.command_with_password(edited_command))
+            # the function has been replaced with Qt6
+            if hasattr(proc, "startCommand"):
+                proc.startCommand(self.command_with_password(edited_command))
+            else:
+                proc.start(self.command_with_password(edited_command))
 
         if not proc.waitForStarted():
             proc = None
