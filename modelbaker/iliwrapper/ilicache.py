@@ -92,11 +92,11 @@ class IliCache(QObject):
 
     def refresh(self) -> None:
         self.repositories = dict()
-        if not self.base_configuration.model_directories is None:
+        if self.base_configuration.model_directories is not None:
             for directory in self.base_configuration.model_directories:
                 self.process_model_directory(directory)
 
-        if not self.single_ili_file is None:
+        if self.single_ili_file is not None:
             if os.path.exists(self.single_ili_file):
                 self.process_single_ili_file()
 
@@ -951,8 +951,8 @@ class IliToppingFileCache(IliDataCache):
         return IliToppingFileItemModel()
 
     def refresh(self) -> None:
-        if not self.base_configuration.model_directories is None:
-            for directory in self.base_configuration.model_directories:
+        if self.base_configuration.ilidata_directories is not None:
+            for directory in self.base_configuration.ilidata_directories:
                 self.process_model_directory(directory)
 
         # collect local files

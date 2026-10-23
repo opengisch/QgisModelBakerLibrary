@@ -111,6 +111,8 @@ class BaseConfiguration:
         if self.custom_model_directories_enabled and self.custom_model_directories:
             dirs = self.custom_model_directories.split(";")
         else:
+            # this is adds model.opengis.ch to the repo scan (is linking to http://models.interlis.ch)
+            # this could be removed in future, when everyone uses their own data-repo and everywhere the models_directory can be used
             dirs = ["https://models.opengis.ch/"]
         return dirs
 
