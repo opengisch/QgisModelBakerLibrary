@@ -36,7 +36,7 @@ jobs:
         run: pip install -r requirements.txt
 
       - name: Build documentation
-        run: mkdocs build --strict
+        run: properdocs build
 
       - uses: actions/upload-artifact@v5
         if: ${{ github.event_name == 'pull_request' }}
@@ -47,4 +47,4 @@ jobs:
 
       - name: Deploy to GitHub Pages
         if: contains(fromJSON('["push", "workflow_dispatch"]'), github.event_name)
-        run: mkdocs gh-deploy --force
+        run: properdocs gh-deploy --force
