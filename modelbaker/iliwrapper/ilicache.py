@@ -56,6 +56,7 @@ class IliCache(QObject):
     ns = {"ili23": "http://www.interlis.ch/INTERLIS2.3"}
 
     new_message = pyqtSignal(int, str)
+    model_refreshed = pyqtSignal(int)
 
     CACHE_PATH = os.path.expanduser("~/.ilicache")
 
@@ -67,13 +68,13 @@ class IliCache(QObject):
         self.repositories = dict()
         self.base_configuration = configuration
         self.single_ili_file = single_ili_file
-        self.model = IliModelItemModel()
+        self.model = self.get_model()
+        self.model.modelReset.connect(
+            lambda: self.model_refreshed.emit(self.model.rowCount())
+        )
         self.sorted_model = QSortFilterProxyModel()
         self.sorted_model.setSourceModel(self.model)
         self.sorted_model.sort(0, Qt.SortOrder.AscendingOrder)
-        self.directories = None
-        if self.base_configuration:
-            self.directories = self.base_configuration.model_directories
 
         # refresh the models on changing values but avoid massive db connects by timer
         self.modelReposTimer = QTimer()
@@ -82,16 +83,20 @@ class IliCache(QObject):
             lambda: self.model.set_repositories(self.repositories)
         )
 
+    def get_model(self):
+        return IliModelItemModel()
+
     def set_repositories_to_model(self) -> None:
         # hold refresh back
         self.modelReposTimer.start(500)
 
     def refresh(self) -> None:
-        if not self.directories is None:
-            for directory in self.directories:
+        self.repositories = dict()
+        if self.base_configuration.model_directories is not None:
+            for directory in self.base_configuration.model_directories:
                 self.process_model_directory(directory)
 
-        if not self.single_ili_file is None:
+        if self.single_ili_file is not None:
             if os.path.exists(self.single_ili_file):
                 self.process_single_ili_file()
 
@@ -144,18 +149,24 @@ class IliCache(QObject):
 
         if os.path.isdir(url):
             # continue with the local file
+            found_anything = False
             if os.path.exists(information_file_url):
                 self._process_informationfile(information_file_url, netloc, url)
+                found_anything = True
             else:
                 logger.warning(
                     self.tr("Could not find local file {}").format(information_file_url)
                 )
             if os.path.exists(ilisite_url):
                 self._process_ilisite(ilisite_url)
+                found_anything = True
             else:
                 logger.warning(
                     self.tr("Could not find local file  {}").format(ilisite_url)
                 )
+            if not found_anything:
+                # update repositories on dead end (when nothing has been found, then update with empty)
+                self.set_repositories_to_model()
         else:
             netloc_dir = os.path.join(self.CACHE_PATH, netloc)
             os.makedirs(netloc_dir, exist_ok=True)
@@ -313,7 +324,6 @@ class IliCache(QObject):
         self.repositories[path] = sorted(
             models, key=lambda m: m["version"], reverse=True
         )
-
         self.set_repositories_to_model()
 
     def process_ili_file(self, ilifile: str) -> list:
@@ -413,6 +423,7 @@ class IliModelItemModel(QStandardItemModel):
         super().__init__(0, 1, parent)
 
     def set_repositories(self, repositories: dict) -> None:
+        self.beginResetModel()
         self.clear()
         names = list()
 
@@ -441,6 +452,7 @@ class IliModelItemModel(QStandardItemModel):
                 item.setData(model.get("file", ""), int(IliModelItemModel.Roles.FILE))
                 names.append(name)
                 self.appendRow(item)
+        self.endResetModel()
 
 
 class ModelCompleterDelegate(QItemDelegate):
@@ -502,7 +514,6 @@ class IliDataCache(IliCache):
 
     file_download_succeeded = pyqtSignal(str, str)
     file_download_failed = pyqtSignal(str, str)
-    model_refreshed = pyqtSignal(int)
 
     CACHE_PATH = os.path.expanduser("~/.ilidatacache")
 
@@ -516,20 +527,12 @@ class IliDataCache(IliCache):
         IliCache.__init__(self, configuration)
         self.information_file = "ilidata.xml"
 
-        self.model = IliDataItemModel()
-        self.model.modelReset.connect(
-            lambda: self.model_refreshed.emit(self.model.rowCount())
-        )
-        self.sorted_model.setSourceModel(self.model)
-        self.sorted_model.sort(0, Qt.SortOrder.AscendingOrder)
         self.filter_models = models.split(";") if models else []
         self.type = type
-        self.directories = (
-            self.base_configuration.ilidata_directories
-            if self.base_configuration
-            else []
-        )
         self.datasources = datasources
+
+    def get_model(self):
+        return IliDataItemModel()
 
     def process_model_directory(self, path: str) -> None:
         # download remote and local repositories
@@ -738,7 +741,6 @@ class IliDataCache(IliCache):
             key=lambda m: m["version"] if m["version"] else "0",
             reverse=True,
         )
-
         self.set_repositories_to_model()
 
     def download_file(
@@ -930,9 +932,6 @@ class IliToppingFileCache(IliDataCache):
         tool_dir: Optional[str] = None,
     ):
         IliDataCache.__init__(self, configuration)
-        self.model = IliToppingFileItemModel()
-        self.sorted_model.setSourceModel(self.model)
-        self.sorted_model.sort(0, Qt.SortOrder.AscendingOrder)
         self.file_ids = file_ids
         self.tool_dir = (
             tool_dir
@@ -948,9 +947,12 @@ class IliToppingFileCache(IliDataCache):
         )
         self.model.rowsInserted.connect(lambda: self.on_download_status(None))
 
+    def get_model(self):
+        return IliToppingFileItemModel()
+
     def refresh(self) -> None:
-        if not self.directories is None:
-            for directory in self.directories:
+        if self.base_configuration.ilidata_directories is not None:
+            for directory in self.base_configuration.ilidata_directories:
                 self.process_model_directory(directory)
 
         # collect local files
@@ -1063,7 +1065,6 @@ class IliToppingFileCache(IliDataCache):
             key=lambda m: m["version"] if m["version"] else "0",
             reverse=True,
         )
-
         self.set_repositories_to_model()
 
 
@@ -1083,6 +1084,7 @@ class IliToppingFileItemModel(QStandardItemModel):
         super().__init__(0, 1, parent)
 
     def set_repositories(self, repositories: dict) -> None:
+        self.beginResetModel()
         self.clear()
         ids = list()
 
@@ -1116,3 +1118,4 @@ class IliToppingFileItemModel(QStandardItemModel):
 
                 ids.append(toppingfile["id"])
                 self.appendRow(item)
+        self.endResetModel()
