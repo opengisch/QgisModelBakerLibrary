@@ -1,0 +1,50 @@
+name: doc
+on:
+  pull_request:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'modelbaker/**'
+      - '.github/workflows/docs.yml'
+  push:
+    branches:
+      - main
+    paths:
+      - 'docs/**'
+      - 'modelbaker/**'
+      - '.github/workflows/docs.yml'
+  workflow_dispatch:
+
+defaults:
+  run:
+    working-directory: docs
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Checkout Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install Python requirements
+        run: pip install -r requirements.txt
+
+      - name: Build documentation
+        run: mkdocs build --strict
+
+      - uses: actions/upload-artifact@v5
+        if: ${{ github.event_name == 'pull_request' }}
+        with:
+          name: docs
+          path: docs/site
+          if-no-files-found: error
+
+      - name: Deploy to GitHub Pages
+        if: contains(fromJSON('["push", "workflow_dispatch"]'), github.event_name)
+        run: mkdocs gh-deploy --force
