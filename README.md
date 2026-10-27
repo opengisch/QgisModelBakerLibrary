@@ -1,4 +1,4 @@
-<img alt="logo" src="https://raw.githubusercontent.com/opengisch/QgisModelBakerLibrary/main/assets/Long-Logo_Green_Modelbaker_RGB.png">
+<img alt="logo" src="https://raw.githubusercontent.com/opengisch/QgisModelBakerLibrary/main/assets/long-logo-lib-modelbaker.png">
 
 # modelbaker - the library
 
