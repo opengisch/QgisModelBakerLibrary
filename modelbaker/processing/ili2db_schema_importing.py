@@ -233,8 +233,8 @@ strategy. Concrete classes are mapped using a NewAndSubClass strategy.</p>
 
         metaattrfile_param = QgsProcessingParameterFile(
             self.METAATTRFILE,
-            self.tr("Extra Meta Attribute File (.ini)"),
-            extension="ini",
+            self.tr("Extra Meta Attribute File (.ini/.toml)"),
+            fileFilter="Extra Meta Attribute Files (*.ini *.toml)",
             optional=True,
         )
         metaattrfile_param.setHelp(
