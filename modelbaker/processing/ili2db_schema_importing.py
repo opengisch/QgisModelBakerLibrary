@@ -48,6 +48,9 @@ class ProcessSchemaImporter(ProcessOperatorBase):
     MODELS = "MODELS"  # StringList
     LANGUAGE = "LANGUAGE"  # StringList
     ILIFILE = "ILIFILE"  # File
+    PRESCRIPT = "PRESCRIPT"  # File
+    POSTSCRIPT = "POSTSCRIPT"  # File
+    METAATTRFILE = "METAATTRFILE"  # File
 
     # Result
     ISVALID = "ISVALID"
@@ -206,6 +209,39 @@ strategy. Concrete classes are mapped using a NewAndSubClass strategy.</p>
         )
         params.append(ilifile_param)
 
+        prescript_param = QgsProcessingParameterFile(
+            self.PRESCRIPT,
+            self.tr("Pre-script (.sql)"),
+            extension="sql",
+            optional=True,
+        )
+        prescript_param.setHelp(
+            self.tr("SQL script that runs before the (schema) import.")
+        )
+        params.append(prescript_param)
+
+        postscript_param = QgsProcessingParameterFile(
+            self.POSTSCRIPT,
+            self.tr("Post-script (.sql)"),
+            extension="sql",
+            optional=True,
+        )
+        postscript_param.setHelp(
+            self.tr("SQL script that runs after the (schema) import.")
+        )
+        params.append(postscript_param)
+
+        metaattrfile_param = QgsProcessingParameterFile(
+            self.METAATTRFILE,
+            self.tr("Extra Meta Attribute File (.ini/.toml)"),
+            fileFilter="Extra Meta Attribute Files (*.ini *.toml)",
+            optional=True,
+        )
+        metaattrfile_param.setHelp(
+            self.tr("Extra meta attribute file (the file previously known as toml)")
+        )
+        params.append(metaattrfile_param)
+
         return params
 
     def import_output_params(self):
@@ -306,6 +342,15 @@ strategy. Concrete classes are mapped using a NewAndSubClass strategy.</p>
         )
         configuration.ilifile = self.parent.parameterAsFile(
             parameters, self.ILIFILE, context
+        )
+        configuration.pre_script = self.parent.parameterAsFile(
+            parameters, self.PRESCRIPT, context
+        )
+        configuration.post_script = self.parent.parameterAsFile(
+            parameters, self.POSTSCRIPT, context
+        )
+        configuration.tomlfile = self.parent.parameterAsFile(
+            parameters, self.METAATTRFILE, context
         )
 
         return configuration
