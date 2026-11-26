@@ -1,6 +1,8 @@
-properdocs
+properdocs==1.6.7
 mkdocs-material==9.6.22
-mkdocstrings[python]
+mkdocstrings[python]==1.0.8
+mkdocstrings-python==2.0.11
+griffe==2.4.1
 mkdocs-gen-files
 mkdocs-literate-nav
-black
+black==26.10.1
