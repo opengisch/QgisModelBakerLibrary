@@ -1,0 +1,73 @@
+site_name: Model Baker Library API Documentation
+site_url: https://opengisch.github.io/QgisModelBakerLibrary/
+
+docs_dir: docs
+
+# Repository
+repo_name: opengisch/QgisModelBakerLibrary
+repo_url: https://github.com/opengisch/QgisModelBakerLibrary
+edit_uri: https://github.com/opengisch/QgisModelBakerLibrary/tree/main/docs/
+
+theme:
+  name: material
+  palette:
+    - scheme: default
+      primary: black
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+        primary: white
+  logo: assets/modelbaker_lib_icon.svg
+  favicon: assets/modelbaker_lib_icon.svg
+  features:
+    - navigation.indexes
+    - navigation.top
+    - search.highlight
+    - content.code.copy
+
+nav:
+  - Home: index.md
+  - API Reference: reference/
+
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
+plugins:
+  - search
+  - gen-files:
+      scripts:
+        - scripts/gen_ref_pages.py
+  - literate-nav:
+      nav_file: SUMMARY.md
+  - mkdocstrings:
+      handlers:
+        python:
+          paths: [..]
+          options:
+            extensions:
+              - scripts/griffe_strip_license.py:StripLicenseHeader
+            docstring_style: google
+            docstring_options:
+              returns_named_value: false
+            docstring_section_style: table
+            members_order: source
+            filters: ["!^_[^_]"]
+            show_if_no_docstring: true
+            show_root_heading: true
+            show_root_full_path: false
+            show_source: true
+            show_signature_annotations: true
+            separate_signature: true
+            show_symbol_type_heading: true
+            show_symbol_type_toc: true
+            merge_init_into_class: true
+            inherited_members: false

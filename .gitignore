@@ -12,3 +12,4 @@ dist
 build
 **/__pycache__
 **/modelbaker.egg-info
+/docs/site
